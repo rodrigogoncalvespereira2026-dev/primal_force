@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Power Rangers Primal Force</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ── MENU ── -->
+  <div id="screen-menu" class="screen active">
+    <div class="menu-bg"></div>
+
+    <!-- Canto superior esquerdo -->
+    <button class="menu-icon-btn menu-corner-tl" id="btn-trofeus">
+      <span class="corner-icon">⭐</span><span class="corner-label">PASSE</span>
+    </button>
+
+    <!-- Canto superior direito -->
+    <button class="menu-icon-btn menu-corner-tr" id="btn-mundo">
+      <span class="corner-icon">🗺️</span><span class="corner-label">MAPA</span>
+    </button>
+
+    <!-- Lado esquerdo, centro vertical -->
+    <div class="menu-side-left">
+      <button class="menu-icon-btn" id="btn-loja">
+        <span class="corner-icon">🛒</span><span class="corner-label">LOJA</span>
+      </button>
+      <button class="menu-icon-btn" id="btn-rangers">
+        <span class="corner-icon">🦖</span><span class="corner-label">RANGERS</span>
+      </button>
+    </div>
+
+    <!-- Canto inferior esquerdo -->
+    <button class="menu-icon-btn menu-corner-bl" id="btn-opcoes">
+      <span class="corner-icon">⚙️</span>
+    </button>
+
+    <!-- Canto inferior direito -->
+    <button class="menu-icon-btn menu-corner-br menu-play-btn" id="btn-jogar">
+      <span class="corner-icon">⚡</span><span class="corner-label">JOGAR</span>
+    </button>
+
+    <div class="trophy-bar-menu">🏆 <span id="menu-trophies">0</span> Troféus &nbsp;·&nbsp; 💰 <span id="menu-coins">0</span> Moedas</div>
+
+    <div class="menu-content">
+      <div class="logo-title">
+        <div class="logo-sub">POWER RANGERS</div>
+        <div class="logo-main">PRIMAL FORCE</div>
+        <div class="logo-tagline">— A tua força, a tua lenda —</div>
+      </div>
+    </div>
+      <div class="menu-footer">v0.3 — Power Rangers Primal Force</div>
+  </div>
+
+  <!-- ── SELEÇÃO RANGER ── -->
+  <div id="screen-select" class="screen">
+    <div class="select-header">
+      <button class="back-btn" id="btn-back-select">&#8592; Voltar</button>
+      <h1>ESCOLHE O TEU RANGER</h1>
+    </div>
+    <div id="ranger-grid" class="ranger-grid"></div>
+    <div class="select-footer">
+      <button class="menu-btn" id="btn-confirmar-ranger">CONFIRMAR</button>
+    </div>
+  </div>
+
+  <!-- ── MAPA DO MUNDO ── -->
+  <div id="screen-worldmap" class="screen">
+    <div class="wm-header">
+      <button class="back-btn" id="btn-back-worldmap">&#8592; Voltar</button>
+      <h1>MAPA DO MUNDO</h1>
+      <div class="wm-trophies">🏆 <span id="wm-trophy-count">0</span></div>
+    </div>
+    <div class="wm-body">
+      <canvas id="wm-canvas"></canvas>
+      <div id="wm-panel" class="wm-panel">
+        <div class="wm-panel-empty">👆 Clica numa zona<br>para ver as missões</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DIÁLOGO RPG ── -->
+  <div id="screen-dialog" class="screen overlay dialog-overlay">
+    <div class="dlg-box">
+      <div class="dlg-top">
+        <div id="dlg-portrait" class="dlg-portrait">🦖</div>
+        <div class="dlg-right">
+          <div id="dlg-speaker" class="dlg-speaker">Roro</div>
+          <div id="dlg-text"    class="dlg-text"></div>
+        </div>
+      </div>
+      <div class="dlg-bottom">
+        <span id="dlg-progress" class="dlg-progress">1/4</span>
+        <button id="dlg-btn-skip" class="dlg-skip">Saltar ▶▶</button>
+        <span id="dlg-continue" class="dlg-continue" style="opacity:0">Toca para continuar ▶</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TROFÉUS & PASSE ── -->
+  <div id="screen-trophies" class="screen">
+    <div class="select-header">
+      <button class="back-btn" id="btn-back-trophies">&#8592; Voltar</button>
+      <h1>PROGRESSÃO</h1>
+    </div>
+    <div class="trophy-tabs">
+      <button class="trophy-tab active-tab" id="tab-trophies">🏆 TROFÉUS</button>
+      <button class="trophy-tab" id="tab-battlepass">⭐ PASSE DE BATALHA</button>
+    </div>
+    <div id="trophies-content"   class="trophy-scroll"></div>
+    <div id="battlepass-content" class="trophy-scroll" style="display:none"></div>
+  </div>
+
+  <!-- ── LOJA ── -->
+  <div id="screen-shop" class="screen">
+    <div class="select-header">
+      <button class="back-btn" id="btn-back-shop">&#8592; Voltar</button>
+      <h1>LOJA</h1>
+    </div>
+    <div class="shop-coins-bar">💰 <span id="shop-coins">0</span> Moedas</div>
+    <div class="shop-hint">Os itens comprados são usados automaticamente no início da próxima missão.</div>
+    <div id="shop-grid" class="shop-grid"></div>
+  </div>
+
+  <!-- ── JOGO ── -->
+  <div id="screen-game" class="screen">
+    <div id="hud">
+      <div id="hud-left">
+        <div id="ranger-name-hud">RORO — RED RANGER</div>
+        <div class="bar-row"><span class="bar-label hp-label">HP</span><div class="bar-wrap"><div class="bar-fill" id="bar-hp"></div></div><span class="bar-num" id="hp-num">100</span></div>
+        <div class="bar-row"><span class="bar-label pwr-label">PWR</span><div class="bar-wrap"><div class="bar-fill pwr" id="bar-pwr"></div></div><span class="bar-num" id="pwr-num">100</span></div>
+      </div>
+      <div id="hud-center">
+        <div id="hud-wave-info"><span id="hud-wave">Onda 1</span><span class="wave-sep">·</span><span id="hud-enemies">0/10</span> inimigos</div>
+        <div id="combo-display"></div>
+        <div id="msg-box"></div>
+      </div>
+      <div id="hud-right">
+        <div class="hud-stat">Pts: <span id="hud-score">0</span></div>
+        <div class="hud-stat">🏆 <span id="hud-trophies">0</span></div>
+        <canvas id="minimap" width="90" height="72"></canvas>
+      </div>
+    </div>
+    <canvas id="game-canvas"></canvas>
+    <!-- Boss HUD (oculto por defeito) -->
+    <div id="boss-hud" style="display:none; position:absolute; bottom:90px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.7); border:2px solid #e24b4a; border-radius:12px; padding:8px 18px; text-align:center; pointer-events:none; min-width:220px;">
+      <div id="boss-hud-name" style="color:#fff; font-size:13px; font-weight:bold; letter-spacing:1px;">BOSS</div>
+      <div id="boss-hud-title" style="color:#ccc; font-size:10px; margin-bottom:4px;"></div>
+      <div style="background:#1a1a2e; border-radius:6px; overflow:hidden; height:12px; width:200px;">
+        <div id="boss-hud-bar" style="height:100%; width:100%; background:#e24b4a; transition:width 0.2s; border-radius:6px;"></div>
+      </div>
+      <div id="boss-hud-hp" style="color:#fff; font-size:10px; margin-top:3px;"></div>
+    </div>
+    <div id="skill-bar">
+      <div class="skill-slot"><div class="skill-icon">⚔️</div><div class="skill-name">Melee</div><div class="skill-key">ESPACO</div><div class="skill-cd" id="cd-melee"></div></div>
+      <div class="skill-slot"><div class="skill-icon">🔫</div><div class="skill-name">Laser</div><div class="skill-key">X</div><div class="skill-cd" id="cd-laser"></div></div>
+      <div class="skill-slot"><div class="skill-icon">⚡</div><div class="skill-name">Especial</div><div class="skill-key">C</div><div class="skill-cd" id="cd-special"></div></div>
+      <div class="skill-slot"><div class="skill-icon">🛡️</div><div class="skill-name">Escudo</div><div class="skill-key">V</div><div class="skill-cd" id="cd-shield"></div></div>
+      <div class="skill-slot ultimate"><div class="skill-icon">🦖</div><div class="skill-name">ZORD</div><div class="skill-key">Q</div><div class="skill-cd" id="cd-zord"></div></div>
+    </div>
+    <div id="mobile-controls">
+      <div id="dpad">
+        <div class="d-row">
+          <div class="d-center"></div>
+          <div class="d-btn" id="d-up">▲</div>
+          <div class="d-center"></div>
+        </div>
+        <div class="d-row">
+          <div class="d-btn" id="d-left">◀</div>
+          <div class="d-center"></div>
+          <div class="d-btn" id="d-right">▶</div>
+        </div>
+        <div class="d-row">
+          <div class="d-center"></div>
+          <div class="d-btn" id="d-down">▼</div>
+          <div class="d-center"></div>
+        </div>
+      </div>
+      <div id="action-buttons">
+        <div class="act-row">
+          <button class="act-btn shield-btn" id="btn-mb-shield">🛡️</button>
+          <button class="act-btn zord-btn" id="btn-mb-zord">🦖</button>
+        </div>
+        <div class="act-row">
+          <button class="act-btn special-btn" id="btn-mb-special">⚡</button>
+          <button class="act-btn laser-btn" id="btn-mb-laser">🔫</button>
+        </div>
+        <div class="act-row">
+          <button class="act-btn attack-btn" id="btn-mb-melee">⚔️</button>
+        </div>
+      </div>
+    </div>
+    <button id="btn-pause">❚❚</button>
+  </div>
+
+  <!-- ── PAUSA ── -->
+  <div id="screen-pause" class="screen overlay">
+    <div class="pause-box">
+      <h2>PAUSA</h2>
+      <button class="menu-btn" id="btn-continuar">CONTINUAR</button>
+      <button class="menu-btn secondary" id="btn-menu-pause">MENU PRINCIPAL</button>
+    </div>
+  </div>
+
+  <!-- ── GAME OVER ── -->
+  <div id="screen-gameover" class="screen overlay">
+    <div class="gameover-box">
+      <h2 id="go-title">DERROTA</h2>
+      <div id="go-score">Pontuação: 0</div>
+      <div id="go-kills">Inimigos derrotados: 0</div>
+      <div id="go-trophies" style="color:#fac775;font-size:18px;font-weight:700"></div>
+      <button class="menu-btn" id="btn-retry">TENTAR NOVAMENTE</button>
+      <button class="menu-btn secondary" id="btn-go-menu">MENU PRINCIPAL</button>
+    </div>
+  </div>
+
+</div>
+
+<script src="js/core/utils.js"></script>
+<script src="js/core/input.js"></script>
+<script src="js/core/joystick.js"></script>
+<script src="js/core/renderer.js"></script>
+<script src="js/core/world.js"></script>
+<script src="js/core/wave.js"></script>
+<script src="js/core/progression.js"></script>
+<script src="js/core/story.js"></script>
+<script src="js/entities/ranger.js"></script>
+<script src="js/entities/enemy.js"></script>
+<script src="js/entities/boss.js"></script>
+<script src="js/entities/projectile.js"></script>
+<script src="js/entities/particle.js"></script>
+<script src="js/entities/pickup.js"></script>
+<script src="js/ui/hud.js"></script>
+<script src="js/scenes/menu.js"></script>
+<script src="js/scenes/select.js"></script>
+<script src="js/scenes/dialog.js"></script>
+<script src="js/scenes/worldmap.js"></script>
+<script src="js/scenes/trophies.js"></script>
+<script src="js/scenes/shop.js"></script>
+<script src="js/scenes/game.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
