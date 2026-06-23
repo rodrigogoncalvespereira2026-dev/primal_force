@@ -2,10 +2,9 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover, maximum-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#000000">
   <title>Power Rangers Primal Force</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -84,6 +83,36 @@
     <div id="ranger-grid" class="ranger-grid"></div>
     <div class="select-footer">
       <button class="menu-btn" id="btn-confirmar-ranger">CONFIRMAR</button>
+    </div>
+  </div>
+
+  <!-- ── RANGER DETAIL ── -->
+  <div id="screen-ranger" class="screen">
+    <div class="select-header">
+      <button class="back-btn" id="btn-back-ranger">&#8592; Voltar</button>
+      <h1 id="rd-title">DETALHES DO RANGER</h1>
+    </div>
+    <div class="ranger-detail">
+      <div class="ranger-detail-left">
+        <h2 id="rd-name">Ranger</h2>
+        <div id="rd-sub" class="rd-sub">Ranger Title</div>
+        <div id="rd-desc" class="rd-desc">Descrição do ranger aparece aqui.</div>
+        <div class="rd-actions">
+          <button class="menu-btn" id="rd-select">SELECIONAR</button>
+          <button class="menu-btn" id="rd-test">TESTAR</button>
+        </div>
+      </div>
+      <div class="ranger-detail-center">
+        <div id="rd-avatar" class="rd-avatar">🦖</div>
+      </div>
+      <div class="ranger-detail-right" id="rd-stats">
+        <div class="rd-power">NÍVEL <span id="rd-level">1</span></div>
+        <div class="rd-stats-list">
+          <div>SAÚDE <b id="rd-hp">0</b></div>
+          <div>ATAQUE <b id="rd-atk">0</b></div>
+          <div>SUPER <b id="rd-super">-</b></div>
+        </div>
+      </div>
     </div>
   </div>
 

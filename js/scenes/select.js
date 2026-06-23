@@ -7,6 +7,23 @@ const SelectScene = {
       App.selectedRanger = RANGERS_DATA[this.selected];
       App.goTo('game');
     };
+    // ranger detail controls
+    const backR = document.getElementById('btn-back-ranger');
+    if (backR) backR.onclick = () => App.goTo('select');
+    const rdSelect = document.getElementById('rd-select');
+    if (rdSelect) rdSelect.onclick = () => {
+      if (this._detailIndex != null) {
+        App.selectedRanger = RANGERS_DATA[this._detailIndex];
+        App.goTo('game');
+      }
+    };
+    const rdTest = document.getElementById('rd-test');
+    if (rdTest) rdTest.onclick = () => {
+      if (this._detailIndex != null) {
+        App.selectedRanger = RANGERS_DATA[this._detailIndex];
+        App.goTo('game');
+      }
+    };
     this._buildGrid();
   },
 
@@ -38,11 +55,33 @@ const SelectScene = {
         </div>
       `;
       card.onclick = () => {
-        SelectScene.selected = i;
-        SelectScene._buildGrid();
+        SelectScene.showDetail(i);
       };
       grid.appendChild(card);
     });
+  },
+
+  showDetail(index) {
+    const r = RANGERS_DATA[index];
+    this._detailIndex = index;
+    // populate detail screen
+    const elName = document.getElementById('rd-name');
+    const elSub = document.getElementById('rd-sub');
+    const elDesc = document.getElementById('rd-desc');
+    const elAvatar = document.getElementById('rd-avatar');
+    const elLevel = document.getElementById('rd-level');
+    const elHp = document.getElementById('rd-hp');
+    const elAtk = document.getElementById('rd-atk');
+    const elSuper = document.getElementById('rd-super');
+    if (elName) elName.textContent = r.name;
+    if (elSub) elSub.textContent = r.title + ' · ' + r.zord;
+    if (elDesc) elDesc.textContent = r.specialDesc || r.title;
+    if (elAvatar) elAvatar.textContent = r.emoji;
+    if (elLevel) elLevel.textContent = Math.min(11, 5 + index);
+    if (elHp) elHp.textContent = r.maxHp;
+    if (elAtk) elAtk.textContent = r.attack;
+    if (elSuper) elSuper.textContent = r.specialName || '-';
+    App.goTo('ranger');
   },
 
   _statIcon(emoji, val, color) {
