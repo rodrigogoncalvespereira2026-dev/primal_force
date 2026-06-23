@@ -12,7 +12,7 @@ const MenuScene = {
     };
     // Fechar ao clicar fora
     document.getElementById('screen-menu').addEventListener('click', e => {
-      if (!e.target.closest('#opcoes-sidebar') && e.target.id !== 'btn-opcoes') {
+      if (!e.target.closest('#opcoes-sidebar') && !e.target.closest('#btn-opcoes')) {
         sidebar.classList.remove('open');
       }
     });
