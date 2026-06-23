@@ -548,7 +548,7 @@ body {
   height: 46px;
   background: rgba(255,255,255,0.12);
   border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 8px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -574,13 +574,13 @@ body {
 
 .act-btn {
   padding: 0;
-  width: 64px;
-  height: 50px;
-  border-radius: 10px;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
   border: 2px solid;
   background: rgba(0,0,0,0.5);
   color: #fff;
-  font-size: 11px;
+  font-size: 20px;
   font-weight: 700;
   font-family: inherit;
   letter-spacing: 1px;
@@ -592,7 +592,7 @@ body {
 
 .act-btn:active { opacity: 0.6; }
 
-.attack-btn { border-color: #e24b4a; color: #e24b4a; width: 80px; }
+.attack-btn { border-color: #e24b4a; color: #e24b4a; }
 .laser-btn { border-color: #fac775; color: #fac775; }
 .special-btn { border-color: #3cb371; color: #3cb371; }
 .shield-btn { border-color: #378add; color: #378add; }
@@ -677,27 +677,39 @@ body {
 }
 
 /* Telemóveis em paisagem (ecrã baixo) */
-.is-mobile @media (orientation: landscape) and (max-height: 500px) {
-  #mobile-controls { padding: 3px 8px 5px; }
-  #dpad { flex-direction: row; gap: 3px; }
-  .d-btn { width: 32px; height: 32px; font-size: 11px; border-radius: 6px; }
-  .d-center { width: 0; height: 0; display: none; }
-  .d-row { gap: 3px; }
-  .act-btn { width: 42px; height: 32px; font-size: 9px; border-radius: 7px; }
-  .attack-btn { width: 52px; }
-  #action-buttons { flex-direction: row; align-items: center; gap: 4px; }
-  .act-row { gap: 4px; }
-  #btn-pause { top: 4px; right: 6px; left: auto; transform: none; padding: 3px 8px; font-size: 10px; z-index: 20; }
-  #hud { padding: 4px 6px; }
-  .bar-wrap { width: 60px; height: 5px; }
-  #ranger-name-hud { font-size: 8px; }
-  .bar-label { font-size: 7px; width: 16px; }
-  .bar-num { font-size: 7px; min-width: 14px; }
-  #combo-display { font-size: 13px; }
-  #msg-box { font-size: 10px; }
-  #minimap { width: 40px; height: 32px; }
-  #hud-wave-info { font-size: 9px; }
-  .hud-stat { font-size: 8px; }
+@media (orientation: landscape) and (max-height: 500px) {
+  .is-mobile #mobile-controls {
+    padding: 4px 12px 8px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+  }
+  /* Dpad: circular, compacto */
+  .is-mobile #dpad { gap: 2px; }
+  .is-mobile .d-btn { width: 34px; height: 34px; font-size: 12px; border-radius: 50%; }
+  .is-mobile .d-center { width: 34px; height: 34px; }
+  .is-mobile .d-row { gap: 2px; }
+  /* Botões de acção: linha única em baixo */
+  .is-mobile #action-buttons {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+  }
+  .is-mobile .act-row { gap: 6px; }
+  .is-mobile .act-btn { width: 44px; height: 44px; font-size: 18px; border-radius: 50%; }
+  .is-mobile #btn-pause { top: 4px; right: 6px; left: auto; transform: none; padding: 3px 8px; font-size: 10px; z-index: 20; }
+  .is-mobile #hud { padding: 4px 6px; }
+  .is-mobile .bar-wrap { width: 60px; height: 5px; }
+  .is-mobile #ranger-name-hud { font-size: 8px; }
+  .is-mobile .bar-label { font-size: 7px; width: 16px; }
+  .is-mobile .bar-num { font-size: 7px; min-width: 14px; }
+  .is-mobile #combo-display { font-size: 13px; }
+  .is-mobile #msg-box { font-size: 10px; }
+  .is-mobile #minimap { width: 40px; height: 32px; }
+  .is-mobile #hud-wave-info { font-size: 9px; }
+  .is-mobile .hud-stat { font-size: 8px; }
 }
 
 /* Telemóveis (até 480px) */
@@ -767,52 +779,52 @@ body {
 }
 
 /* Select screen em paisagem */
-.is-mobile @media (orientation: landscape) and (max-height: 500px) {
-  #screen-select { padding: 8px 12px; gap: 8px; }
-  .ranger-grid { grid-template-columns: repeat(6, 1fr); gap: 6px; padding-bottom: 4px; }
-  .ranger-card { padding: 6px 4px; gap: 4px; }
-  .ranger-avatar { width: 32px; height: 32px; font-size: 18px; }
-  .ranger-card-name { font-size: 10px; }
-  .ranger-card-zord, .ranger-card-stats { display: none; }
-  .ranger-card-title { font-size: 8px; }
-  .select-header h1 { font-size: 14px; }
-  .select-footer { padding: 4px; }
-  #btn-confirmar-ranger { padding: 8px 16px; font-size: 12px; }
-}
+@media (orientation: landscape) and (max-height: 500px) {
+  .is-mobile #screen-select { padding: 8px 12px; gap: 8px; }
+  .is-mobile .ranger-grid { grid-template-columns: repeat(6, 1fr); gap: 6px; padding-bottom: 4px; }
+  .is-mobile .ranger-card { padding: 6px 4px; gap: 4px; }
+  .is-mobile .ranger-avatar { width: 32px; height: 32px; font-size: 18px; }
+  .is-mobile .ranger-card-name { font-size: 10px; }
+  .is-mobile .ranger-card-zord, .is-mobile .ranger-card-stats { display: none; }
+  .is-mobile .ranger-card-title { font-size: 8px; }
+  .is-mobile .select-header h1 { font-size: 14px; }
+  .is-mobile .select-footer { padding: 4px; }
+  .is-mobile #btn-confirmar-ranger { padding: 8px 16px; font-size: 12px; }
 
-/* Menu em paisagem (telemóvel) */
-.is-mobile @media (orientation: landscape) and (max-height: 500px) {
-  #screen-menu.active { flex-direction: row; align-items: center; justify-content: center; padding: 0 20px; }
-  .menu-content { flex-direction: row; gap: 24px; align-items: center; }
-  .logo-main { font-size: 28px; }
-  .logo-sub { font-size: 11px; }
-  .logo-tagline { display: none; }
-  .trophy-bar-menu { position: static; transform: none; font-size: 10px; padding: 4px 10px; }
-  .menu-icon-btn { min-width: 80px; padding: 8px 14px; }
-  .menu-corner-tl, .menu-corner-tr, .menu-corner-bl, .menu-play-btn { position: static; }
-  .menu-side-left { display: none; }
-}
+  /* Menu em paisagem (telemóvel) */
+  .is-mobile #screen-menu.active { flex-direction: row; align-items: center; justify-content: center; padding: 0 20px; }
+  .is-mobile .menu-content { flex-direction: row; gap: 24px; align-items: center; }
+  .is-mobile .logo-main { font-size: 28px; }
+  .is-mobile .logo-sub { font-size: 11px; }
+  .is-mobile .logo-tagline { display: none; }
+  .is-mobile .trophy-bar-menu { position: static; transform: none; font-size: 10px; padding: 4px 10px; }
+  .is-mobile .menu-icon-btn { min-width: 80px; padding: 8px 14px; }
+  /* Botões do menu: posição estática em paisagem para evitar sobreposição */
+  .is-mobile .menu-corner-tl,
+  .is-mobile .menu-corner-tr,
+  .is-mobile .menu-corner-bl,
+  .is-mobile .menu-play-btn { position: static; }
+  .is-mobile .menu-side-left { display: none; }
 
-/* World map / Shop / Trophies em paisagem */
-.is-mobile @media (orientation: landscape) and (max-height: 500px) {
-  #screen-worldmap.active { flex-direction: row; }
-  .wm-header { padding: 6px 10px; }
-  .wm-header h1 { font-size: 13px; }
-  .wm-body { flex-direction: row; }
-  #wm-canvas { flex: 1; height: auto; }
-  .wm-panel { width: 200px; min-width: 0; max-height: none; max-width: 200px; border-left: 1px solid rgba(255,255,255,0.1); border-top: none; }
-  #screen-trophies { padding: 8px; gap: 8px; }
-  .trophy-tab { padding: 6px; font-size: 10px; }
-  .trophy-node { padding: 6px 8px; gap: 6px; }
-  .trophy-node-icon { font-size: 14px; }
-  .trophy-node-label { font-size: 10px; }
-  #screen-shop { padding: 8px; gap: 8px; }
-  .shop-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 0 4px 8px; }
-  .shop-item { padding: 8px 6px; }
-  .shop-item-icon { font-size: 20px; }
-  .shop-item-desc { display: none; }
-  .shop-hint { display: none; }
-  .select-header h1 { font-size: 13px; }
+  /* World map / Shop / Trophies em paisagem */
+  .is-mobile #screen-worldmap.active { flex-direction: row; }
+  .is-mobile .wm-header { padding: 6px 10px; }
+  .is-mobile .wm-header h1 { font-size: 13px; }
+  .is-mobile .wm-body { flex-direction: row; }
+  .is-mobile #wm-canvas { flex: 1; height: auto; }
+  .is-mobile .wm-panel { width: 200px; min-width: 0; max-height: none; max-width: 200px; border-left: 1px solid rgba(255,255,255,0.1); border-top: none; }
+  .is-mobile #screen-trophies { padding: 8px; gap: 8px; }
+  .is-mobile .trophy-tab { padding: 6px; font-size: 10px; }
+  .is-mobile .trophy-node { padding: 6px 8px; gap: 6px; }
+  .is-mobile .trophy-node-icon { font-size: 14px; }
+  .is-mobile .trophy-node-label { font-size: 10px; }
+  .is-mobile #screen-shop { padding: 8px; gap: 8px; }
+  .is-mobile .shop-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 0 4px 8px; }
+  .is-mobile .shop-item { padding: 8px 6px; }
+  .is-mobile .shop-item-icon { font-size: 20px; }
+  .is-mobile .shop-item-desc { display: none; }
+  .is-mobile .shop-hint { display: none; }
+  .is-mobile .select-header h1 { font-size: 13px; }
 }
 
 /* ── WAVE HUD ── */

@@ -8,13 +8,16 @@ const Joystick = {
 
   init() {
     const canvas = document.getElementById('game-canvas');
-    canvas.addEventListener('pointerdown',  e => this._onDown(e));
+    canvas.addEventListener('pointerdown',  e => { e.preventDefault(); this._onDown(e); });
     canvas.addEventListener('pointermove',  e => this._onMove(e));
     canvas.addEventListener('pointerup',    e => this._onUp(e));
     canvas.addEventListener('pointercancel',e => this._onUp(e));
   },
 
   _onDown(e) {
+    // Ignora toques que vieram de elementos HTML (botões, dpad)
+    if (e.target.id !== 'game-canvas') return;
+
     const cw = e.target.clientWidth;
     const isLeft = e.clientX < cw / 2;
 
@@ -24,6 +27,7 @@ const Joystick = {
       this.left.startX    = e.clientX;
       this.left.startY    = e.clientY;
       this.left.dx = this.left.dy = 0;
+      try { e.target.setPointerCapture(e.pointerId); } catch(_) {}
     } else if (!isLeft && !this.right.active) {
       this.right.active    = true;
       this.right.pointerId = e.pointerId;
@@ -31,6 +35,7 @@ const Joystick = {
       this.right.startY    = e.clientY;
       this.right.dx = this.right.dy = 0;
       this.right.firing = true;
+      try { e.target.setPointerCapture(e.pointerId); } catch(_) {}
     }
   },
 
@@ -65,16 +70,20 @@ const Joystick = {
 
   // Desenha os joysticks no canvas
   draw(ctx, canvasW, canvasH) {
+    // Em mobile com controlos em baixo, posiciona joysticks mais acima
+    const isMobile = document.body.classList.contains('is-mobile');
+    const baseY = isMobile ? canvasH * 0.62 : canvasH * 0.78;
+
     // Esquerdo
     this._drawStick(ctx,
       this.left.active ? this.left.startX : canvasW * 0.18,
-      this.left.active ? this.left.startY : canvasH * 0.78,
+      this.left.active ? this.left.startY : baseY,
       this.left.dx, this.left.dy, this.left.active, '#378add'
     );
     // Direito
     this._drawStick(ctx,
       this.right.active ? this.right.startX : canvasW * 0.82,
-      this.right.active ? this.right.startY : canvasH * 0.78,
+      this.right.active ? this.right.startY : baseY,
       this.right.dx, this.right.dy, this.right.active, '#e24b4a'
     );
   },
