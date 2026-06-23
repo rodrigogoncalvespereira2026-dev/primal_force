@@ -3,7 +3,8 @@ const MenuScene = {
     document.getElementById('btn-jogar').onclick   = () => App.goTo('select');
     document.getElementById('btn-rangers').onclick = () => App.goTo('select');
     document.getElementById('btn-mundo').onclick   = () => App.goTo('worldmap');
-    document.getElementById('btn-trofeus').onclick = () => App.goTo('trophies');
+    document.getElementById('btn-trofeus').onclick = () => { TrophiesScene.tab = 'trophies'; App.goTo('trophies'); };
+    document.getElementById('btn-passe').onclick   = () => { TrophiesScene.tab = 'battlepass'; App.goTo('trophies'); };
     document.getElementById('btn-missoes').onclick = () => alert('Missões — em breve!');
     document.getElementById('btn-perfil').onclick  = () => alert('Perfil — em breve!');
     document.getElementById('btn-loja').onclick    = () => App.goTo('shop');

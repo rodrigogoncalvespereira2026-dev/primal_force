@@ -188,28 +188,11 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
   position: absolute;
   z-index: 2;
 }
-.menu-corner-tl {
-  position: absolute;
-  z-index: 2;
-  top: 80px;
-  left: 20px;
-  display: flex;
-  flex-direction: row;
-  gap: 10px;
-}
-.menu-corner-tl-item { min-width: 0; padding: 14px 18px; }
-.menu-corner-tr { top: 80px;   right: 20px; }
-.menu-corner-bl {
-  position: absolute;
-  z-index: 2;
-  bottom: 24px;
-  left: 20px;
-  display: flex;
-  flex-direction: row;
-  gap: 10px;
-}
-.menu-corner-bl-item { min-width: 0; padding: 14px 18px; }
-.menu-corner-bl-item .corner-icon { font-size: 24px; }
+.menu-corner-tl { top: 80px; left: 20px; display: flex; flex-direction: row; gap: 10px; }
+.menu-corner-tr { top: 80px; right: 20px; }
+.menu-corner-bl { bottom: 24px; left: 20px; display: flex; flex-direction: row; gap: 10px; }
+.menu-corner-item { min-width: 0; padding: 14px 18px; }
+.menu-corner-item .corner-icon { font-size: 24px; }
 
 .menu-side-right {
   position: absolute;
@@ -849,10 +832,9 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
   
   /* Posicionamento absoluto igual ao PC */
   .is-mobile .menu-corner-tl { top: 60px; left: 15px; gap: 6px; }
-  .is-mobile .menu-corner-tl-item { padding: 8px 12px; }
-  .is-mobile .menu-corner-tr { position: absolute; top: 60px; right: 15px; }
+  .is-mobile .menu-corner-tr { top: 60px; right: 15px; }
   .is-mobile .menu-corner-bl { bottom: 15px; left: 15px; gap: 6px; }
-  .is-mobile .menu-corner-bl-item { padding: 8px 12px; }
+  .is-mobile .menu-corner-item { padding: 8px 12px; }
   
   .is-mobile .menu-side-left {
     position: absolute;
