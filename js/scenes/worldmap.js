@@ -73,8 +73,9 @@ const WorldMap = {
     if (!canvas) return;
     const panel = document.getElementById('wm-panel');
     const panelW = panel ? panel.offsetWidth : 260;
-    canvas.width  = window.innerWidth - panelW;
-    canvas.height = window.innerHeight - 60;
+    const isP = document.body.classList.contains('portrait');
+    canvas.width  = (isP ? window.innerHeight : window.innerWidth) - panelW;
+    canvas.height = (isP ? window.innerWidth  : window.innerHeight) - 60;
     this._drawCanvas();
 
     // Remove listeners antigos clonando

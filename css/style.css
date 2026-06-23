@@ -987,9 +987,9 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
 .wm-complete-msg { color:#3cb371; font-weight:700; text-align:center; font-size:14px; margin-top:auto; }
 .wm-base-msg { color:#af56f5; font-size:12px; line-height:1.4; }
 @media(max-width:600px){
-  .wm-body { flex-direction:column; }
-  .wm-panel { width:100%; min-width:0; border-left:none; border-top:1px solid rgba(255,255,255,0.1); max-height:200px; }
-  #wm-canvas { flex:none; height:55vh; }
+  body:not(.portrait) .wm-body { flex-direction:column; }
+  body:not(.portrait) .wm-panel { width:100%; min-width:0; border-left:none; border-top:1px solid rgba(255,255,255,0.1); max-height:200px; }
+  body:not(.portrait) #wm-canvas { flex:none; height:55vh; }
 }
 
 /* ── DIÁLOGO RPG ── */
@@ -1111,13 +1111,5 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
   margin: 0;
 }
 
-/* Força modo paisagem em mobile */
-@media (orientation: portrait) {
-  body.is-mobile #app {
-    display: none !important;
-  }
-  body.is-mobile #orientation-blocker {
-    display: flex !important;
-  }
-}
+/* Nota: o bloqueio de portrait é feito por software em App._forceLandscape() */
 
