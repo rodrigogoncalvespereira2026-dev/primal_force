@@ -186,13 +186,13 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
 
 .menu-corner-tr { position: absolute; z-index: 2; top: 80px; right: 20px; }
 
-#btn-perfil  { position: absolute; z-index: 2; top: 80px; left: 20px; min-width: 0; padding: 14px 18px; }
-#btn-trofeus { position: absolute; z-index: 2; top: 80px; left: 166px; min-width: 0; padding: 14px 18px; }
+#btn-perfil  { position: absolute; z-index: 2; top: 55px; left: 20px; min-width: 0; padding: 14px 18px; }
+#btn-trofeus { position: absolute; z-index: 2; top: 55px; left: 166px; min-width: 0; padding: 14px 18px; }
 #btn-passe   { position: absolute; z-index: 2; bottom: 24px; left: 20px; min-width: 0; padding: 14px 18px; }
 #btn-missoes { position: absolute; z-index: 2; bottom: 24px; left: 166px; min-width: 0; padding: 14px 18px; }
 
-.is-mobile #btn-perfil  { top: 48px; left: 10px; padding: 6px 10px; gap: 6px; }
-.is-mobile #btn-trofeus { top: 48px; left: 125px; padding: 6px 10px; gap: 6px; }
+.is-mobile #btn-perfil  { top: 32px; left: 10px; padding: 6px 10px; gap: 6px; }
+.is-mobile #btn-trofeus { top: 32px; left: 125px; padding: 6px 10px; gap: 6px; }
 .is-mobile #btn-passe   { bottom: 10px; left: 10px; padding: 6px 10px; gap: 6px; }
 .is-mobile #btn-missoes { bottom: 10px; left: 125px; padding: 6px 10px; gap: 6px; }
 
