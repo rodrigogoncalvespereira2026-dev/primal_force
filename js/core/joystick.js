@@ -2,7 +2,7 @@
 // Ouve no document (não no canvas) — mais fiável em Android Chrome
 const Joystick = {
   left:  { active: false, startX: 0, startY: 0, dx: 0, dy: 0, id: -1 },
-  right: { active: false, startX: 0, startY: 0, dx: 0, dy: 0, id: -1, firing: false },
+  right: { active: false, startX: 0, startY: 0, dx: 0, dy: 0, id: -1, dragged: false },
 
   RADIUS: 60,
   KNOB:   26,
@@ -35,6 +35,30 @@ const Joystick = {
     return typeof GameScene !== 'undefined' && GameScene.running;
   },
 
+  // Executa o ataque Melee (com opção de aim direction ou auto-aim)
+  _triggerMelee(stick) {
+    if (!this._gameActive() || !GameScene.player) return;
+
+    if (stick.dragged && (stick.dx !== 0 || stick.dy !== 0)) {
+      // Apontou e largou -> ataca na direção em que estava a apontar
+      GameScene.player.facing = Math.atan2(stick.dy, stick.dx);
+    } else {
+      // Apenas tocou -> auto-aim no inimigo mais próximo
+      let nearest = null;
+      let nearDist = Infinity;
+      for (const e of GameScene.enemies) {
+        if (e.dead) continue;
+        const d = Utils.dist(GameScene.player, e);
+        if (d < nearDist) { nearDist = d; nearest = e; }
+      }
+      if (nearest) {
+        GameScene.player.facing = Math.atan2(nearest.y - GameScene.player.y, nearest.x - GameScene.player.x);
+      }
+    }
+
+    GameScene.player.doMelee(GameScene);
+  },
+
   // ── TOUCH ────────────────────────────────────────────────────────────
   _tStart(e) {
     if (!this._gameActive()) return;
@@ -49,7 +73,7 @@ const Joystick = {
       if (isLeft && !this.left.active) {
         this.left = { active: true, startX: t.clientX, startY: t.clientY, dx: 0, dy: 0, id: t.identifier };
       } else if (!isLeft && !this.right.active) {
-        this.right = { active: true, startX: t.clientX, startY: t.clientY, dx: 0, dy: 0, id: t.identifier, firing: true };
+        this.right = { active: true, startX: t.clientX, startY: t.clientY, dx: 0, dy: 0, id: t.identifier, dragged: false };
       }
     }
   },
@@ -64,7 +88,9 @@ const Joystick = {
         this._calcDir(this.right, t.clientX, t.clientY);
         const dx = t.clientX - this.right.startX;
         const dy = t.clientY - this.right.startY;
-        this.right.firing = Math.sqrt(dx*dx + dy*dy) > 8;
+        if (Math.sqrt(dx*dx + dy*dy) > 10) {
+          this.right.dragged = true;
+        }
       }
     }
     e.preventDefault();
@@ -72,8 +98,13 @@ const Joystick = {
 
   _tEnd(e) {
     for (const t of e.changedTouches) {
-      if (this.left.active  && t.identifier === this.left.id)  { this.left.active  = false; this.left.dx  = this.left.dy  = 0; }
-      if (this.right.active && t.identifier === this.right.id) { this.right.active = false; this.right.dx = this.right.dy = 0; this.right.firing = false; }
+      if (this.left.active  && t.identifier === this.left.id)  {
+        this.left.active  = false; this.left.dx  = this.left.dy  = 0;
+      }
+      if (this.right.active && t.identifier === this.right.id) {
+        this._triggerMelee(this.right);
+        this.right.active = false; this.right.dx = this.right.dy = 0; this.right.dragged = false;
+      }
     }
   },
 
@@ -85,7 +116,7 @@ const Joystick = {
     if (isLeft && !this.left.active) {
       this.left = { active: true, startX: e.clientX, startY: e.clientY, dx: 0, dy: 0, id: 0 };
     } else if (!isLeft && !this.right.active) {
-      this.right = { active: true, startX: e.clientX, startY: e.clientY, dx: 0, dy: 0, id: 1, firing: true };
+      this.right = { active: true, startX: e.clientX, startY: e.clientY, dx: 0, dy: 0, id: 1, dragged: false };
     }
   },
 
@@ -94,15 +125,21 @@ const Joystick = {
     if (this.right.active && this.right.id === 1) {
       this._calcDir(this.right, e.clientX, e.clientY);
       const dx = e.clientX - this.right.startX, dy = e.clientY - this.right.startY;
-      this.right.firing = Math.sqrt(dx*dx + dy*dy) > 8;
+      if (Math.sqrt(dx*dx + dy*dy) > 10) {
+        this.right.dragged = true;
+      }
     }
   },
 
   _mUp(e) {
     if (e.button === 0) {
       const isLeft = e.clientX < window.innerWidth / 2;
-      if (isLeft)  { this.left.active  = false; this.left.dx  = this.left.dy  = 0; }
-      else         { this.right.active = false; this.right.dx = this.right.dy = 0; this.right.firing = false; }
+      if (isLeft)  {
+        this.left.active  = false; this.left.dx  = this.left.dy  = 0;
+      } else if (this.right.active) {
+        this._triggerMelee(this.right);
+        this.right.active = false; this.right.dx = this.right.dy = 0; this.right.dragged = false;
+      }
     }
   },
 

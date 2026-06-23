@@ -154,7 +154,6 @@ const GameScene = {
       if (!el) return;
       el.addEventListener('pointerdown', e => { e.preventDefault(); if (this.running) fn(); });
     };
-    mb('btn-mb-melee',   () => this.player.doMelee(this));
     mb('btn-mb-laser',   () => this.player.doLaser(this));
     mb('btn-mb-special', () => this.player.doSpecial(this));
     mb('btn-mb-shield',  () => this.player.doShield(this));
@@ -278,17 +277,10 @@ const GameScene = {
       p.facing=Math.atan2(n.y,n.x);
     }
 
-    // Joystick direito — apontar e disparar
+    // Joystick direito — apontar
     const aim=Joystick.getAimDir();
     if(aim.x!==0||aim.y!==0) {
       p.facing=Math.atan2(aim.y,aim.x);
-      if(Joystick.isFiring()) {
-        this.laserFireTimer-=dt;
-        if(this.laserFireTimer<=0) {
-          this.laserFireTimer=18;
-          p.doLaser(this);
-        }
-      }
     }
 
     // Update entidades
