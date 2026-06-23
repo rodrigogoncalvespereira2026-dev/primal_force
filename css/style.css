@@ -602,7 +602,7 @@ body {
 
 /* Mobile: mostrar controlos touch, esconder skill-bar */
 .is-mobile #mobile-controls { display: flex; }
-.is-mobile #skill-bar { display: none; }
+.is-mobile #skill-bar { display: none !important; }
 
 /* PAUSE BTN */
 #btn-pause {

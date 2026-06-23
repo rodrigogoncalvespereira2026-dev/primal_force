@@ -230,6 +230,12 @@ const GameScene = {
       boostMsgs.length ? 'ONDA 1! Itens usados: ' + boostMsgs.join(' ') : 'ONDA 1 — PRIMAL FORCE!',
       160
     );
+    // Garante que o skill-bar fica escondido em mobile
+    const skillBar = document.getElementById('skill-bar');
+    if (skillBar && document.body.classList.contains('is-mobile')) {
+      skillBar.style.display = 'none';
+    }
+
     this._resize();
     this.running=true;
     this._lastTime=performance.now();

@@ -41,7 +41,8 @@ const App = {
 
   init() {
     const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    if (isTouch) {
+    const isUA    = /Android|iPhone|iPad|iPod|Mobile|Tablet/i.test(navigator.userAgent);
+    if (isTouch || isUA) {
       document.body.classList.add('is-mobile');
       // Tenta bloquear em landscape — se funcionar, o sistema roda o ecrã
       if (screen.orientation && screen.orientation.lock) {
