@@ -83,8 +83,12 @@ const WorldMap = {
 
     newCanvas.addEventListener('click', e => {
       const rect = newCanvas.getBoundingClientRect();
-      const mx = (e.clientX - rect.left) / newCanvas.width;
-      const my = (e.clientY - rect.top)  / newCanvas.height;
+      const isPortrait = document.body.classList.contains('portrait');
+      const nx = (e.clientX - rect.left) / rect.width;
+      const ny = (e.clientY - rect.top)  / rect.height;
+      // rotate(90deg) mapeia visual nx → logical ny, visual ny → logical 1-nx
+      const mx = isPortrait ? ny : nx;
+      const my = isPortrait ? (1 - nx) : ny;
       for (const z of this.zones) {
         const baseH = 16;
         const H_norm = baseH / newCanvas.height;

@@ -59,21 +59,30 @@ const Joystick = {
     GameScene.player.doMelee(GameScene);
   },
 
+  _appWidth() {
+    return document.body.classList.contains('portrait') ? window.innerHeight : window.innerWidth;
+  },
+
+  _touchToApp(cx, cy) {
+    return App.vpToApp(cx, cy);
+  },
+
   // ── TOUCH ────────────────────────────────────────────────────────────
   _tStart(e) {
     if (!this._gameActive()) return;
-    const sw = window.innerWidth;
+    const sw = this._appWidth();
 
     for (const t of e.changedTouches) {
+      const p = this._touchToApp(t.clientX, t.clientY);
       if (this._isButton(t.clientX, t.clientY)) continue;
       e.preventDefault();
 
-      const isLeft = t.clientX < sw / 2;
+      const isLeft = p.x < sw / 2;
 
       if (isLeft && !this.left.active) {
-        this.left = { active: true, startX: t.clientX, startY: t.clientY, dx: 0, dy: 0, id: t.identifier };
+        this.left = { active: true, startX: p.x, startY: p.y, dx: 0, dy: 0, id: t.identifier };
       } else if (!isLeft && !this.right.active) {
-        this.right = { active: true, startX: t.clientX, startY: t.clientY, dx: 0, dy: 0, id: t.identifier, dragged: false };
+        this.right = { active: true, startX: p.x, startY: p.y, dx: 0, dy: 0, id: t.identifier, dragged: false };
       }
     }
   },
@@ -81,13 +90,14 @@ const Joystick = {
   _tMove(e) {
     if (!this._gameActive()) return;
     for (const t of e.changedTouches) {
+      const p = this._touchToApp(t.clientX, t.clientY);
       if (this.left.active && t.identifier === this.left.id) {
-        this._calcDir(this.left, t.clientX, t.clientY);
+        this._calcDir(this.left, p.x, p.y);
       }
       if (this.right.active && t.identifier === this.right.id) {
-        this._calcDir(this.right, t.clientX, t.clientY);
-        const dx = t.clientX - this.right.startX;
-        const dy = t.clientY - this.right.startY;
+        this._calcDir(this.right, p.x, p.y);
+        const dx = p.x - this.right.startX;
+        const dy = p.y - this.right.startY;
         if (Math.sqrt(dx*dx + dy*dy) > 10) {
           this.right.dragged = true;
         }
@@ -111,20 +121,22 @@ const Joystick = {
   // ── MOUSE ────────────────────────────────────────────────────────────
   _mDown(e) {
     if (!this._gameActive()) return;
+    const p = this._touchToApp(e.clientX, e.clientY);
     if (this._isButton(e.clientX, e.clientY)) return;
-    const isLeft = e.clientX < window.innerWidth / 2;
+    const isLeft = p.x < this._appWidth() / 2;
     if (isLeft && !this.left.active) {
-      this.left = { active: true, startX: e.clientX, startY: e.clientY, dx: 0, dy: 0, id: 0 };
+      this.left = { active: true, startX: p.x, startY: p.y, dx: 0, dy: 0, id: 0 };
     } else if (!isLeft && !this.right.active) {
-      this.right = { active: true, startX: e.clientX, startY: e.clientY, dx: 0, dy: 0, id: 1, dragged: false };
+      this.right = { active: true, startX: p.x, startY: p.y, dx: 0, dy: 0, id: 1, dragged: false };
     }
   },
 
   _mMove(e) {
-    if (this.left.active  && this.left.id  === 0) this._calcDir(this.left,  e.clientX, e.clientY);
+    const p = this._touchToApp(e.clientX, e.clientY);
+    if (this.left.active  && this.left.id  === 0) this._calcDir(this.left,  p.x, p.y);
     if (this.right.active && this.right.id === 1) {
-      this._calcDir(this.right, e.clientX, e.clientY);
-      const dx = e.clientX - this.right.startX, dy = e.clientY - this.right.startY;
+      this._calcDir(this.right, p.x, p.y);
+      const dx = p.x - this.right.startX, dy = p.y - this.right.startY;
       if (Math.sqrt(dx*dx + dy*dy) > 10) {
         this.right.dragged = true;
       }
@@ -133,7 +145,8 @@ const Joystick = {
 
   _mUp(e) {
     if (e.button === 0) {
-      const isLeft = e.clientX < window.innerWidth / 2;
+      const p = this._touchToApp(e.clientX, e.clientY);
+      const isLeft = p.x < this._appWidth() / 2;
       if (isLeft)  {
         this.left.active  = false; this.left.dx  = this.left.dy  = 0;
       } else if (this.right.active) {

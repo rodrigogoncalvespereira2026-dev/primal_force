@@ -39,6 +39,7 @@ body {
 }
 
 #app { width: 100vw; height: 100vh; position: relative; }
+body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; }
 
 /* ── SCREENS ── */
 .screen {
