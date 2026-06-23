@@ -4,6 +4,8 @@ const MenuScene = {
     document.getElementById('btn-rangers').onclick = () => App.goTo('select');
     document.getElementById('btn-mundo').onclick   = () => App.goTo('worldmap');
     document.getElementById('btn-trofeus').onclick = () => App.goTo('trophies');
+    document.getElementById('btn-missoes').onclick = () => alert('Missões — em breve!');
+    document.getElementById('btn-perfil').onclick  = () => alert('Perfil — em breve!');
     document.getElementById('btn-loja').onclick    = () => App.goTo('shop');
 
     const sidebar = document.getElementById('opcoes-sidebar');
