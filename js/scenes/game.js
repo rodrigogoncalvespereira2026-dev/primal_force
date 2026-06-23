@@ -2,15 +2,12 @@ const GameScene = {
   canvas: null, ctx: null,
   player: null,
   enemies: [], projectiles: [], particles: [], pickups: [],
-  boss: null,           // boss ativo (null se não houver)
-  bossDefeated: false,  // flag para cutscene de derrota
   score: 0, kills: 0,
   combo: 0, comboTimer: 0,
   msg: '', msgTimer: 0,
   cam: { x: 0, y: 0 },
   running: false, _raf: null, _lastTime: 0,
   laserFireTimer: 0,
-  activeBoosts: { coinMult: 1, trophyMult: 1 },
 
   spawnParticles(x, y, color, n=10) { for(let i=0;i<n;i++) this.particles.push(new Particle(x,y,color)); },
   showMsg(txt, dur=80) { this.msg=txt; this.msgTimer=dur; },
@@ -32,77 +29,11 @@ const GameScene = {
     this._updateWaveHUD();
   },
 
-  // ── BOSS ───────────────────────────────────────────────────────────
-  _spawnBoss() {
-    const bossKey = pickRandomBoss();
-    const bossType = BOSS_TYPES[bossKey];
-    const dialogKey = bossType.dialogKey;
-
-    this.showMsg('⚠️ BOSS APROXIMA-SE!', 120);
-    this.spawnParticles(this.player.x, this.player.y, '#ff4444', 30);
-
-    // Cutscene antes do boss
-    const lines = Story.dialogues[dialogKey];
-    if (lines) {
-      this.stop();
-      DialogSystem.show(lines, () => {
-        this.boss = new Boss(bossKey);
-        this._updateBossHUD(true);
-        this.resume();
-      });
-    } else {
-      this.boss = new Boss(bossKey);
-      this._updateBossHUD(true);
-    }
-  },
-
-  onBossKill(boss) {
-    this.bossDefeated = true;
-    const trophiesEarned = Math.round((30 + WaveSystem.wave * 5) * this.activeBoosts.trophyMult);
-    const coinsEarned    = Math.round((80 + WaveSystem.wave * 8) * this.activeBoosts.coinMult);
-    Progression.addTrophies(trophiesEarned);
-    Progression.addCoins(coinsEarned);
-    Progression.addBattlePassXP(200 + WaveSystem.wave * 20);
-    this.score += boss.score * (1 + Math.floor(this.combo / 4));
-    this.kills++;
-    this.updateScoreEl();
-    this.spawnParticles(boss.x, boss.y, boss.color, 80);
-    this.spawnParticles(boss.x, boss.y, '#ffffff', 40);
-    this._updateBossHUD(false);
-
-    // Cutscene de derrota do boss
-    const defeatKey = boss.typeKey + '_defeat';
-    const lines = Story.dialogues[defeatKey];
-    this.stop();
-    if (lines) {
-      DialogSystem.show(lines, () => this._afterBossDefeat(trophiesEarned, coinsEarned));
-    } else {
-      this._afterBossDefeat(trophiesEarned, coinsEarned);
-    }
-  },
-
-  _afterBossDefeat(trophiesEarned, coinsEarned) {
-    // Completa a missão e vai para gameover com vitória
-    if (App.currentZone) WorldMap.completeMission(App.currentZone.id);
-    document.getElementById('go-title').textContent     = '🏆 VITÓRIA!';
-    document.getElementById('go-score').textContent     = 'Pontuação: ' + this.score;
-    document.getElementById('go-kills').textContent      = 'Inimigos derrotados: ' + this.kills;
-    document.getElementById('go-trophies').textContent  = '+' + trophiesEarned + ' 🏆 · +' + coinsEarned + ' 💰 — BOSS DERROTADO!';
-    App.goTo('gameover');
-  },
-
-  _updateBossHUD(show) {
-    const el = document.getElementById('boss-hud');
-    if (el) el.style.display = show ? 'block' : 'none';
-  },
-
   onWaveComplete(waveNum) {
-    const trophiesEarned = Math.round((5 + waveNum * 2) * this.activeBoosts.trophyMult);
-    const coinsEarned    = Math.round((3 + waveNum)     * this.activeBoosts.coinMult);
+    const trophiesEarned = 5 + waveNum * 2;
     Progression.addTrophies(trophiesEarned);
-    Progression.addCoins(coinsEarned);
     Progression.addBattlePassXP(50 + waveNum * 10);
-    this.showMsg('ONDA ' + waveNum + ' COMPLETA! +' + trophiesEarned + ' 🏆 +' + coinsEarned + ' 💰', 180);
+    this.showMsg('ONDA ' + waveNum + ' COMPLETA! +' + trophiesEarned + ' 🏆', 180);
     this.spawnParticles(this.player.x, this.player.y, '#fac775', 40);
     this._updateWaveHUD();
   },
@@ -110,16 +41,14 @@ const GameScene = {
   onPlayerDeath() {
     this.running = false;
     cancelAnimationFrame(this._raf);
-    // Troféus e moedas mesmo ao perder
-    const trophiesEarned = Math.round(Math.floor(this.kills / 2) * this.activeBoosts.trophyMult);
-    const coinsEarned    = Math.round(this.kills * this.activeBoosts.coinMult);
+    // Troféus mesmo ao perder
+    const trophiesEarned = Math.floor(this.kills / 2);
     if (trophiesEarned > 0) Progression.addTrophies(trophiesEarned);
-    if (coinsEarned > 0)    Progression.addCoins(coinsEarned);
     Progression.addBattlePassXP(this.kills * 5);
     document.getElementById('go-title').textContent  = 'DERROTA';
     document.getElementById('go-score').textContent  = 'Pontuação: ' + this.score;
     document.getElementById('go-kills').textContent  = 'Inimigos derrotados: ' + this.kills;
-    document.getElementById('go-trophies').textContent = '+' + trophiesEarned + ' 🏆 · +' + coinsEarned + ' 💰';
+    document.getElementById('go-trophies').textContent = '+' + trophiesEarned + ' 🏆 Troféus';
     App.goTo('gameover');
   },
 
@@ -148,22 +77,27 @@ const GameScene = {
     document.getElementById('btn-retry').onclick    = () => App.goTo('game');
     document.getElementById('btn-go-menu').onclick  = () => App.goTo('menu');
 
-    // Controlos touch (mobile)
-    const mb = (id, fn) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.addEventListener('pointerdown', e => { e.preventDefault(); if (this.running) fn(); });
-    };
-    mb('btn-mb-melee',   () => this.player.doMelee(this));
-    mb('btn-mb-laser',   () => this.player.doLaser(this));
-    mb('btn-mb-special', () => this.player.doSpecial(this));
-    mb('btn-mb-shield',  () => this.player.doShield(this));
-    mb('btn-mb-zord',    () => this.player.doZord(this));
-
     // Teclado (PC)
+    const mobileActionButtons = {
+      'btn-mb-melee': () => this.player.doMelee(this),
+      'btn-mb-laser': () => this.player.doLaser(this),
+      'btn-mb-special': () => this.player.doSpecial(this),
+      'btn-mb-shield': () => this.player.doShield(this),
+      'btn-mb-zord': () => this.player.doZord(this),
+    };
+
+    Object.entries(mobileActionButtons).forEach(([id, action]) => {
+      const btn = document.getElementById(id);
+      if (!btn) return;
+      btn.addEventListener('pointerdown', () => {
+        if (!this.running || !this.player) return;
+        action();
+      });
+    });
+
     document.addEventListener('keydown', e => {
       if (!this.running) return;
-      if (e.code==='Space') { e.preventDefault(); this.player.doMelee(this); }
+      if (e.code==='KeyZ') this.player.doMelee(this);
       if (e.code==='KeyX') this.player.doLaser(this);
       if (e.code==='KeyC') this.player.doSpecial(this);
       if (e.code==='KeyV') this.player.doShield(this);
@@ -190,34 +124,6 @@ const GameScene = {
     this.combo = this.comboTimer = 0;
     this.msg=''; this.msgTimer=0;
     this.laserFireTimer=0;
-    this.boss = null;
-    this.bossDefeated = false;
-
-    // ── Aplica itens da loja (consumidos automaticamente nesta missão) ──
-    this.activeBoosts = { coinMult: 1, trophyMult: 1 };
-    const boostMsgs = [];
-    if (Progression.consumeItem('potion')) {
-      this.player.hp = this.player.maxHp;
-      boostMsgs.push('🧪 Poção de Vida');
-    }
-    if (Progression.consumeItem('shield')) {
-      this.player.invincible = 240;
-      boostMsgs.push('🛡️ Escudo de Entrada');
-    }
-    if (Progression.consumeItem('speedBoost')) {
-      this.player.speedMult = 1.3;
-      this.player.speed = this.player.data.speed * this.player.speedMult;
-      boostMsgs.push('⚡ Bota de Velocidade');
-    }
-    if (Progression.consumeItem('doubleCoins'))    { this.activeBoosts.coinMult    = 2; boostMsgs.push('💰 Moeda Dupla'); }
-    if (Progression.consumeItem('doubleTrophies')) { this.activeBoosts.trophyMult  = 2; boostMsgs.push('🏆 Troféu Duplo'); }
-
-    // Configura número de ondas pela zona
-    WaveSystem.maxWaves = App.currentZone ? (App.currentZone.waves || 3) : 3;
-    // Boss só na última missão da zona (ex: missão 3 de 3)
-    WaveSystem.isFinalMission = App.currentZone
-      ? (App.currentMission >= App.currentZone.missions.length - 1)
-      : true;
 
     WaveSystem.reset();
     WaveSystem.startWave(1);
@@ -226,10 +132,7 @@ const GameScene = {
     HUD.init(rangerData);
     this._updateWaveHUD();
 
-    this.showMsg(
-      boostMsgs.length ? 'ONDA 1! Itens usados: ' + boostMsgs.join(' ') : 'ONDA 1 — PRIMAL FORCE!',
-      160
-    );
+    this.showMsg('ONDA 1 — PRIMAL FORCE!', 140);
     this._resize();
     this.running=true;
     this._lastTime=performance.now();
@@ -294,15 +197,6 @@ const GameScene = {
     for(const pk of this.pickups)     pk.update(dt,p,this);
     for(const pt of this.particles)   pt.update(dt);
 
-    // Update do boss
-    if (this.boss && !this.boss.dead) {
-      this.boss.update(dt, p, this);
-      // Projéteis do boss já estão em game.projectiles (BossProjectile)
-    }
-    if (this.boss && this.boss.dead && !this.bossDefeated) {
-      this.onBossKill(this.boss);
-    }
-
     this.enemies     = this.enemies.filter(e=>!e.dead);
     this.projectiles = this.projectiles.filter(pr=>!pr.dead);
     this.pickups     = this.pickups.filter(pk=>!pk.dead);
@@ -312,14 +206,8 @@ const GameScene = {
     if(this.msgTimer>0)  this.msgTimer-=dt;
 
     const vw=this.canvas.width, vh=this.canvas.height;
-    this.cam.x = p.x;
-    this.cam.y = p.y;
-    this.cam.vw = vw;
-    this.cam.vh = vh;
-    this.cam.vx = Utils.clamp(p.x - vw/2, 0, Math.max(0, World.W - vw));
-    this.cam.vy = Utils.clamp(p.y - vh/2, 0, Math.max(0, World.H - vh));
-    this.cam.flatX = p.x - vw / 2;
-    this.cam.flatY = p.y - vh / 2;
+    this.cam.x=Utils.clamp(p.x-vw/2,0,Math.max(0,World.W-vw));
+    this.cam.y=Utils.clamp(p.y-vh/2,0,Math.max(0,World.H-vh));
 
     HUD.update(p,this);
     HUD.updateMinimap(p,this.enemies,this.cam,vw,vh);
@@ -331,13 +219,11 @@ const GameScene = {
     const w=this.canvas.width, h=this.canvas.height;
     ctx.fillStyle='#04080a';
     ctx.fillRect(0,0,w,h);
-
-    World.draw(ctx,this.cam,w,h);
+    World.draw(ctx,this.cam.x,this.cam.y,w,h);
     for(const pk of this.pickups)     pk.draw(ctx,this.cam);
     for(const pt of this.particles)   pt.draw(ctx,this.cam);
     for(const pr of this.projectiles) pr.draw(ctx,this.cam);
     for(const e  of this.enemies)     e.draw(ctx,this.cam);
-    if (this.boss && !this.boss.dead) this.boss.draw(ctx, this.cam);
     this.player.draw(ctx,this.cam);
 
     // Linha de mira (joystick direito)
@@ -362,10 +248,9 @@ const GameScene = {
 
   _drawAimLine(ctx) {
     const p=this.player;
-    const sx=Renderer.screenX(p.x, p.y, this.cam);
-    const sy=Renderer.screenY(p.x, p.y, this.cam);
+    const sx=p.x-this.cam.x, sy=p.y-this.cam.y;
     const aim=Joystick.getAimDir();
-    const len=200;
+    const len=220;
     const ex=sx+aim.x*len, ey=sy+aim.y*len;
     ctx.save();
     ctx.strokeStyle=p.data.laserColor+'99';
@@ -376,6 +261,7 @@ const GameScene = {
     ctx.lineTo(ex,ey);
     ctx.stroke();
     ctx.setLineDash([]);
+    // ponto no fim
     ctx.fillStyle=p.data.laserColor;
     ctx.beginPath();
     ctx.arc(ex,ey,5,0,Math.PI*2);
