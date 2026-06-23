@@ -6,22 +6,21 @@ const MenuScene = {
     document.getElementById('btn-trofeus').onclick = () => App.goTo('trophies');
     document.getElementById('btn-loja').onclick    = () => App.goTo('shop');
 
-    const popup = document.getElementById('popup-opcoes');
+    const sidebar = document.getElementById('opcoes-sidebar');
     document.getElementById('btn-opcoes').onclick = () => {
-      popup.classList.add('active');
-      popup.querySelector('.popup-box').style.animation = 'slideUp 0.2s ease';
+      sidebar.classList.toggle('open');
     };
-    document.getElementById('btn-fechar-opcoes').onclick = () => {
-      popup.classList.remove('active');
-    };
-    popup.addEventListener('click', e => {
-      if (e.target === popup) popup.classList.remove('active');
+    // Fechar ao clicar fora
+    document.getElementById('screen-menu').addEventListener('click', e => {
+      if (!e.target.closest('#opcoes-sidebar') && e.target.id !== 'btn-opcoes') {
+        sidebar.classList.remove('open');
+      }
     });
-    // Cada botão do popup — placeholder
-    popup.querySelectorAll('.popup-btn').forEach(btn => {
+    // Cada botão — placeholder
+    sidebar.querySelectorAll('.op-btn').forEach(btn => {
       btn.onclick = () => {
         const nome = btn.querySelector('span:last-child').textContent;
-        popup.classList.remove('active');
+        sidebar.classList.remove('open');
         setTimeout(() => alert(`${nome} — em breve!`), 150);
       };
     });
