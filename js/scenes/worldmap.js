@@ -86,11 +86,23 @@ const WorldMap = {
       const mx = (e.clientX - rect.left) / newCanvas.width;
       const my = (e.clientY - rect.top)  / newCanvas.height;
       for (const z of this.zones) {
-        const zx = z.x, zy = z.y;
-        const dx = mx - zx, dy = my - zy;
-        // Raio de clique normalizado
-        const R = 38 / newCanvas.width;
-        if (Math.sqrt(dx*dx + dy*dy*((newCanvas.width/newCanvas.height)**2)) < R * 2) {
+        const unlocked = this.isUnlocked(z);
+        const baseH = unlocked ? 36 : 20;
+        const H_norm = baseH / newCanvas.height;
+
+        // Distância até a base (chão)
+        const dxBase = mx - z.x;
+        const dyBase = my - z.y;
+        const distBase = Math.sqrt(dxBase*dxBase + dyBase*dyBase * Math.pow(newCanvas.width / newCanvas.height, 2));
+
+        // Distância até o topo (coluna elevada)
+        const dxTop = mx - z.x;
+        const dyTop = my - (z.y - H_norm);
+        const distTop = Math.sqrt(dxTop*dxTop + dyTop*dyTop * Math.pow(newCanvas.width / newCanvas.height, 2));
+
+        // Raio de clique dinâmico
+        const R = 32 / newCanvas.width;
+        if (distBase < R * 1.6 || distTop < R * 1.6) {
           this.selectedZone = z;
           this._drawCanvas();
           this._showPanel(z);
@@ -116,15 +128,44 @@ const WorldMap = {
     const ctx = canvas.getContext('2d');
     const W = canvas.width, H = canvas.height;
 
-    ctx.fillStyle = '#06090f';
-    ctx.fillRect(0,0,W,H);
+    // Fundo espacial escuro com gradiente
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+    bgGrad.addColorStop(0, '#04060b');
+    bgGrad.addColorStop(1, '#0c101b');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, W, H);
 
-    // Grid decorativa
-    ctx.strokeStyle='rgba(255,255,255,0.025)'; ctx.lineWidth=1;
-    for(let x=0;x<W;x+=50){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
-    for(let y=0;y<H;y+=50){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+    // ── GRELHA DE PERSPECTIVA HOLOGRÁFICA 3D ──
+    ctx.strokeStyle = 'rgba(55, 138, 221, 0.05)';
+    ctx.lineWidth = 1;
+    
+    // Ponto de fuga (acima do ecrã)
+    const vpX = W / 2;
+    const vpY = -H * 0.4;
 
-    // Conexões
+    // Linhas radiais (perspetiva)
+    const linesCount = 24;
+    for (let i = 0; i <= linesCount; i++) {
+      const ratio = i / linesCount;
+      ctx.beginPath();
+      ctx.moveTo(vpX, vpY);
+      // Espalha a partir do fundo
+      ctx.lineTo(W * (ratio - 0.5) * 3 + W/2, H);
+      ctx.stroke();
+    }
+
+    // Linhas horizontais (aproximam-se com a distância)
+    const horizCount = 15;
+    for (let i = 0; i < horizCount; i++) {
+      const ratio = i / horizCount;
+      const y = H * Math.pow(ratio, 1.8); // progressão não-linear para perspetiva
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(W, y);
+      ctx.stroke();
+    }
+
+    // ── CONEXÕES (No chão da perspetiva) ──
     const conns=[['forest','city'],['forest','ocean'],['forest','base'],
       ['city','enemy_base'],['city','base'],['city','desert'],
       ['enemy_base','volcano'],['ocean','desert'],['desert','mountains'],['mountains','volcano']];
@@ -132,60 +173,111 @@ const WorldMap = {
       const za=this.zones.find(z=>z.id===a), zb=this.zones.find(z=>z.id===b);
       if(!za||!zb) continue;
       const unlA=this.isUnlocked(za), unlB=this.isUnlocked(zb);
-      ctx.strokeStyle=(unlA&&unlB)?'rgba(255,255,255,0.25)':'rgba(255,255,255,0.07)';
-      ctx.lineWidth=2; ctx.setLineDash([6,5]);
-      ctx.beginPath(); ctx.moveTo(za.x*W,za.y*H); ctx.lineTo(zb.x*W,zb.y*H); ctx.stroke();
+      ctx.strokeStyle=(unlA&&unlB)?'rgba(55, 138, 221, 0.4)':'rgba(255,255,255,0.06)';
+      ctx.lineWidth=3;
+      ctx.setLineDash([8,6]);
+      ctx.beginPath();
+      ctx.moveTo(za.x*W, za.y*H);
+      ctx.lineTo(zb.x*W, zb.y*H);
+      ctx.stroke();
       ctx.setLineDash([]);
     }
 
-    // Nós das zonas
+    // ── PILARES E NÓS 3D ──
     for(const z of this.zones){
       const cx=z.x*W, cy=z.y*H;
       const unlocked=this.isUnlocked(z);
       const selected=this.selectedZone?.id===z.id;
-      const pulse=selected?Math.sin(this.animT*0.07)*5:0;
-      const R=32+pulse;
+      
+      // Tamanho e altura dos pilares 3D
+      const R = Math.max(26, Math.round(W * 0.024)); 
+      const rx = R;
+      const ry = R * 0.55; // Elipse achatada para efeito 3D
+      
+      const baseHeight = unlocked ? 36 : 20;
+      const H_pillar = baseHeight + (selected ? Math.sin(this.animT * 0.1) * 6 : 0);
 
-      // Sombra
-      ctx.beginPath(); ctx.arc(cx,cy+3,R,0,Math.PI*2);
-      ctx.fillStyle='rgba(0,0,0,0.6)'; ctx.fill();
+      // 1. Sombra da base
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx + 4, ry + 2, 0, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+      ctx.fill();
 
-      // Círculo
-      ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2);
-      if(unlocked){
-        const g=ctx.createRadialGradient(cx-R*0.3,cy-R*0.3,0,cx,cy,R);
-        g.addColorStop(0,z.color+'ff'); g.addColorStop(1,z.color+'88');
-        ctx.fillStyle=g;
+      const colorHex = unlocked ? z.color : '#3d3d3d';
+
+      // 2. Laterais do pilar 3D (Cilindro)
+      if (H_pillar > 0) {
+        ctx.beginPath();
+        ctx.moveTo(cx - rx, cy);
+        ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI, false);
+        ctx.lineTo(cx + rx, cy - H_pillar);
+        ctx.ellipse(cx, cy - H_pillar, rx, ry, 0, Math.PI, 0, true);
+        ctx.lineTo(cx - rx, cy);
+        ctx.closePath();
+
+        // Degradê horizontal para simular iluminação lateral 3D
+        const cylGrad = ctx.createLinearGradient(cx - rx, 0, cx + rx, 0);
+        cylGrad.addColorStop(0, colorHex + 'bb');
+        cylGrad.addColorStop(0.3, colorHex + 'ff');
+        cylGrad.addColorStop(0.8, colorHex + 'aa');
+        cylGrad.addColorStop(1.0, colorHex + '66');
+        ctx.fillStyle = cylGrad;
+        ctx.fill();
+      }
+
+      // 3. Topo do pilar 3D (Tampa)
+      ctx.beginPath();
+      ctx.ellipse(cx, cy - H_pillar, rx, ry, 0, 0, Math.PI*2);
+      if (unlocked) {
+        const topGrad = ctx.createRadialGradient(cx - rx*0.2, cy - H_pillar - ry*0.2, 0, cx, cy - H_pillar, rx);
+        topGrad.addColorStop(0, colorHex + 'ff');
+        topGrad.addColorStop(1, colorHex + 'bb');
+        ctx.fillStyle = topGrad;
       } else {
-        ctx.fillStyle='#2a2a2a';
+        ctx.fillStyle = '#282828';
       }
       ctx.fill();
 
-      // Borda selecionado
-      if(selected){
-        ctx.strokeStyle='#fff'; ctx.lineWidth=3;
-        ctx.beginPath(); ctx.arc(cx,cy,R+5,0,Math.PI*2); ctx.stroke();
-        // Glow
-        ctx.strokeStyle=z.color+'66'; ctx.lineWidth=8;
-        ctx.beginPath(); ctx.arc(cx,cy,R+8,0,Math.PI*2); ctx.stroke();
+      // Borda da tampa superior
+      ctx.strokeStyle = unlocked ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Destaque de Seleção
+      if (selected) {
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy - H_pillar, rx + 4, ry + 2, 0, 0, Math.PI*2);
+        ctx.stroke();
+
+        ctx.strokeStyle = colorHex + '55';
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy - H_pillar, rx + 7, ry + 3.5, 0, 0, Math.PI*2);
+        ctx.stroke();
       }
 
-      // Emoji / ícone
-      ctx.font=`${unlocked?22:16}px sans-serif`;
-      ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText(unlocked?z.emoji:'🔒', cx, cy);
+      // 4. Emoji ou Cadeado (Desenhado no topo da coluna)
+      ctx.font = `${unlocked ? 20 : 14}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(unlocked ? z.emoji : '🔒', cx, cy - H_pillar);
 
-      // Nome da zona
-      ctx.fillStyle=unlocked?'#fff':'rgba(255,255,255,0.25)';
-      ctx.font=`bold ${Math.max(11,Math.round(W*0.017))}px sans-serif`;
-      ctx.fillText(z.name, cx, cy+R+14);
+      // 5. Nome da zona (flutuando por baixo da base do pilar)
+      ctx.fillStyle = unlocked ? '#ffffff' : 'rgba(255,255,255,0.35)';
+      ctx.font = `bold ${Math.max(11, Math.round(W * 0.016))}px sans-serif`;
+      ctx.shadowColor = 'black';
+      ctx.shadowBlur = 3;
+      ctx.fillText(z.name, cx, cy + ry + 12);
+      ctx.shadowBlur = 0;
 
-      // Progresso missões
-      if(unlocked && z.missions?.length){
-        const done=this.completed[z.id]||0;
-        ctx.fillStyle=done>=z.missions.length?'#3cb371':'#fac775';
-        ctx.font=`${Math.max(10,Math.round(W*0.013))}px sans-serif`;
-        ctx.fillText(`${done}/${z.missions.length}`, cx, cy+R+28);
+      // 6. Progresso da zona
+      if (unlocked && z.missions?.length) {
+        const done = this.completed[z.id] || 0;
+        ctx.fillStyle = done >= z.missions.length ? '#3cb371' : '#fac775';
+        ctx.font = `bold ${Math.max(10, Math.round(W * 0.012))}px sans-serif`;
+        ctx.fillText(`${done}/${z.missions.length}`, cx, cy + ry + 25);
       }
     }
   },
