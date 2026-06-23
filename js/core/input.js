@@ -25,6 +25,19 @@ const Input = {
     return 0;
   },
 
+  getDir() {
+    return { x: this.getDirX(), y: this.getDirY() };
+  },
+
+  isAnyDown(...codes) {
+    return codes.some(code => !!this.keys[code]);
+  },
+
+  reset() {
+    this.keys = {};
+    this.mobile = { up: false, down: false, left: false, right: false };
+  },
+
   _bindMobile() {
     const bind = (id, key) => {
       const el = document.getElementById(id);
