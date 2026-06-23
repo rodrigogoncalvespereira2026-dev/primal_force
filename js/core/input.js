@@ -33,7 +33,8 @@ const Input = {
       const off = () => this.mobile[key] = false;
       el.addEventListener('pointerdown',  on);
       el.addEventListener('pointerup',   off);
-      el.addEventListener('pointerleave',off);
+      el.addEventListener('pointerleave', off);
+      el.addEventListener('pointercancel', off);
     };
     bind('d-up',    'up');
     bind('d-down',  'down');
