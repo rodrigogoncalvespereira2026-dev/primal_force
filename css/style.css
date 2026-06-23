@@ -1120,5 +1120,62 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
   margin: 0;
 }
 
+/* ── POPUP OPÇÕES ── */
+.popup-box {
+  background: rgba(10,12,20,0.98);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 340px;
+  max-width: 90vw;
+  max-height: 90vh;
+}
+.popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.popup-header h2 {
+  font-size: 20px;
+  letter-spacing: 4px;
+}
+.popup-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.popup-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 10px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  transition: all 0.15s;
+  text-align: center;
+}
+.popup-btn:hover {
+  background: rgba(220,30,30,0.2);
+  border-color: rgba(220,30,30,0.5);
+  transform: scale(1.03);
+}
+.popup-btn:active {
+  transform: scale(0.96);
+}
+.popup-icon {
+  font-size: 24px;
+}
+
 /* Nota: o bloqueio de portrait é feito por software em App._forceLandscape() */
 
