@@ -191,10 +191,10 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
 #btn-passe   { position: absolute; z-index: 2; bottom: 24px; left: 20px; min-width: 0; padding: 14px 18px; }
 #btn-missoes { position: absolute; z-index: 2; bottom: 24px; left: 166px; min-width: 0; padding: 14px 18px; }
 
-.is-mobile #btn-perfil  { top: 60px; left: 15px; padding: 8px 12px; }
-.is-mobile #btn-trofeus { top: 60px; left: 130px; padding: 8px 12px; }
-.is-mobile #btn-passe   { bottom: 15px; left: 15px; padding: 8px 12px; }
-.is-mobile #btn-missoes { bottom: 15px; left: 130px; padding: 8px 12px; }
+.is-mobile #btn-perfil  { top: 48px; left: 10px; padding: 6px 10px; gap: 6px; }
+.is-mobile #btn-trofeus { top: 48px; left: 125px; padding: 6px 10px; gap: 6px; }
+.is-mobile #btn-passe   { bottom: 10px; left: 10px; padding: 6px 10px; gap: 6px; }
+.is-mobile #btn-missoes { bottom: 10px; left: 125px; padding: 6px 10px; gap: 6px; }
 
 .menu-side-right {
   position: absolute;
