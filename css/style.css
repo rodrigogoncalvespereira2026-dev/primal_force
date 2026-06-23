@@ -678,7 +678,11 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
 
 /* Tablets (até 1024px) */
 .is-mobile .wm-panel { width: 100%; min-width: 0; }
-.is-mobile .menu-play-btn { font-size: 14px; padding: 10px 18px; }
+.is-mobile .menu-side-right { right: 15px; bottom: 15px; gap: 8px; }
+.is-mobile .menu-play-btn { min-width: 130px; padding: 12px 20px; }
+.is-mobile .menu-play-btn .corner-icon { font-size: 22px; }
+.is-mobile .menu-play-btn .corner-label { font-size: 12px; }
+.is-mobile #btn-mundo { min-width: 110px; padding: 12px 18px; }
 .is-mobile .corner-icon { font-size: 22px; }
 .is-mobile .corner-label { font-size: 9px; }
 
@@ -839,12 +843,6 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
     flex-direction: column;
     gap: 10px;
   }
-  .is-mobile .menu-side-right { right: 15px; bottom: 15px; gap: 8px; }
-  .is-mobile .menu-play-btn { min-width: 130px; padding: 12px 20px; }
-  .is-mobile .menu-play-btn .corner-icon { font-size: 22px; }
-  .is-mobile .menu-play-btn .corner-label { font-size: 12px; }
-  .is-mobile #btn-mundo { min-width: 110px; padding: 12px 18px; }
-
   /* World map / Shop / Trophies em paisagem */
   .is-mobile #screen-worldmap.active { flex-direction: row; }
   .is-mobile .wm-header { padding: 6px 10px; }
