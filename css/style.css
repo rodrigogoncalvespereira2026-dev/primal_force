@@ -697,6 +697,30 @@ body {
   .menu-content { gap: 16px; }
 }
 
+/* Telemóveis em paisagem (ecrã baixo) */
+.is-mobile @media (orientation: landscape) and (max-height: 500px) {
+  #mobile-controls { padding: 3px 8px 5px; }
+  #dpad { flex-direction: row; gap: 3px; }
+  .d-btn { width: 32px; height: 32px; font-size: 11px; border-radius: 6px; }
+  .d-center { width: 0; height: 0; display: none; }
+  .d-row { gap: 3px; }
+  .act-btn { width: 42px; height: 32px; font-size: 9px; border-radius: 7px; }
+  .attack-btn { width: 52px; }
+  #action-buttons { flex-direction: row; align-items: center; gap: 4px; }
+  .act-row { gap: 4px; }
+  #btn-pause { top: 4px; right: 6px; left: auto; transform: none; padding: 3px 8px; font-size: 10px; z-index: 20; }
+  #hud { padding: 4px 6px; }
+  .bar-wrap { width: 60px; height: 5px; }
+  #ranger-name-hud { font-size: 8px; }
+  .bar-label { font-size: 7px; width: 16px; }
+  .bar-num { font-size: 7px; min-width: 14px; }
+  #combo-display { font-size: 13px; }
+  #msg-box { font-size: 10px; }
+  #minimap { width: 40px; height: 32px; }
+  #hud-wave-info { font-size: 9px; }
+  .hud-stat { font-size: 8px; }
+}
+
 /* Telemóveis (até 480px) */
 @media (max-width: 480px) {
   .bar-wrap { width: 80px; height: 6px; }
@@ -761,6 +785,55 @@ body {
   .d-row { gap: 1px; }
   #mobile-controls { padding: 6px 10px 10px; }
   #btn-pause { top: 6px; padding: 4px 10px; font-size: 12px; }
+}
+
+/* Select screen em paisagem */
+.is-mobile @media (orientation: landscape) and (max-height: 500px) {
+  #screen-select { padding: 8px 12px; gap: 8px; }
+  .ranger-grid { grid-template-columns: repeat(6, 1fr); gap: 6px; padding-bottom: 4px; }
+  .ranger-card { padding: 6px 4px; gap: 4px; }
+  .ranger-avatar { width: 32px; height: 32px; font-size: 18px; }
+  .ranger-card-name { font-size: 10px; }
+  .ranger-card-zord, .ranger-card-stats { display: none; }
+  .ranger-card-title { font-size: 8px; }
+  .select-header h1 { font-size: 14px; }
+  .select-footer { padding: 4px; }
+  #btn-confirmar-ranger { padding: 8px 16px; font-size: 12px; }
+}
+
+/* Menu em paisagem (telemóvel) */
+.is-mobile @media (orientation: landscape) and (max-height: 500px) {
+  #screen-menu.active { flex-direction: row; align-items: center; justify-content: center; padding: 0 20px; }
+  .menu-content { flex-direction: row; gap: 24px; align-items: center; }
+  .logo-main { font-size: 28px; }
+  .logo-sub { font-size: 11px; }
+  .logo-tagline { display: none; }
+  .trophy-bar-menu { position: static; transform: none; font-size: 10px; padding: 4px 10px; }
+  .menu-icon-btn { min-width: 80px; padding: 8px 14px; }
+  .menu-corner-tl, .menu-corner-tr, .menu-corner-bl, .menu-play-btn { position: static; }
+  .menu-side-left { display: none; }
+}
+
+/* World map / Shop / Trophies em paisagem */
+.is-mobile @media (orientation: landscape) and (max-height: 500px) {
+  #screen-worldmap.active { flex-direction: row; }
+  .wm-header { padding: 6px 10px; }
+  .wm-header h1 { font-size: 13px; }
+  .wm-body { flex-direction: row; }
+  #wm-canvas { flex: 1; height: auto; }
+  .wm-panel { width: 200px; min-width: 0; max-height: none; max-width: 200px; border-left: 1px solid rgba(255,255,255,0.1); border-top: none; }
+  #screen-trophies { padding: 8px; gap: 8px; }
+  .trophy-tab { padding: 6px; font-size: 10px; }
+  .trophy-node { padding: 6px 8px; gap: 6px; }
+  .trophy-node-icon { font-size: 14px; }
+  .trophy-node-label { font-size: 10px; }
+  #screen-shop { padding: 8px; gap: 8px; }
+  .shop-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 0 4px 8px; }
+  .shop-item { padding: 8px 6px; }
+  .shop-item-icon { font-size: 20px; }
+  .shop-item-desc { display: none; }
+  .shop-hint { display: none; }
+  .select-header h1 { font-size: 13px; }
 }
 
 /* ── WAVE HUD ── */
