@@ -1163,5 +1163,10 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
 .op-btn:active { transform: scale(0.96); }
 .op-icon { font-size: 16px; }
 
+/* Mobile */
+.is-mobile .opcoes-sidebar { min-width: 140px; padding: 60px 10px; gap: 4px; }
+.is-mobile .op-btn { padding: 6px 10px; font-size: 11px; gap: 6px; }
+.is-mobile .op-icon { font-size: 14px; }
+
 /* Nota: o bloqueio de portrait é feito por software em App._forceLandscape() */
 
