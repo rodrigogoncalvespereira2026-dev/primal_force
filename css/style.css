@@ -184,15 +184,7 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
 .corner-icon  { font-size: 28px; line-height: 1; }
 .corner-label { font-size: 14px; font-weight: 800; letter-spacing: 1.5px; }
 
-.menu-corner-tl, .menu-corner-tr, .menu-corner-bl {
-  position: absolute;
-  z-index: 2;
-}
-.menu-corner-tl { top: 80px; left: 20px; display: flex; flex-direction: row; gap: 10px; }
-.menu-corner-tr { top: 80px; right: 20px; }
-.menu-corner-bl { bottom: 24px; left: 20px; display: flex; flex-direction: row; gap: 10px; }
-.menu-corner-item { min-width: 0; padding: 14px 18px; }
-.menu-corner-item .corner-icon { font-size: 24px; }
+.menu-corner-tr { position: absolute; z-index: 2; top: 80px; right: 20px; }
 
 .menu-side-right {
   position: absolute;
@@ -831,10 +823,7 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
   .is-mobile .corner-label { font-size: 10px; }
   
   /* Posicionamento absoluto igual ao PC */
-  .is-mobile .menu-corner-tl { top: 60px; left: 15px; gap: 6px; }
   .is-mobile .menu-corner-tr { top: 60px; right: 15px; }
-  .is-mobile .menu-corner-bl { bottom: 15px; left: 15px; gap: 6px; }
-  .is-mobile .menu-corner-item { padding: 8px 12px; }
   
   .is-mobile .menu-side-left {
     position: absolute;

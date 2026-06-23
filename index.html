@@ -13,32 +13,17 @@
   <div id="screen-menu" class="screen active">
     <div class="menu-bg"></div>
 
-    <!-- Canto superior esquerdo -->
-    <div class="menu-corner-tl">
-      <button class="menu-icon-btn menu-corner-item" id="btn-perfil">
-        <span class="corner-icon">👤</span><span class="corner-label">PERFIL</span>
-      </button>
-      <button class="menu-icon-btn menu-corner-item" id="btn-trofeus">
-        <span class="corner-icon">🏆</span><span class="corner-label">TROFÉUS</span>
-      </button>
-    </div>
+    <button class="menu-icon-btn" id="btn-perfil" style="position:absolute;z-index:2;top:80px;left:20px;min-width:0;padding:14px 18px;">
+      <span class="corner-icon">👤</span><span class="corner-label">PERFIL</span>
+    </button>
+    <button class="menu-icon-btn" id="btn-trofeus" style="position:absolute;z-index:2;top:80px;left:166px;min-width:0;padding:14px 18px;">
+      <span class="corner-icon">🏆</span><span class="corner-label">TROFÉUS</span>
+    </button>
 
-    <!-- Canto superior direito -->
-    <button class="menu-icon-btn menu-corner-tr" id="btn-opcoes">
+    <button class="menu-icon-btn" id="btn-opcoes" style="position:absolute;z-index:2;top:80px;right:20px;">
       <span class="corner-icon">⚙️</span>
     </button>
 
-    <!-- Canto inferior esquerdo -->
-    <div class="menu-corner-bl">
-      <button class="menu-icon-btn menu-corner-item" id="btn-passe">
-        <span class="corner-icon">⭐</span><span class="corner-label">PASSE</span>
-      </button>
-      <button class="menu-icon-btn menu-corner-item" id="btn-missoes">
-        <span class="corner-icon">📋</span><span class="corner-label">MISSÕES</span>
-      </button>
-    </div>
-
-    <!-- Lado esquerdo, centro vertical -->
     <div class="menu-side-left">
       <button class="menu-icon-btn" id="btn-loja">
         <span class="corner-icon">🛒</span><span class="corner-label">LOJA</span>
@@ -48,7 +33,6 @@
       </button>
     </div>
 
-    <!-- Lado direito, centro vertical (Mapa e Jogar) -->
     <div class="menu-side-right">
       <button class="menu-icon-btn" id="btn-mundo">
         <span class="corner-icon">🗺️</span><span class="corner-label">MAPA</span>
@@ -57,6 +41,13 @@
         <span class="corner-icon">⚡</span><span class="corner-label">JOGAR</span>
       </button>
     </div>
+
+    <button class="menu-icon-btn" id="btn-passe" style="position:absolute;z-index:2;bottom:24px;left:20px;min-width:0;padding:14px 18px;">
+      <span class="corner-icon">⭐</span><span class="corner-label">PASSE</span>
+    </button>
+    <button class="menu-icon-btn" id="btn-missoes" style="position:absolute;z-index:2;bottom:24px;left:166px;min-width:0;padding:14px 18px;">
+      <span class="corner-icon">📋</span><span class="corner-label">MISSÕES</span>
+    </button>
 
     <div class="trophy-bar-menu">🏆 <span id="menu-trophies">0</span> Troféus &nbsp;·&nbsp; 💰 <span id="menu-coins">0</span> Moedas</div>
 
@@ -69,7 +60,6 @@
     </div>
       <div class="menu-footer">v0.3 — Power Rangers Primal Force</div>
 
-    <!-- Sidebar opções (lado direito) -->
     <div class="opcoes-sidebar" id="opcoes-sidebar">
       <button class="op-btn" data-opcao="config"><span class="op-icon">⚙️</span><span>Configurações</span></button>
       <button class="op-btn" data-opcao="historico"><span class="op-icon">📜</span><span>Histórico</span></button>
@@ -172,7 +162,6 @@
       </div>
     </div>
     <canvas id="game-canvas"></canvas>
-    <!-- Boss HUD (oculto por defeito) -->
     <div id="boss-hud" style="display:none; position:absolute; bottom:90px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.7); border:2px solid #e24b4a; border-radius:12px; padding:8px 18px; text-align:center; pointer-events:none; min-width:220px;">
       <div id="boss-hud-name" style="color:#fff; font-size:13px; font-weight:bold; letter-spacing:1px;">BOSS</div>
       <div id="boss-hud-title" style="color:#ccc; font-size:10px; margin-bottom:4px;"></div>
