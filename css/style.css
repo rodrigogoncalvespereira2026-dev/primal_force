@@ -186,6 +186,16 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
 
 .menu-corner-tr { position: absolute; z-index: 2; top: 80px; right: 20px; }
 
+#btn-perfil  { position: absolute; z-index: 2; top: 80px; left: 20px; min-width: 0; padding: 14px 18px; }
+#btn-trofeus { position: absolute; z-index: 2; top: 80px; left: 166px; min-width: 0; padding: 14px 18px; }
+#btn-passe   { position: absolute; z-index: 2; bottom: 24px; left: 20px; min-width: 0; padding: 14px 18px; }
+#btn-missoes { position: absolute; z-index: 2; bottom: 24px; left: 166px; min-width: 0; padding: 14px 18px; }
+
+.is-mobile #btn-perfil  { top: 60px; left: 15px; padding: 8px 12px; }
+.is-mobile #btn-trofeus { top: 60px; left: 130px; padding: 8px 12px; }
+.is-mobile #btn-passe   { bottom: 15px; left: 15px; padding: 8px 12px; }
+.is-mobile #btn-missoes { bottom: 15px; left: 130px; padding: 8px 12px; }
+
 .menu-side-right {
   position: absolute;
   z-index: 2;
