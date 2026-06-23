@@ -1060,3 +1060,63 @@ body {
 .shop-buy-btn:disabled {
   background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.3); cursor: not-allowed;
 }
+
+/* ── ORIENTATION BLOCKER ───────────────────────────────────────────── */
+#orientation-blocker {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: #06090f;
+  color: #fff;
+  z-index: 99999;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-family: inherit;
+  padding: 20px;
+}
+
+.blocker-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.blocker-phone {
+  font-size: 64px;
+  animation: phoneRotate 2.5s infinite ease-in-out;
+}
+
+@keyframes phoneRotate {
+  0% { transform: rotate(0deg); }
+  50% { transform: rotate(-90deg); }
+  100% { transform: rotate(0deg); }
+}
+
+#orientation-blocker h2 {
+  font-size: 24px;
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+#orientation-blocker p {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  max-width: 280px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Força modo paisagem em mobile */
+@media (orientation: portrait) {
+  body.is-mobile #app {
+    display: none !important;
+  }
+  body.is-mobile #orientation-blocker {
+    display: flex !important;
+  }
+}
+

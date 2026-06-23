@@ -86,8 +86,7 @@ const WorldMap = {
       const mx = (e.clientX - rect.left) / newCanvas.width;
       const my = (e.clientY - rect.top)  / newCanvas.height;
       for (const z of this.zones) {
-        const unlocked = this.isUnlocked(z);
-        const baseH = unlocked ? 36 : 20;
+        const baseH = 16;
         const H_norm = baseH / newCanvas.height;
 
         // Distância até a base (chão)
@@ -128,44 +127,30 @@ const WorldMap = {
     const ctx = canvas.getContext('2d');
     const W = canvas.width, H = canvas.height;
 
-    // Fundo espacial escuro com gradiente
-    const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
-    bgGrad.addColorStop(0, '#04060b');
-    bgGrad.addColorStop(1, '#0c101b');
-    ctx.fillStyle = bgGrad;
+    // Fundo azul escuro espacial (céu)
+    ctx.fillStyle = '#0f1423';
     ctx.fillRect(0, 0, W, H);
 
-    // ── GRELHA DE PERSPECTIVA HOLOGRÁFICA 3D ──
-    ctx.strokeStyle = 'rgba(55, 138, 221, 0.05)';
+    // ── GRELHA ISOMÉTRICA DO CHÃO (Estilo Minecraft Flat World) ──
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.035)';
     ctx.lineWidth = 1;
-    
-    // Ponto de fuga (acima do ecrã)
-    const vpX = W / 2;
-    const vpY = -H * 0.4;
-
-    // Linhas radiais (perspetiva)
-    const linesCount = 24;
-    for (let i = 0; i <= linesCount; i++) {
-      const ratio = i / linesCount;
+    const tileW = 44;
+    const tileH = 22;
+    for (let x = -W; x < W * 2; x += tileW) {
+      // Linhas inclinadas esquerda -> direita descendo
       ctx.beginPath();
-      ctx.moveTo(vpX, vpY);
-      // Espalha a partir do fundo
-      ctx.lineTo(W * (ratio - 0.5) * 3 + W/2, H);
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x + H * (tileW / tileH), H);
+      ctx.stroke();
+
+      // Linhas inclinadas direita -> esquerda descendo
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x - H * (tileW / tileH), H);
       ctx.stroke();
     }
 
-    // Linhas horizontais (aproximam-se com a distância)
-    const horizCount = 15;
-    for (let i = 0; i < horizCount; i++) {
-      const ratio = i / horizCount;
-      const y = H * Math.pow(ratio, 1.8); // progressão não-linear para perspetiva
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(W, y);
-      ctx.stroke();
-    }
-
-    // ── CONEXÕES (No chão da perspetiva) ──
+    // ── CONEXÕES NO CHÃO ──
     const conns=[['forest','city'],['forest','ocean'],['forest','base'],
       ['city','enemy_base'],['city','base'],['city','desert'],
       ['enemy_base','volcano'],['ocean','desert'],['desert','mountains'],['mountains','volcano']];
@@ -173,9 +158,11 @@ const WorldMap = {
       const za=this.zones.find(z=>z.id===a), zb=this.zones.find(z=>z.id===b);
       if(!za||!zb) continue;
       const unlA=this.isUnlocked(za), unlB=this.isUnlocked(zb);
-      ctx.strokeStyle=(unlA&&unlB)?'rgba(55, 138, 221, 0.4)':'rgba(255,255,255,0.06)';
-      ctx.lineWidth=3;
-      ctx.setLineDash([8,6]);
+      
+      // Conexões vermelhas/neon holográficas estilo Redstone
+      ctx.strokeStyle = (unlA && unlB) ? 'rgba(226, 75, 74, 0.6)' : 'rgba(255,255,255,0.06)';
+      ctx.lineWidth = 3;
+      ctx.setLineDash([8, 6]);
       ctx.beginPath();
       ctx.moveTo(za.x*W, za.y*H);
       ctx.lineTo(zb.x*W, zb.y*H);
@@ -183,101 +170,180 @@ const WorldMap = {
       ctx.setLineDash([]);
     }
 
-    // ── PILARES E NÓS 3D ──
+    // ── BLOCOS VOXEL 3D (Minecraft) ──
     for(const z of this.zones){
-      const cx=z.x*W, cy=z.y*H;
-      const unlocked=this.isUnlocked(z);
-      const selected=this.selectedZone?.id===z.id;
-      
-      // Tamanho e altura dos pilares 3D
-      const R = Math.max(26, Math.round(W * 0.024)); 
-      const rx = R;
-      const ry = R * 0.55; // Elipse achatada para efeito 3D
-      
-      const baseHeight = unlocked ? 36 : 20;
-      const H_pillar = baseHeight + (selected ? Math.sin(this.animT * 0.1) * 6 : 0);
+      const cx = z.x * W;
+      const cy = z.y * H;
+      const unlocked = this.isUnlocked(z);
+      const selected = this.selectedZone?.id === z.id;
 
-      // 1. Sombra da base
-      ctx.beginPath();
-      ctx.ellipse(cx, cy, rx + 4, ry + 2, 0, 0, Math.PI*2);
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-      ctx.fill();
+      // Dimensões do bloco Minecraft
+      const w = 32;          // largura/2
+      const h = 16;          // inclinação topo/2
+      const d = 26;          // espessura da lateral
 
-      const colorHex = unlocked ? z.color : '#3d3d3d';
+      // Efeito hover se selecionado (flutua para cima)
+      const hoverY = selected ? Math.sin(this.animT * 0.15) * 6 - 8 : 0;
+      const bx = cx;
+      const by = cy + hoverY;
 
-      // 2. Laterais do pilar 3D (Cilindro)
-      if (H_pillar > 0) {
-        ctx.beginPath();
-        ctx.moveTo(cx - rx, cy);
-        ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI, false);
-        ctx.lineTo(cx + rx, cy - H_pillar);
-        ctx.ellipse(cx, cy - H_pillar, rx, ry, 0, Math.PI, 0, true);
-        ctx.lineTo(cx - rx, cy);
-        ctx.closePath();
+      // Definição de cores por bioma (Top, Left, Right)
+      let colors = { top: '#4a4a4a', left: '#2a2a2a', right: '#383838' }; // Default bloqueado/pedra
 
-        // Degradê horizontal para simular iluminação lateral 3D
-        const cylGrad = ctx.createLinearGradient(cx - rx, 0, cx + rx, 0);
-        cylGrad.addColorStop(0, colorHex + 'bb');
-        cylGrad.addColorStop(0.3, colorHex + 'ff');
-        cylGrad.addColorStop(0.8, colorHex + 'aa');
-        cylGrad.addColorStop(1.0, colorHex + '66');
-        ctx.fillStyle = cylGrad;
-        ctx.fill();
-      }
-
-      // 3. Topo do pilar 3D (Tampa)
-      ctx.beginPath();
-      ctx.ellipse(cx, cy - H_pillar, rx, ry, 0, 0, Math.PI*2);
       if (unlocked) {
-        const topGrad = ctx.createRadialGradient(cx - rx*0.2, cy - H_pillar - ry*0.2, 0, cx, cy - H_pillar, rx);
-        topGrad.addColorStop(0, colorHex + 'ff');
-        topGrad.addColorStop(1, colorHex + 'bb');
-        ctx.fillStyle = topGrad;
-      } else {
-        ctx.fillStyle = '#282828';
+        switch(z.id) {
+          case 'forest': // Bloco de Relva/Terra
+            colors = { top: '#5c8e32', left: '#5a4634', right: '#725c48' };
+            break;
+          case 'city': // Bloco de Tijolo/Ruína cinzenta
+            colors = { top: '#8a8a8a', left: '#525252', right: '#6c6c6c' };
+            break;
+          case 'enemy_base': // Bloco de Netherin/Obsidiana (roxo metálico)
+            colors = { top: '#3a225c', left: '#1b0e2d', right: '#271542' };
+            break;
+          case 'volcano': // Bloco de Magma/Basalto
+            colors = { top: '#e24d15', left: '#242424', right: '#363636' };
+            break;
+          case 'ocean': // Bloco de Água cristalina
+            colors = { top: '#1c74c6', left: '#105696', right: '#1565b0' };
+            break;
+          case 'desert': // Bloco de Areia
+            colors = { top: '#e6c367', left: '#aa8c3f', right: '#cca953' };
+            break;
+          case 'mountains': // Bloco de Neve/Pedra
+            colors = { top: '#f0f4f8', left: '#5f6e7c', right: '#7a8b9b' };
+            break;
+          case 'base': // Bloco de Redstone ativo / Ranger Base
+            colors = { top: '#ff2222', left: '#5e0c0c', right: '#8c1616' };
+            break;
+        }
       }
+
+      // 1. Sombra projetada no chão (abaixo do bloco)
+      ctx.beginPath();
+      ctx.ellipse(cx, cy + d, w * 0.9, h * 0.9, 0, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
       ctx.fill();
 
-      // Borda da tampa superior
-      ctx.strokeStyle = unlocked ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)';
-      ctx.lineWidth = 1.5;
+      // 2. FACE ESQUERDA do bloco
+      ctx.beginPath();
+      ctx.moveTo(bx - w, by - h);
+      ctx.lineTo(bx, by);
+      ctx.lineTo(bx, by + d);
+      ctx.lineTo(bx - w, by - h + d);
+      ctx.closePath();
+      ctx.fillStyle = colors.left;
+      ctx.fill();
+
+      // 3. FACE DIREITA do bloco
+      ctx.beginPath();
+      ctx.moveTo(bx, by);
+      ctx.lineTo(bx + w, by - h);
+      ctx.lineTo(bx + w, by - h + d);
+      ctx.lineTo(bx, by + d);
+      ctx.closePath();
+      ctx.fillStyle = colors.right;
+      ctx.fill();
+
+      // Detalhe de textura extra estilo Minecraft
+      if (unlocked) {
+        if (z.id === 'forest') {
+          // Relva pendurada no bloco de terra
+          ctx.fillStyle = colors.top;
+          
+          // Lado esquerdo
+          ctx.beginPath();
+          ctx.moveTo(bx - w, by - h);
+          ctx.lineTo(bx, by);
+          ctx.lineTo(bx, by + 6);
+          ctx.lineTo(bx - w * 0.4, by - h * 0.4 + 9);
+          ctx.lineTo(bx - w * 0.7, by - h * 0.7 + 5);
+          ctx.lineTo(bx - w, by - h + 7);
+          ctx.closePath();
+          ctx.fill();
+
+          // Lado direito
+          ctx.beginPath();
+          ctx.moveTo(bx, by);
+          ctx.lineTo(bx + w, by - h);
+          ctx.lineTo(bx + w, by - h + 6);
+          ctx.lineTo(bx + w * 0.6, by - h * 0.6 + 8);
+          ctx.lineTo(bx + w * 0.3, by - h * 0.3 + 5);
+          ctx.lineTo(bx, by + 7);
+          ctx.closePath();
+          ctx.fill();
+        } else if (z.id === 'volcano') {
+          // Rachaduras de lava correndo pelas laterais do basalto
+          ctx.fillStyle = '#ffaa00';
+          ctx.beginPath();
+          ctx.moveTo(bx - w * 0.4, by - h * 0.4 + 5);
+          ctx.lineTo(bx - w * 0.3, by - h * 0.3 + 12);
+          ctx.lineTo(bx - w * 0.3, by - h * 0.3 + 16);
+          ctx.lineTo(bx - w * 0.4, by - h * 0.4 + 8);
+          ctx.closePath();
+          ctx.fill();
+        } else if (z.id === 'mountains') {
+          // Neve acumulada no topo e escorrendo pelos lados
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.moveTo(bx - w, by - h);
+          ctx.lineTo(bx, by);
+          ctx.lineTo(bx, by + 4);
+          ctx.lineTo(bx - w * 0.5, by - h * 0.5 + 6);
+          ctx.lineTo(bx - w, by - h + 3);
+          ctx.closePath();
+          ctx.fill();
+        }
+      }
+
+      // 4. FACE SUPERIOR (Topo do bloco)
+      ctx.beginPath();
+      ctx.moveTo(bx, by - h * 2);
+      ctx.lineTo(bx + w, by - h);
+      ctx.lineTo(bx, by);
+      ctx.lineTo(bx - w, by - h);
+      ctx.closePath();
+      ctx.fillStyle = colors.top;
+      ctx.fill();
+
+      // Borda subtil no topo do bloco
+      ctx.strokeStyle = unlocked ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)';
+      ctx.lineWidth = 1;
       ctx.stroke();
 
-      // Destaque de Seleção
+      // Destaque brilhante se selecionado (Contorno neon)
       if (selected) {
         ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 2.5;
         ctx.beginPath();
-        ctx.ellipse(cx, cy - H_pillar, rx + 4, ry + 2, 0, 0, Math.PI*2);
-        ctx.stroke();
-
-        ctx.strokeStyle = colorHex + '55';
-        ctx.lineWidth = 6;
-        ctx.beginPath();
-        ctx.ellipse(cx, cy - H_pillar, rx + 7, ry + 3.5, 0, 0, Math.PI*2);
+        ctx.moveTo(bx, by - h * 2 - 3);
+        ctx.lineTo(bx + w + 3, by - h);
+        ctx.lineTo(bx, by + 3);
+        ctx.lineTo(bx - w - 3, by - h);
+        ctx.closePath();
         ctx.stroke();
       }
 
-      // 4. Emoji ou Cadeado (Desenhado no topo da coluna)
-      ctx.font = `${unlocked ? 20 : 14}px sans-serif`;
+      // 5. Ícone/Emoji no topo do bloco Minecraft
+      ctx.font = `${unlocked ? 18 : 12}px sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(unlocked ? z.emoji : '🔒', cx, cy - H_pillar);
+      ctx.fillText(unlocked ? z.emoji : '🔒', bx, by - h);
 
-      // 5. Nome da zona (flutuando por baixo da base do pilar)
-      ctx.fillStyle = unlocked ? '#ffffff' : 'rgba(255,255,255,0.35)';
+      // 6. Nome da zona (flutuando por baixo)
+      ctx.fillStyle = unlocked ? '#ffffff' : 'rgba(255, 255, 255, 0.35)';
       ctx.font = `bold ${Math.max(11, Math.round(W * 0.016))}px sans-serif`;
       ctx.shadowColor = 'black';
       ctx.shadowBlur = 3;
-      ctx.fillText(z.name, cx, cy + ry + 12);
+      ctx.fillText(z.name, cx, cy + d + 18);
       ctx.shadowBlur = 0;
 
-      // 6. Progresso da zona
+      // 7. Progresso das missões
       if (unlocked && z.missions?.length) {
         const done = this.completed[z.id] || 0;
         ctx.fillStyle = done >= z.missions.length ? '#3cb371' : '#fac775';
         ctx.font = `bold ${Math.max(10, Math.round(W * 0.012))}px sans-serif`;
-        ctx.fillText(`${done}/${z.missions.length}`, cx, cy + ry + 25);
+        ctx.fillText(`${done}/${z.missions.length}`, cx, cy + d + 31);
       }
     }
   },
