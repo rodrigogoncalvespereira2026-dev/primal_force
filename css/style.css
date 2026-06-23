@@ -804,20 +804,34 @@ body {
   .is-mobile .select-footer { padding: 4px; }
   .is-mobile #btn-confirmar-ranger { padding: 8px 16px; font-size: 12px; }
 
-  /* Menu em paisagem (telemóvel) */
-  .is-mobile #screen-menu.active { flex-direction: row; align-items: center; justify-content: center; padding: 0 20px; }
-  .is-mobile .menu-content { flex-direction: row; gap: 24px; align-items: center; }
-  .is-mobile .logo-main { font-size: 28px; }
+  /* Menu em paisagem (telemóvel) — igual ao PC */
+  .is-mobile #screen-menu.active { flex-direction: column; align-items: center; justify-content: center; }
+  .is-mobile .menu-content { flex-direction: column; gap: 20px; align-items: center; }
+  .is-mobile .logo-main { font-size: clamp(28px, 6vw, 42px); }
   .is-mobile .logo-sub { font-size: 11px; }
-  .is-mobile .logo-tagline { display: none; }
-  .is-mobile .trophy-bar-menu { position: static; transform: none; font-size: 10px; padding: 4px 10px; }
-  .is-mobile .menu-icon-btn { min-width: 80px; padding: 8px 14px; }
-  /* Botões do menu: posição estática em paisagem para evitar sobreposição */
-  .is-mobile .menu-corner-tl,
-  .is-mobile .menu-corner-tr,
-  .is-mobile .menu-corner-bl,
-  .is-mobile .menu-play-btn { position: static; }
-  .is-mobile .menu-side-left { display: none; }
+  .is-mobile .logo-tagline { display: block; font-size: 11px; }
+  .is-mobile .trophy-bar-menu { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); font-size: 11px; padding: 5px 12px; border-radius: 14px; }
+  .is-mobile .menu-icon-btn { min-width: 110px; padding: 8px 14px; border-radius: 6px; }
+  .is-mobile .corner-icon { font-size: 18px; }
+  .is-mobile .corner-label { font-size: 10px; }
+  
+  /* Posicionamento absoluto igual ao PC */
+  .is-mobile .menu-corner-tl { position: absolute; top: 60px; left: 15px; }
+  .is-mobile .menu-corner-tr { position: absolute; top: 60px; right: 15px; }
+  .is-mobile .menu-corner-bl { position: absolute; bottom: 15px; left: 15px; min-width: 0; padding: 8px 12px; }
+  .is-mobile .menu-play-btn { position: absolute; bottom: 15px; right: 15px; min-width: 130px; padding: 12px 20px; }
+  .is-mobile .menu-play-btn .corner-icon { font-size: 22px; }
+  .is-mobile .menu-play-btn .corner-label { font-size: 12px; }
+  
+  .is-mobile .menu-side-left {
+    position: absolute;
+    left: 15px;
+    top: 52%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
 
   /* World map / Shop / Trophies em paisagem */
   .is-mobile #screen-worldmap.active { flex-direction: row; }
