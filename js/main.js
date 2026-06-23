@@ -40,8 +40,26 @@ const App = {
   },
 
   init() {
-    if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (isTouch) {
       document.body.classList.add('is-mobile');
+      // Tenta bloquear orientação retrato
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('portrait').catch(() => {});
+      }
+      // Detecta orientação
+      const checkOrientation = () => {
+        const el = document.getElementById('rotate-overlay');
+        if (!el) return;
+        if (window.innerHeight > window.innerWidth) {
+          el.classList.remove('active');
+        } else {
+          el.classList.add('active');
+        }
+      };
+      window.addEventListener('orientationchange', () => setTimeout(checkOrientation, 300));
+      window.addEventListener('resize', checkOrientation);
+      checkOrientation();
     }
     Progression.load();
     WorldMap.load();

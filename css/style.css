@@ -1,5 +1,29 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* Remove hover sticky em touch e melhora resposta tátil */
+.is-mobile *,
+.is-mobile *::before,
+.is-mobile *::after {
+  -webkit-tap-highlight-color: transparent;
+}
+.is-mobile .menu-btn:hover,
+.is-mobile .shop-buy-btn:hover,
+.is-mobile .trophy-tab:hover,
+.is-mobile .dlg-skip:hover {
+  transform: none !important;
+  background: inherit !important;
+  border-color: inherit !important;
+  color: inherit !important;
+}
+.is-mobile button,
+.is-mobile .menu-btn,
+.is-mobile .d-btn,
+.is-mobile .act-btn,
+.is-mobile .ranger-card,
+.is-mobile .shop-buy-btn {
+  touch-action: manipulation;
+}
+
 body {
   background: #000;
   font-family: 'Segoe UI', Arial, sans-serif;
@@ -8,6 +32,27 @@ body {
   height: 100vh;
   color: #fff;
 }
+
+/* ── OVERLAY DE ORIENTAÇÃO ── */
+#rotate-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #04060a;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+#rotate-overlay.active { display: flex; }
+.rotate-icon { font-size: 64px; animation: rotatePhone 2s ease-in-out infinite; }
+@keyframes rotatePhone {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(90deg); }
+}
+.rotate-msg { font-size: 22px; font-weight: 800; letter-spacing: 2px; text-align: center; color: #fff; }
+.rotate-sub { font-size: 14px; color: rgba(255,255,255,0.4); text-align: center; }
 
 #app { width: 100vw; height: 100vh; position: relative; }
 
@@ -105,6 +150,7 @@ body {
   border-radius: 4px;
   transition: all 0.15s;
   font-family: inherit;
+  touch-action: manipulation;
 }
 
 .menu-btn:hover {
@@ -626,12 +672,95 @@ body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
 
-/* RESPONSIVE */
-@media (max-width: 600px) {
-  .bar-wrap { width: 100px; }
+/* ── RESPONSIVE ────────────────────────────────────────────────────── */
+
+/* Tablets (até 1024px) */
+.is-mobile .wm-panel { width: 100%; min-width: 0; }
+.is-mobile .menu-play-btn { font-size: 14px; padding: 10px 18px; }
+.is-mobile .corner-icon { font-size: 22px; }
+.is-mobile .corner-label { font-size: 9px; }
+
+@media (max-width: 1024px) {
+  .bar-wrap { width: 110px; }
   #skill-bar { gap: 4px; bottom: 84px; }
   .skill-slot { width: 44px; height: 44px; }
   #hud { padding: 8px 10px; }
+  #hud-wave-info { font-size: 11px; }
+  .hud-stat { font-size: 10px; }
+  #minimap { width: 70px; height: 56px; }
+  .ranger-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 12px; }
+  .ranger-card { padding: 14px 10px; }
+  .trophy-bar-menu { font-size: 13px; padding: 6px 14px; top: 14px; }
+  .shop-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .logo-main { font-size: 32px; }
+  .logo-sub { font-size: 13px; }
+  .menu-content { gap: 16px; }
+}
+
+/* Telemóveis (até 480px) */
+@media (max-width: 480px) {
+  .bar-wrap { width: 80px; height: 6px; }
+  #ranger-name-hud { font-size: 9px; letter-spacing: 1px; }
+  .bar-label { font-size: 8px; width: 20px; }
+  .bar-num { font-size: 8px; min-width: 18px; }
+  #hud { padding: 6px 8px; gap: 4px; }
+  #hud-center { gap: 3px; }
+  #combo-display { font-size: 16px; }
+  #msg-box { font-size: 12px; }
+  #minimap { width: 54px; height: 44px; }
+  #hud-wave-info { font-size: 10px; }
+  .hud-stat { font-size: 9px; }
+
+  .ranger-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 8px; }
+  .ranger-card { padding: 10px 8px; }
+  .ranger-card-emoji { font-size: 28px; }
+  .ranger-card-name { font-size: 12px; }
+  .ranger-card-title { font-size: 9px; }
+  .ranger-card-stats { gap: 2px; font-size: 9px; }
+
+  .logo-main { font-size: 24px; letter-spacing: 6px; }
+  .logo-sub { font-size: 11px; letter-spacing: 4px; }
+  .logo-tagline { font-size: 11px; }
+  .trophy-bar-menu { font-size: 11px; padding: 4px 12px; top: 10px; border-radius: 14px; }
+  .menu-icon-btn { width: 44px; height: 44px; }
+
+  .shop-grid { grid-template-columns: 1fr; gap: 8px; padding: 0 10px 16px; }
+  .shop-item { padding: 12px 8px; }
+  .shop-item-icon { font-size: 26px; }
+  .shop-item-name { font-size: 12px; }
+  .shop-item-desc { font-size: 10px; min-height: 32px; }
+
+  .select-header h1 { font-size: 14px; letter-spacing: 2px; }
+  .select-footer { padding: 10px; }
+
+  .wm-header { padding: 8px 12px; gap: 8px; }
+  .wm-header h1 { font-size: 14px; }
+  .wm-panel { padding: 12px; max-height: 160px; }
+  .wm-panel-title { font-size: 14px; }
+
+  .dlg-box { padding: 14px; border-radius: 12px 12px 0 0; }
+  .dlg-portrait { width: 48px; height: 48px; font-size: 22px; }
+  .dlg-text { font-size: 13px; min-height: 36px; }
+  .dlg-speaker { font-size: 11px; }
+
+  .trophy-tab { font-size: 11px; padding: 8px; }
+  .trophy-node { padding: 10px 12px; gap: 8px; }
+  .trophy-node-icon { font-size: 18px; }
+  .trophy-node-label { font-size: 11px; }
+  .bp-tier-num { height: 36px; font-size: 10px; }
+  .bp-reward { height: 36px; }
+  .bp-reward-item { font-size: 13px; }
+
+  .act-btn { width: 54px; height: 42px; font-size: 10px; }
+  .attack-btn { width: 68px; }
+  .d-btn { width: 38px; height: 38px; font-size: 13px; }
+  .d-center { width: 38px; height: 38px; }
+  #action-buttons { gap: 5px; }
+  .act-row { gap: 5px; }
+  #dpad { gap: 1px; }
+  .d-row { gap: 1px; }
+  #mobile-controls { padding: 6px 10px 10px; }
+  #btn-pause { top: 6px; padding: 4px 10px; font-size: 12px; }
 }
 
 /* ── WAVE HUD ── */
