@@ -522,9 +522,9 @@ body {
   left: 0;
   right: 0;
   display: none;
-  justify-content: space-between;
+  justify-content: center;
   align-items: flex-end;
-  padding: 10px 16px 14px;
+  padding: 10px 16px 18px;
   z-index: 10;
   pointer-events: none;
 }
@@ -565,12 +565,14 @@ body {
 
 #action-buttons {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
   pointer-events: all;
 }
 
-.act-row { display: flex; gap: 8px; justify-content: flex-end; }
+.act-row { display: flex; gap: 12px; justify-content: center; }
 
 .act-btn {
   padding: 0;
