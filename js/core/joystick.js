@@ -1,152 +1,129 @@
-// ── JOYSTICK DUPLO ESTILO BRAWL STARS ────────────────────────────────
-// Usa TouchEvents (Android/iOS) + fallback PointerEvents (desktop)
+// ── JOYSTICK DUPLO ─────────────────────────────────────────────────────
+// Ouve no document (não no canvas) — mais fiável em Android Chrome
 const Joystick = {
-  left:  { active: false, startX: 0, startY: 0, dx: 0, dy: 0, touchId: -1 },
-  right: { active: false, startX: 0, startY: 0, dx: 0, dy: 0, touchId: -1, firing: false },
+  left:  { active: false, startX: 0, startY: 0, dx: 0, dy: 0, id: -1 },
+  right: { active: false, startX: 0, startY: 0, dx: 0, dy: 0, id: -1, firing: false },
 
-  RADIUS: 55,
-  KNOB:   24,
+  RADIUS: 60,
+  KNOB:   26,
+
+  // IDs dos botões de habilidade — não interferir com eles
+  _btnIds: new Set(['btn-mb-melee','btn-mb-laser','btn-mb-special','btn-mb-shield','btn-mb-zord','btn-pause']),
 
   init() {
-    const canvas = document.getElementById('game-canvas');
+    // ── Touch (Android / iOS) ─────────────────────────────────────────
+    document.addEventListener('touchstart',  e => this._tStart(e),  { passive: false });
+    document.addEventListener('touchmove',   e => this._tMove(e),   { passive: false });
+    document.addEventListener('touchend',    e => this._tEnd(e),    { passive: false });
+    document.addEventListener('touchcancel', e => this._tEnd(e),    { passive: false });
 
-    // ── Touch Events (Android/iOS — mais fiável) ──────────────────────
-    canvas.addEventListener('touchstart',  e => { e.preventDefault(); this._onTouchStart(e);  }, { passive: false });
-    canvas.addEventListener('touchmove',   e => { e.preventDefault(); this._onTouchMove(e);   }, { passive: false });
-    canvas.addEventListener('touchend',    e => { e.preventDefault(); this._onTouchEnd(e);    }, { passive: false });
-    canvas.addEventListener('touchcancel', e => { e.preventDefault(); this._onTouchEnd(e);    }, { passive: false });
-
-    // ── Pointer Events (desktop/mouse) ────────────────────────────────
-    canvas.addEventListener('pointerdown', e => {
-      if (e.pointerType === 'touch') return; // Já tratado pelos touch events
-      e.preventDefault();
-      this._onPointerDown(e);
-    });
-    canvas.addEventListener('pointermove', e => {
-      if (e.pointerType === 'touch') return;
-      this._onPointerMove(e);
-    });
-    canvas.addEventListener('pointerup',    e => {
-      if (e.pointerType === 'touch') return;
-      this._onPointerUp(e);
-    });
-    canvas.addEventListener('pointercancel', e => {
-      if (e.pointerType === 'touch') return;
-      this._onPointerUp(e);
-    });
+    // ── Mouse (desktop) ───────────────────────────────────────────────
+    document.addEventListener('mousedown', e => this._mDown(e));
+    document.addEventListener('mousemove', e => this._mMove(e));
+    document.addEventListener('mouseup',   e => this._mUp(e));
   },
 
-  // ── TOUCH EVENTS ─────────────────────────────────────────────────────
-  _onTouchStart(e) {
-    const canvas = e.target;
-    const cw = canvas.clientWidth;
+  // Verifica se o toque é sobre um botão de habilidade — se sim, ignora
+  _isButton(x, y) {
+    const el = document.elementFromPoint(x, y);
+    if (!el) return false;
+    return this._btnIds.has(el.id) || el.closest('button') !== null;
+  },
+
+  // Verifica se o jogo está ativo
+  _gameActive() {
+    return typeof GameScene !== 'undefined' && GameScene.running;
+  },
+
+  // ── TOUCH ────────────────────────────────────────────────────────────
+  _tStart(e) {
+    if (!this._gameActive()) return;
+    const sw = window.innerWidth;
 
     for (const t of e.changedTouches) {
-      const isLeft = t.clientX < cw / 2;
+      if (this._isButton(t.clientX, t.clientY)) continue;
+      e.preventDefault();
+
+      const isLeft = t.clientX < sw / 2;
 
       if (isLeft && !this.left.active) {
-        this.left.active  = true;
-        this.left.touchId = t.identifier;
-        this.left.startX  = t.clientX;
-        this.left.startY  = t.clientY;
-        this.left.dx = this.left.dy = 0;
+        this.left = { active: true, startX: t.clientX, startY: t.clientY, dx: 0, dy: 0, id: t.identifier };
       } else if (!isLeft && !this.right.active) {
-        this.right.active  = true;
-        this.right.touchId = t.identifier;
-        this.right.startX  = t.clientX;
-        this.right.startY  = t.clientY;
-        this.right.dx = this.right.dy = 0;
-        this.right.firing = true;
+        this.right = { active: true, startX: t.clientX, startY: t.clientY, dx: 0, dy: 0, id: t.identifier, firing: true };
       }
     }
   },
 
-  _onTouchMove(e) {
+  _tMove(e) {
+    if (!this._gameActive()) return;
     for (const t of e.changedTouches) {
-      if (this.left.active && t.identifier === this.left.touchId) {
-        const dx = t.clientX - this.left.startX;
-        const dy = t.clientY - this.left.startY;
-        const len = Math.sqrt(dx*dx + dy*dy);
-        const cl  = Math.min(len, this.RADIUS);
-        this.left.dx = len > 0 ? (dx / len) * (cl / this.RADIUS) : 0;
-        this.left.dy = len > 0 ? (dy / len) * (cl / this.RADIUS) : 0;
+      if (this.left.active && t.identifier === this.left.id) {
+        this._calcDir(this.left, t.clientX, t.clientY);
       }
-      if (this.right.active && t.identifier === this.right.touchId) {
+      if (this.right.active && t.identifier === this.right.id) {
+        this._calcDir(this.right, t.clientX, t.clientY);
         const dx = t.clientX - this.right.startX;
         const dy = t.clientY - this.right.startY;
-        const len = Math.sqrt(dx*dx + dy*dy);
-        const cl  = Math.min(len, this.RADIUS);
-        this.right.dx = len > 0 ? (dx / len) * (cl / this.RADIUS) : 0;
-        this.right.dy = len > 0 ? (dy / len) * (cl / this.RADIUS) : 0;
-        this.right.firing = len > 8;
+        this.right.firing = Math.sqrt(dx*dx + dy*dy) > 8;
       }
     }
+    e.preventDefault();
   },
 
-  _onTouchEnd(e) {
+  _tEnd(e) {
     for (const t of e.changedTouches) {
-      if (this.left.active  && t.identifier === this.left.touchId)  {
-        this.left.active  = false; this.left.dx  = this.left.dy  = 0;
-      }
-      if (this.right.active && t.identifier === this.right.touchId) {
-        this.right.active = false; this.right.dx = this.right.dy = 0; this.right.firing = false;
-      }
+      if (this.left.active  && t.identifier === this.left.id)  { this.left.active  = false; this.left.dx  = this.left.dy  = 0; }
+      if (this.right.active && t.identifier === this.right.id) { this.right.active = false; this.right.dx = this.right.dy = 0; this.right.firing = false; }
     }
   },
 
-  // ── POINTER EVENTS (mouse/desktop) ───────────────────────────────────
-  _onPointerDown(e) {
-    const cw = e.target.clientWidth;
-    const isLeft = e.clientX < cw / 2;
+  // ── MOUSE ────────────────────────────────────────────────────────────
+  _mDown(e) {
+    if (!this._gameActive()) return;
+    if (this._isButton(e.clientX, e.clientY)) return;
+    const isLeft = e.clientX < window.innerWidth / 2;
     if (isLeft && !this.left.active) {
-      this.left.active    = true;
-      this.left.touchId   = e.pointerId;
-      this.left.startX    = e.clientX;
-      this.left.startY    = e.clientY;
-      this.left.dx = this.left.dy = 0;
+      this.left = { active: true, startX: e.clientX, startY: e.clientY, dx: 0, dy: 0, id: 0 };
     } else if (!isLeft && !this.right.active) {
-      this.right.active   = true;
-      this.right.touchId  = e.pointerId;
-      this.right.startX   = e.clientX;
-      this.right.startY   = e.clientY;
-      this.right.dx = this.right.dy = 0;
-      this.right.firing = true;
+      this.right = { active: true, startX: e.clientX, startY: e.clientY, dx: 0, dy: 0, id: 1, firing: true };
     }
   },
 
-  _onPointerMove(e) {
-    if (this.left.active && e.pointerId === this.left.touchId) {
-      const dx = e.clientX - this.left.startX;
-      const dy = e.clientY - this.left.startY;
-      const len = Math.sqrt(dx*dx + dy*dy);
-      const cl  = Math.min(len, this.RADIUS);
-      this.left.dx = len > 0 ? (dx / len) * (cl / this.RADIUS) : 0;
-      this.left.dy = len > 0 ? (dy / len) * (cl / this.RADIUS) : 0;
-    }
-    if (this.right.active && e.pointerId === this.right.touchId) {
-      const dx = e.clientX - this.right.startX;
-      const dy = e.clientY - this.right.startY;
-      const len = Math.sqrt(dx*dx + dy*dy);
-      const cl  = Math.min(len, this.RADIUS);
-      this.right.dx = len > 0 ? (dx / len) * (cl / this.RADIUS) : 0;
-      this.right.dy = len > 0 ? (dy / len) * (cl / this.RADIUS) : 0;
-      this.right.firing = len > 8;
+  _mMove(e) {
+    if (this.left.active  && this.left.id  === 0) this._calcDir(this.left,  e.clientX, e.clientY);
+    if (this.right.active && this.right.id === 1) {
+      this._calcDir(this.right, e.clientX, e.clientY);
+      const dx = e.clientX - this.right.startX, dy = e.clientY - this.right.startY;
+      this.right.firing = Math.sqrt(dx*dx + dy*dy) > 8;
     }
   },
 
-  _onPointerUp(e) {
-    if (this.left.active  && e.pointerId === this.left.touchId)  { this.left.active  = false; this.left.dx  = this.left.dy  = 0; }
-    if (this.right.active && e.pointerId === this.right.touchId) { this.right.active = false; this.right.dx = this.right.dy = 0; this.right.firing = false; }
+  _mUp(e) {
+    if (e.button === 0) {
+      const isLeft = e.clientX < window.innerWidth / 2;
+      if (isLeft)  { this.left.active  = false; this.left.dx  = this.left.dy  = 0; }
+      else         { this.right.active = false; this.right.dx = this.right.dy = 0; this.right.firing = false; }
+    }
+  },
+
+  // ── HELPERS ──────────────────────────────────────────────────────────
+  _calcDir(stick, cx, cy) {
+    const dx = cx - stick.startX;
+    const dy = cy - stick.startY;
+    const len = Math.sqrt(dx*dx + dy*dy);
+    const cl  = Math.min(len, this.RADIUS);
+    stick.dx = len > 0 ? (dx / len) * (cl / this.RADIUS) : 0;
+    stick.dy = len > 0 ? (dy / len) * (cl / this.RADIUS) : 0;
   },
 
   getMoveDir() { return { x: this.left.dx,  y: this.left.dy  }; },
   getAimDir()  { return { x: this.right.dx, y: this.right.dy }; },
   isFiring()   { return this.right.firing; },
 
-  // Desenha os joysticks no canvas
+  // ── DESENHO ───────────────────────────────────────────────────────────
   draw(ctx, canvasW, canvasH) {
     const isMobile = document.body.classList.contains('is-mobile');
-    const baseY = isMobile ? canvasH * 0.58 : canvasH * 0.78;
+    const baseY = isMobile ? canvasH * 0.55 : canvasH * 0.78;
 
     this._drawStick(ctx,
       this.left.active ? this.left.startX : canvasW * 0.18,

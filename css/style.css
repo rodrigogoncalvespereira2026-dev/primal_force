@@ -1,5 +1,10 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+html, body {
+  touch-action: none;
+  overscroll-behavior: none;
+}
+
 /* Remove hover sticky em touch e melhora resposta tátil */
 .is-mobile *,
 .is-mobile *::before,
@@ -604,6 +609,11 @@ body {
 /* Mobile: mostrar controlos touch, esconder skill-bar */
 .is-mobile #mobile-controls { display: flex; }
 .is-mobile #skill-bar { display: none !important; }
+
+/* Botões de habilidade: touch-action independente do global */
+.act-btn, #btn-pause, .menu-btn, .back-btn {
+  touch-action: manipulation;
+}
 
 /* PAUSE BTN */
 #btn-pause {
