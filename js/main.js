@@ -45,13 +45,13 @@ const App = {
       document.body.classList.add('is-mobile');
       // Tenta bloquear orientação retrato
       if (screen.orientation && screen.orientation.lock) {
-        screen.orientation.lock('portrait').catch(() => {});
+        screen.orientation.lock('landscape').catch(() => {});
       }
       // Detecta orientação
       const checkOrientation = () => {
         const el = document.getElementById('rotate-overlay');
         if (!el) return;
-        if (window.innerHeight > window.innerWidth) {
+        if (window.innerWidth > window.innerHeight) {
           el.classList.remove('active');
         } else {
           el.classList.add('active');
