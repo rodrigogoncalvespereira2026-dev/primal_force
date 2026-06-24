@@ -1069,14 +1069,14 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
 
 /* ── PORTRAIT (rotação CSS ativa) ────────────────────────────────────── */
 /* Mapeamento: left:L → viewport_y=L (top); bottom:B → viewport_x=B (left) */
-.portrait #btn-perfil  { top: auto !important; left: 70px !important; bottom: 20px !important; padding: 8px 12px !important; min-width: 0 !important; gap: 6px !important; }
-.portrait #btn-trofeus { top: auto !important; left: 70px !important; bottom: 166px !important; padding: 8px 12px !important; min-width: 0 !important; gap: 6px !important; }
-.portrait #btn-opcoes  { top: auto !important; left: 20px !important; bottom: 94% !important; right: auto !important; padding: 8px 12px !important; min-width: 0 !important; }
-.portrait #btn-passe   { left: 94% !important; bottom: 20px !important; padding: 8px 12px !important; min-width: 0 !important; gap: 6px !important; }
-.portrait #btn-missoes { left: 94% !important; bottom: 166px !important; padding: 8px 12px !important; min-width: 0 !important; gap: 6px !important; }
-.portrait .menu-side-right { left: 94% !important; bottom: 92% !important; right: auto !important; top: auto !important; }
+.portrait #btn-perfil  { top: auto !important; left: 60px !important; bottom: 20px !important; padding: 8px 12px !important; min-width: 0 !important; gap: 6px !important; }
+.portrait #btn-trofeus { top: auto !important; left: 60px !important; bottom: 160px !important; padding: 8px 12px !important; min-width: 0 !important; gap: 6px !important; }
+.portrait #btn-opcoes  { top: auto !important; left: 15px !important; bottom: calc(100% - 30px) !important; right: auto !important; padding: 8px 12px !important; min-width: 0 !important; }
+.portrait #btn-passe   { left: calc(100% - 80px) !important; bottom: 20px !important; padding: 8px 12px !important; min-width: 0 !important; gap: 6px !important; }
+.portrait #btn-missoes { left: calc(100% - 80px) !important; bottom: 160px !important; padding: 8px 12px !important; min-width: 0 !important; gap: 6px !important; }
+.portrait .menu-side-right { left: calc(100% - 80px) !important; bottom: calc(100% - 30px) !important; right: auto !important; top: auto !important; }
 .portrait .menu-side-left  { left: 50% !important; bottom: 20px !important; top: auto !important; transform: translateX(-50%) !important; }
-.portrait .trophy-bar-menu { left: 20px !important; bottom: 50% !important; top: auto !important; transform: none !important; padding: 4px 12px !important; font-size: 11px !important; }
+.portrait .trophy-bar-menu { left: 18px !important; bottom: 50% !important; top: auto !important; transform: none !important; padding: 4px 12px !important; font-size: 11px !important; }
 .portrait .corner-icon  { font-size: 20px !important; }
 .portrait .corner-label { font-size: 10px !important; letter-spacing: 1px !important; }
 
