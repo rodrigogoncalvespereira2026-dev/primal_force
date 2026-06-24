@@ -48,6 +48,11 @@ const App = {
     const isUA    = /Android|iPhone|iPad|iPod|Mobile|Tablet/i.test(navigator.userAgent);
     if (isTouch || isUA) {
       document.body.classList.add('is-mobile');
+      try {
+        if (screen.orientation && screen.orientation.lock) {
+          screen.orientation.lock('landscape').catch(() => {});
+        }
+      } catch(e) {}
     }
     Progression.load();
     WorldMap.load();
