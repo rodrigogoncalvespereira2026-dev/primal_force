@@ -24,6 +24,15 @@ const App = {
     const el = document.getElementById(this.screens[name]);
     if (el) el.classList.add('active');
 
+    const isMobile = document.body.classList.contains('is-mobile');
+    if (isMobile && window.innerHeight > window.innerWidth) {
+      if (name === 'game') {
+        this._rotateApp(true);
+      } else if (this._current === 'game') {
+        this._rotateApp(false);
+      }
+    }
+
     if (name === 'menu') {
       document.getElementById('menu-trophies').textContent = Progression.data.trophies;
       document.getElementById('menu-coins').textContent    = Progression.data.coins;
@@ -39,43 +48,31 @@ const App = {
     this._current = name;
   },
 
-  _forceLandscape() {
+  _rotateApp(enable) {
     const app = document.getElementById('app');
-    const isPortrait = () => window.innerHeight > window.innerWidth;
-    const apply = () => {
-      const portrait = isPortrait();
-      if (portrait) {
-        app.style.position = 'absolute';
-        app.style.top = '0';
-        app.style.left = '0';
-        app.style.width = window.innerHeight + 'px';
-        app.style.height = window.innerWidth + 'px';
-        app.style.transformOrigin = 'top left';
-        app.style.transform = 'rotate(90deg) translate(0, -100vw)';
-        document.body.classList.add('portrait');
-      } else {
-        app.style.position = '';
-        app.style.top = '';
-        app.style.left = '';
-        app.style.width = '';
-        app.style.height = '';
-        app.style.transformOrigin = '';
-        app.style.transform = '';
-        document.body.classList.remove('portrait');
-      }
-    };
-    apply();
-    window.addEventListener('orientationchange', () => setTimeout(apply, 400));
-    window.addEventListener('resize', apply);
-    try {
-      if (screen.orientation && screen.orientation.lock) {
-        screen.orientation.lock('landscape').catch(() => {});
-      }
-    } catch(e) {}
+    if (enable) {
+      app.style.position = 'absolute';
+      app.style.top = '0';
+      app.style.left = '0';
+      app.style.width = window.innerHeight + 'px';
+      app.style.height = window.innerWidth + 'px';
+      app.style.transformOrigin = 'top left';
+      app.style.transform = 'rotate(90deg) translate(0, -100vw)';
+      document.body.classList.add('portrait');
+    } else {
+      app.style.position = '';
+      app.style.top = '';
+      app.style.left = '';
+      app.style.width = '';
+      app.style.height = '';
+      app.style.transformOrigin = '';
+      app.style.transform = '';
+      document.body.classList.remove('portrait');
+    }
   },
 
   vpToApp(vx, vy) {
-    if (window.innerHeight > window.innerWidth) {
+    if (document.body.classList.contains('portrait')) {
       return { x: vy, y: window.innerWidth - vx };
     }
     return { x: vx, y: vy };
@@ -86,7 +83,6 @@ const App = {
     const isUA    = /Android|iPhone|iPad|iPod|Mobile|Tablet/i.test(navigator.userAgent);
     if (isTouch || isUA) {
       document.body.classList.add('is-mobile');
-      this._forceLandscape();
     }
     Progression.load();
     WorldMap.load();
