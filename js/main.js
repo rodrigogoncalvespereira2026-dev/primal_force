@@ -37,6 +37,17 @@ const App = {
       setTimeout(() => GameScene.start(ranger), 0);
     }
     this._current = name;
+    this._checkOrient();
+  },
+
+  _checkOrient() {
+    const overlay = document.getElementById('rotate-overlay');
+    if (this._current === 'game' && window.innerHeight > window.innerWidth) {
+      overlay.style.display = 'flex';
+      try { if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(() => {}); } catch(e) {}
+    } else {
+      overlay.style.display = 'none';
+    }
   },
 
   vpToApp(vx, vy) {
@@ -48,12 +59,9 @@ const App = {
     const isUA    = /Android|iPhone|iPad|iPod|Mobile|Tablet/i.test(navigator.userAgent);
     if (isTouch || isUA) {
       document.body.classList.add('is-mobile');
-      try {
-        if (screen.orientation && screen.orientation.lock) {
-          screen.orientation.lock('landscape').catch(() => {});
-        }
-      } catch(e) {}
     }
+    window.addEventListener('orientationchange', () => setTimeout(() => App._checkOrient(), 400));
+    window.addEventListener('resize', () => App._checkOrient());
     Progression.load();
     WorldMap.load();
     Input.init();
