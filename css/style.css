@@ -196,6 +196,17 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
 .is-mobile #btn-passe   { bottom: 10px; left: 10px; padding: 6px 10px; gap: 6px; }
 .is-mobile #btn-missoes { bottom: 10px; left: 125px; padding: 6px 10px; gap: 6px; }
 
+/* Portrait (CSS rotation active) – override coordenadas app → viewport */
+/* app (left,top) → viewport (innerWidth-top, left) = (V-left, V-top) */
+/* app (left,bottom) → viewport (bottom, left) = (V-left, V-top) */
+.portrait #btn-perfil  { top: auto !important; left: 55px !important; bottom: 20px !important; }
+.portrait #btn-trofeus { top: auto !important; left: 55px !important; bottom: 125px !important; }
+.portrait #btn-opcoes  { top: auto !important; left: 10px !important; bottom: 355px !important; }
+.portrait #btn-passe   { left: 640px !important; bottom: 20px !important; }
+.portrait #btn-missoes { left: 640px !important; bottom: 125px !important; }
+.portrait .menu-side-right { right: 20px !important; bottom: 355px !important; }
+.portrait .menu-side-left  { left: 50% !important; bottom: 20px !important; top: auto !important; transform: none !important; }
+
 .menu-side-right {
   position: absolute;
   z-index: 2;
@@ -699,7 +710,7 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
   #minimap { width: 70px; height: 56px; }
   .ranger-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 12px; }
   .ranger-card { padding: 14px 10px; }
-  .trophy-bar-menu { font-size: 13px; padding: 6px 14px; top: 14px; }
+  .trophy-bar-menu { font-size: 13px; padding: 6px 14px; top: 10px; }
   .shop-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
   .logo-main { font-size: 32px; }
   .logo-sub { font-size: 13px; }
@@ -766,7 +777,7 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
   .logo-main { font-size: 24px; letter-spacing: 6px; }
   .logo-sub { font-size: 11px; letter-spacing: 4px; }
   .logo-tagline { font-size: 11px; }
-  .trophy-bar-menu { font-size: 11px; padding: 4px 12px; top: 10px; border-radius: 14px; }
+  .trophy-bar-menu { font-size: 11px; padding: 4px 12px; top: 6px; border-radius: 14px; }
   .menu-icon-btn { width: 44px; height: 44px; }
 
   .shop-grid { grid-template-columns: 1fr; gap: 8px; padding: 0 10px 16px; }
@@ -827,7 +838,7 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
   .is-mobile .logo-main { font-size: clamp(28px, 6vw, 42px); }
   .is-mobile .logo-sub { font-size: 11px; }
   .is-mobile .logo-tagline { display: block; font-size: 11px; }
-  .is-mobile .trophy-bar-menu { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); font-size: 11px; padding: 5px 12px; border-radius: 14px; }
+  .is-mobile .trophy-bar-menu { position: absolute; top: 6px; left: 50%; transform: translateX(-50%); font-size: 11px; padding: 5px 12px; border-radius: 14px; }
   .is-mobile .menu-icon-btn { min-width: 110px; padding: 8px 14px; border-radius: 6px; }
   .is-mobile .corner-icon { font-size: 18px; }
   .is-mobile .corner-label { font-size: 10px; }
@@ -878,7 +889,7 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
 /* ── TROPHY BAR MENU ── */
 .trophy-bar-menu {
   position: absolute;
-  top: 20px;
+  top: 14px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 2;
