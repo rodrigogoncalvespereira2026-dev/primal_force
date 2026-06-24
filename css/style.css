@@ -534,7 +534,7 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
 
 /* MOBILE CONTROLS */
 #mobile-controls {
-  position: absolute;
+  position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
@@ -628,7 +628,7 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
 
 /* PAUSE BTN */
 #btn-pause {
-  position: absolute;
+  position: fixed;
   top: 10px;
   left: 50%;
   transform: translateX(-50%);
@@ -1105,15 +1105,6 @@ body.portrait #skill-bar {
   position: absolute;
   left: calc(100vh - 80px); top: 50%;
   transform: translateY(-50%);
-}
-body.portrait #mobile-controls {
-  position: absolute;
-  left: calc(100vh - 80px); top: 0;
-}
-body.portrait #btn-pause {
-  position: absolute;
-  left: 10px; top: 94%;
-  transform: none;
 }
 
 
