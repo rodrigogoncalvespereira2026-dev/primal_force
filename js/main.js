@@ -40,32 +40,23 @@ const App = {
   },
 
   _forceLandscape() {
-    const app = document.getElementById('app');
+    const blocker = document.getElementById('orientation-blocker');
     const isPortrait = () => window.innerHeight > window.innerWidth;
     const apply = () => {
       if (isPortrait()) {
-        app.style.position = 'absolute';
-        app.style.top = '0';
-        app.style.left = '0';
-        app.style.width = window.innerHeight + 'px';
-        app.style.height = window.innerWidth + 'px';
-        app.style.transformOrigin = 'top left';
-        app.style.transform = 'rotate(90deg) translate(0, -100vw)';
-        document.body.classList.add('portrait');
+        blocker.style.display = 'flex';
       } else {
-        app.style.position = '';
-        app.style.top = '';
-        app.style.left = '';
-        app.style.width = '';
-        app.style.height = '';
-        app.style.transformOrigin = '';
-        app.style.transform = '';
-        document.body.classList.remove('portrait');
+        blocker.style.display = 'none';
       }
     };
     apply();
-    window.addEventListener('orientationchange', () => setTimeout(apply, 300));
+    window.addEventListener('orientationchange', () => setTimeout(apply, 400));
     window.addEventListener('resize', apply);
+    try {
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('landscape').catch(() => {});
+      }
+    } catch(e) {}
   },
 
   // Viewport → app coordinates (when rotated)
