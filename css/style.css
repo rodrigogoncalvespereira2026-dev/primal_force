@@ -39,7 +39,6 @@ body {
 }
 
 #app { width: 100vw; height: 100vh; position: relative; }
-body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; }
 
 /* ── SCREENS ── */
 .screen {
@@ -992,9 +991,9 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
 .wm-complete-msg { color:#3cb371; font-weight:700; text-align:center; font-size:14px; margin-top:auto; }
 .wm-base-msg { color:#af56f5; font-size:12px; line-height:1.4; }
 @media(max-width:600px){
-  body:not(.portrait) .wm-body { flex-direction:column; }
-  body:not(.portrait) .wm-panel { width:100%; min-width:0; border-left:none; border-top:1px solid rgba(255,255,255,0.1); max-height:200px; }
-  body:not(.portrait) #wm-canvas { flex:none; height:55vh; }
+  .wm-body { flex-direction:column; }
+  .wm-panel { width:100%; min-width:0; border-left:none; border-top:1px solid rgba(255,255,255,0.1); max-height:200px; }
+  #wm-canvas { flex:none; height:55vh; }
 }
 
 /* ── DIÁLOGO RPG ── */
@@ -1067,55 +1066,6 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
   background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.3); cursor: not-allowed;
 }
 
-/* ── ORIENTATION BLOCKER ───────────────────────────────────────────── */
-#orientation-blocker {
-  display: none;
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: #06090f;
-  color: #fff;
-  z-index: 99999;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  font-family: inherit;
-  padding: 20px;
-}
-
-.blocker-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-}
-
-.blocker-phone {
-  font-size: 64px;
-  animation: phoneRotate 2.5s infinite ease-in-out;
-}
-
-@keyframes phoneRotate {
-  0% { transform: rotate(0deg); }
-  50% { transform: rotate(-90deg); }
-  100% { transform: rotate(0deg); }
-}
-
-#orientation-blocker h2 {
-  font-size: 24px;
-  letter-spacing: 1px;
-  margin: 0;
-}
-
-#orientation-blocker p {
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 14px;
-  max-width: 280px;
-  line-height: 1.5;
-  margin: 0;
-}
-
 /* ── SIDEBAR OPÇÕES ── */
 .opcoes-sidebar {
   position: absolute;
@@ -1164,5 +1114,5 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
 .is-mobile .op-btn { padding: 6px 10px; font-size: 11px; gap: 6px; }
 .is-mobile .op-icon { font-size: 14px; }
 
-/* Nota: o bloqueio de portrait é feito por software em App._forceLandscape() */
+/* Nota: o jogo funciona em qualquer orientação; landscape é recomendado */
 

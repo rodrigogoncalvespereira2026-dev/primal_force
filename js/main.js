@@ -39,57 +39,14 @@ const App = {
     this._current = name;
   },
 
-  _forceLandscape() {
-    const blocker = document.getElementById('orientation-blocker');
-    const showBlocker = () => { blocker.style.display = 'flex'; };
-    const hideBlocker = () => { blocker.style.display = 'none'; };
-    const checkOrientation = () => {
-      if (window.innerHeight > window.innerWidth) {
-        showBlocker();
-      } else {
-        hideBlocker();
-      }
-    };
-    // matchMedia é o método mais fiável para detetar orientação
-    const mql = window.matchMedia('(orientation: landscape)');
-    const onChange = (e) => {
-      if (e.matches) {
-        hideBlocker();
-      } else {
-        showBlocker();
-      }
-    };
-    if (mql.addEventListener) {
-      mql.addEventListener('change', onChange);
-    } else {
-      mql.addListener(onChange); // fallback Safari antigo
-    }
-    // Fallback: resize
-    window.addEventListener('resize', checkOrientation);
-    // Tentar bloquear orientação
-    try {
-      if (screen.orientation && screen.orientation.lock) {
-        screen.orientation.lock('landscape').catch(() => {});
-      }
-    } catch(e) {}
-    // Estado inicial
-    checkOrientation();
-  },
-
-  // Viewport → app coordinates (when rotated)
-  vpToApp(vx, vy) {
-    if (document.body.classList.contains('portrait')) {
-      return { x: vy, y: window.innerWidth - vx };
-    }
-    return { x: vx, y: vy };
-  },
+  // Viewport → app coordinates (no rotation, identity)
+  vpToApp(vx, vy) { return { x: vx, y: vy }; },
 
   init() {
     const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     const isUA    = /Android|iPhone|iPad|iPod|Mobile|Tablet/i.test(navigator.userAgent);
     if (isTouch || isUA) {
       document.body.classList.add('is-mobile');
-      this._forceLandscape();
     }
     Progression.load();
     WorldMap.load();
