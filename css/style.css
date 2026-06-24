@@ -1039,14 +1039,6 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
   background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.3); cursor: not-allowed;
 }
 
-/* ── PORTRAIT (rotação #app ativa) ──────────────────────────────────── */
-body.portrait #game-canvas { top: auto !important; left: 0 !important; bottom: 0 !important; width: 100% !important; height: 100% !important; }
-body.portrait #hud { top: auto !important; left: 0 !important; bottom: 0 !important; right: auto !important; width: 100% !important; }
-body.portrait #skill-bar { left: calc(100% - 80px) !important; bottom: 50% !important; top: auto !important; transform: translateX(-50%) !important; }
-body.portrait #mobile-controls { left: calc(100% - 80px) !important; bottom: 0 !important; top: auto !important; right: auto !important; width: 100% !important; }
-body.portrait #btn-pause { left: 10px !important; bottom: 94% !important; top: auto !important; right: auto !important; transform: none !important; }
-body.portrait #boss-hud { left: 90px !important; bottom: 50% !important; top: auto !important; right: auto !important; transform: translateX(-50%) !important; }
-
 /* ── SIDEBAR OPÇÕES ── */
 .opcoes-sidebar {
   position: absolute;
