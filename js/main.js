@@ -66,12 +66,6 @@ const App = {
     apply();
     window.addEventListener('orientationchange', () => setTimeout(apply, 300));
     window.addEventListener('resize', apply);
-    // Force native landscape lock
-    try {
-      if (screen.orientation && screen.orientation.lock) {
-        screen.orientation.lock('landscape').catch(() => {});
-      }
-    } catch(e) {}
   },
 
   // Viewport → app coordinates (when rotated)
