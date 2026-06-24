@@ -39,7 +39,38 @@ const App = {
     this._current = name;
   },
 
+  _forceLandscape() {
+    const wrap = document.getElementById('app-rotated');
+    const apply = () => {
+      if (window.innerHeight > window.innerWidth) {
+        wrap.style.position = 'absolute';
+        wrap.style.top = '0';
+        wrap.style.left = '0';
+        wrap.style.width = window.innerHeight + 'px';
+        wrap.style.height = window.innerWidth + 'px';
+        wrap.style.transformOrigin = 'top left';
+        wrap.style.transform = 'rotate(90deg) translate(0, -100vw)';
+        document.body.classList.add('portrait');
+      } else {
+        wrap.style.position = '';
+        wrap.style.top = '';
+        wrap.style.left = '';
+        wrap.style.width = '';
+        wrap.style.height = '';
+        wrap.style.transformOrigin = '';
+        wrap.style.transform = '';
+        document.body.classList.remove('portrait');
+      }
+    };
+    apply();
+    window.addEventListener('orientationchange', () => setTimeout(apply, 400));
+    window.addEventListener('resize', apply);
+  },
+
   vpToApp(vx, vy) {
+    if (document.getElementById('app-rotated').style.transform) {
+      return { x: vy, y: window.innerWidth - vx };
+    }
     return { x: vx, y: vy };
   },
 
@@ -48,6 +79,7 @@ const App = {
     const isUA    = /Android|iPhone|iPad|iPod|Mobile|Tablet/i.test(navigator.userAgent);
     if (isTouch || isUA) {
       document.body.classList.add('is-mobile');
+      this._forceLandscape();
     }
     Progression.load();
     WorldMap.load();

@@ -222,8 +222,11 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
 }
 
 .menu-footer {
-  position: fixed;
+  position: absolute;
   bottom: 16px;
+  left: 0;
+  right: 0;
+  text-align: center;
   color: rgba(255,255,255,0.2);
   font-size: 11px;
   letter-spacing: 2px;
@@ -844,7 +847,7 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
 
 /* ── TROPHY BAR MENU ── */
 .trophy-bar-menu {
-  position: absolute;
+  position: fixed;
   top: 20px;
   left: 50%;
   transform: translateX(-50%);
@@ -1041,7 +1044,7 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
 
 /* ── SIDEBAR OPÇÕES ── */
 .opcoes-sidebar {
-  position: absolute;
+  position: fixed;
   z-index: 5;
   right: 0;
   top: 0;
@@ -1087,37 +1090,31 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
 .is-mobile .op-btn { padding: 6px 10px; font-size: 11px; gap: 6px; }
 .is-mobile .op-icon { font-size: 14px; }
 
-/* ── MENSAGEM DE ORIENTAÇÃO ── */
-#portrait-msg {
-  display: none;
+/* ── ROTAÇÃO ATIVA (portrait → landscape via JS) ────────────────────── */
+body.portrait #game-canvas {
   position: absolute;
-  inset: 0;
-  z-index: 100;
-  background: #04060a;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
+  left: 0; top: 100vh;
+  width: 100vh; height: 100vw;
 }
-.pm-icon { font-size: 56px; margin-bottom: 24px; }
-.pm-title { font-size: 20px; font-weight: bold; letter-spacing: 2px; }
-.pm-sub   { font-size: 13px; color: #999; margin-top: 12px; }
+body.portrait #hud {
+  position: absolute;
+  left: 0; top: 100vh;
+  width: 100vh;
+}
+body.portrait #skill-bar {
+  position: absolute;
+  left: calc(100vh - 80px); top: 50%;
+  transform: translateY(-50%);
+}
+body.portrait #mobile-controls {
+  position: absolute;
+  left: calc(100vh - 80px); top: 0;
+}
+body.portrait #btn-pause {
+  position: absolute;
+  left: 10px; top: 94%;
+  transform: none;
+}
 
-/* ── PORTRAIT (esconder jogo, mostrar mensagem) ────────────────────── */
-@media (orientation: portrait) {
-  #screen-game.active #game-canvas,
-  #screen-game.active #hud,
-  #screen-game.active #skill-bar,
-  #screen-game.active #mobile-controls,
-  #screen-game.active #btn-pause,
-  #screen-game.active #boss-hud {
-    display: none !important;
-  }
-  #screen-game.active #portrait-msg {
-    display: flex;
-  }
-}
-@media (orientation: landscape) {
-  #portrait-msg { display: none !important; }
-}
+
 

@@ -11,48 +11,54 @@
 <body>
 <div id="app">
 
+  <!-- ── BOTÕES DO MENU (position: fixed, fora dos ecrãs) ── -->
+  <button class="menu-icon-btn" id="btn-perfil">
+    <span class="corner-icon">👤</span><span class="corner-label">PERFIL</span>
+  </button>
+  <button class="menu-icon-btn" id="btn-trofeus">
+    <span class="corner-icon">🏆</span><span class="corner-label">TROFÉUS</span>
+  </button>
+  <button class="menu-icon-btn menu-corner-tr" id="btn-opcoes">
+    <span class="corner-icon">⚙️</span>
+  </button>
+  <div class="menu-side-left">
+    <button class="menu-icon-btn" id="btn-loja">
+      <span class="corner-icon">🛒</span><span class="corner-label">LOJA</span>
+    </button>
+    <button class="menu-icon-btn" id="btn-rangers">
+      <span class="corner-icon">🦖</span><span class="corner-label">RANGERS</span>
+    </button>
+  </div>
+  <div class="menu-side-right">
+    <button class="menu-icon-btn" id="btn-mundo">
+      <span class="corner-icon">🗺️</span><span class="corner-label">MAPA</span>
+    </button>
+    <button class="menu-icon-btn menu-play-btn" id="btn-jogar">
+      <span class="corner-icon">⚡</span><span class="corner-label">JOGAR</span>
+    </button>
+  </div>
+  <button class="menu-icon-btn" id="btn-passe">
+    <span class="corner-icon">⭐</span><span class="corner-label">PASSE</span>
+  </button>
+  <button class="menu-icon-btn" id="btn-missoes">
+    <span class="corner-icon">📋</span><span class="corner-label">MISSÕES</span>
+  </button>
+  <div class="trophy-bar-menu">🏆 <span id="menu-trophies">0</span> Troféus &nbsp;·&nbsp; 💰 <span id="menu-coins">0</span> Moedas</div>
+  <div class="opcoes-sidebar" id="opcoes-sidebar">
+    <button class="op-btn" data-opcao="config"><span class="op-icon">⚙️</span><span>Configurações</span></button>
+    <button class="op-btn" data-opcao="historico"><span class="op-icon">📜</span><span>Histórico</span></button>
+    <button class="op-btn" data-opcao="lideranca"><span class="op-icon">🏆</span><span>Liderança</span></button>
+    <button class="op-btn" data-opcao="serie"><span class="op-icon">📺</span><span>Série Ranger</span></button>
+    <button class="op-btn" data-opcao="caixa"><span class="op-icon">📬</span><span>Caixa de entrada</span></button>
+    <button class="op-btn" data-opcao="batalha"><span class="op-icon">⚔️</span><span>Batalha amistosa</span></button>
+    <button class="op-btn" data-opcao="mapas"><span class="op-icon">🗺️</span><span>Criador de mapas</span></button>
+    <button class="op-btn" data-opcao="id"><span class="op-icon">🆔</span><span>PrimalForce ID</span></button>
+  </div>
+
+  <div id="app-rotated">
   <!-- ── MENU ── -->
   <div id="screen-menu" class="screen active">
     <div class="menu-bg"></div>
-
-    <button class="menu-icon-btn" id="btn-perfil">
-      <span class="corner-icon">👤</span><span class="corner-label">PERFIL</span>
-    </button>
-    <button class="menu-icon-btn" id="btn-trofeus">
-      <span class="corner-icon">🏆</span><span class="corner-label">TROFÉUS</span>
-    </button>
-
-    <button class="menu-icon-btn menu-corner-tr" id="btn-opcoes">
-      <span class="corner-icon">⚙️</span>
-    </button>
-
-    <div class="menu-side-left">
-      <button class="menu-icon-btn" id="btn-loja">
-        <span class="corner-icon">🛒</span><span class="corner-label">LOJA</span>
-      </button>
-      <button class="menu-icon-btn" id="btn-rangers">
-        <span class="corner-icon">🦖</span><span class="corner-label">RANGERS</span>
-      </button>
-    </div>
-
-    <div class="menu-side-right">
-      <button class="menu-icon-btn" id="btn-mundo">
-        <span class="corner-icon">🗺️</span><span class="corner-label">MAPA</span>
-      </button>
-      <button class="menu-icon-btn menu-play-btn" id="btn-jogar">
-        <span class="corner-icon">⚡</span><span class="corner-label">JOGAR</span>
-      </button>
-    </div>
-
-    <button class="menu-icon-btn" id="btn-passe">
-      <span class="corner-icon">⭐</span><span class="corner-label">PASSE</span>
-    </button>
-    <button class="menu-icon-btn" id="btn-missoes">
-      <span class="corner-icon">📋</span><span class="corner-label">MISSÕES</span>
-    </button>
-
-    <div class="trophy-bar-menu">🏆 <span id="menu-trophies">0</span> Troféus &nbsp;·&nbsp; 💰 <span id="menu-coins">0</span> Moedas</div>
-
     <div class="menu-content">
       <div class="logo-title">
         <div class="logo-sub">POWER RANGERS</div>
@@ -60,18 +66,7 @@
         <div class="logo-tagline">— A tua força, a tua lenda —</div>
       </div>
     </div>
-      <div class="menu-footer">v0.3 — Power Rangers Primal Force</div>
-
-    <div class="opcoes-sidebar" id="opcoes-sidebar">
-      <button class="op-btn" data-opcao="config"><span class="op-icon">⚙️</span><span>Configurações</span></button>
-      <button class="op-btn" data-opcao="historico"><span class="op-icon">📜</span><span>Histórico</span></button>
-      <button class="op-btn" data-opcao="lideranca"><span class="op-icon">🏆</span><span>Liderança</span></button>
-      <button class="op-btn" data-opcao="serie"><span class="op-icon">📺</span><span>Série Ranger</span></button>
-      <button class="op-btn" data-opcao="caixa"><span class="op-icon">📬</span><span>Caixa de entrada</span></button>
-      <button class="op-btn" data-opcao="batalha"><span class="op-icon">⚔️</span><span>Batalha amistosa</span></button>
-      <button class="op-btn" data-opcao="mapas"><span class="op-icon">🗺️</span><span>Criador de mapas</span></button>
-      <button class="op-btn" data-opcao="id"><span class="op-icon">🆔</span><span>PrimalForce ID</span></button>
-    </div>
+    <div class="menu-footer">v0.3 — Power Rangers Primal Force</div>
   </div>
 
   <!-- ── SELEÇÃO RANGER ── -->
@@ -220,11 +215,6 @@
       </div>
     </div>
     <button id="btn-pause">❚❚</button>
-    <div id="portrait-msg">
-      <div class="pm-icon">📱</div>
-      <div class="pm-title">RODE O DISPOSITIVO</div>
-      <div class="pm-sub">Use o telefone na horizontal para jogar</div>
-    </div>
   </div>
 
   <!-- ── PAUSA ── -->
@@ -248,7 +238,8 @@
     </div>
   </div>
 
-</div>
+  </div><!-- /app-rotated -->
+</div><!-- /app -->
 
 <script src="js/core/utils.js"></script>
 <script src="js/core/input.js"></script>
