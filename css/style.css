@@ -1067,26 +1067,28 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
   background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.3); cursor: not-allowed;
 }
 
-/* ── PORTRAIT (rotação CSS ativa) ────────────────────────────────────── */
+/* ── PORTRAIT (media query, baseado na orientação física) ──────────── */
 /* Mapeamento: left:L → viewport_y=L (top); bottom:B → viewport_x=B (left) */
-.portrait #btn-perfil  { top: auto !important; left: 60px !important; bottom: 20px !important; padding: 8px 12px !important; min-width: 0 !important; gap: 6px !important; }
-.portrait #btn-trofeus { top: auto !important; left: 60px !important; bottom: 160px !important; padding: 8px 12px !important; min-width: 0 !important; gap: 6px !important; }
-.portrait #btn-opcoes  { top: auto !important; left: 15px !important; bottom: calc(100% - 30px) !important; right: auto !important; padding: 8px 12px !important; min-width: 0 !important; }
-.portrait #btn-passe   { left: calc(100% - 80px) !important; bottom: 20px !important; padding: 8px 12px !important; min-width: 0 !important; gap: 6px !important; }
-.portrait #btn-missoes { left: calc(100% - 80px) !important; bottom: 160px !important; padding: 8px 12px !important; min-width: 0 !important; gap: 6px !important; }
-.portrait .menu-side-right { left: calc(100% - 80px) !important; bottom: calc(100% - 30px) !important; right: auto !important; top: auto !important; }
-.portrait .menu-side-left  { left: 50% !important; bottom: 20px !important; top: auto !important; transform: translateX(-50%) !important; }
-.portrait .trophy-bar-menu { left: 18px !important; bottom: 50% !important; top: auto !important; transform: none !important; padding: 4px 12px !important; font-size: 11px !important; }
-.portrait .corner-icon  { font-size: 20px !important; }
-.portrait .corner-label { font-size: 10px !important; letter-spacing: 1px !important; }
+@media (orientation: portrait) {
+  #btn-perfil  { top: auto !important; left: 60px !important; bottom: 20px !important; padding: 8px 12px !important; min-width: 0 !important; gap: 6px !important; }
+  #btn-trofeus { top: auto !important; left: 60px !important; bottom: 160px !important; padding: 8px 12px !important; min-width: 0 !important; gap: 6px !important; }
+  #btn-opcoes  { top: auto !important; left: 15px !important; bottom: calc(100% - 30px) !important; right: auto !important; padding: 8px 12px !important; min-width: 0 !important; }
+  #btn-passe   { left: calc(100% - 80px) !important; bottom: 20px !important; padding: 8px 12px !important; min-width: 0 !important; gap: 6px !important; }
+  #btn-missoes { left: calc(100% - 80px) !important; bottom: 160px !important; padding: 8px 12px !important; min-width: 0 !important; gap: 6px !important; }
+  .menu-side-right { left: calc(100% - 80px) !important; bottom: calc(100% - 30px) !important; right: auto !important; top: auto !important; }
+  .menu-side-left  { left: 50% !important; bottom: 20px !important; top: auto !important; transform: translateX(-50%) !important; }
+  .trophy-bar-menu { left: 18px !important; bottom: 50% !important; top: auto !important; transform: none !important; padding: 4px 12px !important; font-size: 11px !important; }
+  .corner-icon  { font-size: 20px !important; }
+  .corner-label { font-size: 10px !important; letter-spacing: 1px !important; }
 
-/* ── JOGO em portrait ── */
-.portrait #game-canvas { top: auto !important; left: 0 !important; bottom: 0 !important; width: 100% !important; height: 100% !important; }
-.portrait #hud { top: auto !important; left: 0 !important; bottom: 0 !important; right: auto !important; width: 100% !important; }
-.portrait #skill-bar { left: calc(100% - 80px) !important; bottom: 50% !important; top: auto !important; transform: translateX(-50%) !important; }
-.portrait #mobile-controls { left: calc(100% - 80px) !important; bottom: 0 !important; top: auto !important; right: auto !important; width: 100% !important; }
-.portrait #btn-pause { left: 10px !important; bottom: 94% !important; top: auto !important; right: auto !important; transform: none !important; }
-.portrait #boss-hud { left: 90% !important; bottom: 50% !important; top: auto !important; right: auto !important; transform: translateX(-50%) !important; }
+  /* JOGO em portrait */
+  #game-canvas { top: auto !important; left: 0 !important; bottom: 0 !important; width: 100% !important; height: 100% !important; }
+  #hud { top: auto !important; left: 0 !important; bottom: 0 !important; right: auto !important; width: 100% !important; }
+  #skill-bar { left: calc(100% - 80px) !important; bottom: 50% !important; top: auto !important; transform: translateX(-50%) !important; }
+  #mobile-controls { left: calc(100% - 80px) !important; bottom: 0 !important; top: auto !important; right: auto !important; width: 100% !important; }
+  #btn-pause { left: 10px !important; bottom: 94% !important; top: auto !important; right: auto !important; transform: none !important; }
+  #boss-hud { left: 90% !important; bottom: 50% !important; top: auto !important; right: auto !important; transform: translateX(-50%) !important; }
+}
 
 /* ── SIDEBAR OPÇÕES ── */
 .opcoes-sidebar {
