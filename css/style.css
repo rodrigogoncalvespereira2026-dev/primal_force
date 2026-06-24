@@ -1087,5 +1087,37 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
 .is-mobile .op-btn { padding: 6px 10px; font-size: 11px; gap: 6px; }
 .is-mobile .op-icon { font-size: 14px; }
 
-/* Nota: o jogo funciona em qualquer orientação; landscape é recomendado */
+/* ── MENSAGEM DE ORIENTAÇÃO ── */
+#portrait-msg {
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  background: #04060a;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+.pm-icon { font-size: 56px; margin-bottom: 24px; }
+.pm-title { font-size: 20px; font-weight: bold; letter-spacing: 2px; }
+.pm-sub   { font-size: 13px; color: #999; margin-top: 12px; }
+
+/* ── PORTRAIT (esconder jogo, mostrar mensagem) ────────────────────── */
+@media (orientation: portrait) {
+  #screen-game.active #game-canvas,
+  #screen-game.active #hud,
+  #screen-game.active #skill-bar,
+  #screen-game.active #mobile-controls,
+  #screen-game.active #btn-pause,
+  #screen-game.active #boss-hud {
+    display: none !important;
+  }
+  #screen-game.active #portrait-msg {
+    display: flex;
+  }
+}
+@media (orientation: landscape) {
+  #portrait-msg { display: none !important; }
+}
 
