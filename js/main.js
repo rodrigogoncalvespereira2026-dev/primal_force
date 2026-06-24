@@ -42,19 +42,23 @@ const App = {
   _forceLandscape() {
     const blocker = document.getElementById('orientation-blocker');
     const isPortrait = () => window.innerHeight > window.innerWidth;
+    let wasPortrait = null;
     const apply = () => {
-      if (isPortrait()) {
-        blocker.style.display = 'flex';
-      } else {
-        blocker.style.display = 'none';
-      }
+      const p = isPortrait();
+      if (p === wasPortrait) return;
+      wasPortrait = p;
+      blocker.style.display = p ? 'flex' : 'none';
     };
-    apply();
-    window.addEventListener('orientationchange', () => setTimeout(apply, 400));
+    apply(); // primeira execução: wasPortrait é null, p é true/false, avança
+    window.addEventListener('orientationchange', () => setTimeout(apply, 500));
     window.addEventListener('resize', apply);
+    setInterval(apply, 500);
     try {
       if (screen.orientation && screen.orientation.lock) {
         screen.orientation.lock('landscape').catch(() => {});
+      }
+      if (screen.orientation) {
+        screen.orientation.onchange = () => setTimeout(apply, 500);
       }
     } catch(e) {}
   },
