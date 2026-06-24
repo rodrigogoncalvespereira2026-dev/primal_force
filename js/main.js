@@ -42,8 +42,14 @@ const App = {
   _forceLandscape() {
     const app = document.getElementById('app');
     const isPortrait = () => window.innerHeight > window.innerWidth;
+    const p = (id, rules) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      for (const [k,v] of Object.entries(rules)) el.style[k] = v;
+    };
     const apply = () => {
-      if (isPortrait()) {
+      const portrait = isPortrait();
+      if (portrait) {
         app.style.position = 'absolute';
         app.style.top = '0';
         app.style.left = '0';
@@ -52,6 +58,11 @@ const App = {
         app.style.transformOrigin = 'top left';
         app.style.transform = 'rotate(90deg) translate(0, -100vw)';
         document.body.classList.add('portrait');
+        p('btn-perfil',  { top:'auto', left:'60px', bottom:'20px', padding:'8px 12px', minWidth:'0', gap:'6px' });
+        p('btn-trofeus', { top:'auto', left:'60px', bottom:'160px', padding:'8px 12px', minWidth:'0', gap:'6px' });
+        p('btn-opcoes',  { top:'auto', left:'15px', bottom:'calc(100% - 30px)', right:'auto', padding:'8px 12px', minWidth:'0' });
+        p('btn-passe',   { left:'calc(100% - 80px)', bottom:'20px', padding:'8px 12px', minWidth:'0', gap:'6px' });
+        p('btn-missoes', { left:'calc(100% - 80px)', bottom:'160px', padding:'8px 12px', minWidth:'0', gap:'6px' });
       } else {
         app.style.position = '';
         app.style.top = '';
@@ -61,6 +72,11 @@ const App = {
         app.style.transformOrigin = '';
         app.style.transform = '';
         document.body.classList.remove('portrait');
+        p('btn-perfil',  { top:'', left:'', bottom:'', padding:'', minWidth:'', gap:'' });
+        p('btn-trofeus', { top:'', left:'', bottom:'', padding:'', minWidth:'', gap:'' });
+        p('btn-opcoes',  { top:'', left:'', bottom:'', right:'', padding:'', minWidth:'' });
+        p('btn-passe',   { left:'', bottom:'', padding:'', minWidth:'', gap:'' });
+        p('btn-missoes', { left:'', bottom:'', padding:'', minWidth:'', gap:'' });
       }
     };
     apply();
