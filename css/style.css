@@ -39,7 +39,6 @@ body {
 }
 
 #app { width: 100vw; height: 100vh; position: relative; }
-body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; }
 
 /* ── SCREENS ── */
 .screen {
@@ -184,15 +183,15 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
 .corner-icon  { font-size: 28px; line-height: 1; }
 .corner-label { font-size: 14px; font-weight: 800; letter-spacing: 1.5px; }
 
-.menu-corner-tr { position: fixed; z-index: 2; top: 80px; right: 20px; }
+.menu-corner-tr { position: absolute; z-index: 2; top: 80px; right: 20px; }
 
-#btn-perfil  { position: fixed; z-index: 2; top: 70px; left: 20px; padding: 14px 18px; }
-#btn-trofeus { position: fixed; z-index: 2; top: 70px; left: 166px; padding: 14px 18px; }
-#btn-passe   { position: fixed; z-index: 2; bottom: 24px; left: 20px; padding: 14px 18px; }
-#btn-missoes { position: fixed; z-index: 2; bottom: 24px; left: 166px; padding: 14px 18px; }
+#btn-perfil  { position: absolute; z-index: 2; top: 70px; left: 20px; padding: 14px 18px; }
+#btn-trofeus { position: absolute; z-index: 2; top: 70px; left: 166px; padding: 14px 18px; }
+#btn-passe   { position: absolute; z-index: 2; bottom: 24px; left: 20px; padding: 14px 18px; }
+#btn-missoes { position: absolute; z-index: 2; bottom: 24px; left: 166px; padding: 14px 18px; }
 
 .menu-side-right {
-  position: fixed;
+  position: absolute;
   z-index: 2;
   right: 24px;
   bottom: 24px;
@@ -211,7 +210,7 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
 .menu-play-btn .corner-label { font-size: 16px; }
 
 .menu-side-left {
-  position: fixed;
+  position: absolute;
   z-index: 2;
   left: 20px;
   top: 50%;
@@ -534,7 +533,7 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
 
 /* MOBILE CONTROLS */
 #mobile-controls {
-  position: fixed;
+  position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
@@ -628,7 +627,7 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
 
 /* PAUSE BTN */
 #btn-pause {
-  position: fixed;
+  position: absolute;
   top: 10px;
   left: 50%;
   transform: translateX(-50%);
@@ -847,7 +846,7 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
 
 /* ── TROPHY BAR MENU ── */
 .trophy-bar-menu {
-  position: fixed;
+  position: absolute;
   top: 20px;
   left: 50%;
   transform: translateX(-50%);
@@ -929,11 +928,6 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
 .bp-reward.premium { background:rgba(175,86,245,0.06); }
 .bp-reward.premium.done { background:rgba(175,86,245,0.12); }
 .bp-reward-item { font-size:16px; }
-
-/* ── GAME SCREEN fix ── */
-#screen-game { position:absolute; inset:0; background:#04080a; display:none; overflow:hidden; }
-#screen-game.active { display:block; }
-#game-canvas { position:absolute; top:0; left:0; width:100%; height:100%; display:block; }
 
 /* ── MAPA DO MUNDO ── */
 #screen-worldmap { background: #06090f; display:none; flex-direction:column; }
@@ -1044,7 +1038,7 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
 
 /* ── SIDEBAR OPÇÕES ── */
 .opcoes-sidebar {
-  position: fixed;
+  position: absolute;
   z-index: 5;
   right: 0;
   top: 0;
@@ -1090,22 +1084,6 @@ body.portrait { overflow: hidden; position: fixed; width: 100vw; height: 100vh; 
 .is-mobile .op-btn { padding: 6px 10px; font-size: 11px; gap: 6px; }
 .is-mobile .op-icon { font-size: 14px; }
 
-/* ── ROTAÇÃO ATIVA (portrait → landscape via JS) ────────────────────── */
-body.portrait #game-canvas {
-  position: absolute;
-  left: 0; top: 100vh;
-  width: 100vh; height: 100vw;
-}
-body.portrait #hud {
-  position: absolute;
-  left: 0; top: 100vh;
-  width: 100vh;
-}
-body.portrait #skill-bar {
-  position: absolute;
-  left: calc(100vh - 80px); top: 50%;
-  transform: translateY(-50%);
-}
 
 
 
