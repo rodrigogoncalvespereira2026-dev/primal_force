@@ -41,26 +41,39 @@ const App = {
 
   _forceLandscape() {
     const blocker = document.getElementById('orientation-blocker');
-    const isPortrait = () => window.innerHeight > window.innerWidth;
-    let wasPortrait = null;
-    const apply = () => {
-      const p = isPortrait();
-      if (p === wasPortrait) return;
-      wasPortrait = p;
-      blocker.style.display = p ? 'flex' : 'none';
+    const showBlocker = () => { blocker.style.display = 'flex'; };
+    const hideBlocker = () => { blocker.style.display = 'none'; };
+    const checkOrientation = () => {
+      if (window.innerHeight > window.innerWidth) {
+        showBlocker();
+      } else {
+        hideBlocker();
+      }
     };
-    apply(); // primeira execução: wasPortrait é null, p é true/false, avança
-    window.addEventListener('orientationchange', () => setTimeout(apply, 500));
-    window.addEventListener('resize', apply);
-    setInterval(apply, 500);
+    // matchMedia é o método mais fiável para detetar orientação
+    const mql = window.matchMedia('(orientation: landscape)');
+    const onChange = (e) => {
+      if (e.matches) {
+        hideBlocker();
+      } else {
+        showBlocker();
+      }
+    };
+    if (mql.addEventListener) {
+      mql.addEventListener('change', onChange);
+    } else {
+      mql.addListener(onChange); // fallback Safari antigo
+    }
+    // Fallback: resize
+    window.addEventListener('resize', checkOrientation);
+    // Tentar bloquear orientação
     try {
       if (screen.orientation && screen.orientation.lock) {
         screen.orientation.lock('landscape').catch(() => {});
       }
-      if (screen.orientation) {
-        screen.orientation.onchange = () => setTimeout(apply, 500);
-      }
     } catch(e) {}
+    // Estado inicial
+    checkOrientation();
   },
 
   // Viewport → app coordinates (when rotated)
