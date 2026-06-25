@@ -734,6 +734,19 @@ body {
   .is-mobile .hud-stat { font-size: 8px; }
 }
 
+/* Portrait rotacionado via CSS (landscape forçado) */
+body.portrait-rotated #mobile-controls {
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 20px;
+}
+body.portrait-rotated #dpad {
+  order: 1;
+}
+body.portrait-rotated #action-buttons {
+  order: 2;
+}
+
 
 /* Telemóveis (até 480px) */
 @media (max-width: 480px) {

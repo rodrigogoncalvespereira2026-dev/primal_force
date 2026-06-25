@@ -40,57 +40,66 @@ const App = {
   },
 
   vpToApp(vx, vy) {
-    // Retorna coordenadas como estão (sem rotação CSS)
-    return { x: vx, y: vy };
+    // Converte coordenadas quando o app está rotacionado 90deg
+    const isRotated = document.body.classList.contains('portrait-rotated');
+    if (!isRotated) {
+      return { x: vx, y: vy };
+    }
+    // Quando rotacionado 90deg: viewport (x,y) -> app (y, innerWidth - x)
+    return { x: vy, y: window.innerWidth - vx };
   },
 
   _forceLandscape() {
+    const app = document.getElementById('app');
     const rotateMsg = document.getElementById('rotate-message');
     const continueBtn = document.getElementById('btn-continue-anyway');
 
-    const checkOrientation = () => {
-      // Usa screen.orientation.type se disponível, senão usa dimensões
-      let isPortrait = false;
-      if (screen.orientation && screen.orientation.type) {
-        isPortrait = screen.orientation.type.includes('portrait');
+    const applyLandscape = () => {
+      const isPortrait = window.innerHeight > window.innerWidth;
+
+      if (isPortrait) {
+        // Aplica rotação CSS quando em portrait
+        const vh = window.innerHeight;
+        const vw = window.innerWidth;
+        app.style.width = vh + 'px';
+        app.style.height = vw + 'px';
+        app.style.transform = 'rotate(90deg)';
+        app.style.transformOrigin = 'top left';
+        app.style.position = 'absolute';
+        app.style.top = '0';
+        app.style.left = '0';
+        document.body.classList.add('portrait-rotated');
       } else {
-        isPortrait = window.innerHeight > window.innerWidth;
+        // Remove rotação quando em landscape
+        app.style.width = '';
+        app.style.height = '';
+        app.style.transform = '';
+        app.style.transformOrigin = '';
+        app.style.position = '';
+        app.style.top = '';
+        app.style.left = '';
+        document.body.classList.remove('portrait-rotated');
       }
 
+      // Esconde mensagem de rotação
       if (rotateMsg) {
-        rotateMsg.classList.toggle('active', isPortrait);
+        rotateMsg.classList.remove('active');
       }
     };
 
     // Botão para continuar mesmo em portrait
     if (continueBtn) {
-      continueBtn.addEventListener('click', () => {
-        if (rotateMsg) {
-          rotateMsg.classList.remove('active');
-        }
-      });
+      continueBtn.addEventListener('click', applyLandscape);
     }
 
-    // Tenta bloquear orientação landscape nativamente
-    const tryLock = () => {
-      if (screen.orientation && screen.orientation.lock) {
-        screen.orientation.lock('landscape').catch(() => {
-          // Se falhar, verifica orientação
-          checkOrientation();
-        });
-      }
-      checkOrientation();
-    };
+    // Aplica imediatamente e em eventos
+    applyLandscape();
+    setTimeout(applyLandscape, 100);
+    setTimeout(applyLandscape, 500);
 
-    // Verifica orientação em eventos
-    window.addEventListener('resize', checkOrientation);
-    window.addEventListener('orientationchange', () => setTimeout(checkOrientation, 200));
-
-    // Tenta bloquear imediatamente e após carregar
-    tryLock();
-    setTimeout(tryLock, 500);
-    setTimeout(tryLock, 1000);
-    window.addEventListener('load', tryLock);
+    window.addEventListener('resize', applyLandscape);
+    window.addEventListener('orientationchange', () => setTimeout(applyLandscape, 200));
+    window.addEventListener('load', applyLandscape);
   },
 
   init() {
