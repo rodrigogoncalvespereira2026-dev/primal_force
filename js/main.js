@@ -5,15 +5,16 @@ const App = {
   _current: null,
 
   screens: {
-    menu:     'screen-menu',
-    select:   'screen-select',
-    worldmap: 'screen-worldmap',
-    trophies: 'screen-trophies',
-    shop:     'screen-shop',
-    dialog:   'screen-dialog',
-    game:     'screen-game',
-    pause:    'screen-pause',
-    gameover: 'screen-gameover',
+    menu:        'screen-menu',
+    select:      'screen-select',
+    worldmap:    'screen-worldmap',
+    trophies:    'screen-trophies',
+    battlepass:  'screen-battlepass',
+    shop:        'screen-shop',
+    dialog:      'screen-dialog',
+    game:        'screen-game',
+    pause:       'screen-pause',
+    gameover:    'screen-gameover',
   },
 
   goTo(name) {
@@ -30,6 +31,7 @@ const App = {
     }
     if (name === 'worldmap') WorldMap.show();
     if (name === 'trophies') TrophiesScene.show();
+    if (name === 'battlepass') BattlePassScene.show();
     if (name === 'shop') ShopScene.show();
     if (name === 'game') {
       GameScene.stop();
@@ -73,6 +75,7 @@ const App = {
     MenuScene.init();
     SelectScene.init();
     TrophiesScene.init();
+    BattlePassScene.init();
     ShopScene.init();
     DialogSystem.init();
     GameScene.init();

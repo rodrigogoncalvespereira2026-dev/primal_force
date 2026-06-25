@@ -142,18 +142,22 @@
     </div>
   </div>
 
-  <!-- ── TROFÉUS & PASSE ── -->
+  <!-- ── TROFÉUS ── -->
   <div id="screen-trophies" class="screen">
     <div class="select-header">
       <button class="back-btn" id="btn-back-trophies">&#8592; Voltar</button>
-      <h1>PROGRESSÃO</h1>
+      <h1>TROFÉUS</h1>
     </div>
-    <div class="trophy-tabs">
-      <button class="trophy-tab active-tab" id="tab-trophies">🏆 TROFÉUS</button>
-      <button class="trophy-tab" id="tab-battlepass">⭐ PASSE DE BATALHA</button>
+    <div id="trophies-content" class="trophy-scroll"></div>
+  </div>
+
+  <!-- ── PASSE DE BATALHA ── -->
+  <div id="screen-battlepass" class="screen">
+    <div class="select-header">
+      <button class="back-btn" id="btn-back-battlepass">&#8592; Voltar</button>
+      <h1>PASSE DE BATALHA</h1>
     </div>
-    <div id="trophies-content"   class="trophy-scroll"></div>
-    <div id="battlepass-content" class="trophy-scroll" style="display:none"></div>
+    <div id="battlepass-content" class="trophy-scroll"></div>
   </div>
 
   <!-- ── LOJA ── -->
@@ -275,6 +279,7 @@
 <script src="js/scenes/dialog.js"></script>
 <script src="js/scenes/worldmap.js"></script>
 <script src="js/scenes/trophies.js"></script>
+<script src="js/scenes/battlepass.js"></script>
 <script src="js/scenes/shop.js"></script>
 <script src="js/scenes/game.js"></script>
 <script src="js/main.js"></script>
