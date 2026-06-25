@@ -46,19 +46,36 @@ const App = {
 
   _forceLandscape() {
     const rotateMsg = document.getElementById('rotate-message');
+    const continueBtn = document.getElementById('btn-continue-anyway');
 
     const checkOrientation = () => {
-      const isPortrait = window.innerHeight > window.innerWidth;
+      // Usa screen.orientation.type se disponível, senão usa dimensões
+      let isPortrait = false;
+      if (screen.orientation && screen.orientation.type) {
+        isPortrait = screen.orientation.type.includes('portrait');
+      } else {
+        isPortrait = window.innerHeight > window.innerWidth;
+      }
+
       if (rotateMsg) {
         rotateMsg.classList.toggle('active', isPortrait);
       }
     };
 
+    // Botão para continuar mesmo em portrait
+    if (continueBtn) {
+      continueBtn.addEventListener('click', () => {
+        if (rotateMsg) {
+          rotateMsg.classList.remove('active');
+        }
+      });
+    }
+
     // Tenta bloquear orientação landscape nativamente
     const tryLock = () => {
       if (screen.orientation && screen.orientation.lock) {
         screen.orientation.lock('landscape').catch(() => {
-          // Se falhar, mostra mensagem para girar
+          // Se falhar, verifica orientação
           checkOrientation();
         });
       }
@@ -72,6 +89,7 @@ const App = {
     // Tenta bloquear imediatamente e após carregar
     tryLock();
     setTimeout(tryLock, 500);
+    setTimeout(tryLock, 1000);
     window.addEventListener('load', tryLock);
   },
 
