@@ -40,7 +40,14 @@ const App = {
   },
 
   vpToApp(vx, vy) {
-    return { x: vx, y: vy };
+    // Converte coordenadas de viewport para coordenadas do app
+    // Quando em portrait (rotacionado 90deg), precisa converter
+    const isPortrait = document.body.classList.contains('portrait');
+    if (!isPortrait) {
+      return { x: vx, y: vy };
+    }
+    // Em portrait: viewport (x,y) -> app (y, innerWidth - x)
+    return { x: vy, y: window.innerWidth - vx };
   },
 
   _forceLandscape() {
@@ -92,6 +99,10 @@ const App = {
       ['btn-perfil','btn-trofeus','btn-opcoes','btn-passe','btn-missoes'].forEach(id => undPos(document.getElementById(id)));
       undPos(document.querySelector('.menu-side-left'));
       undPos(document.querySelector('.menu-side-right'));
+      const mc = document.getElementById('mobile-controls');
+      if (mc) { mc.style.left = mc.style.top = mc.style.right = mc.style.bottom = ''; mc.style.transform = ''; mc.style.width = ''; mc.style.height = ''; mc.style.flexDirection = ''; }
+      const pb = document.getElementById('btn-pause');
+      if (pb) undPos(pb);
     };
 
     const handleResize = () => {
@@ -99,12 +110,21 @@ const App = {
       else unrotateApp();
     };
 
+    // Aplica imediatamente e em múltiplos eventos
+    handleResize();
+    setTimeout(handleResize, 100);
+    setTimeout(handleResize, 500);
+
     // tentar orientation.lock primeiro
     if (screen.orientation && screen.orientation.lock) {
-      screen.orientation.lock('landscape').catch(() => rotateApp());
+      screen.orientation.lock('landscape').catch(() => {
+        // Fallback para CSS transform se lock falhar
+        handleResize();
+      });
     } else {
-      rotateApp();
+      handleResize();
     }
+
     // no primeiro toque, tentar de novo (se lock funcionar, remove a rotação CSS)
     document.addEventListener('pointerdown', async () => {
       if (app.style.transform && screen.orientation && screen.orientation.lock) {
@@ -116,6 +136,7 @@ const App = {
     }, { once: true });
 
     window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', () => setTimeout(handleResize, 200));
   },
 
   init() {

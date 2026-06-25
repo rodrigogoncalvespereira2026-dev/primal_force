@@ -5,68 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="screen-orientation" content="landscape">
-  <meta name="x5-orientation" content="landscape">
   <title>Power Rangers Primal Force</title>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-    }
-    #app {
-      width: 100%;
-      height: 100%;
-    }
-    @media screen and (orientation: portrait) {
-      #app {
-        transform: rotate(90deg) translateY(-100%);
-        transform-origin: left top;
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100vh;
-        height: 100vw;
-      }
-    }
-  </style>
-  <script>
-    // Forçar landscape automaticamente no Android
-    (function() {
-      function forceLandscape() {
-        const isPortrait = window.innerHeight > window.innerWidth;
-        const app = document.getElementById('app');
-        
-        if (isPortrait && app) {
-          app.style.transform = 'rotate(90deg) translateY(-100%)';
-          app.style.transformOrigin = 'left top';
-          app.style.position = 'absolute';
-          app.style.top = '0';
-          app.style.left = '0';
-          app.style.width = window.innerHeight + 'px';
-          app.style.height = window.innerWidth + 'px';
-        } else if (app) {
-          app.style.transform = 'none';
-          app.style.width = '100%';
-          app.style.height = '100%';
-        }
-      }
-      
-      // Aplica com delay para garantir que o DOM esteja pronto
-      setTimeout(forceLandscape, 100);
-      setTimeout(forceLandscape, 500);
-      setTimeout(forceLandscape, 1000);
-      
-      document.addEventListener('DOMContentLoaded', forceLandscape);
-      window.addEventListener('load', forceLandscape);
-      window.addEventListener('orientationchange', function() {
-        setTimeout(forceLandscape, 200);
-      });
-      window.addEventListener('resize', forceLandscape);
-    })();
-  </script>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -264,6 +203,23 @@
       <div class="skill-slot ultimate"><div class="skill-icon">🦖</div><div class="skill-name">ZORD</div><div class="skill-key">Q</div><div class="skill-cd" id="cd-zord"></div></div>
     </div>
     <div id="mobile-controls">
+      <div id="dpad">
+        <div class="d-row">
+          <div></div>
+          <button class="d-btn" id="d-up">▲</button>
+          <div></div>
+        </div>
+        <div class="d-row">
+          <button class="d-btn" id="d-left">◀</button>
+          <div class="d-center"></div>
+          <button class="d-btn" id="d-right">▶</button>
+        </div>
+        <div class="d-row">
+          <div></div>
+          <button class="d-btn" id="d-down">▼</button>
+          <div></div>
+        </div>
+      </div>
       <div id="action-buttons">
         <div class="act-row">
           <button class="act-btn laser-btn" id="btn-mb-laser">🔫</button>

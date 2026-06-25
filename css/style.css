@@ -540,9 +540,9 @@ body {
   left: 0;
   right: 0;
   display: none;
-  justify-content: center;
+  justify-content: space-between;
   align-items: flex-end;
-  padding: 10px 16px 18px;
+  padding: 10px 20px 20px;
   z-index: 10;
   pointer-events: none;
 }
@@ -703,9 +703,9 @@ body {
 @media (orientation: landscape) and (max-height: 500px) {
   .is-mobile #mobile-controls {
     padding: 4px 12px 8px;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 4px;
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 12px;
   }
   /* Dpad: circular, compacto */
   .is-mobile #dpad { gap: 2px; }
@@ -718,7 +718,6 @@ body {
     align-items: center;
     justify-content: center;
     gap: 6px;
-    width: 100%;
   }
   .is-mobile .act-row { gap: 6px; }
   .is-mobile .act-btn { width: 44px; height: 44px; font-size: 18px; border-radius: 50%; }
@@ -733,6 +732,19 @@ body {
   .is-mobile #minimap { width: 40px; height: 32px; }
   .is-mobile #hud-wave-info { font-size: 9px; }
   .is-mobile .hud-stat { font-size: 8px; }
+}
+
+/* Portrait mode (rotacionado via CSS) */
+body.portrait #mobile-controls {
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 20px;
+}
+body.portrait #dpad {
+  order: 1;
+}
+body.portrait #action-buttons {
+  order: 2;
 }
 
 /* Telemóveis (até 480px) */
