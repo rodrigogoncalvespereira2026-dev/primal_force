@@ -5,7 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="screen-orientation" content="landscape">
+  <meta name="x5-orientation" content="landscape">
   <title>Power Rangers Primal Force</title>
+  <style>
+    @media screen and (orientation: portrait) {
+      body {
+        transform: rotate(90deg);
+        transform-origin: left top;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vh;
+        height: 100vw;
+        overflow: hidden;
+      }
+    }
+    @media screen and (orientation: landscape) {
+      body {
+        transform: none;
+        width: 100vw;
+        height: 100vh;
+      }
+    }
+  </style>
   <script>
     // Forçar landscape automaticamente no Android
     (function() {
@@ -13,16 +36,11 @@
         // Tenta usar Screen Orientation API se disponível
         if (screen.orientation && screen.orientation.lock) {
           screen.orientation.lock('landscape').catch(function() {
-            // Fallback para CSS transform se a API falhar
-            applyLandscapeTransform();
+            console.log('Orientation lock failed, using CSS fallback');
           });
-        } else {
-          // Fallback para navegadores que não suportam a API
-          applyLandscapeTransform();
         }
-      }
-      
-      function applyLandscapeTransform() {
+        
+        // Aplica CSS transform imediatamente
         const isPortrait = window.innerHeight > window.innerWidth;
         const body = document.body;
         
