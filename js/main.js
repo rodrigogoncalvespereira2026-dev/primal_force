@@ -40,103 +40,39 @@ const App = {
   },
 
   vpToApp(vx, vy) {
-    // Converte coordenadas de viewport para coordenadas do app
-    // Quando em portrait (rotacionado 90deg), precisa converter
-    const isPortrait = document.body.classList.contains('portrait');
-    if (!isPortrait) {
-      return { x: vx, y: vy };
-    }
-    // Em portrait: viewport (x,y) -> app (y, innerWidth - x)
-    return { x: vy, y: window.innerWidth - vx };
+    // Retorna coordenadas como estão (sem rotação CSS)
+    return { x: vx, y: vy };
   },
 
   _forceLandscape() {
-    const app = document.getElementById('app');
+    const rotateMsg = document.getElementById('rotate-message');
 
-    const fixPos = (el, visualX, visualY) => {
-      // map visual (x from left, y from top) → CSS { left: visualY, top: innerWidth - visualX }
-      if (!el) return;
-      el.style.left = visualY + 'px';
-      el.style.top = (window.innerWidth - visualX) + 'px';
-      el.style.right = el.style.bottom = '';
-      el.style.transform = 'none';
-    };
-    const undPos = (el) => {
-      if (!el) return;
-      el.style.left = el.style.top = el.style.right = el.style.bottom = '';
-      el.style.transform = '';
-    };
-
-    const rotateApp = () => {
-      if (window.innerHeight <= window.innerWidth) return;
-      app.style.width = window.innerHeight + 'px';
-      app.style.height = window.innerWidth + 'px';
-      app.style.transformOrigin = 'top left';
-      app.style.transform = 'rotate(90deg) translate(0, -100vw)';
-      document.body.classList.add('portrait');
-      const vw = window.innerWidth, vh = window.innerHeight;
-      // fixPos(visualX, visualY) → CSS { left: visualY, top: vw - visualX }
-      fixPos(document.getElementById('btn-perfil'),  20, 70);
-      fixPos(document.getElementById('btn-trofeus'), 166, 70);
-      fixPos(document.getElementById('btn-opcoes'), vw - 64, 80);
-      fixPos(document.getElementById('btn-passe'),  20, vh - 68);
-      fixPos(document.getElementById('btn-missoes'), 166, vh - 68);
-      const sl = document.querySelector('.menu-side-left');
-      if (sl) fixPos(sl, 20, vh / 2 - 74);
-      const sr = document.querySelector('.menu-side-right');
-      if (sr) fixPos(sr, vw - 226, vh - 160);
-      // mobile controls at visual bottom, spanning full width
-      const mc = document.getElementById('mobile-controls');
-      if (mc) { mc.style.left = (vh - 80) + 'px'; mc.style.top = '0'; mc.style.right = ''; mc.style.bottom = ''; mc.style.transform = 'none'; mc.style.width = '80px'; mc.style.height = vw + 'px'; mc.style.flexDirection = 'column'; }
-      // pause btn at top center
-      const pb = document.getElementById('btn-pause');
-      if (pb) fixPos(pb, vw / 2 - 30, 10);
-    };
-    const unrotateApp = () => {
-      app.style.width = app.style.height = '';
-      app.style.transform = app.style.transformOrigin = '';
-      document.body.classList.remove('portrait');
-      ['btn-perfil','btn-trofeus','btn-opcoes','btn-passe','btn-missoes'].forEach(id => undPos(document.getElementById(id)));
-      undPos(document.querySelector('.menu-side-left'));
-      undPos(document.querySelector('.menu-side-right'));
-      const mc = document.getElementById('mobile-controls');
-      if (mc) { mc.style.left = mc.style.top = mc.style.right = mc.style.bottom = ''; mc.style.transform = ''; mc.style.width = ''; mc.style.height = ''; mc.style.flexDirection = ''; }
-      const pb = document.getElementById('btn-pause');
-      if (pb) undPos(pb);
-    };
-
-    const handleResize = () => {
-      if (window.innerHeight > window.innerWidth) rotateApp();
-      else unrotateApp();
-    };
-
-    // Aplica imediatamente e em múltiplos eventos
-    handleResize();
-    setTimeout(handleResize, 100);
-    setTimeout(handleResize, 500);
-
-    // tentar orientation.lock primeiro
-    if (screen.orientation && screen.orientation.lock) {
-      screen.orientation.lock('landscape').catch(() => {
-        // Fallback para CSS transform se lock falhar
-        handleResize();
-      });
-    } else {
-      handleResize();
-    }
-
-    // no primeiro toque, tentar de novo (se lock funcionar, remove a rotação CSS)
-    document.addEventListener('pointerdown', async () => {
-      if (app.style.transform && screen.orientation && screen.orientation.lock) {
-        try {
-          await screen.orientation.lock('landscape');
-          unrotateApp();
-        } catch (e) {}
+    const checkOrientation = () => {
+      const isPortrait = window.innerHeight > window.innerWidth;
+      if (rotateMsg) {
+        rotateMsg.classList.toggle('active', isPortrait);
       }
-    }, { once: true });
+    };
 
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('orientationchange', () => setTimeout(handleResize, 200));
+    // Tenta bloquear orientação landscape nativamente
+    const tryLock = () => {
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('landscape').catch(() => {
+          // Se falhar, mostra mensagem para girar
+          checkOrientation();
+        });
+      }
+      checkOrientation();
+    };
+
+    // Verifica orientação em eventos
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', () => setTimeout(checkOrientation, 200));
+
+    // Tenta bloquear imediatamente e após carregar
+    tryLock();
+    setTimeout(tryLock, 500);
+    window.addEventListener('load', tryLock);
   },
 
   init() {

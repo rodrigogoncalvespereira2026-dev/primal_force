@@ -6,9 +6,52 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Power Rangers Primal Force</title>
+  <style>
+    #rotate-message {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.95);
+      z-index: 9999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+    }
+    #rotate-message.active {
+      display: flex;
+    }
+    #rotate-message .icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+      animation: rotate-icon 2s infinite;
+    }
+    @keyframes rotate-icon {
+      0%, 100% { transform: rotate(0deg); }
+      50% { transform: rotate(90deg); }
+    }
+    #rotate-message h2 {
+      font-size: 24px;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+    #rotate-message p {
+      font-size: 16px;
+      color: rgba(255,255,255,0.7);
+    }
+  </style>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+<div id="rotate-message">
+  <div class="icon">📱</div>
+  <h2>Gira o teu dispositivo</h2>
+  <p>Este jogo requer orientação horizontal</p>
+</div>
 <div id="app">
 
   <!-- ── MENU ── -->

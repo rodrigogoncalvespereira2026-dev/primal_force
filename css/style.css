@@ -734,18 +734,6 @@ body {
   .is-mobile .hud-stat { font-size: 8px; }
 }
 
-/* Portrait mode (rotacionado via CSS) */
-body.portrait #mobile-controls {
-  flex-direction: row;
-  align-items: flex-end;
-  gap: 20px;
-}
-body.portrait #dpad {
-  order: 1;
-}
-body.portrait #action-buttons {
-  order: 2;
-}
 
 /* Telemóveis (até 480px) */
 @media (max-width: 480px) {
