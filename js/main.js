@@ -44,9 +44,24 @@ const App = {
   },
 
   _forceLandscape() {
+    // Tenta bloquear a orientação em landscape
     if (screen.orientation && screen.orientation.lock) {
       screen.orientation.lock('landscape').catch(() => {});
     }
+    
+    // Verifica continuamente a orientação e força landscape
+    const checkOrientation = () => {
+      const isPortrait = window.innerHeight > window.innerWidth;
+      if (isPortrait) {
+        document.body.classList.add('portrait');
+      } else {
+        document.body.classList.remove('portrait');
+      }
+    };
+    
+    checkOrientation();
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', checkOrientation);
   },
 
   init() {

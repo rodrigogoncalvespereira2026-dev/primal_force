@@ -6,29 +6,28 @@ html, body {
 }
 
 /* Force landscape orientation on mobile */
-@media screen and (orientation: portrait) {
-  body::before {
-    content: "Por favor, roda o teu dispositivo para horizontal";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #000;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    font-weight: 700;
-    text-align: center;
-    z-index: 9999;
-    letter-spacing: 2px;
-    padding: 20px;
-  }
-  #app {
-    display: none;
-  }
+body.portrait::before {
+  content: "Por favor, roda o teu dispositivo para horizontal ↻";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+  z-index: 9999;
+  letter-spacing: 2px;
+  padding: 20px;
+}
+
+body.portrait #app {
+  display: none;
 }
 
 /* Remove hover sticky em touch e melhora resposta tátil */
