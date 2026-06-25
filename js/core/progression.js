@@ -10,8 +10,12 @@ const Progression = {
     unlockedSkins: [],
     unlockedWeapons: [],
     coins: 0,
+    gems: 0,
+    lastFreePrimordial: null,
     items: { potion: 0, shield: 0, speedBoost: 0, doubleCoins: 0, doubleTrophies: 0 },
   },
+
+  GEM_PRICES: [10, 20, 30], // joias necessárias para 1ª, 2ª, 3+ gota extra por dia
 
   // Skins cosméticas para recompensas lendárias
   SHOP_SKINS: [
@@ -54,10 +58,12 @@ const Progression = {
     free:    [
       { type:'coins', amount: 50 + i * 10 },
       { type:'coins', amount: 100 + i * 15 },
+      { type:'gems',  amount: i % 5 === 0 ? 1 : 0 },
       { type:'skin',  id: i % 4 === 3 ? `skin_free_${i}` : null },
     ].filter(r => r.id !== null || r.amount),
     premium: [
       { type:'coins',  amount: 150 + i * 25 },
+      { type:'gems',   amount: i % 3 === 0 ? 3 : 0 },
       { type:'weapon', id: i % 5 === 4 ? `weapon_prem_${i}` : null },
       { type:'ranger', id: i === 9 ? 'bonus_ranger' : null },
       { type:'skin',   id: i % 3 === 2 ? `skin_prem_${i}` : null },
@@ -85,6 +91,35 @@ const Progression = {
   addCoins(n) {
     this.data.coins += n;
     this.save();
+  },
+
+  addGems(n) {
+    this.data.gems = (this.data.gems || 0) + n;
+    this.save();
+  },
+
+  spendGems(n) {
+    if ((this.data.gems || 0) < n) return false;
+    this.data.gems -= n;
+    this.save();
+    return true;
+  },
+
+  canClaimFreePrimordial() {
+    const last = this.data.lastFreePrimordial;
+    if (!last) return true;
+    const today = new Date().toISOString().slice(0, 10);
+    return last !== today;
+  },
+
+  claimFreePrimordial() {
+    this.data.lastFreePrimordial = new Date().toISOString().slice(0, 10);
+    this.save();
+  },
+
+  primordialExtraPrice(count) {
+    const idx = Math.min(count, this.GEM_PRICES.length - 1);
+    return this.GEM_PRICES[idx];
   },
 
   buyItem(id) {

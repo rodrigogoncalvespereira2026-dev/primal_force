@@ -4,9 +4,9 @@ const Primordial = {
     { id:'rare',       name:'Raro',         icon:'🔵', tapsMin:5,   tapsMax:9,   color:'#3b82f6', coins:15,  trophies:1, items:['potion'] },
     { id:'super_rare', name:'Super Raro',   icon:'🟣', tapsMin:10,  tapsMax:14,  color:'#8b5cf6', coins:35,  trophies:3, items:['shield'] },
     { id:'epic',       name:'Épico',        icon:'🟠', tapsMin:15,  tapsMax:19,  color:'#f59e0b', coins:70,  trophies:6, items:['speedBoost','potion'] },
-    { id:'mythic',     name:'Mítico',       icon:'🔴', tapsMin:20,  tapsMax:24,  color:'#ef4444', coins:130, trophies:10,items:['doubleCoins','shield'] },
-    { id:'legendary',  name:'Lendário',     icon:'💎', tapsMin:25,  tapsMax:29,  color:'#f97316', coins:250, trophies:20,items:['doubleTrophies','speedBoost'], cosmetic:true },
-    { id:'primal',     name:'PRIMAL',       icon:'🌟', tapsMin:30,  tapsMax:999, color:'#ec4899', coins:500, trophies:40,items:['potion','shield','speedBoost','doubleCoins','doubleTrophies'], cosmetic:true },
+    { id:'mythic',     name:'Mítico',       icon:'🔴', tapsMin:20,  tapsMax:24,  color:'#ef4444', coins:130, trophies:10,items:['doubleCoins','shield'], gems:1 },
+    { id:'legendary',  name:'Lendário',     icon:'💎', tapsMin:25,  tapsMax:29,  color:'#f97316', coins:250, trophies:20,items:['doubleTrophies','speedBoost'], gems:3, cosmetic:true },
+    { id:'primal',     name:'PRIMAL',       icon:'🌟', tapsMin:30,  tapsMax:999, color:'#ec4899', coins:500, trophies:40,items:['potion','shield','speedBoost','doubleCoins','doubleTrophies'], gems:10, cosmetic:true },
   ],
   MAX_TIME: 5,
   TAP_BONUS: 0.15,
@@ -54,6 +54,7 @@ const Primordial = {
     const rewards = [];
     if (tier.coins > 0) rewards.push({ type:'coins', amount:tier.coins });
     if (tier.trophies > 0) rewards.push({ type:'trophies', amount:tier.trophies });
+    if (tier.gems > 0) rewards.push({ type:'gems', amount:tier.gems });
     tier.items.forEach(id => rewards.push({ type:'item', id }));
     if (tier.cosmetic) {
       const skins = Progression.SHOP_SKINS || [];
@@ -71,6 +72,7 @@ const Primordial = {
     rewards.forEach(r => {
       if (r.type === 'coins') Progression.addCoins(r.amount);
       else if (r.type === 'trophies') Progression.addTrophies(r.amount);
+      else if (r.type === 'gems') Progression.addGems(r.amount);
       else if (r.type === 'item') {
         Progression.data.items[r.id] = (Progression.data.items[r.id] || 0) + 1;
         Progression.save();

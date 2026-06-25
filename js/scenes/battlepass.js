@@ -35,10 +35,10 @@ const BattlePassScene = {
       html += `
         <div class="bp-tier-num ${done?'done':''} ${isCur?'current':''}">${tier.tier}</div>
         <div class="bp-reward free ${done?'done':''}">
-          ${tier.free.map(r => `<span class="bp-reward-item">${r.type==='coins'?'🪙'+r.amount:r.type==='skin'?'🎨':'⚔️'}</span>`).join('')}
+          ${tier.free.map(r => `<span class="bp-reward-item">${r.type==='coins'?'🪙'+r.amount:r.type==='gems'?'💎'+r.amount:r.type==='skin'?'🎨':'⚔️'}</span>`).join('')}
         </div>
         <div class="bp-reward premium ${done?'done':''}">
-          ${tier.premium.map(r => `<span class="bp-reward-item">${r.type==='coins'?'🪙'+r.amount:r.type==='ranger'&&r.id?'🦸':r.type==='skin'&&r.id?'🎨':r.type==='weapon'&&r.id?'⚔️':'🪙'}</span>`).join('')}
+          ${tier.premium.map(r => `<span class="bp-reward-item">${r.type==='coins'?'🪙'+r.amount:r.type==='gems'?'💎'+r.amount:r.type==='ranger'&&r.id?'🦸':r.type==='skin'&&r.id?'🎨':r.type==='weapon'&&r.id?'⚔️':'🪙'}</span>`).join('')}
         </div>
       `;
     });

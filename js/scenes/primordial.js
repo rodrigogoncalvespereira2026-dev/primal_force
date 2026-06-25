@@ -179,6 +179,7 @@ const PrimordialScene = {
     this._popRewards = rewards.map(r => {
       if (r.type === 'coins') return { text: '🪙 +' + r.amount };
       if (r.type === 'trophies') return { text: '🏆 +' + r.amount };
+      if (r.type === 'gems') return { text: '💎 +' + r.amount };
       if (r.type === 'item') {
         const item = Progression.SHOP_ITEMS.find(i => i.id === r.id);
         return { text: (item ? item.icon : '📦') + ' ' + (item ? item.name : r.id) };
