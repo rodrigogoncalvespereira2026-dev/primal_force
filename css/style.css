@@ -879,17 +879,7 @@ body.portrait-rotated #action-buttons {
 
 /* ── TROPHIES SCREEN ── */
 #screen-trophies { background: #04060a; padding: 20px; gap: 16px; }
-.trophy-tabs { display: flex; gap: 8px; }
-.trophy-tab {
-  flex: 1; padding: 12px; background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.15); border-radius: 6px;
-  color: rgba(255,255,255,0.5); font-size: 13px; font-weight:700;
-  letter-spacing: 2px; cursor: pointer; font-family: inherit;
-  transition: all 0.15s;
-}
-.trophy-tab:hover { background: rgba(255,255,255,0.1); color:#fff; }
-.trophy-tab.active-tab { background: rgba(250,199,117,0.15); border-color: rgba(250,199,117,0.5); color: #fac775; }
-
+#screen-battlepass { background: #04060a; padding: 20px; gap: 16px; }
 .trophy-scroll { flex:1; overflow-y:auto; padding-bottom:16px; }
 
 /* Trophy header */
