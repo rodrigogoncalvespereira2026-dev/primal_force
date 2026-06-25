@@ -82,13 +82,12 @@ const GameScene = {
   },
 
   _afterBossDefeat(trophiesEarned, coinsEarned) {
-    // Completa a missão e vai para gameover com vitória
     if (App.currentZone) WorldMap.completeMission(App.currentZone.id);
     document.getElementById('go-title').textContent     = '🏆 VITÓRIA!';
     document.getElementById('go-score').textContent     = 'Pontuação: ' + this.score;
     document.getElementById('go-kills').textContent      = 'Inimigos derrotados: ' + this.kills;
     document.getElementById('go-trophies').textContent  = '+' + trophiesEarned + ' 🏆 · +' + coinsEarned + ' 💰 — BOSS DERROTADO!';
-    App.goTo('gameover');
+    this._tryPrimordial({ victory: true, isBoss: true });
   },
 
   _updateBossHUD(show) {
@@ -107,10 +106,18 @@ const GameScene = {
     this._updateWaveHUD();
   },
 
+  _tryPrimordial(missionResult) {
+    const chance = Primordial.canDrop(missionResult);
+    if (Math.random() < chance) {
+      PrimordialScene.show(missionResult.isBoss ? 5 : 3, 'gameover');
+    } else {
+      App.goTo('gameover');
+    }
+  },
+
   onPlayerDeath() {
     this.running = false;
     cancelAnimationFrame(this._raf);
-    // Troféus e moedas mesmo ao perder
     const trophiesEarned = Math.round(Math.floor(this.kills / 2) * this.activeBoosts.trophyMult);
     const coinsEarned    = Math.round(this.kills * this.activeBoosts.coinMult);
     if (trophiesEarned > 0) Progression.addTrophies(trophiesEarned);
@@ -120,7 +127,7 @@ const GameScene = {
     document.getElementById('go-score').textContent  = 'Pontuação: ' + this.score;
     document.getElementById('go-kills').textContent  = 'Inimigos derrotados: ' + this.kills;
     document.getElementById('go-trophies').textContent = '+' + trophiesEarned + ' 🏆 · +' + coinsEarned + ' 💰';
-    App.goTo('gameover');
+    this._tryPrimordial({ victory: false, isBoss: false });
   },
 
   _updateWaveHUD() {

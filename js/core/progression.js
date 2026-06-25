@@ -13,6 +13,15 @@ const Progression = {
     items: { potion: 0, shield: 0, speedBoost: 0, doubleCoins: 0, doubleTrophies: 0 },
   },
 
+  // Skins cosméticas para recompensas lendárias
+  SHOP_SKINS: [
+    { id:'primal_aura',      name:'Aura Primal',      icon:'🌟' },
+    { id:'golden_ranger',    name:'Ranger Dourado',   icon:'✨' },
+    { id:'shadow_phantom',   name:'Fantasma Sombrio', icon:'🌑' },
+    { id:'crystal_guardian', name:'Guardião Cristal', icon:'💎' },
+    { id:'inferno_blaze',    name:'Chama Infernal',   icon:'🔥' },
+  ],
+
   // Catálogo da loja — itens comprados com moedas
   SHOP_ITEMS: [
     { id:'potion',         name:'Poção de Vida',      desc:'Começa a próxima missão com o HP completo.',            icon:'🧪', price:50  },

@@ -10,6 +10,7 @@ const App = {
     worldmap:    'screen-worldmap',
     trophies:    'screen-trophies',
     battlepass:  'screen-battlepass',
+    primordial:  'screen-primordial',
     shop:        'screen-shop',
     dialog:      'screen-dialog',
     game:        'screen-game',
@@ -32,6 +33,7 @@ const App = {
     if (name === 'worldmap') WorldMap.show();
     if (name === 'trophies') TrophiesScene.show();
     if (name === 'battlepass') BattlePassScene.show();
+    if (name === 'primordial') PrimordialScene.show();
     if (name === 'shop') ShopScene.show();
     if (name === 'game') {
       GameScene.stop();
@@ -76,9 +78,17 @@ const App = {
     SelectScene.init();
     TrophiesScene.init();
     BattlePassScene.init();
+    PrimordialScene.init();
     ShopScene.init();
     DialogSystem.init();
     GameScene.init();
+    // pointer handler for primordial canvas
+    const pc = document.getElementById('primordial-canvas');
+    if (pc) {
+      const h = (e) => PrimordialScene.onCanvasPointer(e);
+      pc.addEventListener('pointerdown', h);
+      pc.addEventListener('touchstart', (e) => { e.preventDefault(); h(e); }, {passive:false});
+    }
     this.selectedRanger = RANGERS_DATA[0];
     this.goTo('menu');
   },

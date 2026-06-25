@@ -1089,6 +1089,48 @@ body.portrait-rotated #action-buttons {
 .is-mobile .op-btn { padding: 6px 10px; font-size: 11px; gap: 6px; }
 .is-mobile .op-icon { font-size: 14px; }
 
+/* ── GOTA PRIMORDIAL ──────────────────────────────────────────────── */
+#screen-primordial {
+  background: #0a0c16;
+  display: none;
+  flex-direction: column;
+}
+#screen-primordial.active { display: flex; }
+.primordial-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px;
+  background: rgba(0,0,0,0.4);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  z-index: 2;
+}
+.primordial-title {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  color: rgba(255,255,255,0.7);
+  flex: 1;
+  text-align: center;
+}
+#primordial-canvas {
+  flex: 1;
+  display: block;
+  touch-action: none;
+  cursor: pointer;
+}
+.primordial-hint {
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: rgba(255,255,255,0.25);
+  font-size: 13px;
+  letter-spacing: 2px;
+  pointer-events: none;
+}
+
 /* Portrait: reposiciona botões para ecrã vertical */
 @media (orientation: portrait) {
   .menu-content { gap: 12px; }
