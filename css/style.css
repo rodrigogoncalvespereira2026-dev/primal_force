@@ -30,6 +30,20 @@ body.portrait #app {
   display: none;
 }
 
+/* Forçar landscape via CSS transform como fallback */
+@media screen and (orientation: portrait) {
+  body.is-mobile {
+    transform: rotate(90deg);
+    transform-origin: left top;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vh;
+    height: 100vw;
+    overflow: hidden;
+  }
+}
+
 /* Remove hover sticky em touch e melhora resposta tátil */
 .is-mobile *,
 .is-mobile *::before,

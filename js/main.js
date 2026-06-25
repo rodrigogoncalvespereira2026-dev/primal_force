@@ -45,23 +45,36 @@ const App = {
 
   _forceLandscape() {
     // Tenta bloquear a orientação em landscape
-    if (screen.orientation && screen.orientation.lock) {
-      screen.orientation.lock('landscape').catch(() => {});
-    }
+    const tryLock = () => {
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('landscape').catch(() => {});
+      }
+    };
     
     // Verifica continuamente a orientação e força landscape
     const checkOrientation = () => {
       const isPortrait = window.innerHeight > window.innerWidth;
       if (isPortrait) {
         document.body.classList.add('portrait');
+        // Tenta bloquear novamente
+        tryLock();
       } else {
         document.body.classList.remove('portrait');
       }
     };
     
+    // Verifica imediatamente e periodicamente
     checkOrientation();
+    tryLock();
+    
     window.addEventListener('resize', checkOrientation);
-    window.addEventListener('orientationchange', checkOrientation);
+    window.addEventListener('orientationchange', () => {
+      setTimeout(checkOrientation, 100);
+      tryLock();
+    });
+    
+    // Verificação adicional a cada segundo
+    setInterval(checkOrientation, 1000);
   },
 
   init() {

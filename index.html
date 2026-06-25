@@ -2,13 +2,26 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="screen-orientation" content="landscape">
-  <meta name="x5-orientation" content="landscape">
-  <meta name="x5-page-mode" content="app">
   <title>Power Rangers Primal Force</title>
+  <script>
+    // Forçar landscape imediatamente ao carregar
+    (function() {
+      function forceLandscape() {
+        if (screen.orientation && screen.orientation.lock) {
+          screen.orientation.lock('landscape').catch(() => {});
+        }
+      }
+      // Tenta bloquear imediatamente
+      forceLandscape();
+      // Tenta novamente quando o DOM estiver pronto
+      document.addEventListener('DOMContentLoaded', forceLandscape);
+      // Tenta novamente quando a página carregar completamente
+      window.addEventListener('load', forceLandscape);
+    })();
+  </script>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
