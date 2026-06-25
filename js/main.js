@@ -40,66 +40,24 @@ const App = {
   },
 
   vpToApp(vx, vy) {
-    // Converte coordenadas quando o app está rotacionado 90deg
-    const isRotated = document.body.classList.contains('portrait-rotated');
-    if (!isRotated) {
-      return { x: vx, y: vy };
-    }
-    // Quando rotacionado 90deg: viewport (x,y) -> app (y, innerWidth - x)
-    return { x: vy, y: window.innerWidth - vx };
+    // Retorna coordenadas como estão (sem rotação CSS)
+    return { x: vx, y: vy };
   },
 
   _forceLandscape() {
-    const app = document.getElementById('app');
-    const rotateMsg = document.getElementById('rotate-message');
-    const continueBtn = document.getElementById('btn-continue-anyway');
-
-    const applyLandscape = () => {
-      const isPortrait = window.innerHeight > window.innerWidth;
-
-      if (isPortrait) {
-        // Aplica rotação CSS quando em portrait
-        const vh = window.innerHeight;
-        const vw = window.innerWidth;
-        app.style.width = vh + 'px';
-        app.style.height = vw + 'px';
-        app.style.transform = 'rotate(90deg)';
-        app.style.transformOrigin = 'top left';
-        app.style.position = 'absolute';
-        app.style.top = '0';
-        app.style.left = '0';
-        document.body.classList.add('portrait-rotated');
-      } else {
-        // Remove rotação quando em landscape
-        app.style.width = '';
-        app.style.height = '';
-        app.style.transform = '';
-        app.style.transformOrigin = '';
-        app.style.position = '';
-        app.style.top = '';
-        app.style.left = '';
-        document.body.classList.remove('portrait-rotated');
-      }
-
-      // Esconde mensagem de rotação
-      if (rotateMsg) {
-        rotateMsg.classList.remove('active');
+    // Tenta bloquear orientação landscape nativamente (pode não funcionar em Android Chrome)
+    const tryLock = () => {
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('landscape').catch(() => {
+          console.log('Orientation lock not supported - user must rotate device manually');
+        });
       }
     };
 
-    // Botão para continuar mesmo em portrait
-    if (continueBtn) {
-      continueBtn.addEventListener('click', applyLandscape);
-    }
-
-    // Aplica imediatamente e em eventos
-    applyLandscape();
-    setTimeout(applyLandscape, 100);
-    setTimeout(applyLandscape, 500);
-
-    window.addEventListener('resize', applyLandscape);
-    window.addEventListener('orientationchange', () => setTimeout(applyLandscape, 200));
-    window.addEventListener('load', applyLandscape);
+    // Tenta bloquear
+    tryLock();
+    setTimeout(tryLock, 500);
+    window.addEventListener('load', tryLock);
   },
 
   init() {
