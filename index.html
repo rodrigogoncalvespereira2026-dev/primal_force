@@ -9,69 +9,62 @@
   <meta name="x5-orientation" content="landscape">
   <title>Power Rangers Primal Force</title>
   <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    #app {
+      width: 100%;
+      height: 100%;
+    }
     @media screen and (orientation: portrait) {
-      body {
-        transform: rotate(90deg);
+      #app {
+        transform: rotate(90deg) translateY(-100%);
         transform-origin: left top;
-        position: fixed;
+        position: absolute;
         top: 0;
         left: 0;
         width: 100vh;
         height: 100vw;
-        overflow: hidden;
-      }
-    }
-    @media screen and (orientation: landscape) {
-      body {
-        transform: none;
-        width: 100vw;
-        height: 100vh;
       }
     }
   </style>
   <script>
     // Forçar landscape automaticamente no Android
     (function() {
-      function lockLandscape() {
-        // Tenta usar Screen Orientation API se disponível
-        if (screen.orientation && screen.orientation.lock) {
-          screen.orientation.lock('landscape').catch(function() {
-            console.log('Orientation lock failed, using CSS fallback');
-          });
-        }
-        
-        // Aplica CSS transform imediatamente
+      function forceLandscape() {
         const isPortrait = window.innerHeight > window.innerWidth;
-        const body = document.body;
+        const app = document.getElementById('app');
         
-        if (isPortrait) {
-          body.style.transform = 'rotate(90deg)';
-          body.style.transformOrigin = 'left top';
-          body.style.position = 'fixed';
-          body.style.top = '0';
-          body.style.left = '0';
-          body.style.width = '100vh';
-          body.style.height = '100vw';
-          body.style.overflow = 'hidden';
-        } else {
-          body.style.transform = 'none';
-          body.style.width = '100vw';
-          body.style.height = '100vh';
+        if (isPortrait && app) {
+          app.style.transform = 'rotate(90deg) translateY(-100%)';
+          app.style.transformOrigin = 'left top';
+          app.style.position = 'absolute';
+          app.style.top = '0';
+          app.style.left = '0';
+          app.style.width = window.innerHeight + 'px';
+          app.style.height = window.innerWidth + 'px';
+        } else if (app) {
+          app.style.transform = 'none';
+          app.style.width = '100%';
+          app.style.height = '100%';
         }
       }
       
-      // Aplica imediatamente
-      lockLandscape();
+      // Aplica com delay para garantir que o DOM esteja pronto
+      setTimeout(forceLandscape, 100);
+      setTimeout(forceLandscape, 500);
+      setTimeout(forceLandscape, 1000);
       
-      // Aplica quando o DOM estiver pronto
-      document.addEventListener('DOMContentLoaded', lockLandscape);
-      
-      // Aplica quando a página carregar
-      window.addEventListener('load', lockLandscape);
-      
-      // Aplica quando a orientação mudar
-      window.addEventListener('orientationchange', lockLandscape);
-      window.addEventListener('resize', lockLandscape);
+      document.addEventListener('DOMContentLoaded', forceLandscape);
+      window.addEventListener('load', forceLandscape);
+      window.addEventListener('orientationchange', function() {
+        setTimeout(forceLandscape, 200);
+      });
+      window.addEventListener('resize', forceLandscape);
     })();
   </script>
   <link rel="stylesheet" href="css/style.css">

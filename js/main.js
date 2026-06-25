@@ -44,11 +44,78 @@ const App = {
   },
 
   _forceLandscape() {
-    // Tenta bloquear a orientação em landscape (pode não funcionar em muitos browsers Android)
+    const app = document.getElementById('app');
+
+    const fixPos = (el, visualX, visualY) => {
+      // map visual (x from left, y from top) → CSS { left: visualY, top: innerWidth - visualX }
+      if (!el) return;
+      el.style.left = visualY + 'px';
+      el.style.top = (window.innerWidth - visualX) + 'px';
+      el.style.right = el.style.bottom = '';
+      el.style.transform = 'none';
+    };
+    const undPos = (el) => {
+      if (!el) return;
+      el.style.left = el.style.top = el.style.right = el.style.bottom = '';
+      el.style.transform = '';
+    };
+
+    const rotateApp = () => {
+      if (window.innerHeight <= window.innerWidth) return;
+      app.style.width = window.innerHeight + 'px';
+      app.style.height = window.innerWidth + 'px';
+      app.style.transformOrigin = 'top left';
+      app.style.transform = 'rotate(90deg) translate(0, -100vw)';
+      document.body.classList.add('portrait');
+      const vw = window.innerWidth, vh = window.innerHeight;
+      // fixPos(visualX, visualY) → CSS { left: visualY, top: vw - visualX }
+      fixPos(document.getElementById('btn-perfil'),  20, 70);
+      fixPos(document.getElementById('btn-trofeus'), 166, 70);
+      fixPos(document.getElementById('btn-opcoes'), vw - 64, 80);
+      fixPos(document.getElementById('btn-passe'),  20, vh - 68);
+      fixPos(document.getElementById('btn-missoes'), 166, vh - 68);
+      const sl = document.querySelector('.menu-side-left');
+      if (sl) fixPos(sl, 20, vh / 2 - 74);
+      const sr = document.querySelector('.menu-side-right');
+      if (sr) fixPos(sr, vw - 226, vh - 160);
+      // mobile controls at visual bottom, spanning full width
+      const mc = document.getElementById('mobile-controls');
+      if (mc) { mc.style.left = (vh - 80) + 'px'; mc.style.top = '0'; mc.style.right = ''; mc.style.bottom = ''; mc.style.transform = 'none'; mc.style.width = '80px'; mc.style.height = vw + 'px'; mc.style.flexDirection = 'column'; }
+      // pause btn at top center
+      const pb = document.getElementById('btn-pause');
+      if (pb) fixPos(pb, vw / 2 - 30, 10);
+    };
+    const unrotateApp = () => {
+      app.style.width = app.style.height = '';
+      app.style.transform = app.style.transformOrigin = '';
+      document.body.classList.remove('portrait');
+      ['btn-perfil','btn-trofeus','btn-opcoes','btn-passe','btn-missoes'].forEach(id => undPos(document.getElementById(id)));
+      undPos(document.querySelector('.menu-side-left'));
+      undPos(document.querySelector('.menu-side-right'));
+    };
+
+    const handleResize = () => {
+      if (window.innerHeight > window.innerWidth) rotateApp();
+      else unrotateApp();
+    };
+
+    // tentar orientation.lock primeiro
     if (screen.orientation && screen.orientation.lock) {
-      screen.orientation.lock('landscape').catch(() => {});
+      screen.orientation.lock('landscape').catch(() => rotateApp());
+    } else {
+      rotateApp();
     }
-    // O CSS transform em style.css vai rotacionar o conteúdo automaticamente em portrait
+    // no primeiro toque, tentar de novo (se lock funcionar, remove a rotação CSS)
+    document.addEventListener('pointerdown', async () => {
+      if (app.style.transform && screen.orientation && screen.orientation.lock) {
+        try {
+          await screen.orientation.lock('landscape');
+          unrotateApp();
+        } catch (e) {}
+      }
+    }, { once: true });
+
+    window.addEventListener('resize', handleResize);
   },
 
   init() {
