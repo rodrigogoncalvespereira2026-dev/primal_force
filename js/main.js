@@ -60,6 +60,7 @@ const App = {
       el.style.top = pos.top + 'px';
       el.style.right = '';
       el.style.bottom = '';
+      el.style.transform = 'none'; // CSS transforms interferem no espaço rodado
     };
     const clearPos = (el) => {
       if (!el) return;
@@ -67,6 +68,7 @@ const App = {
       el.style.top = '';
       el.style.right = '';
       el.style.bottom = '';
+      el.style.transform = ''; // restaurar CSS transform original
     };
     const applyRotate = () => {
       if (window.innerHeight > window.innerWidth) {
@@ -75,29 +77,25 @@ const App = {
         app.style.transformOrigin = 'top left';
         app.style.transform = 'rotate(90deg) translate(0, -100vw)';
         document.body.classList.add('portrait');
-        // reposicionar botões do menu
+        const vw = window.innerWidth, vh = window.innerHeight;
         // setPos(visualX, visualY): visualX = dist from visual LEFT, visualY = dist from visual TOP
         setPos(document.getElementById('btn-perfil'), 20, 70);
         setPos(document.getElementById('btn-trofeus'), 166, 70);
-        setPos(document.getElementById('btn-opcoes'), window.innerWidth - 64, 80);
-        setPos(document.getElementById('btn-passe'), 20, window.innerHeight - 68);
-        setPos(document.getElementById('btn-missoes'), 166, window.innerHeight - 68);
-        // menu-side-left: centrado verticalmente
+        setPos(document.getElementById('btn-opcoes'), vw - 64, 80);
+        setPos(document.getElementById('btn-passe'), 20, vh - 68);
+        setPos(document.getElementById('btn-missoes'), 166, vh - 68);
         const sl = document.querySelector('.menu-side-left');
-        if (sl) setPos(sl, 20, window.innerHeight / 2 - 74);
-        // menu-side-right: bottom-right
+        if (sl) setPos(sl, 20, vh / 2 - 74);
         const sr = document.querySelector('.menu-side-right');
-        if (sr) setPos(sr, window.innerWidth - 220, window.innerHeight - 160);
-        // trophy bar
+        if (sr) setPos(sr, vw - 220, vh - 160);
         const tb = document.querySelector('.trophy-bar-menu');
-        if (tb) { tb.style.left = '50%'; tb.style.top = (window.innerWidth - 20) + 'px'; tb.style.transform = 'translateX(-50%)'; }
+        if (tb) { tb.style.left = '20px'; tb.style.top = (vw - 20) + 'px'; tb.style.transform = 'none'; }
       } else {
         app.style.width = '';
         app.style.height = '';
         app.style.transformOrigin = '';
         app.style.transform = '';
         document.body.classList.remove('portrait');
-        // limpar inline styles dos botões
         clearPos(document.getElementById('btn-perfil'));
         clearPos(document.getElementById('btn-trofeus'));
         clearPos(document.getElementById('btn-opcoes'));
