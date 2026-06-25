@@ -5,38 +5,7 @@ html, body {
   overscroll-behavior: none;
 }
 
-/* Force landscape orientation on mobile - rotaciona o conteúdo em portrait */
-@media screen and (orientation: portrait) {
-  body.is-mobile {
-    transform: rotate(90deg);
-    transform-origin: left top;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vh;
-    height: 100vw;
-    overflow: hidden;
-  }
-  
-  body.is-mobile #app {
-    width: 100vh;
-    height: 100vw;
-  }
-}
-
-/* Em landscape, mantém normal */
-@media screen and (orientation: landscape) {
-  body.is-mobile {
-    transform: none;
-    width: 100vw;
-    height: 100vh;
-  }
-  
-  body.is-mobile #app {
-    width: 100vw;
-    height: 100vh;
-  }
-}
+/* Force landscape orientation on mobile - aplicado via JavaScript inline */
 
 /* Remove hover sticky em touch e melhora resposta tátil */
 .is-mobile *,

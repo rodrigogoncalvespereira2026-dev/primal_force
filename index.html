@@ -7,19 +7,40 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Power Rangers Primal Force</title>
   <script>
-    // Forçar landscape imediatamente ao carregar
+    // Forçar landscape via CSS transform imediatamente ao carregar
     (function() {
-      function forceLandscape() {
-        if (screen.orientation && screen.orientation.lock) {
-          screen.orientation.lock('landscape').catch(() => {});
+      function applyLandscapeTransform() {
+        const isPortrait = window.innerHeight > window.innerWidth;
+        const body = document.body;
+        
+        if (isPortrait) {
+          body.style.transform = 'rotate(90deg)';
+          body.style.transformOrigin = 'left top';
+          body.style.position = 'fixed';
+          body.style.top = '0';
+          body.style.left = '0';
+          body.style.width = '100vh';
+          body.style.height = '100vw';
+          body.style.overflow = 'hidden';
+        } else {
+          body.style.transform = 'none';
+          body.style.width = '100vw';
+          body.style.height = '100vh';
         }
       }
-      // Tenta bloquear imediatamente
-      forceLandscape();
-      // Tenta novamente quando o DOM estiver pronto
-      document.addEventListener('DOMContentLoaded', forceLandscape);
-      // Tenta novamente quando a página carregar completamente
-      window.addEventListener('load', forceLandscape);
+      
+      // Aplica imediatamente
+      applyLandscapeTransform();
+      
+      // Aplica quando o DOM estiver pronto
+      document.addEventListener('DOMContentLoaded', applyLandscapeTransform);
+      
+      // Aplica quando a página carregar
+      window.addEventListener('load', applyLandscapeTransform);
+      
+      // Aplica quando a orientação mudar
+      window.addEventListener('orientationchange', applyLandscapeTransform);
+      window.addEventListener('resize', applyLandscapeTransform);
     })();
   </script>
   <link rel="stylesheet" href="css/style.css">
