@@ -19,14 +19,29 @@ const ShopScene = {
     const grid = document.getElementById('shop-grid');
     grid.innerHTML = Progression.SHOP_ITEMS.map(item => {
       const owned  = data.items[item.id] || 0;
-      const canBuy = data.coins >= item.price;
+      const canBuy = Progression._canAfford(item);
+      const priceIcon = item.priceType === 'gems' ? '💎' : '💰';
+      const ownedHtml = item.reward ? '' : `<div class="shop-item-owned">Tens: ${owned}</div>`;
+      // Itens grátis de recolha única
+      if (item.price === 0 && item.once) {
+        const got = owned > 0;
+        return `
+          <div class="shop-item">
+            <div class="shop-item-icon">${item.icon}</div>
+            <div class="shop-item-name">${item.name}</div>
+            <div class="shop-item-desc">${item.desc}</div>
+            <div class="shop-item-owned">${got ? '✅ Obtido' : '🎁 Grátis'}</div>
+            <button class="shop-buy-btn-free" data-id="${item.id}" ${got ? 'disabled' : ''}>${got ? '✅' : '🎁 Grátis'}</button>
+          </div>
+        `;
+      }
       return `
         <div class="shop-item">
           <div class="shop-item-icon">${item.icon}</div>
           <div class="shop-item-name">${item.name}</div>
           <div class="shop-item-desc">${item.desc}</div>
-          <div class="shop-item-owned">Tens: ${owned}</div>
-          <button class="shop-buy-btn" data-id="${item.id}" ${canBuy ? '' : 'disabled'}>💰 ${item.price}</button>
+          ${ownedHtml}
+          <button class="shop-buy-btn" data-id="${item.id}" ${canBuy ? '' : 'disabled'}>${priceIcon} ${item.price}</button>
         </div>
       `;
     }).join('');
