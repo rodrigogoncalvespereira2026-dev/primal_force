@@ -7,6 +7,7 @@ const App = {
   screens: {
     menu:        'screen-menu',
     select:      'screen-select',
+    ranger:      'screen-ranger',
     worldmap:    'screen-worldmap',
     trophies:    'screen-trophies',
     battlepass:  'screen-battlepass',
