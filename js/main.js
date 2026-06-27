@@ -45,14 +45,6 @@ const App = {
   },
 
   vpToApp(vx, vy) {
-    if (document.body.classList.contains('portrait-rotated')) {
-      // After 90deg CW rotation, swap and invert coords
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
-      const tmp = vx;
-      vx = vh - vy;
-      vy = tmp;
-    }
     return { x: vx, y: vy };
   },
 
@@ -67,35 +59,6 @@ const App = {
     tryLock();
     setTimeout(tryLock, 500);
     window.addEventListener('load', tryLock);
-
-    // CSS rotation fallback: se o device está em retrato, rotaciona o body 90deg
-    this._applyRotation();
-    window.addEventListener('resize', () => this._applyRotation());
-    window.addEventListener('orientationchange', () => setTimeout(() => this._applyRotation(), 150));
-  },
-
-  _applyRotation() {
-    const portrait = window.innerHeight > window.innerWidth;
-    const body = document.body;
-    if (portrait) {
-      body.classList.add('portrait-rotated');
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
-      document.documentElement.style.width = vh + 'px';
-      document.documentElement.style.height = vw + 'px';
-      document.body.style.width = vh + 'px';
-      document.body.style.height = vw + 'px';
-      document.body.style.transform = `rotate(90deg) translateX(${vw - vh}px)`;
-      document.body.style.transformOrigin = '0 0';
-    } else {
-      body.classList.remove('portrait-rotated');
-      document.documentElement.style.width = '';
-      document.documentElement.style.height = '';
-      document.body.style.width = '';
-      document.body.style.height = '';
-      document.body.style.transform = '';
-      document.body.style.transformOrigin = '';
-    }
   },
 
   init() {
