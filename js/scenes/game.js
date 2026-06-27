@@ -325,17 +325,32 @@ const GameScene = {
   _update(dt) {
     const p = this.player;
 
+    // Rotação de câmara via toque livre no lado direito (estilo Free Fire)
+    const camDrag = Joystick.getCameraDrag();
+    if (camDrag.dx !== 0 || camDrag.dy !== 0) {
+      Engine3D.orbitAngle(-camDrag.dx * 0.006);
+      Engine3D.orbitPitch(-camDrag.dy * 0.004);
+    }
+
+    // Movimento relativo à câmara (estilo Free Fire)
     const mob = Joystick.getMoveDir();
     const kx = Input.getDirX(), ky = Input.getDirY();
     const mx = mob.x || kx, my = mob.y || ky;
     if (mx!==0||my!==0) {
-      const n=Utils.normalize(mx,my);
-      const spd=p.speed*(p.zordActive?1.4:1)*dt;
-      const nx=Utils.clamp(p.x+n.x*spd,20,World.W-20);
-      const ny=Utils.clamp(p.y+n.y*spd,20,World.H-20);
-      if(!World.isSolid(nx,p.y)) p.x=nx;
-      if(!World.isSolid(p.x,ny)) p.y=ny;
-      p.facing=Math.atan2(n.y,n.x);
+      // Converte input do joystick para direção relativa à câmara
+      const camAngle = Engine3D.camAngle;
+      const cosA = Math.cos(-camAngle + Math.PI / 2);
+      const sinA = Math.sin(-camAngle + Math.PI / 2);
+      const worldMX = mx * cosA - my * sinA;
+      const worldMY = mx * sinA + my * cosA;
+
+      const n = Utils.normalize(worldMX, worldMY);
+      const spd = p.speed * (p.zordActive ? 1.4 : 1) * dt;
+      const nx = Utils.clamp(p.x + n.x * spd, 20, World.W - 20);
+      const ny = Utils.clamp(p.y + n.y * spd, 20, World.H - 20);
+      if (!World.isSolid(nx, p.y)) p.x = nx;
+      if (!World.isSolid(p.x, ny)) p.y = ny;
+      p.facing = Math.atan2(n.y, n.x);
     }
 
     const aim=Joystick.getAimDir();
@@ -395,12 +410,6 @@ const GameScene = {
 
   _sync3D() {
     const p = this.player;
-
-    // Câmara auto-segue a direção do jogador (estilo Brawl Stars)
-    if (p.mesh3d) {
-      const playerAngle = -p.facing + Math.PI / 2;
-      Engine3D._camAngleTarget = -p.facing + Math.PI;
-    }
 
     // Sincronizar posição do jogador
     if (p.mesh3d) {
