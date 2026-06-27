@@ -8,7 +8,7 @@ const Joystick = {
   KNOB:   26,
 
   // IDs dos botões de habilidade — não interferir com eles
-  _btnIds: new Set(['btn-mb-melee','btn-mb-laser','btn-mb-special','btn-mb-shield','btn-mb-zord','btn-pause']),
+  _btnIds: new Set(['btn-mb-melee','btn-mb-laser','btn-mb-special','btn-mb-shield','btn-mb-zord','btn-pause','btn-mb-reaction']),
 
   init() {
     // ── Touch (Android / iOS) ─────────────────────────────────────────

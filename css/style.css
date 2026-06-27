@@ -849,21 +849,8 @@ body {
 .d-btn:active { background: rgba(255,255,255,0.3); }
 .d-center { width: 46px; height: 46px; }
 
-#action-buttons {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  pointer-events: all;
-}
-
-.act-row { display: flex; gap: 12px; justify-content: center; }
-
 .act-btn {
   padding: 0;
-  width: 54px;
-  height: 54px;
   border-radius: 50%;
   border: 2px solid;
   background: rgba(0,0,0,0.5);
@@ -876,15 +863,95 @@ body {
   user-select: none;
   -webkit-user-select: none;
   touch-action: none;
+  flex-shrink: 0;
 }
 
 .act-btn:active { opacity: 0.6; }
 
-.attack-btn { border-color: #e24b4a; color: #e24b4a; }
-.laser-btn { border-color: #fac775; color: #fac775; }
-.special-btn { border-color: #3cb371; color: #3cb371; }
-.shield-btn { border-color: #378add; color: #378add; }
-.zord-btn { border-color: #af56f5; color: #af56f5; }
+#action-buttons {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  pointer-events: all;
+}
+
+#attack-cluster {
+  position: relative;
+  width: 150px;
+  height: 150px;
+}
+
+/* Botão principal (verde) — centro-baixo */
+.act-main {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 80px;
+  border-color: #3cb371;
+  color: #fff;
+  background: rgba(60,179,113,0.35);
+  font-size: 28px;
+  border-width: 3px;
+  z-index: 3;
+}
+
+/* Super (amarelo) — cima-esquerda */
+.act-super {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 62px;
+  height: 62px;
+  border-color: #ffd700;
+  color: #ffd700;
+  background: rgba(255,215,0,0.25);
+  font-size: 24px;
+  border-width: 3px;
+  z-index: 2;
+}
+
+/* Especial (roxo) — cima-direita */
+.act-special {
+  position: absolute;
+  top: 10px;
+  right: 0;
+  width: 56px;
+  height: 56px;
+  border-color: #af56f5;
+  color: #af56f5;
+  background: rgba(175,86,245,0.25);
+  font-size: 22px;
+  border-width: 3px;
+  z-index: 2;
+}
+
+/* Gadget (verde-escuro) — fora do cluster, cima */
+.act-gadget {
+  width: 50px;
+  height: 50px;
+  border-color: #2ecc71;
+  color: #2ecc71;
+  background: rgba(46,204,113,0.25);
+  font-size: 20px;
+  border-width: 2px;
+  align-self: flex-end;
+  margin-bottom: 10px;
+}
+
+/* Reações — fora do cluster, cima */
+.act-reaction {
+  width: 46px;
+  height: 46px;
+  border-color: rgba(255,255,255,0.4);
+  color: #fff;
+  background: rgba(255,255,255,0.12);
+  font-size: 20px;
+  border-width: 2px;
+  align-self: flex-end;
+  margin-bottom: 16px;
+}
 
 /* Mobile: mostrar controlos touch, esconder skill-bar */
 .is-mobile #mobile-controls { display: flex; }
@@ -983,15 +1050,14 @@ body {
   .is-mobile .d-btn { width: 34px; height: 34px; font-size: 12px; border-radius: 50%; }
   .is-mobile .d-center { width: 34px; height: 34px; }
   .is-mobile .d-row { gap: 2px; }
-  /* Botões de acção: linha única em baixo */
-  .is-mobile #action-buttons {
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-  }
-  .is-mobile .act-row { gap: 6px; }
-  .is-mobile .act-btn { width: 44px; height: 44px; font-size: 18px; border-radius: 50%; }
+  /* Botões de acção: estilo Brawl Stars */
+  .is-mobile #action-buttons { gap: 6px; }
+  .is-mobile #attack-cluster { width: 120px; height: 120px; }
+  .is-mobile .act-main { width: 64px; height: 64px; font-size: 22px; }
+  .is-mobile .act-super { width: 50px; height: 50px; font-size: 18px; }
+  .is-mobile .act-special { width: 44px; height: 44px; font-size: 16px; }
+  .is-mobile .act-gadget { width: 40px; height: 40px; font-size: 16px; }
+  .is-mobile .act-reaction { width: 36px; height: 36px; font-size: 16px; }
   .is-mobile #btn-pause { top: 4px; right: 6px; left: auto; transform: none; padding: 3px 8px; font-size: 10px; z-index: 20; }
   .is-mobile #hud { padding: 4px 6px; }
   .is-mobile .bar-wrap { width: 60px; height: 5px; }
@@ -1083,12 +1149,9 @@ body.portrait-rotated #action-buttons {
   .hscroll-arrow { width: 28px; height: 28px; font-size: 11px; }
   .hscroll-wrap { gap: 4px; padding: 0 6px 8px; }
 
-  .act-btn { width: 54px; height: 42px; font-size: 10px; }
-  .attack-btn { width: 68px; }
+  .act-btn { width: 54px; height: 54px; font-size: 10px; }
   .d-btn { width: 38px; height: 38px; font-size: 13px; }
   .d-center { width: 38px; height: 38px; }
-  #action-buttons { gap: 5px; }
-  .act-row { gap: 5px; }
   #dpad { gap: 1px; }
   .d-row { gap: 1px; }
   #mobile-controls { padding: 6px 10px 10px; }

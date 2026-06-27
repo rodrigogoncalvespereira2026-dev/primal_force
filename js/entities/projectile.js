@@ -74,6 +74,39 @@ class Particle {
   }
 }
 
+// ── REACTION EMOJI ────────────────────────────────────────────────
+class ReactionParticle {
+  constructor(x, y, emoji) {
+    this.x = x; this.y = y;
+    this.emoji = emoji;
+    this.vy = -1.5;
+    this.life = 90;
+    this.maxLife = 90;
+    this.dead = false;
+  }
+
+  update(dt) {
+    this.y += this.vy * dt;
+    this.vy *= 0.97;
+    this.life -= dt;
+    if (this.life <= 0) this.dead = true;
+  }
+
+  draw(ctx, cam) {
+    const sx = Renderer.screenX(this.x, this.y, cam);
+    const sy = Renderer.screenY(this.x, this.y, cam);
+    const alpha = Math.min(1, this.life / (this.maxLife * 0.3));
+    const scale = 0.6 + 0.4 * Math.min(1, (this.maxLife - this.life) / 10);
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.font = `${Math.round(24 * scale)}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(this.emoji, sx, sy);
+    ctx.restore();
+  }
+}
+
 // ── PICKUP ─────────────────────────────────────────────────────────
 class Pickup {
   constructor(x, y, type) {

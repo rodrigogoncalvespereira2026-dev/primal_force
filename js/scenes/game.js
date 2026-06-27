@@ -18,6 +18,15 @@ const GameScene = {
   resetCombo() { this.combo=0; },
   updateScoreEl() { document.getElementById('hud-score').textContent=this.score; },
 
+  _reactionIdx: 0,
+  _reactions: ['👍','😂','😡','😢','🎉','💀','🔥','❤️'],
+  _showReaction() {
+    if (!this.player) return;
+    const emoji = this._reactions[this._reactionIdx % this._reactions.length];
+    this._reactionIdx++;
+    this.particles.push(new ReactionParticle(this.player.x, this.player.y - 30, emoji));
+  },
+
   onEnemyKill(e) {
     const bonus = 1 + Math.floor(this.combo/4);
     this.score += e.score * bonus;
@@ -188,6 +197,7 @@ const GameScene = {
     mb('btn-mb-special', () => this.player.doSpecial(this));
     mb('btn-mb-shield',  () => this.player.doShield(this));
     mb('btn-mb-zord',    () => this.player.doZord(this));
+    mb('btn-mb-reaction', () => this._showReaction());
 
     // Teclado (PC)
     document.addEventListener('keydown', e => {
