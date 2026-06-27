@@ -75,7 +75,14 @@ const App = {
     const portrait = vh > vw;
     const html = document.documentElement;
     if (portrait) {
-      html.style.cssText = 'transform:rotate(-90deg);transform-origin:left top;width:' + vh + 'px;height:' + vw + 'px;position:absolute;top:' + vh + 'px;left:0;overflow:hidden';
+      html.style.width = vh + 'px';
+      html.style.height = vw + 'px';
+      html.style.transform = 'rotate(-90deg)';
+      html.style.transformOrigin = 'left top';
+      html.style.position = 'absolute';
+      html.style.top = vh + 'px';
+      html.style.left = '0';
+      html.style.overflow = 'hidden';
       this._isPortraitRotated = true;
     } else {
       html.style.cssText = '';
