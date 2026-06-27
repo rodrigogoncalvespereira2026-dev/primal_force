@@ -50,7 +50,6 @@ const App = {
   },
 
   _forceLandscape() {
-    // Tenta bloquear orientação landscape nativamente (pode não funcionar em Android Chrome)
     const tryLock = () => {
       if (screen.orientation && screen.orientation.lock) {
         screen.orientation.lock('landscape').catch(() => {
@@ -58,11 +57,18 @@ const App = {
         });
       }
     };
-
-    // Tenta bloquear
     tryLock();
     setTimeout(tryLock, 500);
     window.addEventListener('load', tryLock);
+
+    this._checkOrientation();
+    window.addEventListener('resize', () => this._checkOrientation());
+    window.addEventListener('orientationchange', () => setTimeout(() => this._checkOrientation(), 100));
+  },
+
+  _checkOrientation() {
+    const isPortrait = window.innerHeight > window.innerWidth;
+    document.body.classList.toggle('is-portrait', isPortrait);
   },
 
   init() {

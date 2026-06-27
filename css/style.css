@@ -87,7 +87,6 @@ body {
 #screen-battlepass.active,
 #screen-shop.active,
 #screen-worldmap.active,
-#screen-game.active,
 #screen-perfil.active,
 #screen-missoes.active {
   background: linear-gradient(160deg, #040c1c 0%, #0b1e3d 35%, #112e55 65%, #1a3a6b 100%) !important;
@@ -99,7 +98,6 @@ body {
 #screen-battlepass.active::before,
 #screen-shop.active::before,
 #screen-worldmap.active::before,
-#screen-game.active::before,
 #screen-perfil.active::before,
 #screen-missoes.active::before {
   content: '';
@@ -125,7 +123,6 @@ body {
 #screen-battlepass.active::after,
 #screen-shop.active::after,
 #screen-worldmap.active::after,
-#screen-game.active::after,
 #screen-perfil.active::after,
 #screen-missoes.active::after {
   content: '';
@@ -871,14 +868,14 @@ body {
 #action-buttons {
   display: flex;
   align-items: flex-end;
-  gap: 10px;
+  gap: 8px;
   pointer-events: all;
 }
 
 #attack-cluster {
   position: relative;
-  width: 150px;
-  height: 150px;
+  width: 160px;
+  height: 160px;
 }
 
 /* Botão principal (verde) — centro-baixo */
@@ -887,8 +884,8 @@ body {
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 80px;
-  height: 80px;
+  width: 82px;
+  height: 82px;
   border-color: #3cb371;
   color: #fff;
   background: rgba(60,179,113,0.35);
@@ -902,8 +899,8 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  width: 62px;
-  height: 62px;
+  width: 64px;
+  height: 64px;
   border-color: #ffd700;
   color: #ffd700;
   background: rgba(255,215,0,0.25);
@@ -915,10 +912,10 @@ body {
 /* Especial (roxo) — cima-direita */
 .act-special {
   position: absolute;
-  top: 10px;
+  top: 8px;
   right: 0;
-  width: 56px;
-  height: 56px;
+  width: 58px;
+  height: 58px;
   border-color: #af56f5;
   color: #af56f5;
   background: rgba(175,86,245,0.25);
@@ -927,7 +924,7 @@ body {
   z-index: 2;
 }
 
-/* Gadget (verde-escuro) — fora do cluster, cima */
+/* Gadget (verde) — acima do cluster */
 .act-gadget {
   width: 50px;
   height: 50px;
@@ -936,20 +933,18 @@ body {
   background: rgba(46,204,113,0.25);
   font-size: 20px;
   border-width: 2px;
-  align-self: flex-end;
   margin-bottom: 10px;
 }
 
-/* Reações — fora do cluster, cima */
+/* Reações — acima do cluster */
 .act-reaction {
-  width: 46px;
-  height: 46px;
+  width: 44px;
+  height: 44px;
   border-color: rgba(255,255,255,0.4);
   color: #fff;
   background: rgba(255,255,255,0.12);
-  font-size: 20px;
+  font-size: 18px;
   border-width: 2px;
-  align-self: flex-end;
   margin-bottom: 16px;
 }
 
@@ -1041,23 +1036,17 @@ body {
 @media (orientation: landscape) and (max-height: 500px) {
   .is-mobile #mobile-controls {
     padding: 4px 12px 8px;
-    flex-direction: row;
-    align-items: flex-end;
-    gap: 12px;
   }
-  /* Dpad: circular, compacto */
   .is-mobile #dpad { gap: 2px; }
-  .is-mobile .d-btn { width: 34px; height: 34px; font-size: 12px; border-radius: 50%; }
-  .is-mobile .d-center { width: 34px; height: 34px; }
+  .is-mobile .d-btn { width: 36px; height: 36px; font-size: 12px; }
+  .is-mobile .d-center { width: 36px; height: 36px; }
   .is-mobile .d-row { gap: 2px; }
-  /* Botões de acção: estilo Brawl Stars */
-  .is-mobile #action-buttons { gap: 6px; }
-  .is-mobile #attack-cluster { width: 120px; height: 120px; }
-  .is-mobile .act-main { width: 64px; height: 64px; font-size: 22px; }
-  .is-mobile .act-super { width: 50px; height: 50px; font-size: 18px; }
-  .is-mobile .act-special { width: 44px; height: 44px; font-size: 16px; }
-  .is-mobile .act-gadget { width: 40px; height: 40px; font-size: 16px; }
-  .is-mobile .act-reaction { width: 36px; height: 36px; font-size: 16px; }
+  .is-mobile #attack-cluster { width: 130px; height: 130px; }
+  .is-mobile .act-main { width: 68px; height: 68px; font-size: 24px; }
+  .is-mobile .act-super { width: 52px; height: 52px; font-size: 20px; }
+  .is-mobile .act-special { width: 46px; height: 46px; font-size: 18px; }
+  .is-mobile .act-gadget { width: 42px; height: 42px; font-size: 16px; margin-bottom: 6px; }
+  .is-mobile .act-reaction { width: 38px; height: 38px; font-size: 16px; margin-bottom: 10px; }
   .is-mobile #btn-pause { top: 4px; right: 6px; left: auto; transform: none; padding: 3px 8px; font-size: 10px; z-index: 20; }
   .is-mobile #hud { padding: 4px 6px; }
   .is-mobile .bar-wrap { width: 60px; height: 5px; }
@@ -1069,6 +1058,36 @@ body {
   .is-mobile #minimap { width: 40px; height: 32px; }
   .is-mobile #hud-wave-info { font-size: 9px; }
   .is-mobile .hud-stat { font-size: 8px; }
+}
+
+/* Telemóveis em retrato — controles compactos */
+@media (orientation: portrait) and (max-width: 600px) {
+  .is-mobile #mobile-controls {
+    padding: 6px 10px 16px;
+    flex-wrap: nowrap;
+    gap: 4px;
+  }
+  .is-mobile #dpad { gap: 1px; }
+  .is-mobile .d-btn { width: 32px; height: 32px; font-size: 11px; }
+  .is-mobile .d-center { width: 32px; height: 32px; }
+  .is-mobile .d-row { gap: 1px; }
+  .is-mobile #attack-cluster { width: 110px; height: 110px; }
+  .is-mobile .act-main { width: 58px; height: 58px; font-size: 20px; }
+  .is-mobile .act-super { width: 44px; height: 44px; font-size: 16px; }
+  .is-mobile .act-special { width: 40px; height: 40px; font-size: 15px; }
+  .is-mobile .act-gadget { width: 36px; height: 36px; font-size: 14px; margin-bottom: 4px; }
+  .is-mobile .act-reaction { width: 32px; height: 32px; font-size: 14px; margin-bottom: 8px; }
+  .is-mobile #btn-pause { top: 4px; right: 6px; left: auto; transform: none; padding: 3px 8px; font-size: 10px; z-index: 20; }
+  .is-mobile #hud { padding: 4px 6px; }
+  .is-mobile .bar-wrap { width: 55px; height: 4px; }
+  .is-mobile #ranger-name-hud { font-size: 7px; }
+  .is-mobile .bar-label { font-size: 6px; width: 14px; }
+  .is-mobile .bar-num { font-size: 6px; min-width: 12px; }
+  .is-mobile #combo-display { font-size: 11px; }
+  .is-mobile #msg-box { font-size: 9px; }
+  .is-mobile #minimap { width: 36px; height: 28px; }
+  .is-mobile #hud-wave-info { font-size: 8px; }
+  .is-mobile .hud-stat { font-size: 7px; }
 }
 
 /* Portrait rotacionado via CSS (landscape forçado) */
@@ -1083,6 +1102,43 @@ body.portrait-rotated #dpad {
 body.portrait-rotated #action-buttons {
   order: 2;
 }
+
+/* ── Overlay: rodar para paisagem ── */
+#rotate-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(4,8,10,0.95);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  color: #fff;
+  font-family: sans-serif;
+  text-align: center;
+  padding: 24px;
+}
+#rotate-overlay .rotate-icon {
+  font-size: 64px;
+  animation: rotate-phone 2s ease-in-out infinite;
+}
+@keyframes rotate-phone {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-25deg); }
+  75% { transform: rotate(-25deg); }
+}
+#rotate-overlay .rotate-text {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #fac775;
+}
+#rotate-overlay .rotate-sub {
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+}
+body.is-mobile.is-portrait #rotate-overlay { display: flex; }
 
 
 /* Telemóveis (até 480px) */
