@@ -140,14 +140,13 @@ body {
   z-index: 0;
 }
 
-/* Garantir que o conteúdo fica acima do fundo */
+/* Garantir que o conteúdo fica acima do fundo — NÃO aplicar a #screen-game pois quebra canvas/pause */
 #screen-select.active > *,
 #screen-ranger.active > *,
 #screen-trophies.active > *,
 #screen-battlepass.active > *,
 #screen-shop.active > *,
 #screen-worldmap.active > *,
-#screen-game.active > *,
 #screen-perfil.active > *,
 #screen-missoes.active > * {
   position: relative;
@@ -636,6 +635,7 @@ body {
   height: 100%;
   display: block;
   touch-action: none;
+  z-index: 1;
 }
 
 /* HUD */
