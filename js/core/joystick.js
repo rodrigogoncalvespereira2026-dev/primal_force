@@ -8,7 +8,7 @@ const Joystick = {
   KNOB:   26,
 
   // IDs dos botões de habilidade — não interferir com eles
-  _btnIds: new Set(['btn-mb-melee','btn-mb-laser','btn-mb-special','btn-mb-shield','btn-mb-zord','btn-pause','btn-mb-reaction']),
+  _btnIds: new Set(['btn-mb-melee','btn-mb-laser','btn-mb-special','btn-mb-shield','btn-mb-zord','btn-pause','btn-mb-reaction','btn-mb-camera']),
 
   init() {
     // ── Touch (Android / iOS) ─────────────────────────────────────────
@@ -76,6 +76,9 @@ const Joystick = {
       const p = this._touchToApp(t.clientX, t.clientY);
       if (this._isButton(t.clientX, t.clientY)) continue;
       e.preventDefault();
+
+      // Se já há 2 dedos ativos no ecrã, não atribuir ao joystick (permite rotação de câmara)
+      if (e.touches.length > 2) continue;
 
       const isLeft = p.x < sw / 2;
 

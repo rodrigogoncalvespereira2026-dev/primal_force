@@ -5,6 +5,13 @@ const Engine3D = {
   clock: null,
   _initialized: false,
 
+  // Câmara orbital
+  camAngle: 0,          // ângulo horizontal (radians)
+  camPitch: 0.65,       // inclinação vertical (0 = chão, PI/2 = topo)
+  camDist: 100,         // distância ao jogador
+  _camAngleTarget: 0,
+  _camPitchTarget: 0.65,
+
   init(container) {
     if (this._initialized) return;
 
@@ -55,6 +62,103 @@ const Engine3D = {
 
     // Resize handler
     window.addEventListener('resize', () => this._onResize());
+
+    // ── Controlos de câmara ──
+    // Desktop: right-click drag = orbit, scroll = zoom
+    this._isDragging = false;
+    this._lastMX = 0;
+    this._lastMY = 0;
+    this.renderer.domElement.addEventListener('contextmenu', e => e.preventDefault());
+    this.renderer.domElement.addEventListener('mousedown', e => {
+      if (e.button === 2) { this._isDragging = true; this._lastMX = e.clientX; this._lastMY = e.clientY; }
+    });
+    window.addEventListener('mouseup', e => { if (e.button === 2) this._isDragging = false; });
+    window.addEventListener('mousemove', e => {
+      if (!this._isDragging) return;
+      const dx = e.clientX - this._lastMX;
+      const dy = e.clientY - this._lastMY;
+      this._lastMX = e.clientX;
+      this._lastMY = e.clientY;
+      this.orbitAngle(-dx * 0.005);
+      this.orbitPitch(-dy * 0.003);
+    });
+    this.renderer.domElement.addEventListener('wheel', e => {
+      e.preventDefault();
+      this.zoom(e.deltaY * 0.1);
+    }, { passive: false });
+
+    // Mobile: two-finger = orbit, pinch = zoom
+    this._touches = [];
+    this._lastPinchDist = 0;
+    this.renderer.domElement.addEventListener('touchstart', e => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        this._touches = [
+          { x: e.touches[0].clientX, y: e.touches[0].clientY },
+          { x: e.touches[1].clientX, y: e.touches[1].clientY }
+        ];
+        this._lastPinchDist = Math.hypot(
+          this._touches[1].x - this._touches[0].x,
+          this._touches[1].y - this._touches[0].y
+        );
+      }
+    }, { passive: false });
+    this.renderer.domElement.addEventListener('touchmove', e => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        const t0 = e.touches[0], t1 = e.touches[1];
+        const mx = (t0.clientX + t1.clientX) / 2;
+        const my = (t0.clientY + t1.clientY) / 2;
+
+        if (this._touches.length === 2) {
+          const omx = (this._touches[0].x + this._touches[1].x) / 2;
+          const omy = (this._touches[0].y + this._touches[1].y) / 2;
+          this.orbitAngle(-(mx - omx) * 0.004);
+          this.orbitPitch(-(my - omy) * 0.003);
+
+          // Pinch zoom
+          const pinchDist = Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY);
+          if (this._lastPinchDist > 0) {
+            this.zoom((this._lastPinchDist - pinchDist) * 0.3);
+          }
+          this._lastPinchDist = pinchDist;
+        }
+        this._touches = [
+          { x: t0.clientX, y: t0.clientY },
+          { x: t1.clientX, y: t1.clientY }
+        ];
+      }
+    }, { passive: false });
+    this.renderer.domElement.addEventListener('touchend', e => {
+      if (e.touches.length < 2) { this._touches = []; this._lastPinchDist = 0; }
+    });
+
+    // Botão de câmara (mobile) — arrastar para orbitar
+    const camBtn = document.getElementById('btn-mb-camera');
+    if (camBtn) {
+      let camDragging = false, camLastX = 0, camLastY = 0;
+      camBtn.addEventListener('pointerdown', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        camDragging = true;
+        camLastX = e.clientX;
+        camLastY = e.clientY;
+        camBtn.setPointerCapture(e.pointerId);
+      });
+      camBtn.addEventListener('pointermove', e => {
+        if (!camDragging) return;
+        e.preventDefault();
+        const dx = e.clientX - camLastX;
+        const dy = e.clientY - camLastY;
+        camLastX = e.clientX;
+        camLastY = e.clientY;
+        this.orbitAngle(-dx * 0.008);
+        this.orbitPitch(-dy * 0.006);
+      });
+      camBtn.addEventListener('pointerup', e => { camDragging = false; });
+      camBtn.addEventListener('pointercancel', e => { camDragging = false; });
+    }
+
     this._initialized = true;
   },
 
@@ -94,18 +198,48 @@ const Engine3D = {
 
   setCameraTarget(x, y, z) {
     if (!this.camera) return;
-    const targetX = x;
-    const targetY = y + 60;
-    const targetZ = z + 80;
-    // Suavização da câmara
-    this.camera.position.x += (targetX - this.camera.position.x) * 0.08;
-    this.camera.position.y += (targetY - this.camera.position.y) * 0.08;
-    this.camera.position.z += (targetZ - this.camera.position.z) * 0.08;
+
+    // Suavização do ângulo e pitch
+    this.camAngle  += (this._camAngleTarget - this.camAngle)  * 0.06;
+    this.camPitch  += (this._camPitchTarget - this.camPitch)  * 0.06;
+    this.camDist   += (this._camDistTarget  - this.camDist)   * 0.06;
+
+    // Limitar pitch entre 0.15 e 1.2 (não ir abaixo do chão nem topo)
+    this.camPitch = Math.max(0.15, Math.min(1.2, this.camPitch));
+
+    // Posição da câmara em coordenadas esféricas
+    const height = Math.sin(this.camPitch) * this.camDist;
+    const radius = Math.cos(this.camPitch) * this.camDist;
+    const camX = x + Math.sin(this.camAngle) * radius;
+    const camZ = z + Math.cos(this.camAngle) * radius;
+    const camY = y + height;
+
+    // Suavização da posição
+    this.camera.position.x += (camX - this.camera.position.x) * 0.08;
+    this.camera.position.y += (camY - this.camera.position.y) * 0.08;
+    this.camera.position.z += (camZ - this.camera.position.z) * 0.08;
     this.camera.lookAt(x, y + 5, z);
 
     // Mover luz de acompanhamento
     if (this.playerLight) {
       this.playerLight.position.set(x, 40, z);
     }
-  }
+  },
+
+  // Rodar a câmara horizontalmente (radians)
+  orbitAngle(delta) {
+    this._camAngleTarget += delta;
+  },
+
+  // Ajustar pitch (subir/baixar câmara)
+  orbitPitch(delta) {
+    this._camPitchTarget += delta;
+  },
+
+  // Zoom in/out
+  zoom(delta) {
+    this._camDistTarget = Math.max(40, Math.min(200, this._camDistTarget + delta));
+  },
+
+  _camDistTarget: 100,
 };
