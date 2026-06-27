@@ -53,22 +53,13 @@ const App = {
     const tryLock = () => {
       if (screen.orientation && screen.orientation.lock) {
         screen.orientation.lock('landscape').catch(() => {
-          console.log('Orientation lock not supported - user must rotate device manually');
+          console.log('Orientation lock not supported');
         });
       }
     };
     tryLock();
     setTimeout(tryLock, 500);
     window.addEventListener('load', tryLock);
-
-    this._checkOrientation();
-    window.addEventListener('resize', () => this._checkOrientation());
-    window.addEventListener('orientationchange', () => setTimeout(() => this._checkOrientation(), 100));
-  },
-
-  _checkOrientation() {
-    const isPortrait = window.innerHeight > window.innerWidth;
-    document.body.classList.toggle('is-portrait', isPortrait);
   },
 
   init() {
