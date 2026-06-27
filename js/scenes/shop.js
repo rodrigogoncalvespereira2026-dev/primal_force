@@ -42,6 +42,7 @@ const ShopScene = {
 
   _renderPrimordial() {
     const el = document.getElementById('shop-primordial');
+    if (!el) { console.warn('shop-primordial element not found'); return; }
     const freeAvailable = Progression.canClaimFreePrimordial();
     const extraPrice = Progression.primordialExtraPrice(this._extraCount);
     const canBuyExtra = (Progression.data.gems || 0) >= extraPrice;
