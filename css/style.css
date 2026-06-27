@@ -913,6 +913,9 @@ body {
 }
 
 /* PAUSE & GAMEOVER BOXES */
+#screen-pause, #screen-gameover, #screen-gota {
+  z-index: 20;
+}
 .pause-box, .gameover-box {
   background: rgba(10,12,20,0.97);
   border: 1px solid rgba(255,255,255,0.15);
