@@ -416,8 +416,51 @@ const GameScene = {
     // Sincronizar posição do jogador
     if (p.mesh3d) {
       p.mesh3d.position.set(p.x, 0, p.y);
-      // Rotação na direção do facing
       p.mesh3d.rotation.y = -p.facing + Math.PI / 2;
+
+      // Walk animation
+      const isMoving = (p._lastX !== undefined && (Math.abs(p.x - p._lastX) > 0.1 || Math.abs(p.y - p._lastY) > 0.1));
+      if (isMoving) {
+        p._walkTimer = (p._walkTimer || 0) + 0.18;
+      } else {
+        p._walkTimer = (p._walkTimer || 0) * 0.85;
+        if (p._walkTimer < 0.01) p._walkTimer = 0;
+      }
+      p._lastX = p.x;
+      p._lastY = p.y;
+
+      const wt = p._walkTimer;
+      const swing = Math.sin(wt) * 0.45;
+      const idle = Math.sin(performance.now() * 0.003) * 0.04;
+
+      if (p.mesh3d._armL) {
+        p.mesh3d._armL.rotation.x += (isMoving ? swing : idle - 0.1 - p.mesh3d._armL.rotation.x) * 0.15;
+        p.mesh3d._armL.rotation.z = 0.2 + (isMoving ? Math.abs(Math.sin(wt)) * 0.12 : 0);
+      }
+      if (p.mesh3d._armR) {
+        p.mesh3d._armR.rotation.x += (isMoving ? -swing : -idle + 0.1 - p.mesh3d._armR.rotation.x) * 0.15;
+        p.mesh3d._armR.rotation.z = -0.2 - (isMoving ? Math.abs(Math.sin(wt)) * 0.12 : 0);
+      }
+      if (p.mesh3d._legL) {
+        p.mesh3d._legL.rotation.x += (isMoving ? -swing * 0.7 : -p.mesh3d._legL.rotation.x) * 0.15;
+      }
+      if (p.mesh3d._legR) {
+        p.mesh3d._legR.rotation.x += (isMoving ? swing * 0.7 : -p.mesh3d._legR.rotation.x) * 0.15;
+      }
+
+      // Bob na cabeça
+      if (p.mesh3d._head) {
+        if (!p.mesh3d._head._baseY) p.mesh3d._head._baseY = p.mesh3d._head.position.y;
+        const headBob = isMoving ? Math.abs(Math.sin(wt * 2)) * 0.35 : Math.sin(performance.now() * 0.002) * 0.08;
+        p.mesh3d._head.position.y = p.mesh3d._head._baseY + headBob;
+      }
+
+      // Bob no corpo
+      if (p.mesh3d._body) {
+        if (!p.mesh3d._body._baseY) p.mesh3d._body._baseY = p.mesh3d._body.position.y;
+        const bodyBob = isMoving ? Math.abs(Math.sin(wt * 2)) * 0.18 : Math.sin(performance.now() * 0.002) * 0.04;
+        p.mesh3d._body.position.y = p.mesh3d._body._baseY + bodyBob;
+      }
       // Efeito de escudo
       if (p.shielded && !p._shieldMesh) {
         const shieldGeo = new THREE.TorusGeometry(p.size + 12, 1.5, 8, 24);
