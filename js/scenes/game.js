@@ -89,12 +89,13 @@ const GameScene = {
   },
 
   _showGameoverData(title, suffix) {
-    document.getElementById('go-title').textContent    = title;
-    document.getElementById('go-score').textContent    = 'Pontuação: ' + this.score;
-    document.getElementById('go-kills').textContent    = 'Inimigos derrotados: ' + this.kills;
-    document.getElementById('go-mission-rewards').textContent = 'Missão: +' + this._missionRewards.trophies + ' 🏆 +' + this._missionRewards.coins + ' 💰 ' + (suffix || '');
-    document.getElementById('go-gota-rewards').textContent = '';
-    document.getElementById('go-trophies').textContent = 'Total: +' + this._missionRewards.trophies + ' 🏆 +' + this._missionRewards.coins + ' 💰';
+    const setText = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+    setText('go-title', title);
+    setText('go-score', 'Pontuação: ' + this.score);
+    setText('go-kills', 'Inimigos derrotados: ' + this.kills);
+    setText('go-mission-rewards', 'Missão: +' + this._missionRewards.trophies + ' 🏆 +' + this._missionRewards.coins + ' 💰 ' + (suffix || ''));
+    setText('go-gota-rewards', '');
+    setText('go-trophies', 'Total: +' + this._missionRewards.trophies + ' 🏆 +' + this._missionRewards.coins + ' 💰');
   },
 
   _updateBossHUD(show) {
@@ -133,9 +134,10 @@ const GameScene = {
     const gotaTrophies = r.filter(x => x.type === 'trophies').reduce((s, x) => s + x.amount, 0);
     const mCoins = this._missionRewards?.coins || 0;
     const mTrophies = this._missionRewards?.trophies || 0;
-    document.getElementById('go-mission-rewards').textContent = 'Missão: +' + mTrophies + ' 🏆 +' + mCoins + ' 💰';
-    document.getElementById('go-gota-rewards').textContent = 'Gota: +' + gotaTrophies + ' 🏆 +' + gotaCoins + ' 💰';
-    document.getElementById('go-trophies').textContent = 'Total: +' + (mTrophies + gotaTrophies) + ' 🏆 +' + (mCoins + gotaCoins) + ' 💰';
+    const setText = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+    setText('go-mission-rewards', 'Missão: +' + mTrophies + ' 🏆 +' + mCoins + ' 💰');
+    setText('go-gota-rewards', 'Gota: +' + gotaTrophies + ' 🏆 +' + gotaCoins + ' 💰');
+    setText('go-trophies', 'Total: +' + (mTrophies + gotaTrophies) + ' 🏆 +' + (mCoins + gotaCoins) + ' 💰');
   },
 
   onPlayerDeath() {
