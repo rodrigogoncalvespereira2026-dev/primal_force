@@ -52,6 +52,7 @@ class Ranger {
     }
     hit ? game.addCombo() : game.resetCombo();
     game.spawnParticles(this.x+Math.cos(this.facing)*36,this.y+Math.sin(this.facing)*36,this.data.color,5);
+    Engine3D.shake(hit ? 2 : 0.5);
   }
 
   doLaser(game) {
@@ -59,7 +60,6 @@ class Ranger {
     this.cdLaser=18;
     this.power-=12;
 
-    // Auto-aim: mira no inimigo mais próximo
     let nearest = null;
     let nearDist = Infinity;
     for (const e of game.enemies) {
@@ -76,6 +76,7 @@ class Ranger {
       this.data.laserColor, this.data.attack*1.5,
       range/11
     ));
+    Engine3D.shake(1.5);
   }
 
   doShield(game) {
@@ -94,6 +95,7 @@ class Ranger {
     game.showMsg(this.data.specialName.toUpperCase()+'!',80);
     game.spawnParticles(this.x,this.y,this.data.color,20);
     this.invincible=20;
+    Engine3D.shake(3);
   }
 
   doZord(game) {
@@ -103,6 +105,7 @@ class Ranger {
     game.showMsg('ZORD '+this.data.zord.toUpperCase()+' ATIVADO!',100);
     game.spawnParticles(this.x,this.y,this.data.color,40);
     for(const e of game.enemies){if(!e.dead){e.takeDamage(this.data.attack*2.5,game);game.spawnParticles(e.x,e.y,this.data.color,14);}}
+    Engine3D.shake(5);
   }
 
   takeDamage(dmg,game) {
@@ -110,6 +113,7 @@ class Ranger {
     if(this.shielded){game.spawnParticles(this.x,this.y,'#378add',8);game.showMsg('BLOQUEADO!',30);return;}
     this.hp-=dmg; this.invincible=55;
     game.spawnParticles(this.x,this.y,'#ff4444',6);
+    Engine3D.shake(4);
     if(this.hp<=0){this.hp=0;game.onPlayerDeath();}
   }
 

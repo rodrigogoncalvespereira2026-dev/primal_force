@@ -46,6 +46,7 @@ const GameScene = {
     this.spawnParticles(e.x,e.y,e.color,20);
     WaveSystem.enemiesLeft = Math.max(0, WaveSystem.enemiesLeft - 1);
     this._updateWaveHUD();
+    Engine3D.shake(1.5);
   },
 
   _spawnBoss() {
@@ -86,6 +87,7 @@ const GameScene = {
     this.spawnParticles(boss.x, boss.y, '#ffffff', 40);
     this._updateBossHUD(false);
     if (boss.mesh3d) { Engine3D.scene.remove(boss.mesh3d); boss.mesh3d = null; }
+    Engine3D.shake(8);
 
     const defeatKey = boss.typeKey + '_defeat';
     const lines = Story.dialogues[defeatKey];
@@ -351,6 +353,11 @@ const GameScene = {
       if (!World.isSolid(nx, p.y)) p.x = nx;
       if (!World.isSolid(p.x, ny)) p.y = ny;
       p.facing = Math.atan2(n.y, n.x);
+
+      Engine3D.setLookAhead(n.x, n.y);
+      Engine3D.resetIdleTimer();
+    } else {
+      Engine3D.setLookAhead(0, 0);
     }
 
     p.updateTimers(dt, this);

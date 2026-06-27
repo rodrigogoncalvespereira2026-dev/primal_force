@@ -6,11 +6,33 @@ const Engine3D = {
   _initialized: false,
 
   // Câmara orbital
-  camAngle: 0,          // ângulo horizontal (radians)
-  camPitch: 0.65,       // inclinação vertical (0 = chão, PI/2 = topo)
-  camDist: 100,         // distância ao jogador
+  camAngle: 0,
+  camPitch: 0.65,
+  camDist: 100,
   _camAngleTarget: 0,
   _camPitchTarget: 0.65,
+  _camDistTarget: 100,
+
+  // Look-ahead
+  _lookAheadX: 0,
+  _lookAheadZ: 0,
+  _lookAheadTargetX: 0,
+  _lookAheadTargetZ: 0,
+
+  // Camera shake
+  _shakeIntensity: 0,
+  _shakeDecay: 0,
+  _shakeOffsetX: 0,
+  _shakeOffsetZ: 0,
+
+  // Idle auto-rotate
+  _idleTimer: 0,
+  _idleThreshold: 300,
+  _autoRotateSpeed: 0.0008,
+
+  // Dynamic FOV
+  _baseFOV: 50,
+  _targetFOV: 50,
 
   init(container) {
     if (this._initialized) return;
@@ -19,13 +41,11 @@ const Engine3D = {
     this.scene.background = new THREE.Color(0x04080a);
     this.scene.fog = new THREE.Fog(0x04080a, 200, 600);
 
-    // Câmara de terceira pessoa baixa
     const aspect = window.innerWidth / window.innerHeight;
-    this.camera = new THREE.PerspectiveCamera(50, aspect, 0.1, 1000);
+    this.camera = new THREE.PerspectiveCamera(this._baseFOV, aspect, 0.1, 1000);
     this.camera.position.set(0, 60, 80);
     this.camera.lookAt(0, 0, 0);
 
-    // Renderer WebGL
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -34,7 +54,6 @@ const Engine3D = {
     this.renderer.outputEncoding = THREE.sRGBEncoding;
     container.appendChild(this.renderer.domElement);
 
-    // Luzes
     this.ambientLight = new THREE.AmbientLight(0x334455, 0.6);
     this.scene.add(this.ambientLight);
 
@@ -59,12 +78,9 @@ const Engine3D = {
     this.scene.add(this.playerLight);
 
     this.clock = new THREE.Clock();
-
-    // Resize handler
     window.addEventListener('resize', () => this._onResize());
 
     // ── Controlos de câmara ──
-    // Desktop: right-click drag = orbit, scroll = zoom
     this._isDragging = false;
     this._lastMX = 0;
     this._lastMY = 0;
@@ -81,10 +97,12 @@ const Engine3D = {
       this._lastMY = e.clientY;
       this.orbitAngle(-dx * 0.005);
       this.orbitPitch(-dy * 0.003);
+      this._idleTimer = 0;
     });
     this.renderer.domElement.addEventListener('wheel', e => {
       e.preventDefault();
       this.zoom(e.deltaY * 0.1);
+      this._idleTimer = 0;
     }, { passive: false });
 
     // Mobile: two-finger = orbit, pinch = zoom
@@ -101,6 +119,7 @@ const Engine3D = {
           this._touches[1].x - this._touches[0].x,
           this._touches[1].y - this._touches[0].y
         );
+        this._idleTimer = 0;
       }
     }, { passive: false });
     this.renderer.domElement.addEventListener('touchmove', e => {
@@ -116,7 +135,6 @@ const Engine3D = {
           this.orbitAngle(-(mx - omx) * 0.004);
           this.orbitPitch(-(my - omy) * 0.003);
 
-          // Pinch zoom
           const pinchDist = Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY);
           if (this._lastPinchDist > 0) {
             this.zoom((this._lastPinchDist - pinchDist) * 0.3);
@@ -133,7 +151,7 @@ const Engine3D = {
       if (e.touches.length < 2) { this._touches = []; this._lastPinchDist = 0; }
     });
 
-    // Botão de câmara (mobile) — arrastar para orbitar
+    // Botão de câmara (mobile)
     const camBtn = document.getElementById('btn-mb-camera');
     if (camBtn) {
       let camDragging = false, camLastX = 0, camLastY = 0;
@@ -144,6 +162,7 @@ const Engine3D = {
         camLastX = e.clientX;
         camLastY = e.clientY;
         camBtn.setPointerCapture(e.pointerId);
+        this._idleTimer = 0;
       });
       camBtn.addEventListener('pointermove', e => {
         if (!camDragging) return;
@@ -154,6 +173,7 @@ const Engine3D = {
         camLastY = e.clientY;
         this.orbitAngle(-dx * 0.008);
         this.orbitPitch(-dy * 0.006);
+        this._idleTimer = 0;
       });
       camBtn.addEventListener('pointerup', e => { camDragging = false; });
       camBtn.addEventListener('pointercancel', e => { camDragging = false; });
@@ -178,8 +198,6 @@ const Engine3D = {
 
   clear() {
     if (!this.scene) return;
-
-    // Remover todas as entidades (grupos, meshes) mas manter luzes
     const toRemove = [];
     this.scene.traverse(child => {
       if (child !== this.scene && child !== this.ambientLight && child !== this.dirLight && child !== this.hemiLight && child !== this.playerLight) {
@@ -199,47 +217,91 @@ const Engine3D = {
   setCameraTarget(x, y, z) {
     if (!this.camera) return;
 
-    // Suavização do ângulo e pitch (ângulo mais rápido para seguir o jogador)
-    this.camAngle  += (this._camAngleTarget - this.camAngle)  * 0.12;
-    this.camPitch  += (this._camPitchTarget - this.camPitch)  * 0.06;
-    this.camDist   += (this._camDistTarget  - this.camDist)   * 0.06;
+    const dt = this.clock ? this.clock.getDelta() : 0.016;
 
-    // Limitar pitch entre 0.15 e 1.2 (não ir abaixo do chão nem topo)
+    // Frame-rate independent smoothing
+    const angleSmooth = 1 - Math.pow(0.001, dt);
+    const pitchSmooth = 1 - Math.pow(0.0001, dt);
+    const posSmooth = 1 - Math.pow(0.0005, dt);
+    const lookSmooth = 1 - Math.pow(0.01, dt);
+
+    // Idle auto-rotate
+    this._idleTimer++;
+    if (this._idleTimer > this._idleThreshold) {
+      this._camAngleTarget += this._autoRotateSpeed;
+    }
+
+    // Smooth interpolation
+    this.camAngle += (this._camAngleTarget - this.camAngle) * angleSmooth;
+    this.camPitch += (this._camPitchTarget - this.camPitch) * pitchSmooth;
+    this.camDist += (this._camDistTarget - this.camDist) * pitchSmooth;
+
     this.camPitch = Math.max(0.15, Math.min(1.2, this.camPitch));
 
-    // Posição da câmara em coordenadas esféricas
+    // Look-ahead
+    this._lookAheadX += (this._lookAheadTargetX - this._lookAheadX) * lookSmooth;
+    this._lookAheadZ += (this._lookAheadTargetZ - this._lookAheadZ) * lookSmooth;
+
+    // Camera shake
+    if (this._shakeIntensity > 0) {
+      this._shakeOffsetX = (Math.random() - 0.5) * this._shakeIntensity;
+      this._shakeOffsetZ = (Math.random() - 0.5) * this._shakeIntensity;
+      this._shakeIntensity *= Math.pow(0.05, dt);
+      if (this._shakeIntensity < 0.01) this._shakeIntensity = 0;
+    } else {
+      this._shakeOffsetX = 0;
+      this._shakeOffsetZ = 0;
+    }
+
+    // Spherical coordinates
     const height = Math.sin(this.camPitch) * this.camDist;
     const radius = Math.cos(this.camPitch) * this.camDist;
-    const camX = x + Math.sin(this.camAngle) * radius;
-    const camZ = z + Math.cos(this.camAngle) * radius;
+    const camX = x + Math.sin(this.camAngle) * radius + this._lookAheadX + this._shakeOffsetX;
+    const camZ = z + Math.cos(this.camAngle) * radius + this._lookAheadZ + this._shakeOffsetZ;
     const camY = y + height;
 
-    // Suavização da posição
-    this.camera.position.x += (camX - this.camera.position.x) * 0.08;
-    this.camera.position.y += (camY - this.camera.position.y) * 0.08;
-    this.camera.position.z += (camZ - this.camera.position.z) * 0.08;
-    this.camera.lookAt(x, y + 5, z);
+    // Smooth position
+    this.camera.position.x += (camX - this.camera.position.x) * posSmooth;
+    this.camera.position.y += (camY - this.camera.position.y) * posSmooth;
+    this.camera.position.z += (camZ - this.camera.position.z) * posSmooth;
 
-    // Mover luz de acompanhamento
+    // Look at player + look-ahead offset
+    const lookX = x + this._lookAheadX * 0.3;
+    const lookZ = z + this._lookAheadZ * 0.3;
+    this.camera.lookAt(lookX, y + 5, lookZ);
+
+    // Dynamic FOV
+    this.camera.fov += (this._targetFOV - this.camera.fov) * pitchSmooth;
+    this.camera.updateProjectionMatrix();
+
     if (this.playerLight) {
       this.playerLight.position.set(x, 40, z);
     }
   },
 
-  // Rodar a câmara horizontalmente (radians)
   orbitAngle(delta) {
     this._camAngleTarget += delta;
   },
 
-  // Ajustar pitch (subir/baixar câmara)
   orbitPitch(delta) {
     this._camPitchTarget += delta;
   },
 
-  // Zoom in/out
   zoom(delta) {
     this._camDistTarget = Math.max(40, Math.min(200, this._camDistTarget + delta));
+    this._targetFOV = this._baseFOV + (this._camDistTarget - 100) * 0.05;
   },
 
-  _camDistTarget: 100,
+  shake(intensity, duration) {
+    this._shakeIntensity = Math.max(this._shakeIntensity, intensity);
+  },
+
+  setLookAhead(dx, dz) {
+    this._lookAheadTargetX = dx * 30;
+    this._lookAheadTargetZ = dz * 30;
+  },
+
+  resetIdleTimer() {
+    this._idleTimer = 0;
+  },
 };
