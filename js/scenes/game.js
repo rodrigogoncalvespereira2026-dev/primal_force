@@ -1,9 +1,8 @@
 const GameScene = {
-  canvas: null, ctx: null,
   player: null,
   enemies: [], projectiles: [], particles: [], pickups: [],
-  boss: null,           // boss ativo (null se não houver)
-  bossDefeated: false,  // flag para cutscene de derrota
+  boss: null,
+  bossDefeated: false,
   score: 0, kills: 0,
   combo: 0, comboTimer: 0,
   msg: '', msgTimer: 0,
@@ -11,8 +10,16 @@ const GameScene = {
   running: false, _raf: null, _lastTime: 0,
   laserFireTimer: 0,
   activeBoosts: { coinMult: 1, trophyMult: 1 },
+  _entityGroup: null,
+  _overlayCanvas: null,
+  _overlayCtx: null,
 
-  spawnParticles(x, y, color, n=10) { for(let i=0;i<n;i++) this.particles.push(new Particle(x,y,color)); },
+  spawnParticles(x, y, color, n=10) {
+    for (let i = 0; i < n; i++) {
+      const pt = new Particle(x, y, color);
+      this.particles.push(pt);
+    }
+  },
   showMsg(txt, dur=80) { this.msg=txt; this.msgTimer=dur; },
   addCombo()   { this.combo++; this.comboTimer=110; },
   resetCombo() { this.combo=0; },
@@ -41,7 +48,6 @@ const GameScene = {
     this._updateWaveHUD();
   },
 
-  // ── BOSS ───────────────────────────────────────────────────────────
   _spawnBoss() {
     const bossKey = pickRandomBoss();
     const bossType = BOSS_TYPES[bossKey];
@@ -50,17 +56,18 @@ const GameScene = {
     this.showMsg('⚠️ BOSS APROXIMA-SE!', 120);
     this.spawnParticles(this.player.x, this.player.y, '#ff4444', 30);
 
-    // Cutscene antes do boss
     const lines = Story.dialogues[dialogKey];
     if (lines) {
       this.stop();
       DialogSystem.show(lines, () => {
         this.boss = new Boss(bossKey);
+        this._createBossMesh(this.boss);
         this._updateBossHUD(true);
         this.resume();
       });
     } else {
       this.boss = new Boss(bossKey);
+      this._createBossMesh(this.boss);
       this._updateBossHUD(true);
     }
   },
@@ -78,8 +85,8 @@ const GameScene = {
     this.spawnParticles(boss.x, boss.y, boss.color, 80);
     this.spawnParticles(boss.x, boss.y, '#ffffff', 40);
     this._updateBossHUD(false);
+    if (boss.mesh3d) { Engine3D.scene.remove(boss.mesh3d); boss.mesh3d = null; }
 
-    // Cutscene de derrota do boss
     const defeatKey = boss.typeKey + '_defeat';
     const lines = Story.dialogues[defeatKey];
     this.stop();
@@ -169,9 +176,6 @@ const GameScene = {
   },
 
   init() {
-    this.canvas = document.getElementById('game-canvas');
-    this.ctx    = this.canvas.getContext('2d');
-    window.addEventListener('resize', () => this._resize());
     Joystick.init();
 
     document.getElementById('btn-pause').onclick = () => {
@@ -187,7 +191,6 @@ const GameScene = {
     document.getElementById('btn-retry').onclick    = () => App.goTo('game');
     document.getElementById('btn-go-menu').onclick  = () => App.goTo('menu');
 
-    // Controlos touch (mobile)
     const mb = (id, fn) => {
       const el = document.getElementById(id);
       if (!el) return;
@@ -199,7 +202,6 @@ const GameScene = {
     mb('btn-mb-zord',    () => this.player.doZord(this));
     mb('btn-mb-reaction', () => this._showReaction());
 
-    // Teclado (PC)
     document.addEventListener('keydown', e => {
       if (!this.running) return;
       if (e.code==='Space') { e.preventDefault(); this.player.doMelee(this); }
@@ -219,8 +221,39 @@ const GameScene = {
     this.running = false;
     if (this._raf) { cancelAnimationFrame(this._raf); this._raf=null; }
 
+    // ── Setup Three.js ──
+    const container = document.getElementById('game-3d-container');
+    if (!container) return;
+    Engine3D.init(container);
+    Engine3D.clear();
+
+    // Setup overlay 2D canvas (joystick + reactions)
+    this._overlayCanvas = document.getElementById('game-overlay-2d');
+    if (this._overlayCanvas) {
+      this._overlayCanvas.width = window.innerWidth;
+      this._overlayCanvas.height = window.innerHeight;
+      this._overlayCtx = this._overlayCanvas.getContext('2d');
+      window.addEventListener('resize', () => {
+        if (this._overlayCanvas) {
+          this._overlayCanvas.width = window.innerWidth;
+          this._overlayCanvas.height = window.innerHeight;
+        }
+      });
+    }
+
+    // Grupo para entidades
+    this._entityGroup = new THREE.Group();
+    Engine3D.scene.add(this._entityGroup);
+
     World.generate();
+
+    // ── Mundo 3D ──
+    const worldGroup = World3D.build(World);
+    Engine3D.scene.add(worldGroup);
+
     this.player      = new Ranger(rangerData);
+    this._createPlayerMesh(this.player);
+
     this.enemies     = [];
     this.projectiles = [];
     this.particles   = [];
@@ -232,7 +265,6 @@ const GameScene = {
     this.boss = null;
     this.bossDefeated = false;
 
-    // ── Aplica itens da loja (consumidos automaticamente nesta missão) ──
     this.activeBoosts = { coinMult: 1, trophyMult: 1 };
     const boostMsgs = [];
     if (Progression.consumeItem('potion')) {
@@ -251,9 +283,7 @@ const GameScene = {
     if (Progression.consumeItem('doubleCoins'))    { this.activeBoosts.coinMult    = 2; boostMsgs.push('💰 Moeda Dupla'); }
     if (Progression.consumeItem('doubleTrophies')) { this.activeBoosts.trophyMult  = 2; boostMsgs.push('🏆 Troféu Duplo'); }
 
-    // Configura número de ondas pela zona
     WaveSystem.maxWaves = App.currentZone ? (App.currentZone.waves || 3) : 3;
-    // Boss só na última missão da zona (ex: missão 3 de 3)
     WaveSystem.isFinalMission = App.currentZone
       ? (App.currentMission >= App.currentZone.missions.length - 1)
       : true;
@@ -269,13 +299,11 @@ const GameScene = {
       boostMsgs.length ? 'ONDA 1! Itens usados: ' + boostMsgs.join(' ') : 'ONDA 1 — PRIMAL FORCE!',
       160
     );
-    // Garante que o skill-bar fica escondido em mobile
     const skillBar = document.getElementById('skill-bar');
     if (skillBar && document.body.classList.contains('is-mobile')) {
       skillBar.style.display = 'none';
     }
 
-    this._resize();
     this.running=true;
     this._lastTime=performance.now();
     this._raf=requestAnimationFrame(ts=>this._loop(ts));
@@ -284,26 +312,19 @@ const GameScene = {
   stop()   { this.running=false; if(this._raf){cancelAnimationFrame(this._raf);this._raf=null;} },
   resume() { if(this.running)return; this.running=true; this._lastTime=performance.now(); this._raf=requestAnimationFrame(ts=>this._loop(ts)); },
 
-  _resize() {
-    if (!this.canvas) return;
-    const p = this.canvas.parentElement;
-    this.canvas.width  = (p?p.clientWidth :window.innerWidth)  || window.innerWidth;
-    this.canvas.height = (p?p.clientHeight:window.innerHeight) || window.innerHeight;
-  },
-
   _loop(ts) {
     if (!this.running) return;
     const dt = Math.min((ts-this._lastTime)/16.667, 3);
     this._lastTime=ts;
     this._update(dt);
-    this._draw();
+    this._sync3D();
+    this._render3D();
     this._raf=requestAnimationFrame(t=>this._loop(t));
   },
 
   _update(dt) {
     const p = this.player;
 
-    // Movimento via joystick ou teclado
     const mob = Joystick.getMoveDir();
     const kx = Input.getDirX(), ky = Input.getDirY();
     const mx = mob.x || kx, my = mob.y || ky;
@@ -317,13 +338,11 @@ const GameScene = {
       p.facing=Math.atan2(n.y,n.x);
     }
 
-    // Joystick direito — apontar
     const aim=Joystick.getAimDir();
     if(aim.x!==0||aim.y!==0) {
       p.facing=Math.atan2(aim.y,aim.x);
     }
 
-    // Update entidades
     p.updateTimers(dt, this);
     WaveSystem.update(dt, this);
 
@@ -332,13 +351,25 @@ const GameScene = {
     for(const pk of this.pickups)     pk.update(dt,p,this);
     for(const pt of this.particles)   pt.update(dt);
 
-    // Update do boss
     if (this.boss && !this.boss.dead) {
       this.boss.update(dt, p, this);
-      // Projéteis do boss já estão em game.projectiles (BossProjectile)
     }
     if (this.boss && this.boss.dead && !this.bossDefeated) {
       this.onBossKill(this.boss);
+    }
+
+    // Remover entidades mortas e seus meshes 3D
+    for (const e of this.enemies) {
+      if (e.dead && e.mesh3d) { this._entityGroup.remove(e.mesh3d); e.mesh3d = null; }
+    }
+    for (const pr of this.projectiles) {
+      if (pr.dead && pr.mesh3d) { this._entityGroup.remove(pr.mesh3d); pr.mesh3d = null; }
+    }
+    for (const pk of this.pickups) {
+      if (pk.dead && pk.mesh3d) { this._entityGroup.remove(pk.mesh3d); pk.mesh3d = null; }
+    }
+    for (const pt of this.particles) {
+      if (pt.dead && pt.mesh3d) { this._entityGroup.remove(pt.mesh3d); pt.mesh3d = null; }
     }
 
     this.enemies     = this.enemies.filter(e=>!e.dead);
@@ -349,75 +380,216 @@ const GameScene = {
     if(this.comboTimer>0){this.comboTimer-=dt;if(this.comboTimer<=0)this.combo=0;}
     if(this.msgTimer>0)  this.msgTimer-=dt;
 
-    const vw=this.canvas.width, vh=this.canvas.height;
+    // Câmara 2D para minimap
+    const vw = window.innerWidth, vh = window.innerHeight;
     this.cam.x = p.x;
     this.cam.y = p.y;
     this.cam.vw = vw;
     this.cam.vh = vh;
     this.cam.vx = Utils.clamp(p.x - vw/2, 0, Math.max(0, World.W - vw));
     this.cam.vy = Utils.clamp(p.y - vh/2, 0, Math.max(0, World.H - vh));
-    this.cam.flatX = p.x - vw / 2;
-    this.cam.flatY = p.y - vh / 2;
 
     HUD.update(p,this);
-    HUD.updateMinimap(p,this.enemies,this.cam,vw,vh);
     this._updateWaveHUD();
   },
 
-  _draw() {
-    const ctx=this.ctx;
-    const w=this.canvas.width, h=this.canvas.height;
-    ctx.fillStyle='#04080a';
-    ctx.fillRect(0,0,w,h);
+  _sync3D() {
+    const p = this.player;
 
-    World.draw(ctx,this.cam,w,h);
-    for(const pk of this.pickups)     pk.draw(ctx,this.cam);
-    for(const pt of this.particles)   pt.draw(ctx,this.cam);
-    for(const pr of this.projectiles) pr.draw(ctx,this.cam);
-    for(const e  of this.enemies)     e.draw(ctx,this.cam);
-    if (this.boss && !this.boss.dead) this.boss.draw(ctx, this.cam);
-    this.player.draw(ctx,this.cam);
+    // Sincronizar posição do jogador
+    if (p.mesh3d) {
+      p.mesh3d.position.set(p.x, 0, p.y);
+      // Rotação na direção do facing
+      p.mesh3d.rotation.y = -p.facing + Math.PI / 2;
+      // Efeito de escudo
+      if (p.shielded && !p._shieldMesh) {
+        const shieldGeo = new THREE.TorusGeometry(p.size + 12, 1.5, 8, 24);
+        const shieldMat = new THREE.MeshBasicMaterial({ color: 0x378add, transparent: true, opacity: 0.6 });
+        p._shieldMesh = new THREE.Mesh(shieldGeo, shieldMat);
+        p._shieldMesh.rotation.x = Math.PI / 2;
+        p.mesh3d.add(p._shieldMesh);
+      } else if (!p.shielded && p._shieldMesh) {
+        p.mesh3d.remove(p._shieldMesh);
+        p._shieldMesh = null;
+      }
+      // Efeito de zord
+      if (p.zordActive) {
+        p.mesh3d.scale.set(1.3, 1.3, 1.3);
+      } else {
+        p.mesh3d.scale.set(1, 1, 1);
+      }
+      // Piscar se invencível
+      if (p.invincible > 0) {
+        p.mesh3d.visible = Math.floor(p.invincible / 5) % 2 === 0;
+      } else {
+        p.mesh3d.visible = true;
+      }
+    }
 
-    // Linha de mira (joystick direito)
-    const aim=Joystick.getAimDir();
-    if(aim.x!==0||aim.y!==0) this._drawAimLine(ctx);
+    // Sincronizar inimigos
+    for (const e of this.enemies) {
+      if (!e.mesh3d) {
+        this._createEnemyMesh(e);
+      }
+      if (e.mesh3d) {
+        e.mesh3d.position.set(e.x, 0, e.y);
+        if (e.hit > 0) {
+          e.mesh3d.children.forEach(c => {
+            if (c.material && c.material.emissive) c.material.emissive.setHex(0xffffff);
+          });
+        } else {
+          e.mesh3d.children.forEach(c => {
+            if (c.material && c.material.emissive) c.material.emissive.setHex(0x000000);
+          });
+        }
+      }
+    }
 
-    // Joysticks
-    Joystick.draw(ctx,w,h);
+    // Sincronizar projéteis
+    for (const pr of this.projectiles) {
+      if (!pr.mesh3d) {
+        this._createProjectileMesh(pr);
+      }
+      if (pr.mesh3d) {
+        pr.mesh3d.position.set(pr.x, 2, pr.y);
+      }
+    }
 
-    // Entre ondas — countdown
-    if(WaveSystem.betweenWaves) {
-      const secs = Math.ceil(WaveSystem.betweenTimer/60);
-      ctx.fillStyle='rgba(0,0,0,0.45)';
-      ctx.fillRect(0,0,w,h);
-      ctx.fillStyle='#fff';
-      ctx.font=`bold ${Math.round(w*0.06)}px sans-serif`;
-      ctx.textAlign='center';
-      ctx.textBaseline='middle';
-      ctx.fillText('ONDA ' + (WaveSystem.wave+1) + ' EM ' + secs + '...', w/2, h/2);
+    // Sincronizar pickups
+    for (const pk of this.pickups) {
+      if (!pk.mesh3d) {
+        this._createPickupMesh(pk);
+      }
+      if (pk.mesh3d) {
+        pk.mesh3d.position.set(pk.x, 0, pk.y);
+        // Flutuação
+        pk.mesh3d.position.y = Math.sin(pk.t * 0.1) * 2;
+      }
+    }
+
+    // Sincronizar partículas
+    for (const pt of this.particles) {
+      if (!pt.mesh3d) {
+        this._createParticleMesh(pt);
+      }
+      if (pt.mesh3d) {
+        pt.mesh3d.position.set(pt.x, 2, pt.y);
+        const alpha = pt.life / pt.maxLife;
+        pt.mesh3d.scale.setScalar(alpha);
+        if (pt.mesh3d.material) pt.mesh3d.material.opacity = alpha;
+      }
+    }
+
+    // Sincronizar boss
+    if (this.boss && !this.boss.dead && this.boss.mesh3d) {
+      this.boss.mesh3d.position.set(this.boss.x, 0, this.boss.y);
+      if (this.boss.hit > 0) {
+        this.boss.mesh3d.position.x += (Math.random() - 0.5) * 0.5;
+      }
+    }
+
+    // Animar água
+    World3D.update(performance.now() * 0.001);
+  },
+
+  _render3D() {
+    // Câmara segue o jogador
+    if (this.player) {
+      Engine3D.setCameraTarget(this.player.x, 0, this.player.y);
+    }
+    Engine3D.render();
+
+    // Desenhar overlay 2D (joystick + reactions)
+    if (this._overlayCtx) {
+      const ctx = this._overlayCtx;
+      const w = this._overlayCanvas.width;
+      const h = this._overlayCanvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      // Joysticks
+      Joystick.draw(ctx, w, h);
+
+      // Mensagem de onda entre waves
+      if (WaveSystem.betweenWaves) {
+        const secs = Math.ceil(WaveSystem.betweenTimer / 60);
+        ctx.fillStyle = 'rgba(0,0,0,0.45)';
+        ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = '#fff';
+        ctx.font = `bold ${Math.round(w * 0.06)}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('ONDA ' + (WaveSystem.wave + 1) + ' EM ' + secs + '...', w / 2, h / 2);
+      }
+
+      // Reações emoji (2D overlay) — converte world→screen
+      const cam = this.cam;
+      for (const pt of this.particles) {
+        if (pt instanceof ReactionParticle && !pt.dead) {
+          const sx = pt.x - cam.vx;
+          const sy = pt.y - cam.vy;
+          if (sx < -50 || sx > w + 50 || sy < -50 || sy > h + 50) continue;
+          const alpha = Math.min(1, pt.life / (pt.maxLife * 0.3));
+          const scale = 0.6 + 0.4 * Math.min(1, (pt.maxLife - pt.life) / 10);
+          ctx.save();
+          ctx.globalAlpha = alpha;
+          ctx.font = `${Math.round(24 * scale)}px sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(pt.emoji, sx, sy);
+          ctx.restore();
+        }
+      }
     }
   },
 
-  _drawAimLine(ctx) {
-    const p=this.player;
-    const sx=Renderer.screenX(p.x, p.y, this.cam);
-    const sy=Renderer.screenY(p.x, p.y, this.cam);
-    const aim=Joystick.getAimDir();
-    const len=200;
-    const ex=sx+aim.x*len, ey=sy+aim.y*len;
-    ctx.save();
-    ctx.strokeStyle=p.data.laserColor+'99';
-    ctx.lineWidth=2;
-    ctx.setLineDash([8,6]);
-    ctx.beginPath();
-    ctx.moveTo(sx,sy);
-    ctx.lineTo(ex,ey);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillStyle=p.data.laserColor;
-    ctx.beginPath();
-    ctx.arc(ex,ey,5,0,Math.PI*2);
-    ctx.fill();
-    ctx.restore();
+  // ── Criar meshes 3D ──
+
+  _createPlayerMesh(player) {
+    const mesh = Model3D.createChibi(player.data.color, 22, {
+      bodyColor: player.data.color
+    });
+    mesh.position.set(player.x, 0, player.y);
+    this._entityGroup.add(mesh);
+    player.mesh3d = mesh;
+  },
+
+  _createEnemyMesh(enemy) {
+    const mesh = Model3D.createEnemy(enemy.type, enemy.color, enemy.size * 1.1);
+    mesh.position.set(enemy.x, 0, enemy.y);
+    this._entityGroup.add(mesh);
+    enemy.mesh3d = mesh;
+  },
+
+  _createBossMesh(boss) {
+    const mesh = Model3D.createBoss(boss.color, boss.colorAlt, boss.size, {
+      phase2: boss.phase === 2,
+      eyeColor: boss.phase === 2 ? 0xffff00 : 0xffffff,
+      pupilColor: new THREE.Color(boss.colorAlt).getHex()
+    });
+    mesh.position.set(boss.x, 0, boss.y);
+    this._entityGroup.add(mesh);
+    boss.mesh3d = mesh;
+  },
+
+  _createProjectileMesh(proj) {
+    const mesh = Model3D.createProjectile(proj.color, 3);
+    mesh.position.set(proj.x, 2, proj.y);
+    this._entityGroup.add(mesh);
+    proj.mesh3d = mesh;
+  },
+
+  _createPickupMesh(pickup) {
+    const mesh = Model3D.createPickup(pickup.type);
+    mesh.position.set(pickup.x, 0, pickup.y);
+    this._entityGroup.add(mesh);
+    pickup.mesh3d = mesh;
+  },
+
+  _createParticleMesh(pt) {
+    if (pt instanceof ReactionParticle) return; // Reações são 2D (emojis)
+    const mesh = Model3D.createParticle(pt.color, pt.size);
+    mesh.position.set(pt.x, 2, pt.y);
+    this._entityGroup.add(mesh);
+    pt.mesh3d = mesh;
   },
 };
