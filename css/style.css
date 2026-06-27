@@ -57,6 +57,95 @@ body {
 }
 .screen.overlay.active { display: flex; }
 
+/* ── FUNDO AZUL COM RELÂMPAGOS ── */
+@keyframes storm-drift {
+  0%   { transform: translate(0, 0); }
+  100% { transform: translate(90px, 50px); }
+}
+@keyframes storm-drift2 {
+  0%   { transform: translate(0, 0); }
+  100% { transform: translate(-70px, 40px); }
+}
+@keyframes storm-flash {
+  0%, 82%, 100% { opacity: 0; }
+  85% { opacity: 0.5; }
+  87% { opacity: 0; }
+  90% { opacity: 0.35; }
+  93% { opacity: 0; }
+}
+@keyframes storm-flash2 {
+  0%, 70%, 100% { opacity: 0; }
+  73% { opacity: 0.3; }
+  76% { opacity: 0; }
+  80% { opacity: 0.45; }
+  84% { opacity: 0; }
+}
+
+#screen-select.active,
+#screen-ranger.active,
+#screen-trophies.active,
+#screen-battlepass.active,
+#screen-shop.active,
+#screen-worldmap.active,
+#screen-game.active {
+  background: linear-gradient(160deg, #040c1c 0%, #0b1e3d 35%, #112e55 65%, #1a3a6b 100%) !important;
+}
+
+#screen-select.active::before,
+#screen-ranger.active::before,
+#screen-trophies.active::before,
+#screen-battlepass.active::before,
+#screen-shop.active::before,
+#screen-worldmap.active::before,
+#screen-game.active::before {
+  content: '';
+  position: absolute;
+  inset: -60%;
+  width: 220%;
+  height: 220%;
+  background:
+    linear-gradient(52deg, transparent 48.5%, rgba(100,180,255,0.18) 48.8%, rgba(100,180,255,0.18) 49.2%, transparent 49.5%),
+    linear-gradient(-31deg, transparent 48.5%, rgba(80,160,255,0.12) 48.8%, rgba(80,160,255,0.12) 49.2%, transparent 49.5%),
+    linear-gradient(68deg, transparent 48.5%, rgba(130,210,255,0.1) 48.8%, rgba(130,210,255,0.1) 49.2%, transparent 49.5%),
+    linear-gradient(-55deg, transparent 48.5%, rgba(90,150,255,0.14) 48.8%, rgba(90,150,255,0.14) 49.2%, transparent 49.5%),
+    linear-gradient(40deg, transparent 48.5%, rgba(110,190,255,0.08) 48.8%, rgba(110,190,255,0.08) 49.2%, transparent 49.5%),
+    linear-gradient(-18deg, transparent 48.5%, rgba(140,220,255,0.06) 48.8%, rgba(140,220,255,0.06) 49.2%, transparent 49.5%);
+  animation: storm-drift 12s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+#screen-select.active::after,
+#screen-ranger.active::after,
+#screen-trophies.active::after,
+#screen-battlepass.active::after,
+#screen-shop.active::after,
+#screen-worldmap.active::after,
+#screen-game.active::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(150,200,255,0.2), transparent 50%),
+    radial-gradient(ellipse at 70% 60%, rgba(120,180,255,0.15), transparent 45%),
+    radial-gradient(ellipse at 50% 80%, rgba(100,170,255,0.1), transparent 40%);
+  animation: storm-flash 4s ease-in-out infinite, storm-flash2 6s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Garantir que o conteúdo fica acima do fundo */
+#screen-select.active > *,
+#screen-ranger.active > *,
+#screen-trophies.active > *,
+#screen-battlepass.active > *,
+#screen-shop.active > *,
+#screen-worldmap.active > *,
+#screen-game.active > * {
+  position: relative;
+  z-index: 1;
+}
+
 /* ── MENU PRINCIPAL ── */
 #screen-menu { align-items: center; justify-content: center; }
 
