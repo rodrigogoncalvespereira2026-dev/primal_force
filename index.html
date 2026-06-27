@@ -10,9 +10,21 @@
   <meta http-equiv="Expires" content="0">
   <link rel="manifest" href="manifest.json">
   <title>Power Rangers Primal Force</title>
-  <link rel="stylesheet" href="css/style.css?v=9">
+  <link rel="stylesheet" href="css/style.css?v=10">
 </head>
 <body>
+<script>
+document.addEventListener('touchstart', function(e) {
+  if (e.touches.length > 1) return;
+  window._touchStartY = e.touches[0].clientY;
+}, { passive: true });
+document.addEventListener('touchmove', function(e) {
+  var dy = e.touches[0].clientY - (window._touchStartY || 0);
+  if (dy > 0 && window.scrollY <= 0) { e.preventDefault(); }
+}, { passive: false });
+document.addEventListener('gesturestart', function(e) { e.preventDefault(); });
+document.addEventListener('gesturechange', function(e) { e.preventDefault(); });
+</script>
 <div id="app">
 
   <!-- ── MENU ── -->
@@ -333,31 +345,31 @@
 
 </div><!-- /app -->
 
-<script src="js/core/utils.js?v=9"></script>
-<script src="js/core/input.js?v=9"></script>
-<script src="js/core/joystick.js?v=9"></script>
-<script src="js/core/renderer.js?v=9"></script>
-<script src="js/core/world.js?v=9"></script>
-<script src="js/core/wave.js?v=9"></script>
-<script src="js/core/progression.js?v=9"></script>
-<script src="js/core/primordial.js?v=9"></script>
-<script src="js/core/story.js?v=9"></script>
-<script src="js/entities/ranger.js?v=9"></script>
-<script src="js/entities/enemy.js?v=9"></script>
-<script src="js/entities/boss.js?v=9"></script>
-<script src="js/entities/projectile.js?v=9"></script>
-<script src="js/entities/particle.js?v=9"></script>
-<script src="js/entities/pickup.js?v=9"></script>
-<script src="js/ui/hud.js?v=9"></script>
-<script src="js/scenes/menu.js?v=9"></script>
-<script src="js/scenes/select.js?v=9"></script>
-<script src="js/scenes/dialog.js?v=9"></script>
-<script src="js/scenes/worldmap.js?v=9"></script>
-<script src="js/scenes/trophies.js?v=9"></script>
-<script src="js/scenes/battlepass.js?v=9"></script>
-<script src="js/scenes/primordial.js?v=9"></script>
-<script src="js/scenes/shop.js?v=9"></script>
-<script src="js/scenes/game.js?v=9"></script>
-<script src="js/main.js?v=9"></script>
+<script src="js/core/utils.js?v=10"></script>
+<script src="js/core/input.js?v=10"></script>
+<script src="js/core/joystick.js?v=10"></script>
+<script src="js/core/renderer.js?v=10"></script>
+<script src="js/core/world.js?v=10"></script>
+<script src="js/core/wave.js?v=10"></script>
+<script src="js/core/progression.js?v=10"></script>
+<script src="js/core/primordial.js?v=10"></script>
+<script src="js/core/story.js?v=10"></script>
+<script src="js/entities/ranger.js?v=10"></script>
+<script src="js/entities/enemy.js?v=10"></script>
+<script src="js/entities/boss.js?v=10"></script>
+<script src="js/entities/projectile.js?v=10"></script>
+<script src="js/entities/particle.js?v=10"></script>
+<script src="js/entities/pickup.js?v=10"></script>
+<script src="js/ui/hud.js?v=10"></script>
+<script src="js/scenes/menu.js?v=10"></script>
+<script src="js/scenes/select.js?v=10"></script>
+<script src="js/scenes/dialog.js?v=10"></script>
+<script src="js/scenes/worldmap.js?v=10"></script>
+<script src="js/scenes/trophies.js?v=10"></script>
+<script src="js/scenes/battlepass.js?v=10"></script>
+<script src="js/scenes/primordial.js?v=10"></script>
+<script src="js/scenes/shop.js?v=10"></script>
+<script src="js/scenes/game.js?v=10"></script>
+<script src="js/main.js?v=10"></script>
 </body>
 </html>
