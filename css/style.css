@@ -892,8 +892,8 @@ body.portrait-rotated #action-buttons {
 }
 
 /* ── TROPHIES SCREEN ── */
-#screen-trophies { background: #04060a; padding: 20px; gap: 16px; display:flex; flex-direction:column; }
-#screen-battlepass { background: #04060a; padding: 20px; gap: 16px; display:flex; flex-direction:column; }
+#screen-trophies { background: #04060a; padding: 20px; gap: 16px; }
+#screen-battlepass { background: #04060a; padding: 20px; gap: 16px; }
 
 /* Trophy header */
 .trophy-header { padding: 16px 0 0; flex-shrink:0; }
