@@ -396,6 +396,12 @@ const GameScene = {
   _sync3D() {
     const p = this.player;
 
+    // Câmara auto-segue a direção do jogador (estilo Brawl Stars)
+    if (p.mesh3d) {
+      const playerAngle = -p.facing + Math.PI / 2;
+      Engine3D._camAngleTarget = -p.facing + Math.PI;
+    }
+
     // Sincronizar posição do jogador
     if (p.mesh3d) {
       p.mesh3d.position.set(p.x, 0, p.y);

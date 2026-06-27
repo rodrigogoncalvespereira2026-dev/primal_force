@@ -199,8 +199,8 @@ const Engine3D = {
   setCameraTarget(x, y, z) {
     if (!this.camera) return;
 
-    // Suavização do ângulo e pitch
-    this.camAngle  += (this._camAngleTarget - this.camAngle)  * 0.06;
+    // Suavização do ângulo e pitch (ângulo mais rápido para seguir o jogador)
+    this.camAngle  += (this._camAngleTarget - this.camAngle)  * 0.12;
     this.camPitch  += (this._camPitchTarget - this.camPitch)  * 0.06;
     this.camDist   += (this._camDistTarget  - this.camDist)   * 0.06;
 
