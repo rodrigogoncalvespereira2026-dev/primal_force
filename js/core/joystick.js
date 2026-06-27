@@ -94,15 +94,13 @@ const Joystick = {
         this._calcDir(this.left, p.x, p.y);
       }
       if (this.right.active && t.identifier === this.right.id) {
-        // Delta bruto para câmara (estilo Free Fire — não joystick)
-        this._rawDX = p.x - this.right.startX;
-        this._rawDY = p.y - this.right.startY;
+        const dx = p.x - this.right.startX;
+        const dy = p.y - this.right.startY;
+        this._rawDX += dx;
+        this._rawDY += dy;
         this.right.startX = p.x;
         this.right.startY = p.y;
-
-        const ddx = p.x - this.right.startX;
-        const ddy = p.y - this.right.startY;
-        if (Math.sqrt(ddx*ddx + ddy*ddy) > 10) {
+        if (Math.sqrt(dx*dx + dy*dy) > 10) {
           this.right.dragged = true;
         }
       }
@@ -116,7 +114,9 @@ const Joystick = {
         this.left.active  = false; this.left.dx  = this.left.dy  = 0;
       }
       if (this.right.active && t.identifier === this.right.id) {
-        this._triggerMelee(this.right);
+        if (!this.right.dragged) {
+          this._triggerMelee(this.right);
+        }
         this.right.active = false; this.right.dx = this.right.dy = 0; this.right.dragged = false;
         this._rawDX = 0;
         this._rawDY = 0;
@@ -159,7 +159,9 @@ const Joystick = {
       if (isLeft)  {
         this.left.active  = false; this.left.dx  = this.left.dy  = 0;
       } else if (this.right.active) {
-        this._triggerMelee(this.right);
+        if (!this.right.dragged) {
+          this._triggerMelee(this.right);
+        }
         this.right.active = false; this.right.dx = this.right.dy = 0; this.right.dragged = false;
         this._rawDX = 0;
         this._rawDY = 0;

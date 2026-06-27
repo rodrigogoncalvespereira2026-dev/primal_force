@@ -335,14 +335,14 @@ const GameScene = {
     // Movimento relativo à câmara (estilo Free Fire)
     const mob = Joystick.getMoveDir();
     const kx = Input.getDirX(), ky = Input.getDirY();
-    const mx = mob.x || kx, my = mob.y || ky;
+    const mx = (mob.x !== 0) ? mob.x : kx;
+    const my = (mob.y !== 0) ? mob.y : ky;
     if (mx!==0||my!==0) {
-      // Converte input do joystick para direção relativa à câmara
       const camAngle = Engine3D.camAngle;
-      const cosA = Math.cos(-camAngle + Math.PI / 2);
-      const sinA = Math.sin(-camAngle + Math.PI / 2);
-      const worldMX = mx * cosA - my * sinA;
-      const worldMY = mx * sinA + my * cosA;
+      const cosA = Math.cos(camAngle);
+      const sinA = Math.sin(camAngle);
+      const worldMX = mx * cosA + my * sinA;
+      const worldMY = -mx * sinA + my * cosA;
 
       const n = Utils.normalize(worldMX, worldMY);
       const spd = p.speed * (p.zordActive ? 1.4 : 1) * dt;
@@ -351,11 +351,6 @@ const GameScene = {
       if (!World.isSolid(nx, p.y)) p.x = nx;
       if (!World.isSolid(p.x, ny)) p.y = ny;
       p.facing = Math.atan2(n.y, n.x);
-    }
-
-    const aim=Joystick.getAimDir();
-    if(aim.x!==0||aim.y!==0) {
-      p.facing=Math.atan2(aim.y,aim.x);
     }
 
     p.updateTimers(dt, this);
