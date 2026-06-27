@@ -41,14 +41,6 @@ const Progression = {
     { id:'gems_small',     name:'Pacote de Joias',    desc:'3 joias',  icon:'💎', price:200, reward:{ gems:3 } },
     { id:'gems_medium',    name:'Pacote de Joias+',   desc:'8 joias',  icon:'💎', price:500, reward:{ gems:8 } },
     { id:'gems_large',     name:'Pacote de Joias++',  desc:'20 joias', icon:'💎', price:1000, reward:{ gems:20 } },
-    // Sprites de raridade da Gota Primordial (grátis, uma vez cada)
-    { id:'sprite_comum',     name:'Orbe Comum',     desc:'Raridade Comum da Gota Primordial', icon:'💧', price:0, once:true },
-    { id:'sprite_raro',      name:'Orbe Raro',      desc:'Raridade Rara da Gota Primordial',  icon:'🔵', price:0, once:true },
-    { id:'sprite_super_raro',name:'Orbe Super Raro',desc:'Raridade Super Rara',               icon:'🟣', price:0, once:true },
-    { id:'sprite_epico',     name:'Orbe Épico',     desc:'Raridade Épica da Gota Primordial', icon:'🟠', price:0, once:true },
-    { id:'sprite_mitico',    name:'Orbe Mítico',    desc:'Raridade Mítica da Gota Primordial',icon:'🔴', price:0, once:true },
-    { id:'sprite_lendario',  name:'Orbe Lendário',  desc:'Raridade Lendária da Gota Primordial',icon:'💎', price:0, once:true },
-    { id:'sprite_primal',    name:'Orbe PRIMAL',    desc:'Raridade PRIMAL da Gota Primordial', icon:'🌟', price:0, once:true },
   ],
   // Ajudante: devolve moedas/joias conforme o tipo de preço
   _canAfford(item) {
@@ -156,8 +148,6 @@ const Progression = {
   buyItem(id) {
     const item = this.SHOP_ITEMS.find(i => i.id === id);
     if (!item) return false;
-    // Itens de recolha única: só permite comprar uma vez
-    if (item.once && (this.data.items[id] || 0) > 0) return false;
     if (!this._canAfford(item)) return false;
     if (!this._spend(item)) return false;
     // Pacotes de moedas/joias: creditam diretamente
