@@ -87,7 +87,9 @@ body {
 #screen-battlepass.active,
 #screen-shop.active,
 #screen-worldmap.active,
-#screen-game.active {
+#screen-game.active,
+#screen-perfil.active,
+#screen-missoes.active {
   background: linear-gradient(160deg, #040c1c 0%, #0b1e3d 35%, #112e55 65%, #1a3a6b 100%) !important;
 }
 
@@ -97,7 +99,9 @@ body {
 #screen-battlepass.active::before,
 #screen-shop.active::before,
 #screen-worldmap.active::before,
-#screen-game.active::before {
+#screen-game.active::before,
+#screen-perfil.active::before,
+#screen-missoes.active::before {
   content: '';
   position: absolute;
   inset: -60%;
@@ -121,7 +125,9 @@ body {
 #screen-battlepass.active::after,
 #screen-shop.active::after,
 #screen-worldmap.active::after,
-#screen-game.active::after {
+#screen-game.active::after,
+#screen-perfil.active::after,
+#screen-missoes.active::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -141,7 +147,9 @@ body {
 #screen-battlepass.active > *,
 #screen-shop.active > *,
 #screen-worldmap.active > *,
-#screen-game.active > * {
+#screen-game.active > *,
+#screen-perfil.active > *,
+#screen-missoes.active > * {
   position: relative;
   z-index: 1;
 }
