@@ -1128,45 +1128,67 @@ body.portrait-rotated #action-buttons {
 .is-mobile .op-icon { font-size: 14px; }
 
 /* ── GOTA PRIMORDIAL ──────────────────────────────────────────────── */
-#screen-primordial {
+/* ── GOTA PRIMORDIAL (OVERLAY) ── */
+#screen-gota {
   background: #0a0c16;
-  display: none;
-  flex-direction: column;
-}
-#screen-primordial.active { display: flex; }
-.primordial-top {
-  display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 10px 14px;
-  background: rgba(0,0,0,0.4);
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  z-index: 2;
+  justify-content: center;
+  z-index: 100;
 }
-.primordial-title {
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: 3px;
-  color: rgba(255,255,255,0.7);
-  flex: 1;
-  text-align: center;
-}
-#primordial-canvas {
-  flex: 1;
-  display: block;
+#screen-gota.active { display: flex; }
+#gota-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   touch-action: none;
   cursor: pointer;
+  display: block;
 }
-.primordial-hint {
+#gota-canvas-wrap {
   position: absolute;
-  bottom: 20px;
-  left: 0;
-  right: 0;
+  top: 14px; right: 14px;
+  z-index: 2;
+  background: rgba(0,0,0,0.5);
+  border-radius: 50%;
+  width: 44px; height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#gota-tap-counter {
+  font-size: 16px; font-weight: 800;
+  color: #fff;
+}
+.gota-hint {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0,0,0,0.75);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 20px 32px;
+  border-radius: 14px;
+  z-index: 10;
   text-align: center;
-  color: rgba(255,255,255,0.25);
-  font-size: 13px;
-  letter-spacing: 2px;
   pointer-events: none;
+  animation: gotaHintPulse 0.8s ease-in-out infinite alternate;
+}
+@keyframes gotaHintPulse {
+  from { transform: translate(-50%, -50%) scale(1); }
+  to   { transform: translate(-50%, -50%) scale(1.06); }
+}
+.gota-rewards {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
 }
 
 /* Portrait: reposiciona botões para ecrã vertical */

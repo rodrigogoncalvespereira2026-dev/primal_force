@@ -160,14 +160,14 @@
     <div id="battlepass-content" class="trophy-scroll"></div>
   </div>
 
-  <!-- ── GOTA PRIMORDIAL ── -->
-  <div id="screen-primordial" class="screen">
-    <div class="primordial-top">
-      <button class="back-btn" id="btn-close-primordial">&#8592; Sair</button>
-      <div class="primordial-title">GOTA PRIMORDIAL</div>
+  <!-- ── GOTA PRIMORDIAL (overlay) ── -->
+  <div id="screen-gota" class="screen overlay gota-overlay">
+    <div id="gota-canvas-wrap">
+      <span id="gota-tap-counter">0</span>
     </div>
-    <canvas id="primordial-canvas"></canvas>
-    <div class="primordial-hint">👆 Toca no orbe!</div>
+    <canvas id="gota-canvas"></canvas>
+    <div id="gota-hint" class="gota-hint" style="display:none">👆 Toca repetidamente antes do tempo acabar!</div>
+    <div id="gota-rewards" class="gota-rewards" style="display:none"></div>
   </div>
 
   <!-- ── LOJA ── -->
@@ -262,6 +262,8 @@
       <h2 id="go-title">DERROTA</h2>
       <div id="go-score">Pontuação: 0</div>
       <div id="go-kills">Inimigos derrotados: 0</div>
+      <div id="go-mission-rewards" style="color:#fac775;font-size:15px;font-weight:600"></div>
+      <div id="go-gota-rewards" style="color:#7ec8e3;font-size:13px;font-weight:600;margin-top:4px"></div>
       <div id="go-trophies" style="color:#fac775;font-size:18px;font-weight:700"></div>
       <button class="menu-btn" id="btn-retry">TENTAR NOVAMENTE</button>
       <button class="menu-btn secondary" id="btn-go-menu">MENU PRINCIPAL</button>

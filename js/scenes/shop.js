@@ -71,19 +71,23 @@ const ShopScene = {
       </div>
     `;
 
+    const goBack = () => {
+      // Re-render shop after gota closes
+      this._render();
+    };
     document.getElementById('btn-gota-free').onclick = () => {
       if (!Progression.canClaimFreePrimordial()) return;
       Progression.claimFreePrimordial();
-      PrimordialScene.show(5, 'shop');
-      this._render();
+      Primordial.start(6);
+      GotaScene.show({ coins:0, trophies:0 }, goBack);
     };
 
     document.getElementById('btn-gota-extra').onclick = () => {
       const price = Progression.primordialExtraPrice(this._extraCount);
       if (!Progression.spendGems(price)) return;
       this._extraCount++;
-      PrimordialScene.show(5, 'shop');
-      this._render();
+      Primordial.start(6);
+      GotaScene.show({ coins:0, trophies:0 }, goBack);
     };
   },
 };

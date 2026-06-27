@@ -83,11 +83,18 @@ const GameScene = {
 
   _afterBossDefeat(trophiesEarned, coinsEarned) {
     if (App.currentZone) WorldMap.completeMission(App.currentZone.id);
-    document.getElementById('go-title').textContent     = '🏆 VITÓRIA!';
-    document.getElementById('go-score').textContent     = 'Pontuação: ' + this.score;
-    document.getElementById('go-kills').textContent      = 'Inimigos derrotados: ' + this.kills;
-    document.getElementById('go-trophies').textContent  = '+' + trophiesEarned + ' 🏆 · +' + coinsEarned + ' 💰 — BOSS DERROTADO!';
+    this._missionRewards = { coins: coinsEarned, trophies: trophiesEarned };
+    this._showGameoverData('🏆 VITÓRIA!', '— BOSS DERROTADO!');
     this._tryPrimordial({ victory: true, isBoss: true });
+  },
+
+  _showGameoverData(title, suffix) {
+    document.getElementById('go-title').textContent    = title;
+    document.getElementById('go-score').textContent    = 'Pontuação: ' + this.score;
+    document.getElementById('go-kills').textContent    = 'Inimigos derrotados: ' + this.kills;
+    document.getElementById('go-mission-rewards').textContent = 'Missão: +' + this._missionRewards.trophies + ' 🏆 +' + this._missionRewards.coins + ' 💰 ' + (suffix || '');
+    document.getElementById('go-gota-rewards').textContent = '';
+    document.getElementById('go-trophies').textContent = 'Total: +' + this._missionRewards.trophies + ' 🏆 +' + this._missionRewards.coins + ' 💰';
   },
 
   _updateBossHUD(show) {
@@ -107,12 +114,28 @@ const GameScene = {
   },
 
   _tryPrimordial(missionResult) {
-    const chance = Primordial.canDrop(missionResult);
-    if (Math.random() < chance) {
-      PrimordialScene.show(missionResult.isBoss ? 5 : 3, 'gameover');
+    const drop = Primordial.canDrop(missionResult);
+    if (Math.random() < drop.chance) {
+      Primordial.start(drop.maxTier);
+      GotaScene.show(this._missionRewards || { coins:0, trophies:0 }, () => {
+        this._updateGameoverWithGota();
+        App.goTo('gameover');
+      });
     } else {
+      window._gotaRewards = [];
       App.goTo('gameover');
     }
+  },
+
+  _updateGameoverWithGota() {
+    const r = window._gotaRewards || [];
+    const gotaCoins = r.filter(x => x.type === 'coins').reduce((s, x) => s + x.amount, 0);
+    const gotaTrophies = r.filter(x => x.type === 'trophies').reduce((s, x) => s + x.amount, 0);
+    const mCoins = this._missionRewards?.coins || 0;
+    const mTrophies = this._missionRewards?.trophies || 0;
+    document.getElementById('go-mission-rewards').textContent = 'Missão: +' + mTrophies + ' 🏆 +' + mCoins + ' 💰';
+    document.getElementById('go-gota-rewards').textContent = 'Gota: +' + gotaTrophies + ' 🏆 +' + gotaCoins + ' 💰';
+    document.getElementById('go-trophies').textContent = 'Total: +' + (mTrophies + gotaTrophies) + ' 🏆 +' + (mCoins + gotaCoins) + ' 💰';
   },
 
   onPlayerDeath() {
@@ -123,10 +146,8 @@ const GameScene = {
     if (trophiesEarned > 0) Progression.addTrophies(trophiesEarned);
     if (coinsEarned > 0)    Progression.addCoins(coinsEarned);
     Progression.addBattlePassXP(this.kills * 5);
-    document.getElementById('go-title').textContent  = 'DERROTA';
-    document.getElementById('go-score').textContent  = 'Pontuação: ' + this.score;
-    document.getElementById('go-kills').textContent  = 'Inimigos derrotados: ' + this.kills;
-    document.getElementById('go-trophies').textContent = '+' + trophiesEarned + ' 🏆 · +' + coinsEarned + ' 💰';
+    this._missionRewards = { coins: coinsEarned, trophies: trophiesEarned };
+    this._showGameoverData('DERROTA', '');
     this._tryPrimordial({ victory: false, isBoss: false });
   },
 

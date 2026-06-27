@@ -1,227 +1,280 @@
-const PrimordialScene = {
+const GotaScene = {
   _canvas: null, _ctx: null, _raf: null, _running: false,
-  _onboardingDone: false, _exploding: false, _explodeTimer: 0,
-  _popRewards: [], _returnTo: null,
+  _sprites: {}, _imagesLoaded: 0, _imagesTotal: 7,
+  _state: 'idle', // idle | playing | popup | rewards | done
+  _popupTimer: 0, _popupText: '',
+  _rewardIndex: 0, _rewardTimer: 0,
+  _rewards: [], _onDone: null, _missionRewards: null,
+  _bgColor: '#1a1a2e', _targetBgColor: '#1a1a2e',
 
   init() {
-    this._canvas = document.getElementById('primordial-canvas');
+    this._canvas = document.getElementById('gota-canvas');
+    if (!this._canvas) {
+      console.error('GotaScene: canvas element not found');
+      return;
+    }
     this._ctx = this._canvas.getContext('2d');
-    document.getElementById('btn-close-primordial').onclick = () => {
-      const dest = this._returnTo || 'menu';
-      this._returnTo = null;
-      App.goTo(dest);
-    };
+    if (!this._ctx) {
+      console.error('GotaScene: could not get 2d context');
+      return;
+    }
+    this._preloadSprites();
     this._resize();
+    // Pointerdown + touchstart para compatibilidade mobile
+    this._canvas.addEventListener('pointerdown', e => this._onTap(e));
+    this._canvas.addEventListener('touchstart', e => {
+      e.preventDefault();
+      this._onTap(e);
+    }, { passive: false });
+  },
+
+  _preloadSprites() {
+    const names = ['gota-comum','gota-raro','gota-super_raro','gota-epico','gota-mitico','gota-lendario','gota-primal'];
+    this._imagesTotal = names.length;
+    this._imagesLoaded = 0;
+    names.forEach(name => {
+      const img = new Image();
+      img.onload = () => { this._imagesLoaded++; };
+      img.onerror = () => { this._imagesLoaded++; };
+      img.src = 'assets/img/gota/' + name + '.png';
+      this._sprites[name] = img;
+    });
   },
 
   _resize() {
     if (!this._canvas) return;
-    const p = this._canvas.parentElement;
-    this._canvas.width  = (p ? p.clientWidth  : window.innerWidth)  || window.innerWidth;
-    this._canvas.height = (p ? p.clientHeight : window.innerHeight) || window.innerHeight;
+    const w = window.innerWidth, h = window.innerHeight;
+    this._canvas.width = w;
+    this._canvas.height = h;
   },
 
-  show(dropTime, returnTo) {
+  show(missionRewards, onDone) {
     this._resize();
+    this._missionRewards = missionRewards || { coins:0, trophies:0 };
+    this._onDone = onDone || (() => {});
+    this._rewards = null;
+    this._state = 'playing';
+    this._rewardIndex = 0;
+    this._popupTimer = 0;
     this._running = true;
-    this._returnTo = returnTo || null;
-    this._onboardingDone = !!localStorage.getItem('prf_primordial_onboarding');
+    this._bgColor = '#1a1a2e';
+    this._targetBgColor = '#1a1a2e';
 
-    if (!this._onboardingDone) {
-      localStorage.setItem('prf_primordial_onboarding', '1');
-      this._onboardingDone = true;
+    document.getElementById('screen-gota').classList.add('active');
+    document.getElementById('gota-tap-counter').textContent = '0';
+
+    const hint = document.getElementById('gota-hint');
+    if (!localStorage.getItem('prf_gota_onboarding')) {
+      localStorage.setItem('prf_gota_onboarding', '1');
+      hint.style.display = 'block';
+      setTimeout(() => { hint.style.display = 'none'; }, 3000);
     }
 
-    Primordial.start(dropTime);
-    this._exploding = false;
-    this._explodeTimer = 0;
-    this._popRewards = [];
     this._loop();
-  },
-
-  stop() {
-    this._running = false;
-    if (this._raf) { cancelAnimationFrame(this._raf); this._raf = null; }
   },
 
   _loop() {
     if (!this._running) return;
-    if (Primordial.tick(0.016)) {
-      this._finish();
-      return;
+
+    if (this._state === 'popup') {
+      this._popupTimer -= 0.016;
+      if (this._popupTimer <= 0) {
+        this._state = 'playing';
+      }
     }
+
+    if (this._state === 'rewards') {
+      this._rewardTimer += 0.016;
+      if (this._rewardTimer > 0.6 && this._rewardIndex < this._rewards.length) {
+        this._rewardIndex++;
+        this._rewardTimer = 0;
+      }
+      if (this._rewardIndex >= this._rewards.length && this._rewardTimer > 1.5) {
+        this._state = 'done';
+        this._running = false;
+        cancelAnimationFrame(this._raf);
+        document.getElementById('screen-gota').classList.remove('active');
+        this._onDone();
+        return;
+      }
+    }
+
+    // Animação suave da cor de fundo
+    this._bgColor = this._lerpColor(this._bgColor, this._targetBgColor, 0.08);
+
     this._draw();
     this._raf = requestAnimationFrame(() => this._loop());
   },
 
-  _draw() {
-    const ctx = this._ctx;
-    const W = this._canvas.width, H = this._canvas.height;
-    ctx.clearRect(0, 0, W, H);
-
-    // fundo escuro
-    ctx.fillStyle = '#0a0c16';
-    ctx.fillRect(0, 0, W, H);
-
-    const tier = Primordial.getTierData();
-    const cx = W / 2, cy = H * 0.42;
-    const timeRatio = Primordial.state.time / Primordial.MAX_TIME;
-    const r = 90 + 10 * Primordial.state.tierIdx;
-
-    // glow
-    const grad = ctx.createRadialGradient(cx, cy, r * 0.2, cx, cy, r * 1.5);
-    grad.addColorStop(0, tier.color + '60');
-    grad.addColorStop(1, 'transparent');
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(cx, cy, r * 1.5, 0, Math.PI * 2);
-    ctx.fill();
-
-    // orbe
-    const orbGrad = ctx.createRadialGradient(cx - r * 0.3, cy - r * 0.3, r * 0.1, cx, cy, r);
-    orbGrad.addColorStop(0, '#fff');
-    orbGrad.addColorStop(0.3, tier.color);
-    orbGrad.addColorStop(1, tier.color + '80');
-    ctx.fillStyle = orbGrad;
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, Math.PI * 2);
-    ctx.fill();
-
-    // brilho
-    ctx.fillStyle = 'rgba(255,255,255,0.15)';
-    ctx.beginPath();
-    ctx.arc(cx - r * 0.25, cy - r * 0.3, r * 0.18, 0, Math.PI * 2);
-    ctx.fill();
-
-    // nome do tier
-    ctx.fillStyle = '#fff';
-    ctx.font = `bold ${22 + Primordial.state.tierIdx}px sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(tier.icon + ' ' + tier.name, cx, cy);
-
-    // taps
-    ctx.fillStyle = 'rgba(255,255,255,0.4)';
-    ctx.font = '14px sans-serif';
-    ctx.fillText(Primordial.state.taps + ' toques', cx, cy + r + 30);
-
-    // timer circular
-    const angle = timeRatio * Math.PI * 2 - Math.PI / 2;
-    ctx.strokeStyle = timeRatio < 0.3 ? '#ef4444' : tier.color;
-    ctx.lineWidth = 6;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.arc(cx, cy, r + 18, -Math.PI / 2, angle);
-    ctx.stroke();
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 28px monospace';
-    ctx.fillText(Primordial.state.time.toFixed(1) + 's', cx, cy + r + 64);
-
-    // onboarding
-    if (!this._onboardingDone && Primordial.state.taps < 3) {
-      ctx.fillStyle = 'rgba(0,0,0,0.6)';
-      ctx.fillRect(0, 0, W, H);
-      ctx.fillStyle = '#fff';
-      ctx.font = 'bold 20px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('👆 Toca no orbe para acumulares toques!', cx, H * 0.2);
-      ctx.fillStyle = 'rgba(255,255,255,0.5)';
-      ctx.font = '15px sans-serif';
-      ctx.fillText('Cada toque aumenta a raridade e o tempo.', cx, H * 0.2 + 30);
-      ctx.fillText('Quanto mais toques, melhores as recompensas!', cx, H * 0.2 + 52);
-    }
-
-    // explosão final
-    if (this._exploding) {
-      this._drawExplosion(ctx, W, H);
-    }
+  _lerpColor(a, b, t) {
+    const ah = parseInt(a.slice(1), 16), bh = parseInt(b.slice(1), 16);
+    const ar = (ah >> 16) & 0xff, ag = (ah >> 8) & 0xff, ab = ah & 0xff;
+    const br = (bh >> 16) & 0xff, bg = (bh >> 8) & 0xff, bb = bh & 0xff;
+    const rr = Math.round(ar + (br - ar) * t);
+    const rg = Math.round(ag + (bg - ag) * t);
+    const rb = Math.round(ab + (bb - ab) * t);
+    return '#' + ((1 << 24) + (rr << 16) + (rg << 8) + rb).toString(16).slice(1);
   },
 
-  _drawExplosion(ctx, W, H) {
-    const progress = 1 - this._explodeTimer / 1.5;
-    const cx = W / 2, cy = H * 0.42;
-    const intensity = Math.min(1, progress * 2);
+  _draw() {
+    const ctx = this._ctx, w = this._canvas.width, h = this._canvas.height;
 
-    for (let i = 0; i < 40; i++) {
-      const a = Math.random() * Math.PI * 2;
-      const dist = (30 + Math.random() * 150) * intensity;
-      const x = cx + Math.cos(a) * dist;
-      const y = cy + Math.sin(a) * dist;
-      const size = 3 + Math.random() * 6 * intensity;
-      ctx.fillStyle = Primordial.getTierData().color + Math.floor(80 + 100 * intensity).toString(16);
+    if (this._state === 'rewards' || this._state === 'done') {
+      this._drawRewards(ctx, w, h);
+      return;
+    }
+
+    // Fundo com cor da raridade (suave)
+    ctx.fillStyle = this._bgColor;
+    ctx.fillRect(0, 0, w, h);
+
+    // Gradiente no centro
+    const tier = Primordial.getTierData();
+    const grad = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w * 0.5);
+    grad.addColorStop(0, 'rgba(255,255,255,0.08)');
+    grad.addColorStop(1, 'rgba(0,0,0,0.3)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+
+    const cx = w / 2, cy = h * 0.38;
+    const baseR = Math.min(w, h) * 0.18;
+
+    // Gota (sprite)
+    this._drawSprite(ctx, cx, cy, baseR, tier);
+
+    // Nome do tier
+    ctx.fillStyle = tier.color || '#fff';
+    ctx.font = 'bold ' + Math.round(Math.min(w, h) * 0.05) + 'px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(tier.name.toUpperCase(), cx, cy + baseR + 36);
+
+    // Indicador de progresso (toques neste tier)
+    const tapsForTier = Primordial.state.tapsForTier;
+    const needed = Primordial.TAPS_PER_TIER;
+    for (let i = 0; i < needed; i++) {
+      const bx = cx - (needed - 1) * 12 + i * 24;
+      const by = cy + baseR + 66;
       ctx.beginPath();
-      ctx.arc(x, y, size, 0, Math.PI * 2);
+      ctx.arc(bx, by, 7, 0, Math.PI * 2);
+      ctx.fillStyle = i < tapsForTier ? tier.color || '#fff' : 'rgba(255,255,255,0.2)';
       ctx.fill();
     }
 
-    // recompensas popping
-    this._popRewards.forEach((r, i) => {
-      const t = (1 - this._explodeTimer / 1.5) * (1 + i * 0.15);
-      if (t < 0 || t > 1) return;
-      const y = cy + 50 - t * 120 + i * 50;
-      const alpha = Math.min(1, t * 3) * (1 - Math.max(0, t - 0.7) / 0.3);
-      ctx.fillStyle = `rgba(255,255,255,${alpha})`;
-      ctx.font = `bold ${16 + t * 8}px sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.fillText(r.text, cx, y);
-    });
+    // Total de toques
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = Math.round(Math.min(w, h) * 0.028) + 'px sans-serif';
+    ctx.fillText('Total: ' + Primordial.state.taps + ' toques', cx, cy + baseR + 100);
 
-    if (this._explodeTimer <= 0) {
-      // tudo terminou
+    // Popup de evolução
+    if (this._state === 'popup') {
+      ctx.fillStyle = 'rgba(0,0,0,0.6)';
+      const pw = w * 0.6, ph = 50;
+      const px = (w - pw) / 2, py = h * 0.15;
+      ctx.beginPath();
+      ctx.moveTo(px + 12, py);
+      ctx.lineTo(px + pw - 12, py);
+      ctx.quadraticCurveTo(px + pw, py, px + pw, py + 12);
+      ctx.lineTo(px + pw, py + ph - 12);
+      ctx.quadraticCurveTo(px + pw, py + ph, px + pw - 12, py + ph);
+      ctx.lineTo(px + 12, py + ph);
+      ctx.quadraticCurveTo(px, py + ph, px, py + ph - 12);
+      ctx.lineTo(px, py + 12);
+      ctx.quadraticCurveTo(px, py, px + 12, py);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = tier.color || '#fff';
+      ctx.font = 'bold ' + Math.round(Math.min(w, h) * 0.04) + 'px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('⬆ ' + this._popupText, w / 2, py + ph / 2);
     }
   },
 
-  _finish() {
-    const tier = Primordial.getTierData();
-    const rewards = Primordial.getRewards();
-    Primordial.claimRewards(rewards);
-
-    this._popRewards = rewards.map(r => {
-      if (r.type === 'coins') return { text: '🪙 +' + r.amount };
-      if (r.type === 'trophies') return { text: '🏆 +' + r.amount };
-      if (r.type === 'gems') return { text: '💎 +' + r.amount };
-      if (r.type === 'item') {
-        const item = Progression.SHOP_ITEMS.find(i => i.id === r.id);
-        return { text: (item ? item.icon : '📦') + ' ' + (item ? item.name : r.id) };
-      }
-      if (r.type === 'skin') return { text: '🎨 Skin: ' + r.id };
-      return { text: '📦 Recompensa' };
-    });
-
-    this._exploding = true;
-    this._explodeTimer = 1.5;
-
-    const animLoop = () => {
-      this._explodeTimer -= 0.016;
-      this._draw();
-      if (this._explodeTimer > 0) {
-        this._raf = requestAnimationFrame(animLoop);
-      } else {
-        this._running = false;
-        this._draw();
-        setTimeout(() => {
-          const dest = this._returnTo || 'menu';
-          this._returnTo = null;
-          App.goTo(dest);
-        }, 1500);
-      }
-    };
-    animLoop();
+  _drawSprite(ctx, cx, cy, r, tier) {
+    const name = tier.sprite.replace('.png', '');
+    const img = this._sprites[name];
+    if (img && img.complete && img.naturalWidth > 0) {
+      const s = r * 2;
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.drawImage(img, cx - r, cy - r, s, s);
+      ctx.restore();
+    } else {
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fillStyle = tier.color || '#8a9ba8';
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.font = Math.round(r * 1.2) + 'px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(tier.icon || '💧', cx, cy);
+    }
   },
 
-  onCanvasPointer(e) {
-    if (this._exploding) return;
-    const rect = this._canvas.getBoundingClientRect();
-    const x = (e.clientX || e.touches?.[0]?.clientX || 0) - rect.left;
-    const y = (e.clientY || e.touches?.[0]?.clientY || 0) - rect.top;
-    const cx = this._canvas.width / 2, cy = this._canvas.height * 0.42;
-    const r = 90 + 10 * Primordial.state.tierIdx;
-    const dx = x - cx, dy = y - cy;
-    if (dx * dx + dy * dy <= (r + 24) * (r + 24)) {
-      const now = performance.now();
-      if (Primordial.tap(now)) {
-        if (navigator.vibrate) navigator.vibrate(10);
-      }
+  _drawRewards(ctx, w, h) {
+    const tier = Primordial.getTierData();
+    // Fundo com a cor do tier escurecida
+    ctx.fillStyle = this._bgColor;
+    ctx.fillRect(0, 0, w, h);
+
+    // Nome do tier
+    ctx.fillStyle = tier.color || '#fff';
+    ctx.font = 'bold ' + Math.round(Math.min(w, h) * 0.06) + 'px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('⭐ ' + tier.name.toUpperCase() + ' ⭐', w / 2, h * 0.18);
+
+    // Lista de recompensas
+    const shown = this._rewards.slice(0, this._rewardIndex);
+    const startY = h * 0.32;
+    const lineH = Math.min(48, h * 0.07);
+    shown.forEach((r, i) => {
+      const y = startY + i * lineH;
+      const bounce = Math.sin(this._rewardTimer * 8 - i) * 4;
+      ctx.fillStyle = '#fff';
+      ctx.font = Math.round(Math.min(w, h) * 0.038) + 'px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(Primordial.rewardText(r), w / 2, y + bounce);
+    });
+
+    if (this._rewardIndex >= this._rewards.length) {
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.font = Math.round(Math.min(w, h) * 0.03) + 'px sans-serif';
+      ctx.fillText('A continuar…', w / 2, h * 0.85);
+    }
+  },
+
+  _onTap(e) {
+    if (this._state === 'rewards' || this._state === 'done') return;
+    const now = performance.now();
+    const result = Primordial.tap(now);
+    if (!result) return;
+
+    document.getElementById('gota-tap-counter').textContent = Primordial.state.taps;
+
+    const tier = Primordial.getTierData();
+    this._targetBgColor = tier.color || '#1a1a2e';
+
+    if (result === 'evolve') {
+      this._popupText = tier.name + '!';
+      this._popupTimer = 1.2;
+      this._state = 'popup';
+      if (navigator.vibrate) navigator.vibrate([15, 40, 15]);
+    } else if (result === 'claim') {
+      this._rewards = Primordial.getRewards();
+      Primordial.claimRewards(this._rewards);
+      window._gotaRewards = this._rewards;
+      this._rewardIndex = 0;
+      this._rewardTimer = 0;
+      this._state = 'rewards';
+      if (navigator.vibrate) navigator.vibrate([30, 50, 30, 50, 30]);
+    } else {
+      if (navigator.vibrate) navigator.vibrate(10);
     }
   },
 };
