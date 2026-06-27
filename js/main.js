@@ -3,6 +3,7 @@ const App = {
   currentZone:    null,
   currentMission: 0,
   _current: null,
+  _isPortraitRotated: false,
 
   screens: {
     menu:        'screen-menu',
@@ -45,20 +46,41 @@ const App = {
   },
 
   vpToApp(vx, vy) {
+    if (this._isPortraitRotated) {
+      const vh = window.innerHeight;
+      return { x: vh - vy, y: vx };
+    }
     return { x: vx, y: vy };
   },
 
   _forceLandscape() {
     const tryLock = () => {
       if (screen.orientation && screen.orientation.lock) {
-        screen.orientation.lock('landscape').catch(() => {
-          console.log('Orientation lock not supported');
-        });
+        screen.orientation.lock('landscape').catch(() => {});
       }
     };
     tryLock();
     setTimeout(tryLock, 500);
     window.addEventListener('load', tryLock);
+
+    this._applyRotation();
+    const recheck = () => { this._applyRotation(); if (GameScene && GameScene.canvas) GameScene._resize(); };
+    window.addEventListener('resize', recheck);
+    window.addEventListener('orientationchange', () => setTimeout(recheck, 300));
+  },
+
+  _applyRotation() {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const portrait = vh > vw;
+    const html = document.documentElement;
+    if (portrait) {
+      html.style.cssText = 'transform:rotate(-90deg);transform-origin:left top;width:' + vh + 'px;height:' + vw + 'px;position:absolute;top:' + vh + 'px;left:0;overflow:hidden';
+      this._isPortraitRotated = true;
+    } else {
+      html.style.cssText = '';
+      this._isPortraitRotated = false;
+    }
   },
 
   init() {
