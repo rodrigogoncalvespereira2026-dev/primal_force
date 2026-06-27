@@ -73,7 +73,11 @@
       <button class="back-btn" id="btn-back-select">&#8592; Voltar</button>
       <h1>ESCOLHE O TEU RANGER</h1>
     </div>
-    <div id="ranger-grid" class="ranger-grid"></div>
+    <div class="hscroll-wrap">
+      <button class="hscroll-arrow left" id="arrow-rangers-left">&#9664;</button>
+      <div id="ranger-grid" class="ranger-grid hscroll"></div>
+      <button class="hscroll-arrow right" id="arrow-rangers-right">&#9654;</button>
+    </div>
     <div class="select-footer">
       <button class="menu-btn" id="btn-confirmar-ranger">CONFIRMAR</button>
     </div>
@@ -148,7 +152,12 @@
       <button class="back-btn" id="btn-back-trophies">&#8592; Voltar</button>
       <h1>TROFÉUS</h1>
     </div>
-    <div id="trophies-content" class="trophy-scroll"></div>
+    <div id="trophies-content"></div>
+    <div class="hscroll-wrap">
+      <button class="hscroll-arrow left" id="arrow-trophies-left">&#9664;</button>
+      <div id="trophy-path" class="hscroll trophy-path"></div>
+      <button class="hscroll-arrow right" id="arrow-trophies-right">&#9654;</button>
+    </div>
   </div>
 
   <!-- ── PASSE DE BATALHA ── -->
@@ -157,7 +166,12 @@
       <button class="back-btn" id="btn-back-battlepass">&#8592; Voltar</button>
       <h1>PASSE DE BATALHA</h1>
     </div>
-    <div id="battlepass-content" class="trophy-scroll"></div>
+    <div id="battlepass-content"></div>
+    <div class="hscroll-wrap">
+      <button class="hscroll-arrow left" id="arrow-battlepass-left">&#9664;</button>
+      <div id="battlepass-path" class="hscroll"></div>
+      <button class="hscroll-arrow right" id="arrow-battlepass-right">&#9654;</button>
+    </div>
   </div>
 
   <!-- ── GOTA PRIMORDIAL (overlay) ── -->

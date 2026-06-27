@@ -267,13 +267,9 @@ body {
 .back-btn:hover { background: rgba(255,255,255,0.1); }
 
 .ranger-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 16px;
-  overflow-y: auto;
-  flex: 1;
-  padding-bottom: 8px;
+  display: flex; gap: 12px; flex-shrink: 0; align-items: stretch;
 }
+.ranger-grid .ranger-card { width: 170px; flex-shrink: 0; scroll-snap-align: start; }
 
 .ranger-card {
   background: rgba(255,255,255,0.04);
@@ -763,6 +759,7 @@ body.portrait-rotated #action-buttons {
   .hud-stat { font-size: 9px; }
 
   .ranger-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 8px; }
+  .ranger-grid .ranger-card { width: 140px; }
   .ranger-card { padding: 10px 8px; }
   .ranger-card-emoji { font-size: 28px; }
   .ranger-card-name { font-size: 12px; }
@@ -800,12 +797,16 @@ body.portrait-rotated #action-buttons {
   .dlg-speaker { font-size: 11px; }
 
   .trophy-tab { font-size: 11px; padding: 8px; }
+  .trophy-path .trophy-node { width: 160px; }
   .trophy-node { padding: 10px 12px; gap: 8px; }
   .trophy-node-icon { font-size: 18px; }
   .trophy-node-label { font-size: 11px; }
-  .bp-tier-num { height: 36px; font-size: 10px; }
-  .bp-reward { height: 36px; }
-  .bp-reward-item { font-size: 13px; }
+  .bp-tier-card { width: 150px; padding: 8px; }
+  .bp-tier-num { height: 30px; font-size: 12px; }
+  .bp-reward { min-height: 28px; }
+  .bp-reward-item { font-size: 12px; }
+  .hscroll-arrow { width: 28px; height: 28px; font-size: 11px; }
+  .hscroll-wrap { gap: 4px; padding: 0 6px 8px; }
 
   .act-btn { width: 54px; height: 42px; font-size: 10px; }
   .attack-btn { width: 68px; }
@@ -822,8 +823,7 @@ body.portrait-rotated #action-buttons {
 /* Select screen em paisagem */
 @media (orientation: landscape) and (max-height: 500px) {
   .is-mobile #screen-select { padding: 8px 12px; gap: 8px; }
-  .is-mobile .ranger-grid { grid-template-columns: repeat(6, 1fr); gap: 6px; padding-bottom: 4px; }
-  .is-mobile .ranger-card { padding: 6px 4px; gap: 4px; }
+  .is-mobile .ranger-card { width: 110px; padding: 6px 4px; gap: 4px; }
   .is-mobile .ranger-avatar { width: 32px; height: 32px; font-size: 18px; }
   .is-mobile .ranger-card-name { font-size: 10px; }
   .is-mobile .ranger-card-zord, .is-mobile .ranger-card-stats { display: none; }
@@ -841,10 +841,12 @@ body.portrait-rotated #action-buttons {
   .is-mobile #wm-canvas { flex: 1; height: auto; }
   .is-mobile .wm-panel { width: 200px; min-width: 0; max-height: none; max-width: 200px; border-left: 1px solid rgba(255,255,255,0.1); border-top: none; }
   .is-mobile #screen-trophies { padding: 8px; gap: 8px; }
-  .is-mobile .trophy-tab { padding: 6px; font-size: 10px; }
+  .is-mobile .trophy-path .trophy-node { width: 130px; }
   .is-mobile .trophy-node { padding: 6px 8px; gap: 6px; }
   .is-mobile .trophy-node-icon { font-size: 14px; }
   .is-mobile .trophy-node-label { font-size: 10px; }
+  .is-mobile .bp-tier-card { width: 130px; padding: 6px; }
+  .is-mobile .bp-reward-item { font-size: 11px; }
   .is-mobile #screen-shop { padding: 4px; }
   .is-mobile .shop-item { width: 130px; padding: 6px 4px; }
   .is-mobile .shop-item-icon { font-size: 18px; }
@@ -856,6 +858,8 @@ body.portrait-rotated #action-buttons {
   .is-mobile .shop-primordial-section { padding: 6px; }
   .is-mobile .shop-gota-btn { font-size: 10px; padding: 6px 10px; }
   .is-mobile .shop-arrow { width: 24px; height: 24px; font-size: 10px; }
+  .is-mobile .hscroll-arrow { width: 24px; height: 24px; font-size: 10px; }
+  .is-mobile .hscroll-wrap { gap: 2px; padding: 0 4px 8px; }
   .is-mobile .select-header h1 { font-size: 13px; }
 }
 
@@ -888,61 +892,69 @@ body.portrait-rotated #action-buttons {
 }
 
 /* ── TROPHIES SCREEN ── */
-#screen-trophies { background: #04060a; padding: 20px; gap: 16px; }
-#screen-battlepass { background: #04060a; padding: 20px; gap: 16px; }
-.trophy-scroll { flex:1; overflow-y:auto; padding-bottom:16px; }
+#screen-trophies { background: #04060a; padding: 20px; gap: 16px; display:flex; flex-direction:column; }
+#screen-battlepass { background: #04060a; padding: 20px; gap: 16px; display:flex; flex-direction:column; }
 
 /* Trophy header */
-.trophy-header { padding: 16px 0 24px; }
+.trophy-header { padding: 16px 0 0; flex-shrink:0; }
 .trophy-count { font-size: 28px; font-weight:900; color:#fac775; margin-bottom:12px; }
 .trophy-progress-wrap { display:flex; flex-direction:column; gap:6px; }
 .trophy-progress-bar { height:10px; background:rgba(255,255,255,0.1); border-radius:5px; overflow:hidden; }
 .trophy-progress-fill { height:100%; background:#fac775; border-radius:5px; transition:width 0.4s; }
 .trophy-progress-label { font-size:12px; color:rgba(255,255,255,0.4); }
 
-/* Trophy path */
-.trophy-path { display:flex; flex-direction:column; gap:0; }
+/* Trophy path (horizontal scroll) */
+.trophy-path { display:flex; gap:12px; flex-shrink:0; align-items:stretch; }
+.trophy-path .trophy-node { width:200px; flex-shrink:0; scroll-snap-align:start; }
 .trophy-node {
-  display:flex; align-items:center; gap:14px;
+  display:flex; flex-direction:column; align-items:center; gap:8px;
   padding:14px 16px; background:rgba(255,255,255,0.03);
   border:1px solid rgba(255,255,255,0.08); border-radius:8px;
-  position:relative; transition:all 0.15s;
+  text-align:center; transition:all 0.15s;
 }
 .trophy-node.unlocked { background:rgba(250,199,117,0.08); border-color:rgba(250,199,117,0.3); }
 .trophy-node.current  { border-color:rgba(255,255,255,0.4); background:rgba(255,255,255,0.06); }
 .trophy-node-icon { font-size:24px; }
-.trophy-node-trophies { font-size:13px; color:#fac775; font-weight:700; min-width:60px; }
+.trophy-node-trophies { font-size:13px; color:#fac775; font-weight:700; }
 .trophy-node-label { font-size:13px; color:rgba(255,255,255,0.7); }
-.trophy-node-check { margin-left:auto; color:#3cb371; font-size:18px; font-weight:900; }
-.trophy-connector { width:2px; height:16px; background:rgba(255,255,255,0.1); margin-left:28px; }
-.trophy-connector.unlocked { background:rgba(250,199,117,0.4); }
+.trophy-node-check { color:#3cb371; font-size:18px; font-weight:900; }
 
 /* Battle Pass */
-.bp-header { padding:16px 0 20px; display:flex; flex-direction:column; gap:8px; }
+.bp-header { padding:16px 0 0; flex-shrink:0; display:flex; flex-direction:column; gap:8px; }
 .bp-title { font-size:20px; font-weight:900; letter-spacing:4px; color:#fac775; }
 .bp-tier { font-size:14px; color:rgba(255,255,255,0.5); }
 .bp-xp-bar { height:8px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden; }
 .bp-xp-fill { height:100%; background:linear-gradient(90deg,#fac775,#e24b4a); border-radius:4px; transition:width 0.4s; }
 .bp-xp-label { font-size:11px; color:rgba(255,255,255,0.4); }
-.bp-grid { display:grid; grid-template-columns:40px 1fr 1fr; gap:4px; }
-.bp-col-header { font-size:11px; letter-spacing:2px; font-weight:700; padding:8px 4px; }
+
+/* Battle Pass — cartões horizontais por nível */
+.bp-tier-card {
+  width:180px; flex-shrink:0; scroll-snap-align:start;
+  display:flex; flex-direction:column; gap:4px;
+  background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08);
+  border-radius:8px; padding:10px;
+}
+.bp-tier-card.done { background:rgba(250,199,117,0.06); border-color:rgba(250,199,117,0.2); }
+.bp-tier-card.current { border-color:rgba(255,255,255,0.4); background:rgba(255,255,255,0.06); }
 .bp-tier-num {
   display:flex; align-items:center; justify-content:center;
   background:rgba(255,255,255,0.06); border-radius:4px;
-  font-size:12px; font-weight:700; color:rgba(255,255,255,0.4);
-  height:44px;
+  font-size:14px; font-weight:700; color:rgba(255,255,255,0.4);
+  height:36px; margin-bottom:4px;
 }
 .bp-tier-num.done   { background:rgba(250,199,117,0.15); color:#fac775; }
 .bp-tier-num.current{ background:rgba(255,255,255,0.15); color:#fff; border:1px solid rgba(255,255,255,0.4); }
+.bp-row-label { font-size:9px; letter-spacing:1px; color:rgba(255,255,255,0.3); text-align:center; }
+.bp-row-label.premium-label { color:rgba(175,86,245,0.7); }
 .bp-reward {
-  display:flex; align-items:center; gap:6px; padding:0 10px;
+  display:flex; align-items:center; gap:4px; padding:4px 8px;
   background:rgba(255,255,255,0.04); border-radius:4px;
-  height:44px; flex-wrap:wrap;
+  min-height:32px; flex-wrap:wrap; justify-content:center;
 }
 .bp-reward.done { background:rgba(250,199,117,0.08); }
 .bp-reward.premium { background:rgba(175,86,245,0.06); }
 .bp-reward.premium.done { background:rgba(175,86,245,0.12); }
-.bp-reward-item { font-size:16px; }
+.bp-reward-item { font-size:14px; }
 
 /* ── MAPA DO MUNDO ── */
 #screen-worldmap { background: #06090f; display:none; flex-direction:column; }
@@ -1017,6 +1029,31 @@ body.portrait-rotated #action-buttons {
 }
 .dlg-skip:hover { border-color:rgba(255,255,255,0.5); color:#fff; }
 .dlg-continue { margin-left:auto; font-size:12px; color:rgba(255,255,255,0.5); transition:opacity 0.3s; }
+
+/* ── RECIPIENTE HORIZONTAL REUTILIZÁVEL ── */
+.hscroll-wrap {
+  display: flex; align-items: center; gap: 6px;
+  padding: 0 12px 12px; flex: 1; min-height: 0;
+}
+.hscroll {
+  flex: 1; overflow-x: auto; overflow-y: hidden;
+  display: flex; gap: 12px; padding: 4px 0;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.hscroll::-webkit-scrollbar { display: none; }
+.hscroll-arrow {
+  flex-shrink: 0;
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.06); color: #fff;
+  font-size: 13px; cursor: pointer; font-family: inherit;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, transform 0.1s; user-select: none;
+}
+.hscroll-arrow:active { transform: scale(0.9); }
+.hscroll-arrow:hover { background: rgba(255,255,255,0.12); }
 
 /* ── LOJA ──────────────────────────────────────────────────────────── */
 #screen-shop { overflow-y: auto; }

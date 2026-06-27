@@ -25,6 +25,16 @@ const SelectScene = {
       }
     };
     this._buildGrid();
+    this._initArrows('rangers');
+  },
+
+  _initArrows(name) {
+    const scroll = document.getElementById('ranger-grid');
+    const left  = document.getElementById('arrow-' + name + '-left');
+    const right = document.getElementById('arrow-' + name + '-right');
+    if (!scroll || !left || !right) return;
+    left.onclick  = () => { const w = scroll.querySelector('.ranger-card')?.offsetWidth || 170; scroll.scrollBy({ left: -(w + 12), behavior: 'smooth' }); };
+    right.onclick = () => { const w = scroll.querySelector('.ranger-card')?.offsetWidth || 170; scroll.scrollBy({ left:  (w + 12), behavior: 'smooth' }); };
   },
 
   _buildGrid() {
