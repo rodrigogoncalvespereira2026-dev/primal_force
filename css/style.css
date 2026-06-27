@@ -775,13 +775,16 @@ body.portrait-rotated #action-buttons {
   .trophy-bar-menu { font-size: 11px; padding: 4px 12px; top: 10px; border-radius: 14px; }
   .menu-icon-btn { width: 44px; height: 44px; }
 
-  .shop-grid { grid-template-columns: 1fr; gap: 8px; padding: 0 10px 8px; }
-  .shop-item { padding: 12px 8px; }
+  .shop-item { width: 150px; padding: 12px 8px; }
   .shop-item-icon { font-size: 26px; }
   .shop-item-name { font-size: 12px; }
   .shop-item-desc { font-size: 10px; min-height: 32px; }
-  .shop-primordial-section { padding: 12px; }
+  .shop-scroll { gap: 8px; padding: 0 8px 8px; }
+  .shop-grid { gap: 8px; }
+  .shop-primordial-section { width: 170px; padding: 12px; }
   .shop-gota-btn { font-size: 12px; padding: 10px 14px; }
+  .shop-arrows { gap: 12px; }
+  .shop-arrow { width: 30px; height: 30px; font-size: 12px; }
 
   .select-header h1 { font-size: 14px; letter-spacing: 2px; }
   .select-footer { padding: 10px; }
@@ -842,14 +845,16 @@ body.portrait-rotated #action-buttons {
   .is-mobile .trophy-node { padding: 6px 8px; gap: 6px; }
   .is-mobile .trophy-node-icon { font-size: 14px; }
   .is-mobile .trophy-node-label { font-size: 10px; }
-  .is-mobile #screen-shop { padding: 8px; gap: 8px; }
-  .is-mobile .shop-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 0 4px 4px; }
-  .is-mobile .shop-item { padding: 8px 6px; }
-  .is-mobile .shop-item-icon { font-size: 20px; }
+  .is-mobile #screen-shop { padding: 4px; gap: 4px; }
+  .is-mobile .shop-item { width: 130px; padding: 6px 4px; }
+  .is-mobile .shop-item-icon { font-size: 18px; }
   .is-mobile .shop-item-desc { display: none; }
   .is-mobile .shop-hint { display: none; }
-  .is-mobile .shop-primordial-section { padding: 8px; }
-  .is-mobile .shop-gota-btn { font-size: 11px; padding: 8px 12px; }
+  .is-mobile .shop-scroll { gap: 6px; padding: 0 4px 4px; }
+  .is-mobile .shop-grid { gap: 6px; }
+  .is-mobile .shop-primordial-section { width: 150px; padding: 6px; }
+  .is-mobile .shop-gota-btn { font-size: 10px; padding: 6px 10px; }
+  .is-mobile .shop-arrows { display: none; }
   .is-mobile .select-header h1 { font-size: 13px; }
 }
 
@@ -1013,20 +1018,37 @@ body.portrait-rotated #action-buttons {
 .dlg-continue { margin-left:auto; font-size:12px; color:rgba(255,255,255,0.5); transition:opacity 0.3s; }
 
 /* ── LOJA ──────────────────────────────────────────────────────────── */
-.shop-coins-bar {
-  font-size: 18px; font-weight: 800; color: #fac775;
-  text-align: center; padding: 14px 0 4px;
+#screen-shop {
+  display: flex; flex-direction: column;
+  overflow: hidden; /* no vertical scroll, header fixo */
+}
+.shop-currency-bar {
+  font-size: 16px; font-weight: 800; color: #fac775;
+  text-align: center; padding: 10px 0 4px; flex-shrink: 0;
 }
 .shop-hint {
   font-size: 12px; color: rgba(255,255,255,0.45);
-  text-align: center; padding: 0 24px 14px; line-height: 1.5;
+  text-align: center; padding: 0 24px 14px; line-height: 1.5; flex-shrink: 0;
 }
+
+/* ── Scroll horizontal ── */
+.shop-scroll {
+  flex: 1; overflow-x: auto; overflow-y: hidden;
+  display: flex; gap: 12px; padding: 0 12px 12px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  /* esconder scrollbar no Chrome/Safari/Firefox */
+  scrollbar-width: none;
+}
+.shop-scroll::-webkit-scrollbar { display: none; }
+
 .shop-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
-  padding: 0 16px 16px;
+  display: flex; gap: 12px; flex-shrink: 0;
 }
-#screen-shop { overflow-y: auto; }
+
 .shop-item {
+  width: 180px; flex-shrink: 0;
+  scroll-snap-align: start;
   background: rgba(255,255,255,0.04); border: 1.5px solid rgba(255,255,255,0.08);
   border-radius: 12px; padding: 16px 10px 14px;
   display: flex; flex-direction: column; align-items: center; text-align: center; gap: 5px;
@@ -1046,14 +1068,31 @@ body.portrait-rotated #action-buttons {
   background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.3); cursor: not-allowed;
 }
 
-/* ── LOJA — GOTA PRIMORDIAL ── */
-.shop-currency-bar {
-  font-size: 16px; font-weight: 800; color: #fac775;
-  text-align: center; padding: 10px 0 4px;
+/* ── Setas de navegação ── */
+.shop-arrows {
+  display: flex; justify-content: center; gap: 20px;
+  padding-bottom: 6px; flex-shrink: 0;
 }
+.shop-arrow {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.05); color: #fff;
+  font-size: 14px; cursor: pointer; font-family: inherit;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, transform 0.1s; user-select: none;
+}
+.shop-arrow:active { transform: scale(0.9); }
+.shop-arrow:hover { background: rgba(255,255,255,0.12); }
+
+/* ── LOJA — GOTA PRIMORDIAL ── */
 .shop-primordial-section {
-  padding: 16px; border-top: 1.5px solid rgba(255,255,255,0.08);
-  text-align: center;
+  width: 220px; flex-shrink: 0;
+  scroll-snap-align: start;
+  padding: 16px; text-align: center;
+  background: rgba(255,255,255,0.04);
+  border: 1.5px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  display: flex; flex-direction: column; justify-content: center;
 }
 .shop-primordial-title {
   font-size: 15px; font-weight: 700; color: #7ec8e3; margin-bottom: 10px;

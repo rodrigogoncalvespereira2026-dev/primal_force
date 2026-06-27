@@ -3,6 +3,20 @@ const ShopScene = {
 
   init() {
     document.getElementById('btn-back-shop').onclick = () => App.goTo('menu');
+    this._initArrows();
+  },
+
+  _initArrows() {
+    const scroll = document.getElementById('shop-scroll');
+    const left  = document.getElementById('shop-arrow-left');
+    const right = document.getElementById('shop-arrow-right');
+    if (!scroll || !left || !right) return;
+    const scrollBy = () => {
+      const cardW = scroll.querySelector('.shop-item')?.offsetWidth || 180;
+      return cardW + 12; // card + gap
+    };
+    left.onclick  = () => { scroll.scrollBy({ left: -scrollBy(), behavior: 'smooth' }); };
+    right.onclick = () => { scroll.scrollBy({ left:  scrollBy(), behavior: 'smooth' }); };
   },
 
   show() {
