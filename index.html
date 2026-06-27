@@ -85,29 +85,69 @@
 
   <!-- ── RANGER DETAIL ── -->
   <div id="screen-ranger" class="screen">
-    <div class="select-header">
-      <button class="back-btn" id="btn-back-ranger">&#8592; Voltar</button>
-      <h1 id="rd-title">DETALHES DO RANGER</h1>
-    </div>
-    <div class="ranger-detail">
-      <div class="ranger-detail-left">
-        <h2 id="rd-name">Ranger</h2>
-        <div id="rd-sub" class="rd-sub">Ranger Title</div>
-        <div id="rd-desc" class="rd-desc">Descrição do ranger aparece aqui.</div>
+    <div class="rd-layout">
+      <!-- Coluna esquerda -->
+      <div class="rd-left">
+        <button class="back-btn" id="btn-back-ranger">&#8592;</button>
+        <h1 class="rd-name" id="rd-name">RANGER</h1>
+        <div class="rd-class"><span id="rd-class-icon">👊</span> <span id="rd-class">DESTRUIDOR</span></div>
+        <div class="rd-tag" id="rd-tag">RANGER INICIAL</div>
+        <div class="rd-trophy-bar">
+          <span class="rd-trophy-icon">🏆</span>
+          <div class="rd-trophy-progress"><div class="rd-trophy-fill" id="rd-trophy-fill"></div></div>
+          <span class="rd-trophy-text" id="rd-trophies">0/1000</span>
+        </div>
+        <p class="rd-desc" id="rd-desc">Descrição do ranger aparece aqui.</p>
         <div class="rd-actions">
-          <button class="menu-btn" id="rd-select">SELECIONAR</button>
-          <button class="menu-btn" id="rd-test">TESTAR</button>
+          <button class="rd-btn rd-btn-select" id="rd-select">SELECIONAR</button>
+          <button class="rd-btn rd-btn-test" id="rd-test">TESTAR</button>
         </div>
       </div>
-      <div class="ranger-detail-center">
-        <div id="rd-avatar" class="rd-avatar">🦖</div>
+
+      <!-- Centro — avatar grande -->
+      <div class="rd-center">
+        <div class="rd-avatar-wrap">
+          <div class="rd-avatar-glow" id="rd-glow"></div>
+          <div class="rd-avatar" id="rd-avatar">🦖</div>
+        </div>
       </div>
-      <div class="ranger-detail-right" id="rd-stats">
-        <div class="rd-power">NÍVEL <span id="rd-level">1</span></div>
-        <div class="rd-stats-list">
-          <div>SAÚDE <b id="rd-hp">0</b></div>
-          <div>ATAQUE <b id="rd-atk">0</b></div>
-          <div>SUPER <b id="rd-super">-</b></div>
+
+      <!-- Coluna direita — stats -->
+      <div class="rd-right">
+        <div class="rd-power-section">
+          <div class="rd-power-badge" id="rd-level">1</div>
+          <div class="rd-power-info">
+            <div class="rd-power-label">PODER</div>
+            <div class="rd-power-bar"><div class="rd-power-fill" id="rd-power-fill"></div></div>
+            <div class="rd-power-max">MÁX. 11</div>
+          </div>
+        </div>
+        <div class="rd-stats">
+          <div class="rd-stat">
+            <div class="rd-stat-icon hp">❤️</div>
+            <div class="rd-stat-info">
+              <div class="rd-stat-label">SAÚDE</div>
+              <div class="rd-stat-value" id="rd-hp">0</div>
+            </div>
+          </div>
+          <div class="rd-stat">
+            <div class="rd-stat-icon atk">💥</div>
+            <div class="rd-stat-info">
+              <div class="rd-stat-label">ATAQUE</div>
+              <div class="rd-stat-value" id="rd-atk">0</div>
+            </div>
+          </div>
+          <div class="rd-stat">
+            <div class="rd-stat-icon super">💀</div>
+            <div class="rd-stat-info">
+              <div class="rd-stat-label">SUPER</div>
+              <div class="rd-stat-value" id="rd-super">-</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
         </div>
       </div>
     </div>

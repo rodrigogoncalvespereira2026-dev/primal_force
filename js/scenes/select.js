@@ -74,23 +74,32 @@ const SelectScene = {
   showDetail(index) {
     const r = RANGERS_DATA[index];
     this._detailIndex = index;
-    // populate detail screen
-    const elName = document.getElementById('rd-name');
-    const elSub = document.getElementById('rd-sub');
-    const elDesc = document.getElementById('rd-desc');
-    const elAvatar = document.getElementById('rd-avatar');
-    const elLevel = document.getElementById('rd-level');
-    const elHp = document.getElementById('rd-hp');
-    const elAtk = document.getElementById('rd-atk');
-    const elSuper = document.getElementById('rd-super');
-    if (elName) elName.textContent = r.name;
-    if (elSub) elSub.textContent = r.title + ' · ' + r.zord;
-    if (elDesc) elDesc.textContent = r.specialDesc || r.title;
-    if (elAvatar) elAvatar.textContent = r.emoji;
-    if (elLevel) elLevel.textContent = Math.min(11, 5 + index);
-    if (elHp) elHp.textContent = r.maxHp;
-    if (elAtk) elAtk.textContent = r.attack;
-    if (elSuper) elSuper.textContent = r.specialName || '-';
+    const level = Math.min(11, 5 + index);
+    const setText = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+
+    // Coluna esquerda
+    setText('rd-name', r.name);
+    setText('rd-class', r.title);
+    setText('rd-tag', r.zord.toUpperCase());
+    setText('rd-desc', r.specialDesc || r.title);
+    setText('rd-trophies', (index * 12) + '/1000');
+    const tf = document.getElementById('rd-trophy-fill');
+    if (tf) tf.style.width = Math.min(100, (index * 12) / 10) + '%';
+
+    // Centro
+    const av = document.getElementById('rd-avatar');
+    if (av) av.textContent = r.emoji;
+    const glow = document.getElementById('rd-glow');
+    if (glow) glow.style.background = r.color;
+
+    // Coluna direita
+    setText('rd-level', level);
+    const pf = document.getElementById('rd-power-fill');
+    if (pf) pf.style.width = (level / 11 * 100) + '%';
+    setText('rd-hp', r.maxHp);
+    setText('rd-atk', r.attack);
+    setText('rd-super', r.specialName || '-');
+
     App.goTo('ranger');
   },
 
