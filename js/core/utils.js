@@ -30,11 +30,17 @@ const Utils = {
     return { x: vx / len, y: vy / len };
   },
 
-  spawnEdge(worldW, worldH, margin = 60) {
-    const edge = Math.floor(Math.random() * 4);
-    if (edge === 0) return { x: Utils.randRange(0, worldW), y: margin };
-    if (edge === 1) return { x: worldW - margin, y: Utils.randRange(0, worldH) };
-    if (edge === 2) return { x: Utils.randRange(0, worldW), y: worldH - margin };
-    return { x: margin, y: Utils.randRange(0, worldH) };
+  spawnEdge(worldW, worldH, margin = 60, isSolid = null) {
+    for (let attempt = 0; attempt < 20; attempt++) {
+      const edge = Math.floor(Math.random() * 4);
+      let pos;
+      if (edge === 0) pos = { x: Utils.randRange(margin, worldW - margin), y: margin };
+      else if (edge === 1) pos = { x: worldW - margin, y: Utils.randRange(margin, worldH - margin) };
+      else if (edge === 2) pos = { x: Utils.randRange(margin, worldW - margin), y: worldH - margin };
+      else pos = { x: margin, y: Utils.randRange(margin, worldH - margin) };
+
+      if (!isSolid || !isSolid(pos.x, pos.y)) return pos;
+    }
+    return { x: worldW / 2, y: worldH / 2 };
   },
 };

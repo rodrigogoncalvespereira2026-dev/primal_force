@@ -81,7 +81,7 @@ class Boss {
     this.phase2Done = false;
 
     // Posição — spawn na borda do mapa
-    const pos = Utils.spawnEdge(World.W, World.H);
+    const pos = Utils.spawnEdge(World.W, World.H, 60, (x, y) => World.isSolid(x, y));
     this.x = pos.x;
     this.y = pos.y;
 

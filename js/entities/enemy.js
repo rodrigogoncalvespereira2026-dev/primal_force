@@ -8,7 +8,7 @@ const ENEMY_TYPES = [
 class Enemy {
   constructor(type = 0) {
     const t = ENEMY_TYPES[type];
-    const pos = Utils.spawnEdge(World.W, World.H);
+    const pos = Utils.spawnEdge(World.W, World.H, 60, (x, y) => World.isSolid(x, y));
     Object.assign(this, t, pos);
     this.maxHp = t.hp;
     this.dead  = false;
