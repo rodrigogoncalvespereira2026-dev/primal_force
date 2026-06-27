@@ -3,7 +3,6 @@ const App = {
   currentZone:    null,
   currentMission: 0,
   _current: null,
-  _isPortraitRotated: false,
 
   screens: {
     menu:        'screen-menu',
@@ -46,10 +45,6 @@ const App = {
   },
 
   vpToApp(vx, vy) {
-    if (this._isPortraitRotated) {
-      const vh = window.innerHeight;
-      return { x: vh - vy, y: vx };
-    }
     return { x: vx, y: vy };
   },
 
@@ -62,32 +57,6 @@ const App = {
     tryLock();
     setTimeout(tryLock, 500);
     window.addEventListener('load', tryLock);
-
-    this._applyRotation();
-    const recheck = () => { this._applyRotation(); if (GameScene && GameScene.canvas) GameScene._resize(); };
-    window.addEventListener('resize', recheck);
-    window.addEventListener('orientationchange', () => setTimeout(recheck, 300));
-  },
-
-  _applyRotation() {
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const portrait = vh > vw;
-    const html = document.documentElement;
-    if (portrait) {
-      html.style.width = vh + 'px';
-      html.style.height = vw + 'px';
-      html.style.transform = 'rotate(-90deg)';
-      html.style.transformOrigin = 'left top';
-      html.style.position = 'absolute';
-      html.style.top = vh + 'px';
-      html.style.left = '0';
-      html.style.overflow = 'hidden';
-      this._isPortraitRotated = true;
-    } else {
-      html.style.cssText = '';
-      this._isPortraitRotated = false;
-    }
   },
 
   init() {
@@ -96,6 +65,10 @@ const App = {
     if (isTouch || isUA) {
       document.body.classList.add('is-mobile');
       this._forceLandscape();
+      document.addEventListener('touchmove', e => {
+        if (e.target.closest('#mobile-controls') || e.target.closest('#dpad')) return;
+        e.preventDefault();
+      }, { passive: false });
     }
     Progression.load();
     WorldMap.load();
