@@ -243,6 +243,104 @@
     <div id="shop-primordial" class="shop-primordial-section"></div>
   </div>
 
+  <!-- ── MAP EDITOR ── -->
+  <div id="screen-editor" class="screen">
+    <div class="editor-layout">
+      <!-- Barra superior -->
+      <div class="editor-topbar">
+        <button class="back-btn" id="btn-back-editor">&#8592; Voltar</button>
+        <input type="text" id="editor-map-name" class="editor-input" value="Mapa Sem Nome" maxlength="30" placeholder="Nome do mapa">
+        <select id="editor-zone" class="editor-select">
+          <option value="forest">🌿 Floresta</option>
+          <option value="city">🏚️ Cidade</option>
+          <option value="enemy_base">🏭 Base Inimiga</option>
+          <option value="volcano">🌋 Vulcão</option>
+          <option value="ocean">🌊 Oceano</option>
+          <option value="desert">🏜️ Deserto</option>
+          <option value="mountains">⛰️ Montanhas</option>
+        </select>
+        <span class="editor-info" id="editor-status">Terreno · Pintar</span>
+      </div>
+
+      <!-- Área do canvas -->
+      <div class="editor-canvas-wrap">
+        <canvas id="editor-canvas"></canvas>
+        <!-- Minimap -->
+        <div class="editor-minimap-wrap">
+          <canvas id="editor-minimap" width="120" height="96"></canvas>
+        </div>
+      </div>
+
+      <!-- Sidebar esquerda — Ferramentas -->
+      <div class="editor-sidebar-left">
+        <div class="editor-sidebar-section">
+          <button class="editor-tool-btn active" data-tool="paint" title="Pintar (B)">🖌️</button>
+          <button class="editor-tool-btn" data-tool="erase" title="Apagar (E)">🧹</button>
+          <button class="editor-tool-btn" data-tool="fill" title="Preencher (F)">🪣</button>
+        </div>
+        <div class="editor-sidebar-section">
+          <button class="editor-mode-btn active" data-mode="tiles" title="Terreno (T)">🟫</button>
+          <button class="editor-mode-btn" data-mode="objects" title="Objetos (O)">📦</button>
+        </div>
+        <div class="editor-sidebar-section">
+          <button class="editor-action-btn" id="editor-undo" title="Desfazer (Ctrl+Z)">↩️</button>
+          <button class="editor-action-btn" id="editor-redo" title="Refazer (Ctrl+Y)">↪️</button>
+        </div>
+        <div class="editor-sidebar-section">
+          <button class="editor-action-btn" id="editor-zoom-in" title="Zoom In (+)">🔍</button>
+          <button class="editor-action-btn" id="editor-zoom-out" title="Zoom Out (-)">🔎</button>
+          <button class="editor-action-btn" id="editor-zoom-fit" title="Ajustar">⊡</button>
+        </div>
+        <div class="editor-sidebar-section">
+          <button class="editor-action-btn danger" id="editor-clear" title="Limpar Tudo">🗑️</button>
+        </div>
+      </div>
+
+      <!-- Sidebar direita — Modificadores + Save/Load -->
+      <div class="editor-sidebar-right">
+        <div class="editor-sidebar-section">
+          <div class="editor-section-title">Modificadores</div>
+          <label class="editor-label">Ondas
+            <input type="number" id="editor-waves" class="editor-number" value="3" min="1" max="20">
+          </label>
+          <label class="editor-label">Tier Inimigos
+            <select id="editor-tier" class="editor-select small">
+              <option value="0">0 — Fácil</option>
+              <option value="1">1 — Médio</option>
+              <option value="2">2 — Difícil</option>
+              <option value="3">3 — Extremo</option>
+            </select>
+          </label>
+          <label class="editor-label">Tempo (0=inf)
+            <input type="number" id="editor-timer" class="editor-number" value="0" min="0" max="600">
+          </label>
+        </div>
+
+        <div class="editor-sidebar-section">
+          <div class="editor-section-title">Ações</div>
+          <button class="editor-action-btn wide" id="editor-save">💾 Salvar</button>
+          <button class="editor-action-btn wide" id="editor-load">📂 Carregar</button>
+          <button class="editor-action-btn wide" id="editor-export">📤 Exportar JSON</button>
+          <button class="editor-action-btn wide" id="editor-import">📥 Importar JSON</button>
+          <button class="editor-action-btn wide" id="editor-preset">🎲 Zona Aleatória</button>
+          <button class="editor-action-btn wide play" id="editor-play">▶ Jogar Mapa</button>
+        </div>
+
+        <!-- Lista de mapas salvos -->
+        <div class="editor-sidebar-section">
+          <div class="editor-section-title">Mapas Salvos</div>
+          <div id="editor-maps-list" class="editor-maps-list"></div>
+        </div>
+      </div>
+
+      <!-- Palette inferior -->
+      <div class="editor-palette-bar">
+        <div id="editor-palette" class="editor-palette"></div>
+      </div>
+    </div>
+    <input type="file" id="editor-file-input" accept=".json" style="display:none;">
+  </div>
+
   <!-- ── JOGO ── -->
   <div id="screen-game" class="screen">
     <div id="hud">
@@ -364,6 +462,9 @@
 <script src="js/scenes/battlepass.js?v=14"></script>
 <script src="js/scenes/primordial.js?v=14"></script>
 <script src="js/scenes/shop.js?v=14"></script>
+<script src="js/mapeditor/data.js?v=1"></script>
+<script src="js/mapeditor/editor.js?v=1"></script>
+<script src="js/mapeditor/storage.js?v=1"></script>
 <script src="js/scenes/game.js?v=14"></script>
 <script src="js/main.js?v=18"></script>
 </body>

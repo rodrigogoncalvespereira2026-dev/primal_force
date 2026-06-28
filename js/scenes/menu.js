@@ -22,9 +22,22 @@ const MenuScene = {
     // Cada botão — placeholder
     sidebar.querySelectorAll('.op-btn').forEach(btn => {
       btn.onclick = () => {
+        const opcao = btn.dataset.opcao;
         const nome = btn.querySelector('span:last-child').textContent;
         sidebar.classList.remove('open');
-        setTimeout(() => alert(`${nome} — em breve!`), 150);
+        if (opcao === 'mapas') {
+          setTimeout(() => {
+            App.goTo('editor');
+            if (!MapEditor._initialized) {
+              MapEditor.init();
+              MapEditor._initialized = true;
+            }
+            MapEditor.centerView();
+            App._refreshEditorMapsList();
+          }, 150);
+        } else {
+          setTimeout(() => alert(`${nome} — em breve!`), 150);
+        }
       };
     });
   },

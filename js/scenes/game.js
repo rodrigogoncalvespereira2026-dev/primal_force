@@ -247,7 +247,14 @@ const GameScene = {
     this._entityGroup = new THREE.Group();
     Engine3D.scene.add(this._entityGroup);
 
-    World.generate();
+    World.clearCustom();
+    const customMap = MapStorage.loadActiveMap();
+    if (customMap && customMap.grid) {
+      World.loadCustom(customMap);
+      MapStorage.clearActiveMap();
+    } else {
+      World.generate();
+    }
 
     // ── Mundo 3D ──
     const worldGroup = World3D.build(World);
