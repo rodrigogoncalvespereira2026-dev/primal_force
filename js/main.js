@@ -61,70 +61,93 @@ const App = {
 
   _applyMobileMenuLayout() {
     if (!window.matchMedia('(orientation: landscape)').matches) return;
-    const menu = document.getElementById('screen-menu');
-    if (!menu) return;
 
     const style = document.createElement('style');
+    style.id = 'mobile-menu-layout';
     style.textContent = `
-      #screen-menu {
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: wrap;
-        align-items: center;
-        justify-content: center;
-        padding: 6px 10px;
-        gap: 4px;
-        overflow: hidden;
+      /* Mesmas posições do PC mas com percentagens para mobile paisagem */
+      #screen-menu #btn-perfil {
+        position: absolute !important;
+        top: 8% !important; left: 2% !important;
+        bottom: auto !important; right: auto !important;
+        padding: 6px 10px !important;
       }
-      #screen-menu .menu-bg { position: absolute; inset: 0; }
-      #screen-menu .opcoes-sidebar { display: none !important; }
-      #screen-menu .trophy-bar-menu {
-        position: static !important; transform: none; font-size: 11px; padding: 4px 12px;
-        width: 100%; text-align: center; order: -1;
+      #screen-menu #btn-trofeus {
+        position: absolute !important;
+        top: 8% !important; left: 12% !important;
+        bottom: auto !important; right: auto !important;
+        padding: 6px 10px !important;
       }
-      #screen-menu .menu-content { position: static !important; order: 0; flex: 0 0 auto; gap: 4px; }
-      #screen-menu .logo-main { font-size: 18px; }
-      #screen-menu .logo-sub { font-size: 7px; letter-spacing: 3px; }
-      #screen-menu .logo-tagline { display: none; }
-      #screen-menu #btn-perfil,
-      #screen-menu #btn-trofeus,
-      #screen-menu .menu-corner-tr,
-      #screen-menu #btn-passe,
-      #screen-menu #btn-missoes {
-        position: static !important; top: auto !important; left: auto !important;
-        bottom: auto !important; right: auto !important; z-index: 2;
+      #screen-menu .menu-corner-tr {
+        position: absolute !important;
+        top: 8% !important; right: 2% !important;
+        bottom: auto !important; left: auto !important;
+        padding: 6px 10px !important;
       }
-      #screen-menu #btn-perfil { order: 1; }
-      #screen-menu #btn-trofeus { order: 2; }
-      #screen-menu .menu-corner-tr { order: 3; }
       #screen-menu .menu-side-left {
-        position: static !important; transform: none !important;
-        flex-direction: row; gap: 4px; order: 4; z-index: 2;
+        position: absolute !important;
+        left: 2% !important; top: 50% !important;
+        transform: translateY(-50%) !important;
+        bottom: auto !important; right: auto !important;
+        flex-direction: column !important;
+        gap: 6px !important;
       }
       #screen-menu .menu-side-right {
-        position: static !important; transform: none !important;
-        flex-direction: row; gap: 4px; order: 5; z-index: 2;
+        position: absolute !important;
+        right: 2% !important; bottom: 8% !important;
+        top: auto !important; left: auto !important;
+        flex-direction: row !important;
+        gap: 8px !important;
       }
-      #screen-menu #btn-passe { order: 6; }
-      #screen-menu #btn-missoes { order: 7; }
-      #screen-menu .menu-footer { position: static !important; font-size: 8px; width: 100%; text-align: center; order: 8; }
+      #screen-menu #btn-passe {
+        position: absolute !important;
+        bottom: 8% !important; left: 2% !important;
+        top: auto !important; right: auto !important;
+        padding: 6px 10px !important;
+      }
+      #screen-menu #btn-missoes {
+        position: absolute !important;
+        bottom: 8% !important; left: 12% !important;
+        top: auto !important; right: auto !important;
+        padding: 6px 10px !important;
+      }
+      #screen-menu .menu-content {
+        position: absolute !important;
+        top: 50% !important; left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+      }
+      #screen-menu .menu-footer {
+        position: absolute !important;
+        bottom: 2% !important; left: 50% !important;
+        transform: translateX(-50%) !important;
+        font-size: 8px !important;
+      }
+      #screen-menu .trophy-bar-menu {
+        position: absolute !important;
+        top: 2% !important; left: 50% !important;
+        transform: translateX(-50%) !important;
+        font-size: 11px !important; padding: 4px 12px !important;
+      }
+      #screen-menu .opcoes-sidebar { display: none !important; }
+
+      /* Botões mais pequenos */
       #screen-menu .menu-icon-btn {
-        min-width: 0 !important; width: auto; padding: 5px 8px; gap: 4px;
+        min-width: 0 !important;
+        width: auto !important;
+        padding: 6px 10px !important;
+        gap: 4px !important;
       }
-      #screen-menu .corner-icon { font-size: 15px; }
-      #screen-menu .corner-label { font-size: 9px; letter-spacing: 0.5px; }
+      #screen-menu .corner-icon { font-size: 16px !important; }
+      #screen-menu .corner-label { font-size: 9px !important; letter-spacing: 0.5px !important; }
       #screen-menu .menu-play-btn {
-        min-width: 0 !important; width: auto; padding: 7px 12px;
-        background: rgba(220,30,30,0.32); border-color: #e24b4a;
+        min-width: 0 !important;
+        padding: 10px 16px !important;
       }
-      #screen-menu .menu-play-btn .corner-icon { font-size: 17px; }
-      #screen-menu .menu-play-btn .corner-label { font-size: 10px; }
-      #screen-menu #btn-passe .menu-icon-btn,
-      #screen-menu #btn-missoes .menu-icon-btn,
-      #screen-menu .menu-side-left .menu-icon-btn,
-      #screen-menu .menu-side-right .menu-icon-btn {
-        min-width: 0 !important; padding: 5px 6px;
-      }
+      #screen-menu .menu-play-btn .corner-icon { font-size: 20px !important; }
+      #screen-menu .menu-play-btn .corner-label { font-size: 11px !important; }
+      #screen-menu .logo-main { font-size: 18px !important; }
+      #screen-menu .logo-sub { font-size: 8px !important; letter-spacing: 3px !important; }
+      #screen-menu .logo-tagline { display: none !important; }
     `;
     document.head.appendChild(style);
   },
