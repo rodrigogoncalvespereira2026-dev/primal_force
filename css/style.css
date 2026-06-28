@@ -1992,8 +1992,24 @@ body {
   flex-direction: column;
   gap: 6px;
   z-index: 10;
-  max-height: calc(100% - 110px);
+  max-height: calc(100vh - 120px);
   overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.2) transparent;
+}
+
+.editor-sidebar-right::-webkit-scrollbar {
+  width: 4px;
+}
+
+.editor-sidebar-right::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.editor-sidebar-right::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.2);
+  border-radius: 2px;
 }
 
 .editor-sidebar-section {
@@ -2662,6 +2678,7 @@ body {
     top: 52px;
     width: 140px;
     gap: 3px;
+    max-height: calc(100vh - 110px);
   }
   .editor-sidebar-section { padding: 4px; }
   .editor-section-title { font-size: 8px; }
