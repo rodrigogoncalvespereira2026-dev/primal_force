@@ -152,7 +152,8 @@ body {
 }
 
 /* ── MENU PRINCIPAL ── */
-#screen-menu { align-items: center; justify-content: center; display: flex; }
+#screen-menu:not(.active) { display: none !important; }
+#screen-menu { align-items: center; justify-content: center; }
 
 .menu-bg {
   position: absolute;

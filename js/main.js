@@ -65,26 +65,26 @@ const App = {
     const style = document.createElement('style');
     style.id = 'mobile-menu-layout';
     style.textContent = `
-      /* Mesmas posições do PC mas com percentagens para mobile paisagem */
-      #screen-menu #btn-perfil {
+      /* Só aplicar quando o menu está ativo */
+      #screen-menu.active #btn-perfil {
         position: absolute !important;
         top: 8% !important; left: 2% !important;
         bottom: auto !important; right: auto !important;
         padding: 6px 10px !important;
       }
-      #screen-menu #btn-trofeus {
+      #screen-menu.active #btn-trofeus {
         position: absolute !important;
         top: 8% !important; left: 12% !important;
         bottom: auto !important; right: auto !important;
         padding: 6px 10px !important;
       }
-      #screen-menu .menu-corner-tr {
+      #screen-menu.active .menu-corner-tr {
         position: absolute !important;
         top: 8% !important; right: 2% !important;
         bottom: auto !important; left: auto !important;
         padding: 6px 10px !important;
       }
-      #screen-menu .menu-side-left {
+      #screen-menu.active .menu-side-left {
         position: absolute !important;
         left: 2% !important; top: 50% !important;
         transform: translateY(-50%) !important;
@@ -92,62 +92,62 @@ const App = {
         flex-direction: column !important;
         gap: 6px !important;
       }
-      #screen-menu .menu-side-right {
+      #screen-menu.active .menu-side-right {
         position: absolute !important;
         right: 2% !important; bottom: 8% !important;
         top: auto !important; left: auto !important;
         flex-direction: row !important;
         gap: 8px !important;
       }
-      #screen-menu #btn-passe {
+      #screen-menu.active #btn-passe {
         position: absolute !important;
         bottom: 8% !important; left: 2% !important;
         top: auto !important; right: auto !important;
         padding: 6px 10px !important;
       }
-      #screen-menu #btn-missoes {
+      #screen-menu.active #btn-missoes {
         position: absolute !important;
         bottom: 8% !important; left: 12% !important;
         top: auto !important; right: auto !important;
         padding: 6px 10px !important;
       }
-      #screen-menu .menu-content {
+      #screen-menu.active .menu-content {
         position: absolute !important;
         top: 50% !important; left: 50% !important;
         transform: translate(-50%, -50%) !important;
       }
-      #screen-menu .menu-footer {
+      #screen-menu.active .menu-footer {
         position: absolute !important;
         bottom: 2% !important; left: 50% !important;
         transform: translateX(-50%) !important;
         font-size: 8px !important;
       }
-      #screen-menu .trophy-bar-menu {
+      #screen-menu.active .trophy-bar-menu {
         position: absolute !important;
         top: 2% !important; left: 50% !important;
         transform: translateX(-50%) !important;
         font-size: 11px !important; padding: 4px 12px !important;
       }
-      #screen-menu .opcoes-sidebar { display: none !important; }
+      #screen-menu.active .opcoes-sidebar { display: none !important; }
 
       /* Botões mais pequenos */
-      #screen-menu .menu-icon-btn {
+      #screen-menu.active .menu-icon-btn {
         min-width: 0 !important;
         width: auto !important;
         padding: 6px 10px !important;
         gap: 4px !important;
       }
-      #screen-menu .corner-icon { font-size: 16px !important; }
-      #screen-menu .corner-label { font-size: 9px !important; letter-spacing: 0.5px !important; }
-      #screen-menu .menu-play-btn {
+      #screen-menu.active .corner-icon { font-size: 16px !important; }
+      #screen-menu.active .corner-label { font-size: 9px !important; letter-spacing: 0.5px !important; }
+      #screen-menu.active .menu-play-btn {
         min-width: 0 !important;
         padding: 10px 16px !important;
       }
-      #screen-menu .menu-play-btn .corner-icon { font-size: 20px !important; }
-      #screen-menu .menu-play-btn .corner-label { font-size: 11px !important; }
-      #screen-menu .logo-main { font-size: 18px !important; }
-      #screen-menu .logo-sub { font-size: 8px !important; letter-spacing: 3px !important; }
-      #screen-menu .logo-tagline { display: none !important; }
+      #screen-menu.active .menu-play-btn .corner-icon { font-size: 20px !important; }
+      #screen-menu.active .menu-play-btn .corner-label { font-size: 11px !important; }
+      #screen-menu.active .logo-main { font-size: 18px !important; }
+      #screen-menu.active .logo-sub { font-size: 8px !important; letter-spacing: 3px !important; }
+      #screen-menu.active .logo-tagline { display: none !important; }
     `;
     document.head.appendChild(style);
   },
