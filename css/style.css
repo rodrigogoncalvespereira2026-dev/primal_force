@@ -1043,7 +1043,7 @@ body {
 
 /* Menu mobile em paisagem — layout flex compacto */
 @media (orientation: landscape) {
-  .is-mobile #screen-menu {
+  .is-mobile #screen-menu.active {
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: wrap;
@@ -1230,7 +1230,7 @@ body {
   .logo-tagline { font-size: 10px; }
 
   /* Layout grid para mobile */
-  #screen-menu {
+  #screen-menu.active {
     display: grid;
     grid-template-areas:
       "trophy trophy trophy"
@@ -1830,7 +1830,7 @@ body {
   .logo-tagline { font-size: 10px; }
 
   /* Layout grid para mobile */
-  #screen-menu {
+  #screen-menu.active {
     display: grid;
     grid-template-areas:
       "trophy trophy trophy"
