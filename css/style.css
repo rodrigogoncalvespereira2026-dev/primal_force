@@ -2600,4 +2600,85 @@ body {
   transform: translateY(-1px);
 }
 
+/* ── MOBILE: MAPMAKER HUB ────────────────────────────────────────── */
+@media (max-width: 600px), (orientation: landscape) and (max-height: 500px) {
+  .mm-header { padding: 6px 10px; gap: 8px; }
+  .mm-header h1 { font-size: 13px; letter-spacing: 2px; }
+  .mm-count { font-size: 10px; padding: 3px 8px; }
+
+  .mm-body {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .mm-card { min-height: 120px; border-radius: 10px; }
+  .mm-card-new-icon { font-size: 32px; }
+  .mm-card-new-title { font-size: 14px; }
+  .mm-card-new-sub { font-size: 10px; }
+  .mm-card-badge { font-size: 9px; padding: 4px 6px; }
+  .mm-card-emoji { font-size: 22px; }
+  .mm-card-title { font-size: 13px; }
+  .mm-card-body { padding: 8px; }
+  .mm-card-menu { width: 24px; height: 24px; font-size: 13px; top: 3px; right: 5px; }
+
+  .mm-card-popup { min-width: 110px; padding: 4px; }
+  .mm-popup-btn { padding: 7px 10px; font-size: 11px; }
+
+  .mm-modal { width: 95vw; border-radius: 12px; }
+  .mm-modal-header { padding: 10px 14px; }
+  .mm-modal-header h2 { font-size: 14px; letter-spacing: 1px; }
+  .mm-modal-close { width: 28px; height: 28px; font-size: 14px; }
+  .mm-modal-body { padding: 12px; gap: 8px; }
+  .mm-modal-label { font-size: 10px; }
+  .mm-modal-input { padding: 8px 10px; font-size: 14px; }
+  .mm-sel-arrow { width: 30px; height: 30px; font-size: 12px; }
+  .mm-sel-display { padding: 8px 10px; }
+  .mm-sel-emoji { font-size: 22px; }
+  .mm-sel-text { font-size: 12px; }
+  .mm-modal-btn { padding: 10px 30px; font-size: 14px; }
+}
+
+/* ── MOBILE: MAP EDITOR ──────────────────────────────────────────── */
+@media (max-width: 600px), (orientation: landscape) and (max-height: 500px) {
+  .editor-topbar { padding: 4px 8px; gap: 4px; flex-wrap: wrap; }
+  .editor-topbar .back-btn { font-size: 11px; padding: 4px 8px; }
+  .editor-input { font-size: 11px; min-width: 100px; padding: 3px 8px; }
+  .editor-select { font-size: 10px; padding: 3px 6px; }
+  .editor-info { font-size: 9px; }
+
+  .editor-sidebar-left {
+    left: 4px;
+    top: 52px;
+    gap: 3px;
+  }
+  .editor-sidebar-left .editor-sidebar-section { padding: 3px; gap: 2px; }
+  .editor-tool-btn,
+  .editor-mode-btn { font-size: 14px; padding: 5px; width: 30px; height: 30px; }
+  .editor-action-btn { font-size: 13px; padding: 4px; width: 28px; height: 28px; }
+
+  .editor-sidebar-right {
+    right: 4px;
+    top: 52px;
+    width: 140px;
+    gap: 3px;
+  }
+  .editor-sidebar-section { padding: 4px; }
+  .editor-section-title { font-size: 8px; }
+  .editor-label { font-size: 9px; }
+  .editor-number { font-size: 10px; padding: 2px 4px; }
+  .editor-action-btn.wide { font-size: 10px; padding: 4px 6px; }
+  .editor-select.small { font-size: 9px; }
+
+  .editor-palette-bar { padding: 4px 6px; }
+  .editor-palette { gap: 3px; min-height: 40px; }
+  .editor-palette-btn { min-width: 42px; padding: 3px 5px; border-radius: 6px; }
+  .palette-emoji { font-size: 14px; }
+  .palette-label { font-size: 7px; }
+  .palette-category { font-size: 8px; }
+
+  .editor-minimap-wrap { bottom: 50px; left: 4px; }
+  .editor-minimap-wrap canvas { width: 80px; height: 64px; }
+}
+
 

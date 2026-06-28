@@ -231,8 +231,27 @@ const MapEditor = {
 
   _bindEvents() {
     const cv = this.canvas;
+    let touches = [];
+    let lastPinchDist = 0;
 
     cv.addEventListener('pointerdown', e => {
+      if (e.pointerType === 'touch') {
+        touches.push({ id: e.pointerId, x: e.clientX, y: e.clientY });
+        if (touches.length === 2) {
+          lastPinchDist = Math.hypot(
+            touches[1].x - touches[0].x,
+            touches[1].y - touches[0].y
+          );
+          this._dragging = true;
+          this._lastMouse = {
+            x: (touches[0].x + touches[1].x) / 2,
+            y: (touches[0].y + touches[1].y) / 2,
+          };
+          cv.setPointerCapture(e.pointerId);
+          return;
+        }
+      }
+
       if (e.button === 1 || (e.button === 0 && e.shiftKey)) {
         this._dragging = true;
         this._lastMouse = { x: e.clientX, y: e.clientY };
@@ -251,6 +270,39 @@ const MapEditor = {
     });
 
     cv.addEventListener('pointermove', e => {
+      if (e.pointerType === 'touch') {
+        const idx = touches.findIndex(t => t.id === e.pointerId);
+        if (idx >= 0) touches[idx] = { id: e.pointerId, x: e.clientX, y: e.clientY };
+        if (touches.length === 2) {
+          const newDist = Math.hypot(
+            touches[1].x - touches[0].x,
+            touches[1].y - touches[0].y
+          );
+          const midX = (touches[0].x + touches[1].x) / 2;
+          const midY = (touches[0].y + touches[1].y) / 2;
+
+          if (lastPinchDist > 0) {
+            const scale = newDist / lastPinchDist;
+            const rect = cv.getBoundingClientRect();
+            const mx = midX - rect.left;
+            const my = midY - rect.top;
+            const oldZoom = this.zoom;
+            this.zoom = Math.max(0.2, Math.min(3, this.zoom * scale));
+            this.panX = mx - (mx - this.panX) * (this.zoom / oldZoom);
+            this.panY = my - (my - this.panY) * (this.zoom / oldZoom);
+          }
+
+          if (this._lastMouse) {
+            this.panX += midX - this._lastMouse.x;
+            this.panY += midY - this._lastMouse.y;
+          }
+          this._lastMouse = { x: midX, y: midY };
+          lastPinchDist = newDist;
+          this._dirty = true;
+          return;
+        }
+      }
+
       if (this._dragging) {
         const dx = e.clientX - this._lastMouse.x;
         const dy = e.clientY - this._lastMouse.y;
@@ -265,8 +317,17 @@ const MapEditor = {
       }
     });
 
+    const cleanupPointer = (e) => {
+      touches = touches.filter(t => t.id !== e.pointerId);
+      if (touches.length < 2) {
+        lastPinchDist = 0;
+        this._lastMouse = null;
+      }
+    };
+
     cv.addEventListener('pointerup', e => {
-      if (this._dragging) {
+      cleanupPointer(e);
+      if (this._dragging && touches.length === 0) {
         this._dragging = false;
         this._lastMouse = null;
       }
@@ -274,6 +335,13 @@ const MapEditor = {
         this._painting = false;
         this._pushHistory();
       }
+    });
+
+    cv.addEventListener('pointercancel', e => {
+      cleanupPointer(e);
+      this._dragging = false;
+      this._painting = false;
+      this._lastMouse = null;
     });
 
     cv.addEventListener('wheel', e => {
