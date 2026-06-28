@@ -1041,8 +1041,8 @@ body {
 .is-mobile .wm-panel { width: 100%; min-width: 0; }
 
 /* Menu mobile em paisagem — layout compacto com grid */
-@media (orientation: landscape) and (max-height: 600px) {
-  #screen-menu {
+@media (orientation: landscape) {
+  .is-mobile #screen-menu {
     display: grid !important;
     grid-template-areas:
       "trophy trophy trophy trophy trophy"
@@ -1059,47 +1059,47 @@ body {
     justify-content: center;
   }
 
-  .trophy-bar-menu { grid-area: trophy; position: static !important; transform: none; font-size: 11px; padding: 4px 12px; }
-  #btn-perfil { grid-area: perfil; position: static !important; top: auto !important; left: auto !important; }
-  #btn-trofeus { grid-area: trofeus; position: static !important; top: auto !important; left: auto !important; }
-  #btn-opcoes { grid-area: opcoes; position: static !important; top: auto !important; right: auto !important; }
-  .menu-corner-tr { position: static !important; top: auto !important; right: auto !important; }
-  .menu-side-left { grid-area: loja; position: static !important; transform: none; flex-direction: column; gap: 4px; top: auto !important; left: auto !important; bottom: auto !important; }
-  .menu-side-right { grid-area: map; position: static !important; transform: none; flex-direction: column; gap: 4px; top: auto !important; right: auto !important; bottom: auto !important; }
-  #btn-passe { grid-area: passe; position: static !important; top: auto !important; left: auto !important; bottom: auto !important; }
-  #btn-missoes { grid-area: missoes; position: static !important; top: auto !important; left: auto !important; bottom: auto !important; }
-  .menu-content { grid-area: center; position: static !important; }
-  .menu-footer { grid-area: footer; position: static !important; font-size: 8px; }
+  .is-mobile .trophy-bar-menu { grid-area: trophy; position: static !important; transform: none; font-size: 11px; padding: 4px 12px; }
+  .is-mobile #btn-perfil { grid-area: perfil; position: static !important; top: auto !important; left: auto !important; }
+  .is-mobile #btn-trofeus { grid-area: trofeus; position: static !important; top: auto !important; left: auto !important; }
+  .is-mobile #btn-opcoes { grid-area: opcoes; position: static !important; top: auto !important; right: auto !important; }
+  .is-mobile .menu-corner-tr { position: static !important; top: auto !important; right: auto !important; }
+  .is-mobile .menu-side-left { grid-area: loja; position: static !important; transform: none !important; flex-direction: column; gap: 4px; top: auto !important; left: auto !important; bottom: auto !important; }
+  .is-mobile .menu-side-right { grid-area: map; position: static !important; transform: none !important; flex-direction: column; gap: 4px; top: auto !important; right: auto !important; bottom: auto !important; }
+  .is-mobile #btn-passe { grid-area: passe; position: static !important; top: auto !important; left: auto !important; bottom: auto !important; }
+  .is-mobile #btn-missoes { grid-area: missoes; position: static !important; top: auto !important; left: auto !important; bottom: auto !important; }
+  .is-mobile .menu-content { grid-area: center; position: static !important; }
+  .is-mobile .menu-footer { grid-area: footer; position: static !important; font-size: 8px; }
 
-  .menu-icon-btn {
+  .is-mobile .menu-icon-btn {
     min-width: 0 !important;
     width: 100%;
     max-width: 110px;
     padding: 6px 8px;
     gap: 4px;
   }
-  .corner-icon { font-size: 16px; }
-  .corner-label { font-size: 9px; letter-spacing: 0.5px; }
+  .is-mobile .corner-icon { font-size: 16px; }
+  .is-mobile .corner-label { font-size: 9px; letter-spacing: 0.5px; }
 
-  .menu-play-btn {
+  .is-mobile .menu-play-btn {
     min-width: 0 !important;
     width: 100%;
-    max-width: 110px;
+    max-width: 120px;
     padding: 8px 10px;
   }
-  .menu-play-btn .corner-icon { font-size: 18px; }
-  .menu-play-btn .corner-label { font-size: 10px; }
+  .is-mobile .menu-play-btn .corner-icon { font-size: 18px; }
+  .is-mobile .menu-play-btn .corner-label { font-size: 10px; }
 
-  #btn-passe, #btn-missoes, .menu-side-left .menu-icon-btn, .menu-side-right .menu-icon-btn {
+  .is-mobile #btn-passe, .is-mobile #btn-missoes, .is-mobile .menu-side-left .menu-icon-btn, .is-mobile .menu-side-right .menu-icon-btn {
     min-width: 0 !important;
     width: 100%;
     max-width: 100px;
     padding: 5px 6px;
   }
 
-  .logo-main { font-size: 20px; }
-  .logo-sub { font-size: 8px; letter-spacing: 3px; }
-  .logo-tagline { display: none; }
+  .is-mobile .logo-main { font-size: 20px; }
+  .is-mobile .logo-sub { font-size: 8px; letter-spacing: 3px; }
+  .is-mobile .logo-tagline { display: none; }
 
   .is-mobile #mobile-controls {
     padding: 4px 12px 8px;
