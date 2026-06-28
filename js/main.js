@@ -128,7 +128,6 @@ const App = {
         transform: translateX(-50%) !important;
         font-size: 11px !important; padding: 4px 12px !important;
       }
-      #screen-menu.active .opcoes-sidebar { display: none !important; }
 
       /* Botões mais pequenos */
       #screen-menu.active .menu-icon-btn {

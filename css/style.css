@@ -1055,7 +1055,6 @@ body {
   }
 
   .is-mobile .menu-bg { position: absolute; inset: 0; }
-  .is-mobile .opcoes-sidebar { display: none !important; }
 
   .is-mobile .trophy-bar-menu {
     position: static !important; transform: none; font-size: 11px; padding: 4px 12px;
