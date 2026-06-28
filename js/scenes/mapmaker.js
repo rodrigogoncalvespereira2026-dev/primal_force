@@ -140,13 +140,12 @@ const MapMakerScene = {
   _editMap(mapData) {
     MapEditor.mapName = mapData.name || 'Sem nome';
     MapEditor.zone = mapData.zone || 'forest';
-    MapEditor.loadData(mapData);
     App.goTo('editor');
     if (!MapEditor._initialized) {
       MapEditor.init();
-      MapEditor._initialized = true;
     }
-    MapEditor.centerView();
+    MapEditor.loadData(mapData);
+    setTimeout(() => MapEditor.centerView(), 50);
   },
 
   _openModal() {
