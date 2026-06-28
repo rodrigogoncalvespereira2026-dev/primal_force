@@ -1040,10 +1040,10 @@ body {
 /* Tablets (até 1024px) */
 .is-mobile .wm-panel { width: 100%; min-width: 0; }
 
-/* Menu mobile em paisagem — layout compacto */
-@media (orientation: landscape) and (max-height: 500px) {
+/* Menu mobile em paisagem — layout compacto com grid */
+@media (orientation: landscape) and (max-height: 600px) {
   #screen-menu {
-    display: grid;
+    display: grid !important;
     grid-template-areas:
       "trophy trophy trophy trophy trophy"
       "perfil loja   center map   opcoes"
@@ -1056,21 +1056,23 @@ body {
     justify-items: center;
     padding: 6px 10px;
     gap: 4px;
+    justify-content: center;
   }
 
-  .trophy-bar-menu { grid-area: trophy; position: static; transform: none; font-size: 11px; padding: 4px 12px; }
-  #btn-perfil { grid-area: perfil; position: static; }
-  #btn-trofeus { grid-area: trofeus; position: static; }
-  #btn-opcoes { grid-area: opcoes; position: static; }
-  .menu-side-left { grid-area: loja; position: static; transform: none; flex-direction: column; gap: 4px; }
-  .menu-side-right { grid-area: map; position: static; transform: none; flex-direction: column; gap: 4px; }
-  #btn-passe { grid-area: passe; position: static; }
-  #btn-missoes { grid-area: missoes; position: static; }
-  .menu-content { grid-area: center; }
-  .menu-footer { grid-area: footer; font-size: 8px; }
+  .trophy-bar-menu { grid-area: trophy; position: static !important; transform: none; font-size: 11px; padding: 4px 12px; }
+  #btn-perfil { grid-area: perfil; position: static !important; top: auto !important; left: auto !important; }
+  #btn-trofeus { grid-area: trofeus; position: static !important; top: auto !important; left: auto !important; }
+  #btn-opcoes { grid-area: opcoes; position: static !important; top: auto !important; right: auto !important; }
+  .menu-corner-tr { position: static !important; top: auto !important; right: auto !important; }
+  .menu-side-left { grid-area: loja; position: static !important; transform: none; flex-direction: column; gap: 4px; top: auto !important; left: auto !important; bottom: auto !important; }
+  .menu-side-right { grid-area: map; position: static !important; transform: none; flex-direction: column; gap: 4px; top: auto !important; right: auto !important; bottom: auto !important; }
+  #btn-passe { grid-area: passe; position: static !important; top: auto !important; left: auto !important; bottom: auto !important; }
+  #btn-missoes { grid-area: missoes; position: static !important; top: auto !important; left: auto !important; bottom: auto !important; }
+  .menu-content { grid-area: center; position: static !important; }
+  .menu-footer { grid-area: footer; position: static !important; font-size: 8px; }
 
   .menu-icon-btn {
-    min-width: 0;
+    min-width: 0 !important;
     width: 100%;
     max-width: 110px;
     padding: 6px 8px;
@@ -1080,7 +1082,7 @@ body {
   .corner-label { font-size: 9px; letter-spacing: 0.5px; }
 
   .menu-play-btn {
-    min-width: 0;
+    min-width: 0 !important;
     width: 100%;
     max-width: 110px;
     padding: 8px 10px;
@@ -1089,7 +1091,7 @@ body {
   .menu-play-btn .corner-label { font-size: 10px; }
 
   #btn-passe, #btn-missoes, .menu-side-left .menu-icon-btn, .menu-side-right .menu-icon-btn {
-    min-width: 0;
+    min-width: 0 !important;
     width: 100%;
     max-width: 100px;
     padding: 5px 6px;
@@ -1098,27 +1100,7 @@ body {
   .logo-main { font-size: 20px; }
   .logo-sub { font-size: 8px; letter-spacing: 3px; }
   .logo-tagline { display: none; }
-}
 
-@media (max-width: 1024px) {
-  .bar-wrap { width: 110px; }
-  #skill-bar { gap: 4px; bottom: 84px; }
-  .skill-slot { width: 44px; height: 44px; }
-  #hud { padding: 8px 10px; }
-  #hud-wave-info { font-size: 11px; }
-  .hud-stat { font-size: 10px; }
-  #minimap { width: 70px; height: 56px; }
-  .ranger-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 12px; }
-  .ranger-card { padding: 14px 10px; }
-  .trophy-bar-menu { font-size: 13px; padding: 6px 14px; top: 14px; }
-  .shop-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-  .logo-main { font-size: 32px; }
-  .logo-sub { font-size: 13px; }
-  .menu-content { gap: 16px; }
-}
-
-/* Telemóveis em paisagem (ecrã baixo) */
-@media (orientation: landscape) and (max-height: 500px) {
   .is-mobile #mobile-controls {
     padding: 4px 12px 8px;
   }
@@ -1144,6 +1126,60 @@ body {
   .is-mobile #minimap { width: 40px; height: 32px; }
   .is-mobile #hud-wave-info { font-size: 9px; }
   .is-mobile .hud-stat { font-size: 8px; }
+
+  /* World map / Shop / Trophies em paisagem */
+  .is-mobile #screen-worldmap.active { flex-direction: row; }
+  .is-mobile .wm-header { padding: 6px 10px; }
+  .is-mobile .wm-header h1 { font-size: 13px; }
+  .is-mobile .wm-body { flex-direction: row; }
+  .is-mobile #wm-canvas { flex: 1; height: auto; }
+  .is-mobile .wm-panel { width: 200px; min-width: 0; max-height: none; max-width: 200px; border-left: 1px solid rgba(255,255,255,0.1); border-top: none; }
+  .is-mobile #screen-trophies { padding: 8px; gap: 8px; }
+  .is-mobile .trophy-path .trophy-node { width: 130px; }
+  .is-mobile .trophy-node { padding: 6px 8px; gap: 6px; }
+  .is-mobile .trophy-node-icon { font-size: 14px; }
+  .is-mobile .trophy-node-label { font-size: 10px; }
+  .is-mobile .bp-tier-card { width: 130px; padding: 6px; }
+  .is-mobile .bp-reward-item { font-size: 11px; }
+  .is-mobile #screen-shop { padding: 4px; }
+  .is-mobile .shop-item { width: 130px; padding: 6px 4px; }
+  .is-mobile .shop-item-icon { font-size: 18px; }
+  .is-mobile .shop-item-desc { display: none; }
+  .is-mobile .shop-hint { display: none; }
+  .is-mobile .shop-scroll { gap: 6px; }
+  .is-mobile .shop-scroll-wrap { padding: 0 4px 6px; gap: 2px; }
+  .is-mobile .shop-grid { gap: 6px; }
+  .is-mobile .shop-primordial-section { padding: 6px; }
+  .is-mobile .shop-gota-btn { font-size: 10px; padding: 6px 10px; }
+  .is-mobile .shop-arrow { width: 24px; height: 24px; font-size: 10px; }
+  .is-mobile .hscroll-arrow { width: 24px; height: 24px; font-size: 10px; }
+  .is-mobile .hscroll-wrap { gap: 2px; padding: 0 4px 8px; }
+  .is-mobile .select-header h1 { font-size: 13px; }
+  .is-mobile #screen-select { padding: 8px 12px; gap: 8px; }
+  .is-mobile .ranger-card { width: 110px; padding: 6px 4px; gap: 4px; }
+  .is-mobile .ranger-avatar { width: 32px; height: 32px; font-size: 18px; }
+  .is-mobile .ranger-card-name { font-size: 10px; }
+  .is-mobile .ranger-card-zord, .is-mobile .ranger-card-stats { display: none; }
+  .is-mobile .ranger-card-title { font-size: 8px; }
+  .is-mobile .select-footer { padding: 4px; }
+  .is-mobile #btn-confirmar-ranger { padding: 8px 16px; font-size: 12px; }
+}
+
+@media (max-width: 1024px) {
+  .bar-wrap { width: 110px; }
+  #skill-bar { gap: 4px; bottom: 84px; }
+  .skill-slot { width: 44px; height: 44px; }
+  #hud { padding: 8px 10px; }
+  #hud-wave-info { font-size: 11px; }
+  .hud-stat { font-size: 10px; }
+  #minimap { width: 70px; height: 56px; }
+  .ranger-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 12px; }
+  .ranger-card { padding: 14px 10px; }
+  .trophy-bar-menu { font-size: 13px; padding: 6px 14px; top: 14px; }
+  .shop-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .logo-main { font-size: 32px; }
+  .logo-sub { font-size: 13px; }
+  .menu-content { gap: 16px; }
 }
 
 /* Telemóveis em retrato — controles compactos */
