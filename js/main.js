@@ -17,6 +17,7 @@ const App = {
     game:        'screen-game',
     pause:       'screen-pause',
     gameover:    'screen-gameover',
+    mapmaker:    'screen-mapmaker',
     editor:      'screen-editor',
   },
 
@@ -37,6 +38,7 @@ const App = {
     if (name === 'battlepass') BattlePassScene.show();
     if (name === 'gota') GotaScene.show();
     if (name === 'shop') ShopScene.show();
+    if (name === 'mapmaker') MapMakerScene.show();
     if (name === 'editor') MapEditor._editorActive = true;
     if (name === 'game') {
       GameScene.stop();
@@ -158,7 +160,7 @@ const App = {
   _initEditor() {
     document.getElementById('btn-back-editor').onclick = () => {
       MapEditor.destroy();
-      this.goTo('menu');
+      this.goTo('mapmaker');
     };
     document.querySelectorAll('.editor-tool-btn').forEach(btn => {
       btn.onclick = () => MapEditor.setTool(btn.dataset.tool);
@@ -266,6 +268,7 @@ const App = {
     BattlePassScene.init();
     GotaScene.init();
     ShopScene.init();
+    MapMakerScene.init();
     DialogSystem.init();
     GameScene.init();
     this._initEditor();

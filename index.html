@@ -243,6 +243,64 @@
     <div id="shop-primordial" class="shop-primordial-section"></div>
   </div>
 
+  <!-- ── MAPMAKER HUB ── -->
+  <div id="screen-mapmaker" class="screen">
+    <div class="mm-layout">
+      <div class="mm-header">
+        <button class="back-btn" id="btn-back-mapmaker">&#8592; Voltar</button>
+        <h1>CRIADOR DE MAPAS</h1>
+        <div class="mm-count">Rascunhos: <span id="mm-map-count">0</span>/10</div>
+      </div>
+      <div class="mm-body" id="mm-body">
+        <!-- Card "Criar Novo" -->
+        <div class="mm-card mm-card-new" id="mm-btn-new">
+          <div class="mm-card-badge">✨ Novo</div>
+          <div class="mm-card-new-icon">🗺️</div>
+          <div class="mm-card-new-title">CRIAR NOVO!</div>
+          <div class="mm-card-new-sub">Criador de mapas</div>
+        </div>
+        <!-- Mapas salvos são inseridos aqui via JS -->
+      </div>
+    </div>
+
+    <!-- Modal: Criar Novo Mapa -->
+    <div class="mm-modal-overlay" id="mm-modal" style="display:none;">
+      <div class="mm-modal">
+        <div class="mm-modal-header">
+          <h2>CRIAR NOVO MAPA</h2>
+          <button class="mm-modal-close" id="mm-modal-close">✕</button>
+        </div>
+        <div class="mm-modal-body">
+          <label class="mm-modal-label">NOME DO MAPA</label>
+          <input type="text" id="mm-modal-name" class="mm-modal-input" value="Sem nome" maxlength="30">
+
+          <label class="mm-modal-label">MODO DE JOGO</label>
+          <div class="mm-modal-selector">
+            <button class="mm-sel-arrow" id="mm-mode-left">&#9664;</button>
+            <div class="mm-sel-display" id="mm-mode-display">
+              <span class="mm-sel-emoji">⚔️</span>
+              <span class="mm-sel-text">Combate Solitário</span>
+            </div>
+            <button class="mm-sel-arrow" id="mm-mode-right">&#9654;</button>
+          </div>
+
+          <label class="mm-modal-label">AMBIENTE</label>
+          <div class="mm-modal-selector">
+            <button class="mm-sel-arrow" id="mm-env-left">&#9664;</button>
+            <div class="mm-sel-display" id="mm-env-display">
+              <span class="mm-sel-emoji">🌿</span>
+              <span class="mm-sel-text">Floresta</span>
+            </div>
+            <button class="mm-sel-arrow" id="mm-env-right">&#9654;</button>
+          </div>
+        </div>
+        <div class="mm-modal-footer">
+          <button class="mm-modal-btn create" id="mm-modal-create">CRIAR</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ── MAP EDITOR ── -->
   <div id="screen-editor" class="screen">
     <div class="editor-layout">
@@ -462,6 +520,7 @@
 <script src="js/scenes/battlepass.js?v=14"></script>
 <script src="js/scenes/primordial.js?v=14"></script>
 <script src="js/scenes/shop.js?v=14"></script>
+<script src="js/scenes/mapmaker.js?v=1"></script>
 <script src="js/mapeditor/data.js?v=1"></script>
 <script src="js/mapeditor/editor.js?v=1"></script>
 <script src="js/mapeditor/storage.js?v=1"></script>

@@ -2233,4 +2233,371 @@ body {
   padding: 8px;
 }
 
+/* ── MAPMAKER HUB ─────────────────────────────────────────────────── */
+.mm-layout {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(160deg, #0a1628 0%, #0d1f3c 50%, #0a1628 100%);
+  color: #fff;
+}
+
+.mm-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: rgba(0,0,0,0.3);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  flex-shrink: 0;
+}
+
+.mm-header h1 {
+  font-size: 18px;
+  letter-spacing: 3px;
+  margin: 0;
+}
+
+.mm-count {
+  margin-left: auto;
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.06);
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+.mm-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+  padding: 16px;
+  overflow-y: auto;
+  align-content: start;
+}
+
+.mm-card {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  min-height: 160px;
+}
+
+.mm-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.mm-card-badge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-align: center;
+  z-index: 2;
+}
+
+.mm-card-menu {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.5);
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  z-index: 3;
+  color: #fff;
+}
+
+.mm-card-menu:hover {
+  background: rgba(0,0,0,0.7);
+}
+
+/* Card "Criar Novo" */
+.mm-card-new {
+  background: linear-gradient(145deg, #f5c518 0%, #e6a800 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.mm-card-new .mm-card-badge {
+  background: rgba(0,0,0,0.25);
+  color: #fff;
+}
+
+.mm-card-new-icon {
+  font-size: 48px;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
+}
+
+.mm-card-new-title {
+  font-size: 20px;
+  font-weight: 900;
+  color: #1a1a1a;
+  letter-spacing: 1px;
+}
+
+.mm-card-new-sub {
+  font-size: 12px;
+  color: rgba(0,0,0,0.6);
+  font-weight: 600;
+}
+
+/* Cards de mapas */
+.mm-card-map {
+  background: linear-gradient(145deg, #2d7a1e 0%, #1a5c10 100%);
+}
+
+.mm-card-map .mm-card-badge {
+  background: rgba(0,0,0,0.35);
+  color: rgba(255,255,255,0.8);
+  font-size: 10px;
+}
+
+.mm-card-body {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px;
+  background: linear-gradient(transparent, rgba(0,0,0,0.6));
+}
+
+.mm-card-emoji {
+  font-size: 32px;
+  margin-bottom: 4px;
+}
+
+.mm-card-title {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.mm-card-sub {
+  font-size: 10px;
+  color: rgba(255,255,255,0.6);
+  margin-top: 2px;
+}
+
+/* Popup menu */
+.mm-card-popup {
+  position: absolute;
+  top: 40px;
+  right: 8px;
+  background: rgba(10,14,24,0.95);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 20;
+  min-width: 130px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+}
+
+.mm-popup-btn {
+  background: transparent;
+  border: none;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.mm-popup-btn:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.mm-popup-btn.delete {
+  color: #ff6666;
+}
+
+.mm-popup-btn.delete:hover {
+  background: rgba(255,60,60,0.15);
+}
+
+/* Modal */
+.mm-modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.mm-modal {
+  background: #2563eb;
+  border-radius: 16px;
+  width: 380px;
+  max-width: 90vw;
+  overflow: hidden;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+  border: 3px solid #3b82f6;
+}
+
+.mm-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: rgba(0,0,0,0.2);
+  border-bottom: 2px solid rgba(255,255,255,0.1);
+}
+
+.mm-modal-header h2 {
+  margin: 0;
+  font-size: 18px;
+  letter-spacing: 2px;
+  color: #fff;
+}
+
+.mm-modal-close {
+  width: 32px;
+  height: 32px;
+  background: #dc2626;
+  border: 2px solid #fff;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 900;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.mm-modal-close:hover {
+  background: #b91c1c;
+}
+
+.mm-modal-body {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mm-modal-label {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.8);
+}
+
+.mm-modal-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 2px solid rgba(255,255,255,0.2);
+  background: #fff;
+  color: #1a1a1a;
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+}
+
+.mm-modal-input:focus {
+  border-color: #fbbf24;
+}
+
+.mm-modal-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mm-sel-arrow {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #1e40af;
+  border: 2px solid rgba(255,255,255,0.3);
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.mm-sel-arrow:hover {
+  background: #1e3a8a;
+}
+
+.mm-sel-display {
+  flex: 1;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mm-sel-emoji {
+  font-size: 28px;
+}
+
+.mm-sel-text {
+  font-size: 14px;
+  font-weight: 800;
+  color: #1a1a1a;
+  letter-spacing: 0.5px;
+}
+
+.mm-modal-footer {
+  padding: 14px 18px;
+  display: flex;
+  justify-content: center;
+}
+
+.mm-modal-btn {
+  padding: 12px 40px;
+  border-radius: 10px;
+  border: 2px solid rgba(255,255,255,0.3);
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.mm-modal-btn.create {
+  background: linear-gradient(145deg, #6b7280, #4b5563);
+  color: #fff;
+}
+
+.mm-modal-btn.create:hover {
+  background: linear-gradient(145deg, #9ca3af, #6b7280);
+  transform: translateY(-1px);
+}
+
 
