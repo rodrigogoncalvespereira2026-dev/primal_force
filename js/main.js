@@ -256,6 +256,9 @@ const App = {
       this._applyMobileMenuLayout();
       document.addEventListener('touchmove', e => {
         if (e.target.closest('#mobile-controls') || e.target.closest('#dpad')) return;
+        if (e.target.closest('.editor-sidebar-right') || e.target.closest('.editor-sidebar-left')) return;
+        if (e.target.closest('.editor-palette-bar') || e.target.closest('.mm-body')) return;
+        if (e.target.closest('.editor-canvas-wrap')) return;
         e.preventDefault();
       }, { passive: false });
     }

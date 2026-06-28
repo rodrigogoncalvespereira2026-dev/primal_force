@@ -1997,6 +1997,8 @@ body {
   overflow-x: hidden;
   scrollbar-width: thin;
   scrollbar-color: rgba(255,255,255,0.2) transparent;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 
 .editor-sidebar-right::-webkit-scrollbar {
@@ -2124,6 +2126,8 @@ body {
   overflow-x: auto;
   overflow-y: hidden;
   flex-shrink: 0;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
 }
 
 .editor-palette {
@@ -2292,6 +2296,8 @@ body {
   padding: 16px;
   overflow-y: auto;
   align-content: start;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 
 .mm-card {
