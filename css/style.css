@@ -1981,6 +1981,26 @@ body {
   flex-direction: column;
   gap: 6px;
   z-index: 10;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.2) transparent;
+}
+
+.editor-sidebar-left::-webkit-scrollbar {
+  width: 4px;
+}
+
+.editor-sidebar-left::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.editor-sidebar-left::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.2);
+  border-radius: 2px;
 }
 
 .editor-sidebar-right {
@@ -2071,6 +2091,11 @@ body {
   padding: 5px 8px;
   font-size: 11px;
   text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .editor-action-btn.danger {
@@ -2673,6 +2698,10 @@ body {
     left: 4px;
     top: 52px;
     gap: 3px;
+    max-height: calc(100vh - 110px);
+    overflow-y: auto;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
   }
   .editor-sidebar-left .editor-sidebar-section { padding: 3px; gap: 2px; }
   .editor-tool-btn,
@@ -2690,7 +2719,7 @@ body {
   .editor-section-title { font-size: 8px; }
   .editor-label { font-size: 9px; }
   .editor-number { font-size: 10px; padding: 2px 4px; }
-  .editor-action-btn.wide { font-size: 10px; padding: 4px 6px; }
+  .editor-action-btn.wide { font-size: 10px; padding: 4px 5px; white-space: nowrap; }
   .editor-select.small { font-size: 9px; }
 
   .editor-palette-bar { padding: 4px 6px; }
