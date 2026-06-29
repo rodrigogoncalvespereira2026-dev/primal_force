@@ -19,6 +19,7 @@ const App = {
     gameover:    'screen-gameover',
     mapmaker:    'screen-mapmaker',
     editor:      'screen-editor',
+    creator:     'screen-creator',
   },
 
   goTo(name) {
@@ -40,6 +41,8 @@ const App = {
     if (name === 'shop') ShopScene.show();
     if (name === 'mapmaker') MapMakerScene.show();
     if (name === 'editor') MapEditor._editorActive = true;
+    if (name === 'creator') { CreatorScene.show(); }
+    if (this._current === 'creator' && name !== 'creator') { CreatorScene.hide(); }
     if (name === 'game') {
       GameScene.stop();
       const ranger = this.selectedRanger || RANGERS_DATA[0];
@@ -113,6 +116,12 @@ const App = {
         position: absolute !important;
         bottom: 8% !important; left: 12% !important;
         top: auto !important; right: auto !important;
+        padding: 6px 10px !important;
+      }
+      #screen-menu.active #btn-criar {
+        position: absolute !important;
+        top: 8% !important; left: 22% !important;
+        bottom: auto !important; right: auto !important;
         padding: 6px 10px !important;
       }
       #screen-menu.active .menu-content {
@@ -259,6 +268,7 @@ const App = {
         if (e.target.closest('.editor-sidebar-right') || e.target.closest('.editor-sidebar-left')) return;
         if (e.target.closest('.editor-palette-bar') || e.target.closest('.mm-body')) return;
         if (e.target.closest('.editor-canvas-wrap')) return;
+        if (e.target.closest('#screen-creator')) return;
         e.preventDefault();
       }, { passive: false });
     }
@@ -272,6 +282,7 @@ const App = {
     GotaScene.init();
     ShopScene.init();
     MapMakerScene.init();
+    CreatorScene.init();
     DialogSystem.init();
     GameScene.init();
     this._initEditor();

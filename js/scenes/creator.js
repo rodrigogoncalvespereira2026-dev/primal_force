@@ -1,14 +1,12 @@
-const CharacterCreator = {
+const CreatorScene = {
   scene: null,
   camera: null,
   renderer: null,
   charGroup: null,
   petGroup: null,
   _raf: null,
-  _resizeObs: null,
   _time: 0,
   _lastTime: 0,
-  _particles: [],
   _floatingOrbs: [],
 
   _camAngle: 0,
@@ -19,6 +17,7 @@ const CharacterCreator = {
   _camTargetDist: 70,
   _dragging: false,
   _lastMouse: null,
+  _active: false,
 
   current: {
     name: 'Ranger Sem Nome',
@@ -38,16 +37,100 @@ const CharacterCreator = {
       visor:     '#22ccff',
       dark:      '#111122',
     },
-    stats: { hp: 100, atk: 12, spd: 5, def: 6 },
+    stats: { hp: 100, atk: 14, spd: 4, def: 8 },
   },
 
   init() {
-    const canvas = document.getElementById('cc-canvas');
-    if (!canvas) { console.error('No canvas found!'); return; }
+    this._bindNav();
+    this._bindUI();
+  },
 
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    console.log('Init:', w, h, typeof THREE);
+  show() {
+    this._active = true;
+    if (!this.scene) {
+      this._init3D();
+    } else {
+      this._onResize();
+    }
+    this.buildCharacter();
+  },
+
+  hide() {
+    this._active = false;
+    if (this._raf) { cancelAnimationFrame(this._raf); this._raf = null; }
+  },
+
+  _bindNav() {
+    const back = document.getElementById('btn-back-creator');
+    if (back) back.onclick = () => {
+      this.hide();
+      App.goTo('menu');
+    };
+  },
+
+  _bindUI() {
+    document.getElementById('btn-save').onclick = () => this._save();
+    document.getElementById('btn-export-json').onclick = () => this._exportJSON();
+    document.getElementById('btn-export').onclick = () => this._exportJSON();
+    document.getElementById('btn-gallery').onclick = () => this._openGallery();
+    document.getElementById('btn-random').onclick = () => this._randomize();
+    document.getElementById('gallery-close').onclick = () => {
+      document.getElementById('gallery-modal').style.display = 'none';
+    };
+    document.getElementById('gallery-modal').onclick = (e) => {
+      if (e.target.id === 'gallery-modal') e.target.style.display = 'none';
+    };
+
+    document.querySelectorAll('#screen-creator .cc-tab').forEach(tab => {
+      tab.onclick = () => {
+        document.querySelectorAll('#screen-creator .cc-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('#screen-creator .cc-tab-content').forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        const target = document.getElementById('tab-' + tab.dataset.tab);
+        if (target) target.classList.add('active');
+      };
+    });
+
+    document.getElementById('cc-name').oninput = (e) => {
+      this.current.name = e.target.value;
+      document.getElementById('cc-name-label').textContent = (e.target.value || 'RANGER SEM NOME').toUpperCase();
+      document.getElementById('cc-ranger-name').textContent = (e.target.value || 'RANGER SEM NOME').toUpperCase();
+    };
+
+    ['primary', 'secondary', 'accent', 'visor', 'dark'].forEach(key => {
+      const input = document.getElementById('cc-color-' + key);
+      if (input) {
+        input.oninput = (e) => {
+          this.current.colors[key] = e.target.value;
+          this.buildCharacter();
+        };
+      }
+    });
+
+    ['hp', 'atk', 'spd', 'def'].forEach(key => {
+      const input = document.getElementById('cc-' + key);
+      if (input) {
+        input.oninput = (e) => {
+          const val = parseInt(e.target.value);
+          this.current.stats[key] = val;
+          document.getElementById('cc-' + key + '-val').textContent = val;
+          const max = { hp: 200, atk: 30, spd: 15, def: 25 }[key];
+          const min = { hp: 30, atk: 3, spd: 1, def: 1 }[key];
+          const pct = ((val - min) / (max - min)) * 100;
+          const bar = document.getElementById('bar-' + key);
+          if (bar) bar.style.width = pct + '%';
+        };
+      }
+    });
+  },
+
+  _init3D() {
+    const canvas = document.getElementById('cc-canvas');
+    if (!canvas) return;
+
+    const wrap = canvas.parentElement;
+    const w = wrap ? wrap.clientWidth : window.innerWidth;
+    const h = wrap ? wrap.clientHeight : window.innerHeight;
 
     canvas.width = w;
     canvas.height = h;
@@ -63,34 +146,28 @@ const CharacterCreator = {
     this.renderer.setPixelRatio(1);
     this.renderer.setSize(w, h);
     this.renderer.shadowMap.enabled = true;
-    console.log('Renderer created');
 
     this._addLights();
-    console.log('Lights added');
     this._buildPlatform();
-    console.log('Platform built');
     this._buildFloorGrid();
-    console.log('Grid built');
     this._updateCamera(0);
-    console.log('Camera set');
-
-    this._buildUI();
-    console.log('UI built');
-    this._bindEvents();
-    console.log('Events bound');
-    this.buildCharacter();
-    console.log('Character built, scene children:', this.scene.children.length);
+    this._bind3DEvents();
 
     window.addEventListener('resize', () => this._onResize());
 
     this._loop();
-    console.log('Loop started');
   },
 
   _onResize() {
     if (!this.renderer) return;
-    const w = window.innerWidth;
-    const h = window.innerHeight;
+    const canvas = this.renderer.domElement;
+    const wrap = canvas.parentElement;
+    const w = wrap ? wrap.clientWidth : window.innerWidth;
+    const h = wrap ? wrap.clientHeight : window.innerHeight;
+    canvas.width = w;
+    canvas.height = h;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
     this.renderer.setSize(w, h);
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
@@ -112,8 +189,7 @@ const CharacterCreator = {
     dir.shadow.bias = -0.001;
     this.scene.add(dir);
 
-    const hemi = new THREE.HemisphereLight(0x6688bb, 0x443322, 0.5);
-    this.scene.add(hemi);
+    this.scene.add(new THREE.HemisphereLight(0x6688bb, 0x443322, 0.5));
 
     const rim = new THREE.PointLight(0x4466cc, 0.7, 160);
     rim.position.set(-40, 35, -30);
@@ -170,10 +246,8 @@ const CharacterCreator = {
     const g = new THREE.Group();
     const mat = new THREE.LineBasicMaterial({ color: 0x1a2040, transparent: true, opacity: 0.25 });
     for (let i = -50; i <= 50; i += 10) {
-      const points1 = [new THREE.Vector3(i, -0.1, -50), new THREE.Vector3(i, -0.1, 50)];
-      const points2 = [new THREE.Vector3(-50, -0.1, i), new THREE.Vector3(50, -0.1, i)];
-      g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(points1), mat));
-      g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(points2), mat));
+      g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(i, -0.1, -50), new THREE.Vector3(i, -0.1, 50)]), mat));
+      g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-50, -0.1, i), new THREE.Vector3(50, -0.1, i)]), mat));
     }
     this.scene.add(g);
   },
@@ -197,6 +271,7 @@ const CharacterCreator = {
   },
 
   _loop() {
+    if (!this._active) return;
     this._raf = requestAnimationFrame(() => this._loop());
     const now = performance.now();
     const dt = this._lastTime ? Math.min((now - this._lastTime) / 1000, 0.1) : 0.016;
@@ -206,10 +281,8 @@ const CharacterCreator = {
     this._updateCamera(dt);
 
     if (this.charGroup) {
-      const breathe = Math.sin(this._time * 2.2) * 0.25;
-      const sway = Math.sin(this._time * 1.1) * 0.08;
-      this.charGroup.position.y = breathe;
-      this.charGroup.rotation.z = sway;
+      this.charGroup.position.y = Math.sin(this._time * 2.2) * 0.25;
+      this.charGroup.rotation.z = Math.sin(this._time * 1.1) * 0.08;
     }
 
     this._floatingOrbs.forEach((orb, i) => {
@@ -227,13 +300,36 @@ const CharacterCreator = {
     this.renderer.render(this.scene, this.camera);
   },
 
-  destroy() {
-    if (this._raf) cancelAnimationFrame(this._raf);
-    if (this._resizeObs) this._resizeObs.disconnect();
-    if (this.renderer) this.renderer.dispose();
+  _bind3DEvents() {
+    const canvas = this.renderer.domElement;
+
+    canvas.addEventListener('pointerdown', e => {
+      this._dragging = true;
+      this._lastMouse = { x: e.clientX, y: e.clientY };
+      canvas.setPointerCapture(e.pointerId);
+    });
+
+    canvas.addEventListener('pointermove', e => {
+      if (!this._dragging) return;
+      const dx = e.clientX - this._lastMouse.x;
+      const dy = e.clientY - this._lastMouse.y;
+      this._camTargetAngle -= dx * 0.007;
+      this._camTargetPitch = Math.max(0.08, Math.min(1.3, this._camTargetPitch + dy * 0.005));
+      this._lastMouse = { x: e.clientX, y: e.clientY };
+    });
+
+    canvas.addEventListener('pointerup', () => {
+      this._dragging = false;
+      this._lastMouse = null;
+    });
+
+    canvas.addEventListener('wheel', e => {
+      e.preventDefault();
+      this._camTargetDist = Math.max(35, Math.min(180, this._camTargetDist + e.deltaY * 0.08));
+    }, { passive: false });
   },
 
-  _buildUI() {
+  _populateUI() {
     this._populateOptions('opt-helmet', RangerParts.helmets, 'helmet');
     this._populateOptions('opt-chest', RangerParts.chests, 'chest');
     this._populateOptions('opt-weapon', RangerParts.weapons, 'weapon');
@@ -280,13 +376,7 @@ const CharacterCreator = {
         <span class="cc-theme-name">${theme.name}</span>
       `;
       btn.onclick = () => {
-        this.current.colors = {
-          primary: theme.primary,
-          secondary: theme.secondary,
-          accent: theme.accent,
-          visor: theme.visor,
-          dark: theme.dark,
-        };
+        this.current.colors = { primary: theme.primary, secondary: theme.secondary, accent: theme.accent, visor: theme.visor, dark: theme.dark };
         ['primary', 'secondary', 'accent', 'visor', 'dark'].forEach(k => {
           const el = document.getElementById('cc-color-' + k);
           if (el) el.value = this.current.colors[k];
@@ -321,87 +411,6 @@ const CharacterCreator = {
     });
   },
 
-  _bindEvents() {
-    const canvas = this.renderer.domElement;
-
-    canvas.addEventListener('pointerdown', e => {
-      this._dragging = true;
-      this._lastMouse = { x: e.clientX, y: e.clientY };
-      canvas.setPointerCapture(e.pointerId);
-    });
-
-    canvas.addEventListener('pointermove', e => {
-      if (!this._dragging) return;
-      const dx = e.clientX - this._lastMouse.x;
-      const dy = e.clientY - this._lastMouse.y;
-      this._camTargetAngle -= dx * 0.007;
-      this._camTargetPitch = Math.max(0.08, Math.min(1.3, this._camTargetPitch + dy * 0.005));
-      this._lastMouse = { x: e.clientX, y: e.clientY };
-    });
-
-    canvas.addEventListener('pointerup', () => {
-      this._dragging = false;
-      this._lastMouse = null;
-    });
-
-    canvas.addEventListener('wheel', e => {
-      e.preventDefault();
-      this._camTargetDist = Math.max(35, Math.min(180, this._camTargetDist + e.deltaY * 0.08));
-    }, { passive: false });
-
-    document.getElementById('cc-name').oninput = (e) => {
-      this.current.name = e.target.value;
-      document.getElementById('cc-name-label').textContent = e.target.value.toUpperCase() || 'RANGER SEM NOME';
-    };
-
-    ['primary', 'secondary', 'accent', 'visor', 'dark'].forEach(key => {
-      const input = document.getElementById('cc-color-' + key);
-      if (input) {
-        input.oninput = (e) => {
-          this.current.colors[key] = e.target.value;
-          this.buildCharacter();
-        };
-      }
-    });
-
-    ['hp', 'atk', 'spd', 'def'].forEach(key => {
-      const input = document.getElementById('cc-' + key);
-      if (input) {
-        input.oninput = (e) => {
-          const val = parseInt(e.target.value);
-          this.current.stats[key] = val;
-          document.getElementById('cc-' + key + '-val').textContent = val;
-          const max = { hp: 200, atk: 30, spd: 15, def: 25 }[key];
-          const pct = ((val - (key === 'hp' ? 30 : key === 'atk' ? 3 : key === 'spd' ? 1 : 1)) / (max - (key === 'hp' ? 30 : key === 'atk' ? 3 : key === 'spd' ? 1 : 1))) * 100;
-          const bar = document.getElementById('bar-' + key);
-          if (bar) bar.style.width = pct + '%';
-        };
-      }
-    });
-
-    document.getElementById('btn-save').onclick = () => this._save();
-    document.getElementById('btn-export-json').onclick = () => this._exportJSON();
-    document.getElementById('btn-export').onclick = () => this._exportJSON();
-    document.getElementById('btn-gallery').onclick = () => this._openGallery();
-    document.getElementById('btn-random').onclick = () => this._randomize();
-    document.getElementById('gallery-close').onclick = () => {
-      document.getElementById('gallery-modal').style.display = 'none';
-    };
-    document.getElementById('gallery-modal').onclick = (e) => {
-      if (e.target.id === 'gallery-modal') e.target.style.display = 'none';
-    };
-
-    document.querySelectorAll('.cc-tab').forEach(tab => {
-      tab.onclick = () => {
-        document.querySelectorAll('.cc-tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.cc-tab-content').forEach(c => c.classList.remove('active'));
-        tab.classList.add('active');
-        const target = document.getElementById('tab-' + tab.dataset.tab);
-        if (target) target.classList.add('active');
-      };
-    });
-  },
-
   _setStat(key, val) {
     const input = document.getElementById('cc-' + key);
     if (input) {
@@ -429,12 +438,15 @@ const CharacterCreator = {
   },
 
   buildCharacter() {
+    if (!this.scene) return;
     if (this.charGroup) this.scene.remove(this.charGroup);
     if (this.petGroup) this.scene.remove(this.petGroup);
     this._floatingOrbs = [];
 
     this.charGroup = new THREE.Group();
     this.charGroup.position.y = 0;
+
+    this._populateUI();
 
     const c = this.current.colors;
     const pri = new THREE.Color(c.primary);
@@ -457,29 +469,25 @@ const CharacterCreator = {
     if (accDef && accDef.build) this['_' + accDef.build](pri, sec, acc);
 
     this.scene.add(this.charGroup);
-
     this._buildPet();
   },
 
   _buildHead(pri, sec, acc, vis, dk, wht) {
     const g = new THREE.Group();
-
     const head = new THREE.Mesh(new THREE.SphereGeometry(8, 20, 16), this._m(pri));
     head.position.y = 53;
     head.scale.set(1, 1.05, 1.05);
     head.castShadow = true;
     g.add(head);
 
-    const visorShape = this.current.helmet;
-    const visorGeo = visorShape === 'ninja'
+    const visorGeo = this.current.helmet === 'ninja'
       ? new THREE.BoxGeometry(12, 2, 7)
       : new THREE.BoxGeometry(12, 4.5, 7);
     const visorMesh = new THREE.Mesh(visorGeo, this._glow(vis, 0.5));
     visorMesh.position.set(0, 53, 4.5);
     g.add(visorMesh);
 
-    const crownGeo = new THREE.ConeGeometry(3.5, 7, 8);
-    const crown = new THREE.Mesh(crownGeo, this._m(sec));
+    const crown = new THREE.Mesh(new THREE.ConeGeometry(3.5, 7, 8), this._m(sec));
     crown.position.y = 61;
     crown.castShadow = true;
     g.add(crown);
@@ -552,7 +560,7 @@ const CharacterCreator = {
       }
     }
 
-    if (h === 'cobra' || h === 'snake') {
+    if (h === 'cobra') {
       const hood = new THREE.Mesh(new THREE.BoxGeometry(14, 8, 2), this._m(pri));
       hood.position.set(0, 53, -5);
       g.add(hood);
@@ -576,9 +584,9 @@ const CharacterCreator = {
     }
 
     if (h === 'knight') {
-      const visor = new THREE.Mesh(new THREE.BoxGeometry(10, 3, 2), this._m(dk));
-      visor.position.set(0, 51, 7);
-      g.add(visor);
+      const visor2 = new THREE.Mesh(new THREE.BoxGeometry(10, 3, 2), this._m(dk));
+      visor2.position.set(0, 51, 7);
+      g.add(visor2);
       for (let i = -1; i <= 1; i += 2) {
         const bolt = new THREE.Mesh(new THREE.SphereGeometry(0.6, 6, 4), this._m(0x888888));
         bolt.position.set(i * 4, 53, 7);
@@ -596,18 +604,14 @@ const CharacterCreator = {
     }
 
     if (h === 'cyber' || h === 'robot') {
-      const antenna1 = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 5, 4), this._m(0x666677));
-      antenna1.position.set(-3, 62, 0);
-      g.add(antenna1);
-      const antenna2 = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 5, 4), this._m(0x666677));
-      antenna2.position.set(3, 62, 0);
-      g.add(antenna2);
-      const light1 = new THREE.Mesh(new THREE.SphereGeometry(0.6, 6, 4), this._glow(acc, 0.8));
-      light1.position.set(-3, 65, 0);
-      g.add(light1);
-      const light2 = new THREE.Mesh(new THREE.SphereGeometry(0.6, 6, 4), this._glow(acc, 0.8));
-      light2.position.set(3, 65, 0);
-      g.add(light2);
+      for (let i = -1; i <= 1; i += 2) {
+        const ant = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 5, 4), this._m(0x666677));
+        ant.position.set(i * 3, 62, 0);
+        g.add(ant);
+        const light = new THREE.Mesh(new THREE.SphereGeometry(0.6, 6, 4), this._glow(acc, 0.8));
+        light.position.set(i * 3, 65, 0);
+        g.add(light);
+      }
       if (h === 'robot') {
         const plate = new THREE.Mesh(new THREE.BoxGeometry(12, 6, 2), this._m(0x444455));
         plate.position.set(0, 53, 7);
@@ -700,7 +704,6 @@ const CharacterCreator = {
 
   _buildTorso(pri, sec, acc, dk) {
     const g = new THREE.Group();
-
     const torso = new THREE.Mesh(new THREE.CylinderGeometry(8, 9, 16, 12), this._m(pri));
     torso.position.y = 33;
     torso.castShadow = true;
@@ -858,13 +861,14 @@ const CharacterCreator = {
   },
 
   _buildLegs(pri, sec, dk) {
-    const bootStyles = {
+    const acc = new THREE.Color(this.current.colors.accent);
+    const bootDefs = {
       standard: dk,
       armored: sec,
       ninja: new THREE.Color(0x111111),
       heavy: sec,
-      flying: acc => acc,
-      crystal: acc => acc,
+      flying: acc,
+      crystal: acc,
       flame: new THREE.Color(0xcc4400),
       shadow: new THREE.Color(0x0a0a14),
       cyber: new THREE.Color(0x333344),
@@ -892,8 +896,7 @@ const CharacterCreator = {
       lowerLeg.castShadow = true;
       g.add(lowerLeg);
 
-      const bootDef = bootStyles[this.current.boots];
-      const bootColor = typeof bootDef === 'function' ? bootDef(this.current.colors.accent) : (bootDef || dk);
+      const bootColor = bootDefs[this.current.boots] || dk;
       const boot = new THREE.Mesh(new THREE.CylinderGeometry(3.5, 4, 5, 10), this._m(bootColor));
       boot.position.set(side * 5, 1, 0);
       boot.castShadow = true;
@@ -954,7 +957,6 @@ const CharacterCreator = {
   _buildMask(vis, dk, acc) {
     const id = this.current.mask;
     if (id === 'none') return;
-
     const g = new THREE.Group();
 
     if (id === 'visor') {
@@ -962,13 +964,11 @@ const CharacterCreator = {
       v.position.set(0, 53, 7);
       g.add(v);
     }
-
     if (id === 'bandit') {
       const mask = new THREE.Mesh(new THREE.BoxGeometry(12, 4, 3), this._m(dk));
       mask.position.set(0, 53, 6);
       g.add(mask);
     }
-
     if (id === 'gas') {
       const mask = new THREE.Mesh(new THREE.BoxGeometry(8, 5, 4), this._m(dk));
       mask.position.set(0, 50, 7);
@@ -978,13 +978,11 @@ const CharacterCreator = {
       tube.rotation.x = Math.PI / 2;
       g.add(tube);
     }
-
     if (id === 'half') {
       const mask = new THREE.Mesh(new THREE.BoxGeometry(12, 6, 2), this._m(dk));
       mask.position.set(0, 50, 7);
       g.add(mask);
     }
-
     if (id === 'teeth') {
       for (let i = -3; i <= 3; i++) {
         const tooth = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.5, 1), this._m(new THREE.Color(0xeeeecc)));
@@ -992,7 +990,6 @@ const CharacterCreator = {
         g.add(tooth);
       }
     }
-
     if (id === 'tribal') {
       for (let i = -2; i <= 2; i++) {
         const line = new THREE.Mesh(new THREE.BoxGeometry(0.5, 4, 1), this._m(acc));
@@ -1001,19 +998,16 @@ const CharacterCreator = {
         g.add(line);
       }
     }
-
     if (id === 'cyber') {
-      const visor = new THREE.Mesh(new THREE.BoxGeometry(11, 3, 3), this._glow(acc, 0.6));
-      visor.position.set(0, 53, 7);
-      g.add(visor);
+      const visor2 = new THREE.Mesh(new THREE.BoxGeometry(11, 3, 3), this._glow(acc, 0.6));
+      visor2.position.set(0, 53, 7);
+      g.add(visor2);
     }
-
     if (id === 'skull') {
       const jaw = new THREE.Mesh(new THREE.BoxGeometry(6, 3, 3), this._m(new THREE.Color(0xddddcc)));
       jaw.position.set(0, 49, 6);
       g.add(jaw);
     }
-
     if (id === 'flower') {
       for (let i = 0; i < 5; i++) {
         const angle = (i / 5) * Math.PI * 2;
@@ -1037,26 +1031,18 @@ const CharacterCreator = {
     const metal = this._m(0xccccdd);
     const glow = this._glow(ac, 0.5);
 
-    const hand = this.charGroup.children[3];
-    if (hand && hand.children[1]) {
-      g.position.copy(hand.children[1].position || new THREE.Vector3(12, 14, 3));
-    } else {
-      g.position.set(12, 14, 3);
-    }
+    g.position.set(12, 14, 3);
 
     const weaponShapes = {
       sword: () => {
-        const blade = new THREE.Mesh(new THREE.BoxGeometry(1.5, 18, 0.8), metal);
-        blade.position.set(0, 9, 0);
-        g.add(blade);
+        g.add(new THREE.Mesh(new THREE.BoxGeometry(1.5, 18, 0.8), metal).translateY(9));
         const guard = new THREE.Mesh(new THREE.BoxGeometry(6, 1.2, 1.5), this._m(se));
-        guard.position.set(0, 0, 0);
         g.add(guard);
         const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 5, 6), this._m(0x553322));
-        handle.position.set(0, -3, 0);
+        handle.position.y = -3;
         g.add(handle);
         const gem = new THREE.Mesh(new THREE.SphereGeometry(1, 6, 4), glow);
-        gem.position.set(0, 0, 1);
+        gem.position.z = 1;
         g.add(gem);
       },
       katana: () => {
@@ -1066,93 +1052,88 @@ const CharacterCreator = {
         g.add(blade);
         const guard = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 0.8, 6), this._m(se));
         guard.rotation.x = Math.PI / 2;
-        guard.position.set(0, 0, 0);
         g.add(guard);
         const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 6, 6), this._m(0x332211));
-        handle.position.set(0, -3.5, 0);
+        handle.position.y = -3.5;
         g.add(handle);
       },
       dual: () => {
         const blade1 = new THREE.Mesh(new THREE.BoxGeometry(1, 12, 0.6), metal);
-        blade1.position.set(0, 6, 0);
+        blade1.position.y = 6;
         g.add(blade1);
-        const handle1 = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 4, 6), this._m(0x553322));
-        handle1.position.set(0, -2, 0);
-        g.add(handle1);
+        const h1 = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 4, 6), this._m(0x553322));
+        h1.position.y = -2;
+        g.add(h1);
         const blade2 = new THREE.Mesh(new THREE.BoxGeometry(1, 12, 0.6), metal);
         blade2.position.set(5, 6, 0);
         g.add(blade2);
-        const handle2 = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 4, 6), this._m(0x553322));
-        handle2.position.set(5, -2, 0);
-        g.add(handle2);
+        const h2 = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 4, 6), this._m(0x553322));
+        h2.position.set(5, -2, 0);
+        g.add(h2);
       },
       lance: () => {
         const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 30, 6), this._m(0x664422));
-        shaft.position.set(0, 15, 0);
+        shaft.position.y = 15;
         g.add(shaft);
         const tip = new THREE.Mesh(new THREE.ConeGeometry(1.5, 6, 6), metal);
-        tip.position.set(0, 31, 0);
+        tip.position.y = 31;
         g.add(tip);
-        const gem = new THREE.Mesh(new THREE.SphereGeometry(0.8, 6, 4), glow);
-        gem.position.set(0, 28, 0);
-        g.add(gem);
       },
       axe: () => {
         const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 18, 6), this._m(0x664422));
-        shaft.position.set(0, 9, 0);
+        shaft.position.y = 9;
         g.add(shaft);
         const head = new THREE.Mesh(new THREE.BoxGeometry(8, 6, 1), metal);
-        head.position.set(0, 16, 0);
+        head.position.y = 16;
         g.add(head);
       },
       hammer: () => {
         const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 16, 6), this._m(0x664422));
-        shaft.position.set(0, 8, 0);
+        shaft.position.y = 8;
         g.add(shaft);
         const head = new THREE.Mesh(new THREE.BoxGeometry(7, 5, 5), metal);
-        head.position.set(0, 16, 0);
+        head.position.y = 16;
         g.add(head);
       },
       mace: () => {
         const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 14, 6), this._m(0x555555));
-        shaft.position.set(0, 7, 0);
+        shaft.position.y = 7;
         g.add(shaft);
         const head = new THREE.Mesh(new THREE.SphereGeometry(3, 8, 6), metal);
-        head.position.set(0, 15, 0);
+        head.position.y = 15;
         g.add(head);
         for (let i = 0; i < 6; i++) {
           const spike = new THREE.Mesh(new THREE.ConeGeometry(0.4, 2, 4), metal);
           const angle = (i / 6) * Math.PI * 2;
           spike.position.set(Math.cos(angle) * 3, 15, Math.sin(angle) * 3);
-          spike.lookAt(new THREE.Vector3(Math.cos(angle) * 10, 15, Math.sin(angle) * 10));
           g.add(spike);
         }
       },
       flail: () => {
         const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 10, 6), this._m(0x664422));
-        handle.position.set(0, 5, 0);
+        handle.position.y = 5;
         g.add(handle);
         const chain = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 8, 4), this._m(0x888888));
-        chain.position.set(0, 14, 0);
+        chain.position.y = 14;
         g.add(chain);
         const head = new THREE.Mesh(new THREE.SphereGeometry(2.5, 8, 6), metal);
-        head.position.set(0, 19, 0);
+        head.position.y = 19;
         g.add(head);
       },
       halberd: () => {
         const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 28, 6), this._m(0x664422));
-        shaft.position.set(0, 14, 0);
+        shaft.position.y = 14;
         g.add(shaft);
         const axeBlade = new THREE.Mesh(new THREE.BoxGeometry(6, 5, 1), metal);
         axeBlade.position.set(-3, 26, 0);
         g.add(axeBlade);
         const tip = new THREE.Mesh(new THREE.ConeGeometry(1, 4, 6), metal);
-        tip.position.set(0, 30, 0);
+        tip.position.y = 30;
         g.add(tip);
       },
       scythe: () => {
         const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 26, 6), this._m(0x664422));
-        shaft.position.set(0, 13, 0);
+        shaft.position.y = 13;
         g.add(shaft);
         const blade = new THREE.Mesh(new THREE.BoxGeometry(2, 8, 0.5), metal);
         blade.position.set(-2, 25, 0);
@@ -1161,39 +1142,35 @@ const CharacterCreator = {
       },
       rapier: () => {
         const blade = new THREE.Mesh(new THREE.BoxGeometry(0.5, 20, 0.3), metal);
-        blade.position.set(0, 10, 0);
+        blade.position.y = 10;
         g.add(blade);
         const guard = new THREE.Mesh(new THREE.TorusGeometry(2, 0.4, 6, 8), this._m(se));
-        guard.position.set(0, 0, 0);
         guard.rotation.x = Math.PI / 2;
         g.add(guard);
         const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 5, 6), this._m(0x553322));
-        handle.position.set(0, -3, 0);
+        handle.position.y = -3;
         g.add(handle);
       },
       staff: () => {
         const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 28, 6), this._m(0x664422));
-        shaft.position.set(0, 14, 0);
+        shaft.position.y = 14;
         g.add(shaft);
         const orb = new THREE.Mesh(new THREE.SphereGeometry(2, 8, 6), glow);
-        orb.position.set(0, 29, 0);
+        orb.position.y = 29;
         g.add(orb);
       },
       bow: () => {
         const curve = new THREE.Mesh(new THREE.TorusGeometry(8, 0.5, 6, 12, Math.PI), metal);
-        curve.position.set(0, 12, 0);
+        curve.position.y = 12;
         curve.rotation.z = Math.PI / 2;
         g.add(curve);
-        const string = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 16, 4), this._m(0xcccccc));
-        string.position.set(0, 12, 0);
-        g.add(string);
       },
       crossbow: () => {
         const stock = new THREE.Mesh(new THREE.BoxGeometry(1.5, 14, 1.5), this._m(0x664422));
-        stock.position.set(0, 7, 0);
+        stock.position.y = 7;
         g.add(stock);
         const limbs = new THREE.Mesh(new THREE.BoxGeometry(14, 1, 1), metal);
-        limbs.position.set(0, 16, 0);
+        limbs.position.y = 16;
         g.add(limbs);
       },
       blaster: () => {
@@ -1204,49 +1181,33 @@ const CharacterCreator = {
         barrel.rotation.x = Math.PI / 2;
         barrel.position.set(0, 10, 7);
         g.add(barrel);
-        const glowTip = new THREE.Mesh(new THREE.SphereGeometry(0.8, 6, 4), glow);
-        glowTip.position.set(0, 10, 10);
-        g.add(glowTip);
       },
       daggers: () => {
-        const d1 = new THREE.Mesh(new THREE.BoxGeometry(0.8, 8, 0.5), metal);
-        d1.position.set(0, 4, 0);
-        g.add(d1);
-        const h1 = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 3, 6), this._m(0x553322));
-        h1.position.set(0, -1, 0);
-        g.add(h1);
-        const d2 = new THREE.Mesh(new THREE.BoxGeometry(0.8, 8, 0.5), metal);
-        d2.position.set(4, 4, 0);
-        g.add(d2);
-        const h2 = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 3, 6), this._m(0x553322));
-        h2.position.set(4, -1, 0);
-        g.add(h2);
+        for (let i = 0; i < 2; i++) {
+          const d = new THREE.Mesh(new THREE.BoxGeometry(0.8, 8, 0.5), metal);
+          d.position.set(i * 4, 4, 0);
+          g.add(d);
+          const h = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 3, 6), this._m(0x553322));
+          h.position.set(i * 4, -1, 0);
+          g.add(h);
+        }
       },
       nunchucks: () => {
-        const stick1 = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 8, 6), this._m(0x664422));
-        stick1.position.set(0, 4, 0);
-        g.add(stick1);
-        const stick2 = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 8, 6), this._m(0x664422));
-        stick2.position.set(5, 4, 0);
-        g.add(stick2);
-        const chainLink = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 5, 4), this._m(0x888888));
-
-        chainLink.position.set(2.5, 8, 0);
-        g.add(chainLink);
+        for (let i = 0; i < 2; i++) {
+          const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 8, 6), this._m(0x664422));
+          stick.position.set(i * 5, 4, 0);
+          g.add(stick);
+        }
+        const chain = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 5, 4), this._m(0x888888));
+        chain.position.set(2.5, 8, 0);
+        g.add(chain);
       },
       gauntlets: () => {
-        const g1 = new THREE.Mesh(new THREE.BoxGeometry(4, 5, 3), metal);
-        g1.position.set(0, 3, 0);
-        g.add(g1);
-        const g2 = new THREE.Mesh(new THREE.BoxGeometry(4, 5, 3), metal);
-        g2.position.set(8, 3, 0);
-        g.add(g2);
-        const gem1 = new THREE.Mesh(new THREE.SphereGeometry(0.8, 6, 4), glow);
-        gem1.position.set(0, 3, 2);
-        g.add(gem1);
-        const gem2 = new THREE.Mesh(new THREE.SphereGeometry(0.8, 6, 4), glow);
-        gem2.position.set(8, 3, 2);
-        g.add(gem2);
+        for (let i = 0; i < 2; i++) {
+          const gauntlet = new THREE.Mesh(new THREE.BoxGeometry(4, 5, 3), metal);
+          gauntlet.position.set(i * 8, 3, 0);
+          g.add(gauntlet);
+        }
       },
       claws: () => {
         for (let i = 0; i < 3; i++) {
@@ -1258,7 +1219,7 @@ const CharacterCreator = {
       },
       trident: () => {
         const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 24, 6), this._m(0x664422));
-        shaft.position.set(0, 12, 0);
+        shaft.position.y = 12;
         g.add(shaft);
         for (let i = -1; i <= 1; i++) {
           const tip = new THREE.Mesh(new THREE.ConeGeometry(0.6, 4, 4), metal);
@@ -1268,10 +1229,10 @@ const CharacterCreator = {
       },
       chakram: () => {
         const ring = new THREE.Mesh(new THREE.TorusGeometry(5, 0.6, 8, 16), metal);
-        ring.position.set(0, 12, 0);
+        ring.position.y = 12;
         g.add(ring);
         const gem = new THREE.Mesh(new THREE.SphereGeometry(1, 6, 4), glow);
-        gem.position.set(0, 12, 0);
+        gem.position.y = 12;
         g.add(gem);
       },
       shield: () => {
@@ -1279,47 +1240,35 @@ const CharacterCreator = {
         body.rotation.x = Math.PI / 2;
         body.position.set(0, 12, 2);
         g.add(body);
-        const center = new THREE.Mesh(new THREE.SphereGeometry(1.5, 8, 6), glow);
-        center.position.set(0, 12, 3);
-        g.add(center);
       },
       whip: () => {
         const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 6, 6), this._m(0x664422));
-        handle.position.set(0, 3, 0);
+        handle.position.y = 3;
         g.add(handle);
         for (let i = 0; i < 8; i++) {
           const seg = new THREE.Mesh(new THREE.BoxGeometry(0.4, 3, 0.4), this._m(0x886644));
           const t = i / 7;
           seg.position.set(Math.sin(t * 3) * 3, 6 + i * 2.5, Math.cos(t * 2) * 2);
-          seg.rotation.z = t * 0.5;
           g.add(seg);
         }
       },
       bomb: () => {
         const body = new THREE.Mesh(new THREE.SphereGeometry(3, 12, 8), this._m(0x222222));
-        body.position.set(0, 12, 0);
+        body.position.y = 12;
         g.add(body);
-        const fuse = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 4, 4), this._m(0x664422));
-        fuse.position.set(0, 15, 0);
-        fuse.rotation.z = 0.3;
-        g.add(fuse);
-        const spark = new THREE.Mesh(new THREE.SphereGeometry(0.6, 6, 4), this._glow(0xff4400, 0.8));
-        spark.position.set(0.5, 17, 0);
-        g.add(spark);
       },
       orb: () => {
         const orb = new THREE.Mesh(new THREE.SphereGeometry(3, 16, 12), glow);
-        orb.position.set(0, 12, 0);
+        orb.position.y = 12;
         g.add(orb);
         const ring = new THREE.Mesh(new THREE.TorusGeometry(4, 0.3, 8, 16), metal);
-        ring.position.set(0, 12, 0);
+        ring.position.y = 12;
         g.add(ring);
       },
     };
 
     const builder = weaponShapes[id];
     if (builder) builder();
-
     this.charGroup.add(g);
   },
 
@@ -1329,19 +1278,16 @@ const CharacterCreator = {
 
     this.petGroup = new THREE.Group();
 
-    const pri = new THREE.Color(this.current.colors.primary);
-    const acc = new THREE.Color(this.current.colors.accent);
-
     const petDefs = {
-      dragon_baby:   { geo: 'sphere', color: 0x22aa44, size: 3 },
-      phoenix_baby:  { geo: 'sphere', color: 0xff6600, size: 2.5 },
-      wolf_baby:     { geo: 'sphere', color: 0x888888, size: 2.8 },
-      bird:          { geo: 'sphere', color: 0x4488cc, size: 2 },
-      butterfly:     { geo: 'sphere', color: 0xcc44aa, size: 1.5 },
-      bat:           { geo: 'sphere', color: 0x222222, size: 2.2 },
-      ghost_wisp:    { geo: 'sphere', color: 0xaabbcc, size: 2.5 },
-      orbiter:       { geo: 'sphere', color: 0x6c3483, size: 2.8 },
-      spark:         { geo: 'sphere', color: 0xffdd00, size: 1.8 },
+      dragon_baby:   { color: 0x22aa44, size: 3 },
+      phoenix_baby:  { color: 0xff6600, size: 2.5 },
+      wolf_baby:     { color: 0x888888, size: 2.8 },
+      bird:          { color: 0x4488cc, size: 2 },
+      butterfly:     { color: 0xcc44aa, size: 1.5 },
+      bat:           { color: 0x222222, size: 2.2 },
+      ghost_wisp:    { color: 0xaabbcc, size: 2.5 },
+      orbiter:       { color: 0x6c3483, size: 2.8 },
+      spark:         { color: 0xffdd00, size: 1.8 },
     };
 
     const def = petDefs[id];
@@ -1355,24 +1301,17 @@ const CharacterCreator = {
 
     const eyeGeo = new THREE.SphereGeometry(def.size * 0.2, 6, 4);
     const eyeMat = this._m(0xffffff);
-    const eye1 = new THREE.Mesh(eyeGeo, eyeMat);
-    eye1.position.set(-def.size * 0.3, def.size * 0.2, def.size * 0.7);
-    this.petGroup.add(eye1);
-    const eye2 = new THREE.Mesh(eyeGeo, eyeMat);
-    eye2.position.set(def.size * 0.3, def.size * 0.2, def.size * 0.7);
-    this.petGroup.add(eye2);
-
-    const pupilGeo = new THREE.SphereGeometry(def.size * 0.1, 4, 4);
-    const pupilMat = this._m(0x111111);
-    const p1 = new THREE.Mesh(pupilGeo, pupilMat);
-    p1.position.set(-def.size * 0.3, def.size * 0.2, def.size * 0.85);
-    this.petGroup.add(p1);
-    const p2 = new THREE.Mesh(pupilGeo, pupilMat);
-    p2.position.set(def.size * 0.3, def.size * 0.2, def.size * 0.85);
-    this.petGroup.add(p2);
+    [-1, 1].forEach(side => {
+      const eye = new THREE.Mesh(eyeGeo, eyeMat);
+      eye.position.set(side * def.size * 0.3, def.size * 0.2, def.size * 0.7);
+      this.petGroup.add(eye);
+      const pupil = new THREE.Mesh(new THREE.SphereGeometry(def.size * 0.1, 4, 4), this._m(0x111111));
+      pupil.position.set(side * def.size * 0.3, def.size * 0.2, def.size * 0.85);
+      this.petGroup.add(pupil);
+    });
 
     if (id.includes('dragon') || id.includes('phoenix')) {
-      for (let side = -1; side <= 1; side += 2) {
+      [-1, 1].forEach(side => {
         const wing = new THREE.Mesh(
           new THREE.BoxGeometry(1, def.size * 2, def.size),
           this._m(def.color, { transparent: true, opacity: 0.6 })
@@ -1380,7 +1319,7 @@ const CharacterCreator = {
         wing.position.set(side * def.size * 1.2, 0, -def.size * 0.3);
         wing.rotation.z = side * 0.4;
         this.petGroup.add(wing);
-      }
+      });
     }
 
     this.petGroup.position.set(25, 30, 0);
@@ -1388,31 +1327,22 @@ const CharacterCreator = {
   },
 
   _accCape(pri, sec) {
-    const cape = new THREE.Mesh(
-      new THREE.BoxGeometry(14, 22, 1.2),
-      this._m(sec, { side: THREE.DoubleSide })
-    );
+    const cape = new THREE.Mesh(new THREE.BoxGeometry(14, 22, 1.2), this._m(sec, { side: THREE.DoubleSide }));
     cape.position.set(0, 30, -9);
     this.charGroup.add(cape);
   },
 
-  _accWings(pri, sec) {
-    for (let side = -1; side <= 1; side += 2) {
-      const wing = new THREE.Mesh(
-        new THREE.BoxGeometry(2.5, 18, 12),
-        this._m(pri, { transparent: true, opacity: 0.65, side: THREE.DoubleSide })
-      );
+  _accWings(pri) {
+    [-1, 1].forEach(side => {
+      const wing = new THREE.Mesh(new THREE.BoxGeometry(2.5, 18, 12), this._m(pri, { transparent: true, opacity: 0.65, side: THREE.DoubleSide }));
       wing.position.set(side * 11, 36, -7);
       wing.rotation.z = side * 0.35;
       this.charGroup.add(wing);
-    }
+    });
   },
 
   _accAura(_, __, acc) {
-    const aura = new THREE.Mesh(
-      new THREE.SphereGeometry(24, 20, 14),
-      this._m(acc, { transparent: true, opacity: 0.08, emissive: acc, emissiveIntensity: 0.25 })
-    );
+    const aura = new THREE.Mesh(new THREE.SphereGeometry(24, 20, 14), this._m(acc, { transparent: true, opacity: 0.08, emissive: acc, emissiveIntensity: 0.25 }));
     aura.position.y = 30;
     this.charGroup.add(aura);
   },
@@ -1427,30 +1357,22 @@ const CharacterCreator = {
   },
 
   _accHalo(_, __, acc) {
-    const halo = new THREE.Mesh(
-      new THREE.TorusGeometry(6, 0.4, 8, 24),
-      this._glow(acc, 0.7)
-    );
+    const halo = new THREE.Mesh(new THREE.TorusGeometry(6, 0.4, 8, 24), this._glow(acc, 0.7));
     halo.position.set(0, 66, 0);
     halo.rotation.x = -Math.PI / 2;
     this.charGroup.add(halo);
   },
 
   _accScarf(pri, sec) {
-    const scarf = new THREE.Mesh(
-      new THREE.BoxGeometry(10, 3, 14),
-      this._m(sec)
-    );
+    const scarf = new THREE.Mesh(new THREE.BoxGeometry(10, 3, 14), this._m(sec));
     scarf.position.set(0, 46, 2);
     this.charGroup.add(scarf);
-    const tail1 = new THREE.Mesh(new THREE.BoxGeometry(3, 2, 10), this._m(sec));
-    tail1.position.set(-3, 44, -6);
-    tail1.rotation.x = 0.4;
-    this.charGroup.add(tail1);
-    const tail2 = new THREE.Mesh(new THREE.BoxGeometry(3, 2, 10), this._m(sec));
-    tail2.position.set(3, 44, -6);
-    tail2.rotation.x = 0.4;
-    this.charGroup.add(tail2);
+    [-3, 3].forEach(x => {
+      const tail = new THREE.Mesh(new THREE.BoxGeometry(3, 2, 10), this._m(sec));
+      tail.position.set(x, 44, -6);
+      tail.rotation.x = 0.4;
+      this.charGroup.add(tail);
+    });
   },
 
   _accBackpack(pri, sec, acc) {
@@ -1463,12 +1385,9 @@ const CharacterCreator = {
     this.charGroup.add(tube);
   },
 
-  _accTail(pri, sec) {
+  _accTail(pri) {
     for (let i = 0; i < 5; i++) {
-      const seg = new THREE.Mesh(
-        new THREE.SphereGeometry(1.5 - i * 0.2, 6, 4),
-        this._m(pri)
-      );
+      const seg = new THREE.Mesh(new THREE.SphereGeometry(1.5 - i * 0.2, 6, 4), this._m(pri));
       seg.position.set(0, 18 - i * 0.5, -8 - i * 2);
       this.charGroup.add(seg);
     }
@@ -1476,10 +1395,7 @@ const CharacterCreator = {
 
   _accFloating(_, __, acc) {
     for (let i = 0; i < 5; i++) {
-      const orb = new THREE.Mesh(
-        new THREE.SphereGeometry(1.2, 8, 6),
-        this._glow(acc, 0.6)
-      );
+      const orb = new THREE.Mesh(new THREE.SphereGeometry(1.2, 8, 6), this._glow(acc, 0.6));
       const angle = (i / 5) * Math.PI * 2;
       orb.position.set(Math.cos(angle) * 18, 30 + Math.sin(angle) * 5, Math.sin(angle) * 18);
       this.charGroup.add(orb);
@@ -1487,37 +1403,28 @@ const CharacterCreator = {
     }
   },
 
-  _accEnergy(_, sec, acc) {
-    for (let side = -1; side <= 1; side += 2) {
-      const wing = new THREE.Mesh(
-        new THREE.ConeGeometry(4, 12, 4),
-        this._glow(acc, 0.5)
-      );
+  _accEnergy(_, __, acc) {
+    [-1, 1].forEach(side => {
+      const wing = new THREE.Mesh(new THREE.ConeGeometry(4, 12, 4), this._glow(acc, 0.5));
       wing.position.set(side * 12, 35, -5);
       wing.rotation.z = side * 0.6;
       wing.rotation.x = -0.3;
       this.charGroup.add(wing);
-    }
+    });
   },
 
-  _accChain(_, sec) {
+  _accChain() {
     for (let i = 0; i < 8; i++) {
-      const link = new THREE.Mesh(
-        new THREE.TorusGeometry(1.2, 0.3, 6, 8),
-        this._m(0x888888)
-      );
+      const link = new THREE.Mesh(new THREE.TorusGeometry(1.2, 0.3, 6, 8), this._m(0x888888));
       link.position.set(0, 45 - i * 3, -8);
       link.rotation.x = Math.PI / 2;
       this.charGroup.add(link);
     }
   },
 
-  _accThorns(pri, sec, acc) {
+  _accThorns() {
     for (let i = 0; i < 6; i++) {
-      const thorn = new THREE.Mesh(
-        new THREE.ConeGeometry(0.6, 2.5, 4),
-        this._m(new THREE.Color(0x446633))
-      );
+      const thorn = new THREE.Mesh(new THREE.ConeGeometry(0.6, 2.5, 4), this._m(new THREE.Color(0x446633)));
       const angle = (i / 6) * Math.PI * 2;
       thorn.position.set(Math.sin(angle) * 9, 33 + Math.cos(angle) * 3, Math.cos(angle) * 9);
       thorn.lookAt(0, 33, 0);
@@ -1528,10 +1435,7 @@ const CharacterCreator = {
 
   _accTribal(pri, sec, acc) {
     for (let i = 0; i < 4; i++) {
-      const feather = new THREE.Mesh(
-        new THREE.BoxGeometry(0.6, 6, 1.5),
-        this._m(i % 2 === 0 ? pri : acc)
-      );
+      const feather = new THREE.Mesh(new THREE.BoxGeometry(0.6, 6, 1.5), this._m(i % 2 === 0 ? pri : acc));
       feather.position.set(-8 + i * 2, 48, -3);
       feather.rotation.z = -0.3 + i * 0.15;
       this.charGroup.add(feather);
@@ -1539,18 +1443,12 @@ const CharacterCreator = {
   },
 
   _accTech(_, sec, acc) {
-    const ring = new THREE.Mesh(
-      new THREE.TorusGeometry(15, 0.3, 6, 24),
-      this._glow(acc, 0.4)
-    );
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(15, 0.3, 6, 24), this._glow(acc, 0.4));
     ring.position.y = 30;
     ring.rotation.x = Math.PI / 4;
     this.charGroup.add(ring);
     for (let i = 0; i < 3; i++) {
-      const dot = new THREE.Mesh(
-        new THREE.SphereGeometry(0.5, 6, 4),
-        this._glow(acc, 0.7)
-      );
+      const dot = new THREE.Mesh(new THREE.SphereGeometry(0.5, 6, 4), this._glow(acc, 0.7));
       const angle = (i / 3) * Math.PI * 2;
       dot.position.set(Math.cos(angle) * 15, 30 + Math.sin(angle) * 15 * Math.sin(Math.PI / 4), Math.sin(angle) * 15 * Math.cos(Math.PI / 4));
       this.charGroup.add(dot);
@@ -1559,10 +1457,6 @@ const CharacterCreator = {
 
   _randomize() {
     const pick = arr => arr[Math.floor(Math.random() * arr.length)];
-    const pickKey = obj => {
-      const keys = Object.keys(obj);
-      return keys[Math.floor(Math.random() * keys.length)];
-    };
 
     this.current.helmet = pick(RangerParts.helmets).id;
     this.current.chest = pick(RangerParts.chests).id;
@@ -1574,19 +1468,12 @@ const CharacterCreator = {
     this.current.pet = pick(RangerParts.pets).id;
 
     const theme = pick(RangerParts.themes);
-    this.current.colors = {
-      primary: theme.primary,
-      secondary: theme.secondary,
-      accent: theme.accent,
-      visor: theme.visor,
-      dark: theme.dark,
-    };
+    this.current.colors = { primary: theme.primary, secondary: theme.secondary, accent: theme.accent, visor: theme.visor, dark: theme.dark };
     ['primary', 'secondary', 'accent', 'visor', 'dark'].forEach(k => {
       const el = document.getElementById('cc-color-' + k);
       if (el) el.value = this.current.colors[k];
     });
 
-    this._buildUI();
     this.buildCharacter();
   },
 
@@ -1608,40 +1495,6 @@ const CharacterCreator = {
     };
   },
 
-  loadData(data) {
-    if (!data) return;
-    Object.assign(this.current, {
-      name: data.name || 'Ranger Sem Nome',
-      class: data.class || 'warrior',
-      helmet: data.helmet || 'dino',
-      chest: data.chest || 'classic',
-      weapon: data.weapon || 'sword',
-      boots: data.boots || 'standard',
-      shoulder: data.shoulder || 'none',
-      accessory: data.accessory || 'none',
-      mask: data.mask || 'none',
-      pet: data.pet || 'none',
-    });
-    if (data.colors) Object.assign(this.current.colors, data.colors);
-    if (data.stats) Object.assign(this.current.stats, data.stats);
-
-    document.getElementById('cc-name').value = this.current.name;
-    document.getElementById('cc-name-label').textContent = this.current.name.toUpperCase();
-    ['primary', 'secondary', 'accent', 'visor', 'dark'].forEach(k => {
-      const el = document.getElementById('cc-color-' + k);
-      if (el) el.value = this.current.colors[k];
-    });
-    ['hp', 'atk', 'spd', 'def'].forEach(k => {
-      this._setStat(k, this.current.stats[k]);
-    });
-    document.querySelectorAll('.cc-class-btn').forEach(b => {
-      b.classList.toggle('active', b.dataset.class === this.current.class);
-    });
-
-    this._buildUI();
-    this.buildCharacter();
-  },
-
   _save() {
     const data = this.getData();
     let rangers = [];
@@ -1660,21 +1513,21 @@ const CharacterCreator = {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `ranger_${data.name.replace(/[^a-z0-9]/gi, '_')}.json`;
+    a.download = 'ranger_' + data.name.replace(/[^a-z0-9]/gi, '_') + '.json';
     a.click();
     URL.revokeObjectURL(url);
   },
 
   _openGallery() {
     const modal = document.getElementById('gallery-modal');
-    const grid = document.getElementById('gallery-grid');
-    grid.innerHTML = '';
+    const list = document.getElementById('gallery-list');
+    list.innerHTML = '';
 
     let rangers = [];
     try { rangers = JSON.parse(localStorage.getItem('prf_custom_rangers') || '[]'); } catch {}
 
     if (rangers.length === 0) {
-      grid.innerHTML = '<div class="cc-gallery-empty">Nenhum ranger salvo ainda.<br>Cria o teu primeiro ranger!</div>';
+      list.innerHTML = '<div style="text-align:center;padding:30px;color:#667">Nenhum ranger salvo ainda.</div>';
       modal.style.display = 'flex';
       return;
     }
@@ -1691,14 +1544,13 @@ const CharacterCreator = {
         </div>
         <div class="cc-gallery-name">${r.name}</div>
         <div class="cc-gallery-class">${cls.emoji} ${cls.name}</div>
-        <div class="cc-gallery-stats">HP${r.stats.hp} ATK${r.stats.atk} SPD${r.stats.spd} DEF${r.stats.def}</div>
         <div class="cc-gallery-actions">
           <button class="cc-gallery-btn load" data-idx="${i}">Editar</button>
           <button class="cc-gallery-btn del" data-idx="${i}">Apagar</button>
         </div>
       `;
       card.querySelector('.load').onclick = () => {
-        this.loadData(r);
+        this._loadData(r);
         modal.style.display = 'none';
       };
       card.querySelector('.del').onclick = () => {
@@ -1708,27 +1560,40 @@ const CharacterCreator = {
           this._openGallery();
         }
       };
-      grid.appendChild(card);
+      list.appendChild(card);
     });
 
     modal.style.display = 'flex';
   },
-};
 
-(function() {
-  function boot() {
-    try {
-      console.log('Boot starting...');
-      CharacterCreator.init();
-      console.log('Boot complete');
-    } catch (e) {
-      console.error('BOOT ERROR:', e);
-      document.body.innerHTML = '<div style="color:#ff0;font:14px monospace;padding:20px;background:#000;white-space:pre-wrap">' + e.message + '\n' + e.stack + '</div>';
-    }
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => requestAnimationFrame(boot));
-  } else {
-    requestAnimationFrame(boot);
-  }
-})();
+  _loadData(data) {
+    if (!data) return;
+    Object.assign(this.current, {
+      name: data.name || 'Ranger Sem Nome',
+      class: data.class || 'warrior',
+      helmet: data.helmet || 'dino',
+      chest: data.chest || 'classic',
+      weapon: data.weapon || 'sword',
+      boots: data.boots || 'standard',
+      shoulder: data.shoulder || 'none',
+      accessory: data.accessory || 'none',
+      mask: data.mask || 'none',
+      pet: data.pet || 'none',
+    });
+    if (data.colors) Object.assign(this.current.colors, data.colors);
+    if (data.stats) Object.assign(this.current.stats, data.stats);
+
+    document.getElementById('cc-name').value = this.current.name;
+    document.getElementById('cc-name-label').textContent = this.current.name.toUpperCase();
+    document.getElementById('cc-ranger-name').textContent = this.current.name.toUpperCase();
+    ['primary', 'secondary', 'accent', 'visor', 'dark'].forEach(k => {
+      const el = document.getElementById('cc-color-' + k);
+      if (el) el.value = this.current.colors[k];
+    });
+    ['hp', 'atk', 'spd', 'def'].forEach(k => {
+      this._setStat(k, this.current.stats[k]);
+    });
+
+    this.buildCharacter();
+  },
+};

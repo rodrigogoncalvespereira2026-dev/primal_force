@@ -8,6 +8,7 @@ const MenuScene = {
     document.getElementById('btn-missoes').onclick = () => alert('Missões — em breve!');
     document.getElementById('btn-perfil').onclick  = () => alert('Perfil — em breve!');
     document.getElementById('btn-loja').onclick    = () => App.goTo('shop');
+    document.getElementById('btn-criar').onclick   = () => App.goTo('creator');
 
     const sidebar = document.getElementById('opcoes-sidebar');
     document.getElementById('btn-opcoes').onclick = () => {

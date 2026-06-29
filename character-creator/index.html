@@ -14,129 +14,192 @@
       <a href="../index.html" class="cc-back">← Voltar ao Jogo</a>
       <h1>CRIADOR DE RANGERS</h1>
       <div class="cc-header-actions">
-        <button class="cc-btn secondary" id="btn-gallery">📁 Galeria</button>
-        <button class="cc-btn primary" id="btn-export">📤 Exportar</button>
+        <button class="cc-btn" id="btn-gallery">📁 Galeria</button>
+        <button class="cc-btn primary" id="btn-export">📦 Exportar</button>
       </div>
     </header>
 
+    <!-- Layout -->
     <div class="cc-layout">
-      <!-- Painel Esquerdo — Partes -->
-      <aside class="cc-panel cc-panel-left">
-        <div class="cc-panel-title">PARTES</div>
-
-        <div class="cc-section">
-          <div class="cc-section-title">Capacete</div>
-          <div class="cc-options" id="opt-helmet"></div>
+      <!-- LEFT PANEL -->
+      <aside class="cc-panel-left">
+        <div class="cc-tabs">
+          <button class="cc-tab active" data-tab="parts">Peças</button>
+          <button class="cc-tab" data-tab="style">Estilo</button>
+          <button class="cc-tab" data-tab="classes">Classe</button>
         </div>
+        <div class="cc-panel-scroll">
+          <!-- TAB: PARTS -->
+          <div class="cc-tab-content active" id="tab-parts">
+            <div class="cc-section">
+              <div class="cc-section-head">
+                <span class="cc-section-title">Capacete</span>
+              </div>
+              <div class="cc-options" id="opt-helmet"></div>
+            </div>
+            <div class="cc-section">
+              <div class="cc-section-head">
+                <span class="cc-section-title">Peitoral</span>
+              </div>
+              <div class="cc-options" id="opt-chest"></div>
+            </div>
+            <div class="cc-section">
+              <div class="cc-section-head">
+                <span class="cc-section-title">Braços</span>
+              </div>
+              <div class="cc-options" id="opt-arms"></div>
+            </div>
+            <div class="cc-section">
+              <div class="cc-section-head">
+                <span class="cc-section-title">Pernas</span>
+              </div>
+              <div class="cc-options" id="opt-legs"></div>
+            </div>
+            <div class="cc-section">
+              <div class="cc-section-head">
+                <span class="cc-section-title">Sapatos</span>
+              </div>
+              <div class="cc-options" id="opt-boots"></div>
+            </div>
+            <div class="cc-section">
+              <div class="cc-section-head">
+                <span class="cc-section-title">Arma</span>
+              </div>
+              <div class="cc-options" id="opt-weapon"></div>
+            </div>
+            <div class="cc-section">
+              <div class="cc-section-head">
+                <span class="cc-section-title">Ombreiras</span>
+              </div>
+              <div class="cc-options" id="opt-shoulder"></div>
+            </div>
+            <div class="cc-section">
+              <div class="cc-section-head">
+                <span class="cc-section-title">Acessórios</span>
+              </div>
+              <div class="cc-options" id="opt-accessory"></div>
+            </div>
+            <div class="cc-section">
+              <div class="cc-section-head">
+                <span class="cc-section-title">Máscara</span>
+              </div>
+              <div class="cc-options" id="opt-mask"></div>
+            </div>
+            <div class="cc-section">
+              <div class="cc-section-head">
+                <span class="cc-section-title">Companheiro</span>
+              </div>
+              <div class="cc-options" id="opt-pet"></div>
+            </div>
+          </div>
 
-        <div class="cc-section">
-          <div class="cc-section-title">Peitoral</div>
-          <div class="cc-options" id="opt-chest"></div>
-        </div>
+          <!-- TAB: STYLE -->
+          <div class="cc-tab-content" id="tab-style">
+            <div class="cc-section">
+              <div class="cc-section-title">Predefinições</div>
+              <div class="cc-presets" id="preset-list"></div>
+            </div>
+            <div class="cc-section">
+              <div class="cc-section-title">Paletas</div>
+              <div class="cc-palettes" id="palette-list"></div>
+            </div>
+          </div>
 
-        <div class="cc-section">
-          <div class="cc-section-title">Arma</div>
-          <div class="cc-options" id="opt-weapon"></div>
-        </div>
-
-        <div class="cc-section">
-          <div class="cc-section-title">Sapatos</div>
-          <div class="cc-options" id="opt-boots"></div>
-        </div>
-
-        <div class="cc-section">
-          <div class="cc-section-title">Acessórios</div>
-          <div class="cc-options" id="opt-accessory"></div>
+          <!-- TAB: CLASSES -->
+          <div class="cc-tab-content" id="tab-classes">
+            <div class="cc-class-grid" id="class-grid"></div>
+          </div>
         </div>
       </aside>
 
-      <!-- Canvas 3D -->
+      <!-- VIEWPORT -->
       <main class="cc-viewport">
         <canvas id="cc-canvas"></canvas>
-        <div class="cc-platform-label" id="cc-name-label">RANGER SEM NOME</div>
-        <div class="cc-rotation-hint">🖱️ Arrasta para rodar · Scroll para zoom</div>
+        <button class="cc-random-fab" id="btn-random" title="Aleatório">🎲</button>
+        <div class="cc-viewport-overlay">
+          <div class="cc-name-label" id="cc-name-label">RANGER SEM NOME</div>
+          <div class="cc-class-label" id="cc-class-label">⚔️ Guerreiro</div>
+          <div class="cc-hint">Arrasta para rodar · Scroll para zoom</div>
+        </div>
       </main>
 
-      <!-- Painel Direito — Cores + Info -->
-      <aside class="cc-panel cc-panel-right">
-        <div class="cc-panel-title">PERSONALIZAR</div>
+      <!-- RIGHT PANEL -->
+      <aside class="cc-panel-right">
+        <div class="cc-panel-scroll-right">
+          <div class="cc-panel-section">
+            <div class="cc-panel-section-title">Nome</div>
+            <input type="text" id="cc-name" class="cc-input" value="Ranger Sem Nome" maxlength="20">
+          </div>
 
-        <div class="cc-section">
-          <div class="cc-section-title">Nome</div>
-          <input type="text" id="cc-name" class="cc-input" value="Ranger Sem Nome" maxlength="20">
+          <div class="cc-panel-section">
+            <div class="cc-panel-section-title">Cores</div>
+            <div class="cc-colors-grid">
+              <div class="cc-color-row">
+                <label>Primária</label>
+                <input type="color" id="cc-color-primary" value="#2244cc">
+              </div>
+              <div class="cc-color-row">
+                <label>Secundária</label>
+                <input type="color" id="cc-color-secondary" value="#cc2222">
+              </div>
+              <div class="cc-color-row">
+                <label>Accent</label>
+                <input type="color" id="cc-color-accent" value="#ffcc00">
+              </div>
+              <div class="cc-color-row">
+                <label>Visor</label>
+                <input type="color" id="cc-color-visor" value="#22ccff">
+              </div>
+              <div class="cc-color-row">
+                <label>Escuro</label>
+                <input type="color" id="cc-color-dark" value="#111122">
+              </div>
+            </div>
+          </div>
+
+          <div class="cc-panel-section">
+            <div class="cc-panel-section-title">Estatísticas</div>
+            <div class="cc-stats">
+              <div class="cc-stat-row">
+                <span>❤️</span>
+                <input type="range" id="cc-hp" min="30" max="200" value="100">
+                <span class="cc-stat-val" id="cc-hp-val">100</span>
+              </div>
+              <div class="cc-stat-bar"><div class="cc-stat-fill" id="bar-hp" style="width:50%;background:var(--red)"></div></div>
+              <div class="cc-stat-row">
+                <span>💥</span>
+                <input type="range" id="cc-atk" min="3" max="30" value="12">
+                <span class="cc-stat-val" id="cc-atk-val">12</span>
+              </div>
+              <div class="cc-stat-bar"><div class="cc-stat-fill" id="bar-atk" style="width:40%;background:var(--yellow)"></div></div>
+              <div class="cc-stat-row">
+                <span>🏃</span>
+                <input type="range" id="cc-spd" min="1" max="15" value="5">
+                <span class="cc-stat-val" id="cc-spd-val">5</span>
+              </div>
+              <div class="cc-stat-bar"><div class="cc-stat-fill" id="bar-spd" style="width:33%;background:var(--cyan)"></div></div>
+              <div class="cc-stat-row">
+                <span>🛡️</span>
+                <input type="range" id="cc-def" min="1" max="25" value="6">
+                <span class="cc-stat-val" id="cc-def-val">6</span>
+              </div>
+              <div class="cc-stat-bar"><div class="cc-stat-fill" id="bar-def" style="width:24%;background:var(--purple)"></div></div>
+            </div>
+          </div>
         </div>
 
-        <div class="cc-section">
-          <div class="cc-section-title">Classe</div>
-          <div class="cc-class-selector">
-            <button class="cc-class-btn active" data-class="warrior">⚔️ Guerreiro</button>
-            <button class="cc-class-btn" data-class="ranger">🔫 Ranger</button>
-            <button class="cc-class-btn" data-class="mage">⚡ Mago</button>
-            <button class="cc-class-btn" data-class="tank">🛡️ Tanque</button>
-          </div>
-        </div>
-
-        <div class="cc-section">
-          <div class="cc-section-title">Cores</div>
-          <div class="cc-color-row">
-            <label>Primária</label>
-            <input type="color" id="cc-color-primary" value="#2244cc">
-          </div>
-          <div class="cc-color-row">
-            <label>Secundária</label>
-            <input type="color" id="cc-color-secondary" value="#cc2222">
-          </div>
-          <div class="cc-color-row">
-            <label>Accent</label>
-            <input type="color" id="cc-color-accent" value="#ffcc00">
-          </div>
-          <div class="cc-color-row">
-            <label>Visor</label>
-            <input type="color" id="cc-color-visor" value="#22ccff">
-          </div>
-          <div class="cc-color-row">
-            <label>Escuro</label>
-            <input type="color" id="cc-color-dark" value="#111122">
-          </div>
-        </div>
-
-        <div class="cc-section">
-          <div class="cc-section-title">Estatísticas</div>
-          <div class="cc-stat-row">
-            <span>❤️ HP</span>
-            <input type="range" id="cc-hp" min="60" max="150" value="100">
-            <span class="cc-stat-val" id="cc-hp-val">100</span>
-          </div>
-          <div class="cc-stat-row">
-            <span>💥 ATK</span>
-            <input type="range" id="cc-atk" min="5" max="25" value="12">
-            <span class="cc-stat-val" id="cc-atk-val">12</span>
-          </div>
-          <div class="cc-stat-row">
-            <span>🏃 SPD</span>
-            <input type="range" id="cc-spd" min="3" max="8" value="5">
-            <span class="cc-stat-val" id="cc-spd-val">5</span>
-          </div>
-          <div class="cc-stat-row">
-            <span>🛡️ DEF</span>
-            <input type="range" id="cc-def" min="2" max="15" value="6">
-            <span class="cc-stat-val" id="cc-def-val">6</span>
-          </div>
-        </div>
-
-        <div class="cc-section">
-          <div class="cc-section-title">Ações</div>
-          <button class="cc-btn full green" id="btn-save">💾 Salvar Ranger</button>
-          <button class="cc-btn full" id="btn-export-json">📤 Exportar JSON</button>
+        <div class="cc-actions">
+          <button class="cc-btn green full" id="btn-save">💾 Salvar Ranger</button>
+          <button class="cc-btn full" id="btn-export-json">📋 Exportar JSON</button>
         </div>
       </aside>
     </div>
 
     <!-- Gallery Modal -->
-    <div class="cc-modal-overlay" id="gallery-modal" style="display:none;">
+    <div class="cc-modal-overlay" id="gallery-modal">
       <div class="cc-modal">
         <div class="cc-modal-header">
-          <h2>GALERIA DE RANGERS</h2>
+          <h2>📁 GALERIA</h2>
           <button class="cc-modal-close" id="gallery-close">✕</button>
         </div>
         <div class="cc-modal-body" id="gallery-grid"></div>

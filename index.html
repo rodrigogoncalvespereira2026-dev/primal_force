@@ -36,6 +36,9 @@
       <button class="menu-icon-btn" id="btn-rangers">
         <span class="corner-icon">🦖</span><span class="corner-label">RANGERS</span>
       </button>
+      <button class="menu-icon-btn" id="btn-criar">
+        <span class="corner-icon">🎨</span><span class="corner-label">CRIAR</span>
+      </button>
     </div>
     <div class="menu-side-right">
       <button class="menu-icon-btn" id="btn-mundo">
@@ -301,6 +304,141 @@
     </div>
   </div>
 
+  <!-- ── CRIADOR DE RANGERS ── -->
+  <div id="screen-creator" class="screen">
+    <div class="cc-layout">
+      <div class="cc-topbar">
+        <button class="back-btn" id="btn-back-creator">&#8592; Voltar</button>
+        <span class="cc-title">CRIADOR DE RANGERS</span>
+        <div class="cc-topbar-right">
+          <button class="cc-action-btn" id="btn-random" title="Aleatório">🎲</button>
+          <button class="cc-action-btn" id="btn-gallery" title="Galeria">📁</button>
+          <button class="cc-action-btn primary" id="btn-save" title="Salvar">💾</button>
+        </div>
+      </div>
+
+      <div class="cc-body">
+        <!-- PAINEL ESQUERDO — Peças -->
+        <div class="cc-panel cc-left">
+          <div class="cc-tabs">
+            <button class="cc-tab active" data-tab="parts">Peças</button>
+            <button class="cc-tab" data-tab="style">Estilo</button>
+            <button class="cc-tab" data-tab="class">Classe</button>
+          </div>
+
+          <!-- Tab: Peças -->
+          <div class="cc-tab-content active" id="tab-parts">
+            <div class="cc-section">
+              <div class="cc-section-title">Capacete</div>
+              <div class="cc-options" id="opt-helmet"></div>
+            </div>
+            <div class="cc-section">
+              <div class="cc-section-title">Peitoral</div>
+              <div class="cc-options" id="opt-chest"></div>
+            </div>
+            <div class="cc-section">
+              <div class="cc-section-title">Arma</div>
+              <div class="cc-options" id="opt-weapon"></div>
+            </div>
+            <div class="cc-section">
+              <div class="cc-section-title">Botas</div>
+              <div class="cc-options" id="opt-boots"></div>
+            </div>
+            <div class="cc-section">
+              <div class="cc-section-title">Ombreiras</div>
+              <div class="cc-options" id="opt-shoulder"></div>
+            </div>
+            <div class="cc-section">
+              <div class="cc-section-title">Máscara</div>
+              <div class="cc-options" id="opt-mask"></div>
+            </div>
+            <div class="cc-section">
+              <div class="cc-section-title">Acessório</div>
+              <div class="cc-options" id="opt-accessory"></div>
+            </div>
+            <div class="cc-section">
+              <div class="cc-section-title">Mascote</div>
+              <div class="cc-options" id="opt-pet"></div>
+            </div>
+          </div>
+
+          <!-- Tab: Estilo -->
+          <div class="cc-tab-content" id="tab-style">
+            <div class="cc-section">
+              <div class="cc-section-title">Cores</div>
+              <div class="cc-colors">
+                <label>Primária <input type="color" id="cc-color-primary" value="#2244cc"></label>
+                <label>Secundária <input type="color" id="cc-color-secondary" value="#cc2222"></label>
+                <label>Destaque <input type="color" id="cc-color-accent" value="#ffcc00"></label>
+                <label>Visor <input type="color" id="cc-color-visor" value="#22ccff"></label>
+                <label>Escuro <input type="color" id="cc-color-dark" value="#111122"></label>
+              </div>
+            </div>
+            <div class="cc-section">
+              <div class="cc-section-title">Temas</div>
+              <div class="cc-themes" id="palette-list"></div>
+            </div>
+          </div>
+
+          <!-- Tab: Classe -->
+          <div class="cc-tab-content" id="tab-class">
+            <div class="cc-section">
+              <div class="cc-section-title">Classe</div>
+              <div class="cc-class-grid" id="class-grid"></div>
+            </div>
+            <div class="cc-section">
+              <div class="cc-section-title">Estatísticas</div>
+              <div class="cc-stats">
+                <label>❤️ HP <input type="range" id="cc-hp" min="30" max="200" value="100"><span id="cc-hp-val">100</span></label>
+                <div class="cc-stat-bar"><div class="cc-stat-fill" id="bar-hp"></div></div>
+                <label>💥 ATK <input type="range" id="cc-atk" min="3" max="30" value="12"><span id="cc-atk-val">12</span></label>
+                <div class="cc-stat-bar"><div class="cc-stat-fill" id="bar-atk"></div></div>
+                <label>⚡ SPD <input type="range" id="cc-spd" min="1" max="15" value="5"><span id="cc-spd-val">5</span></label>
+                <div class="cc-stat-bar"><div class="cc-stat-fill" id="bar-spd"></div></div>
+                <label>🛡️ DEF <input type="range" id="cc-def" min="1" max="25" value="6"><span id="cc-def-val">6</span></label>
+                <div class="cc-stat-bar"><div class="cc-stat-fill" id="bar-def"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CENTRO — Canvas 3D -->
+        <div class="cc-center">
+          <canvas id="cc-canvas"></canvas>
+          <div class="cc-name-bar">
+            <input type="text" id="cc-name" class="cc-name-input" value="Ranger Sem Nome" maxlength="24">
+            <div class="cc-class-label" id="cc-class-label">⚔️ Guerreiro</div>
+          </div>
+          <div class="cc-center-label" id="cc-name-label">RANGER SEM NOME</div>
+        </div>
+
+        <!-- PAINEL DIREITO — Info + Ações -->
+        <div class="cc-panel cc-right">
+          <div class="cc-section">
+            <div class="cc-section-title">Nome</div>
+            <div class="cc-ranger-name" id="cc-ranger-name">RANGER SEM NOME</div>
+          </div>
+          <div class="cc-section">
+            <div class="cc-section-title">Ações</div>
+            <button class="cc-action-btn wide" id="btn-export-json">📤 Exportar JSON</button>
+            <button class="cc-action-btn wide" id="btn-export">📦 Exportar GLB</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Galeria -->
+    <div class="cc-modal-overlay" id="gallery-modal" style="display:none;">
+      <div class="cc-modal">
+        <div class="cc-modal-header">
+          <h2>GALERIA</h2>
+          <button class="cc-modal-close" id="gallery-close">✕</button>
+        </div>
+        <div class="cc-modal-body" id="gallery-list"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- ── MAP EDITOR ── -->
   <div id="screen-editor" class="screen">
     <div class="editor-layout">
@@ -524,6 +662,8 @@
 <script src="js/mapeditor/data.js?v=1"></script>
 <script src="js/mapeditor/editor.js?v=1"></script>
 <script src="js/mapeditor/storage.js?v=1"></script>
+<script src="js/data/rangerparts.js?v=1"></script>
+<script src="js/scenes/creator.js?v=1"></script>
 <script src="js/scenes/game.js?v=14"></script>
 <script src="js/main.js?v=18"></script>
 </body>
