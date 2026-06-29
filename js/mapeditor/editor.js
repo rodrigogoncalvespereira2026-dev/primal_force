@@ -593,7 +593,7 @@ const MapEditor = {
         container.appendChild(btn);
       });
     } else {
-      const categories = { spawn: 'Spawn', object: 'Objetos', loot: 'Loot', deco: 'Decoração' };
+      const categories = { spawn: 'Spawn', object: 'Objetos', loot: 'Loot', building: 'Edifícios', vehicle: 'Veículos', terrain: 'Terreno', deco: 'Decoração' };
       for (const [cat, catName] of Object.entries(categories)) {
         const items = D.OBJECTS.filter(o => o.category === cat);
         if (items.length === 0) continue;

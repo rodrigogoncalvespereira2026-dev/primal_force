@@ -13,6 +13,7 @@ const MapMakerScene = {
     { id: 'ocean',      name: 'Oceano',       emoji: '🌊' },
     { id: 'desert',     name: 'Deserto',      emoji: '🏜️' },
     { id: 'mountains',  name: 'Montanhas',    emoji: '⛰️' },
+    { id: 'battle_royale', name: 'Battle Royale', emoji: '🔥' },
   ],
   _modeIdx: 0,
   _envIdx: 0,

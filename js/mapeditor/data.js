@@ -33,6 +33,19 @@ const MapEditorData = {
     { id: 'flag',          name: 'Bandeira',        emoji: '🚩', color: '#ff2222', category: 'deco',   max: 10, solid: false },
     { id: 'fence',         name: 'Cerca',           emoji: '🪵', color: '#8B6914', category: 'deco',   max: 99, solid: true },
     { id: 'campfire',      name: 'Fogueira',        emoji: '🔥', color: '#ff6600', category: 'deco',   max: 5,  solid: false },
+    { id: 'house',         name: 'Casa',            emoji: '🏠', color: '#d4c4a8', category: 'building', max: 10, solid: true },
+    { id: 'building',      name: 'Prédio',          emoji: '🏢', color: '#888888', category: 'building', max: 8,  solid: true },
+    { id: 'tower',         name: 'Torre',           emoji: '🗼', color: '#666677', category: 'building', max: 4,  solid: true },
+    { id: 'car',           name: 'Carro',           emoji: '🚗', color: '#cc2222', category: 'vehicle', max: 8,  solid: true },
+    { id: 'truck',         name: 'Camião',          emoji: '🚛', color: '#556b2f', category: 'vehicle', max: 5,  solid: true },
+    { id: 'lamppost',      name: 'Farol',           emoji: '💡', color: '#ffffcc', category: 'deco',   max: 20, solid: false },
+    { id: 'road',          name: 'Estrada',         emoji: '🛣️', color: '#333333', category: 'terrain', max: 99, solid: false },
+    { id: 'bridge',        name: 'Ponte',           emoji: '🌉', color: '#8b6914', category: 'terrain', max: 10, solid: false },
+    { id: 'wall_short',    name: 'Muro Baixo',      emoji: '🧱', color: '#888888', category: 'building', max: 30, solid: true },
+    { id: 'sandbag',       name: 'Areia',           emoji: '🪖', color: '#8b7d5a', category: 'object', max: 20, solid: true },
+    { id: 'crate_stack',   name: 'Caixas Empilhados',emoji: '📦', color: '#8B6914', category: 'object', max: 10, solid: true },
+    { id: 'water_tower',   name: 'Torre de Água',   emoji: '🚰', color: '#445566', category: 'building', max: 4,  solid: true },
+    { id: 'antenna',       name: 'Antena',          emoji: '📡', color: '#aaaaaa', category: 'deco',   max: 6,  solid: false },
   ],
 
   ZONE_THEMES: {
@@ -43,6 +56,7 @@ const MapEditorData = {
     ocean:     { name: 'Oceano',       tiles: [3,0,3,0,5], ground: '#102040' },
     desert:    { name: 'Deserto',      tiles: [5,5,0,5,2], ground: '#c2a050' },
     mountains: { name: 'Montanhas',    tiles: [2,7,2,0,7], ground: '#8a9aa0' },
+    battle_royale: { name: 'Battle Royale', tiles: [0,1,0,0,1,5], ground: '#1a2a12' },
   },
 
   TOOLS: {
