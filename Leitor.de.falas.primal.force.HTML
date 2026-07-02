@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estúdio de Vozes — Primal Force</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1B140F;
+    --bg-panel:#241A12;
+    --bg-panel-2:#2E2117;
+    --bg-row:#2A1E14;
+    --border:#4A3420;
+    --border-soft:#3A2A18;
+    --amber:#E8A33D;
+    --amber-dim:#C97A2B;
+    --red:#D64545;
+    --teal:#5B8C7B;
+    --text:#F3E9DD;
+    --text-dim:#C9B8A4;
+    --text-faint:#8A7660;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    background-image:
+      repeating-linear-gradient(115deg, rgba(232,163,61,0.025) 0px, rgba(232,163,61,0.025) 2px, transparent 2px, transparent 60px);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    padding-bottom:110px;
+  }
+  header{
+    padding:28px 20px 18px;
+    border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg, rgba(232,163,61,0.06), transparent);
+  }
+  .eyebrow{
+    font-family:'Oswald',sans-serif;
+    font-size:11px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--amber-dim);
+    margin:0 0 6px;
+  }
+  h1{
+    font-family:'Oswald',sans-serif;
+    font-weight:700;
+    font-size:26px;
+    letter-spacing:0.01em;
+    margin:0;
+    color:var(--text);
+  }
+  h1 span{color:var(--amber);}
+  .sub{
+    color:var(--text-dim);
+    font-size:13.5px;
+    margin:8px 0 0;
+    max-width:560px;
+    line-height:1.5;
+  }
+  main{
+    max-width:720px;
+    margin:0 auto;
+    padding:20px 16px;
+  }
+  .panel{
+    background:var(--bg-panel);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:18px;
+    margin-bottom:16px;
+  }
+  .panel h2{
+    font-family:'Oswald',sans-serif;
+    font-size:14px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--amber);
+    margin:0 0 12px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .panel h2::before{
+    content:'';
+    width:8px;height:8px;
+    background:var(--amber-dim);
+    display:inline-block;
+    transform:rotate(45deg);
+  }
+  textarea{
+    width:100%;
+    min-height:160px;
+    background:var(--bg-row);
+    border:1px solid var(--border-soft);
+    border-radius:6px;
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    font-size:13.5px;
+    line-height:1.55;
+    padding:12px;
+    resize:vertical;
+  }
+  textarea:focus{outline:1px solid var(--amber); outline-offset:1px;}
+  .row{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;}
+  button{
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:13px;
+    border:1px solid var(--border);
+    background:var(--bg-panel-2);
+    color:var(--text);
+    padding:9px 14px;
+    border-radius:6px;
+    cursor:pointer;
+    transition:border-color .15s, background .15s;
+  }
+  button:hover{border-color:var(--amber-dim);}
+  button:focus-visible{outline:2px solid var(--amber); outline-offset:2px;}
+  button.primary{
+    background:var(--amber-dim);
+    border-color:var(--amber-dim);
+    color:#1B140F;
+  }
+  button.primary:hover{background:var(--amber);}
+  button:disabled{opacity:0.4; cursor:not-allowed;}
+  button.ghost{background:transparent;}
+  .small{font-size:12px; padding:6px 10px;}
+  .note{
+    font-size:12px;
+    color:var(--text-faint);
+    margin-top:10px;
+    line-height:1.5;
+  }
+  .cast-list{display:flex; flex-direction:column; gap:8px;}
+  .cast-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:var(--bg-row);
+    border:1px solid var(--border-soft);
+    border-radius:6px;
+    padding:8px 10px;
+  }
+  .chip{
+    width:11px;height:11px;
+    border-radius:50%;
+    flex-shrink:0;
+    box-shadow:0 0 0 2px rgba(0,0,0,0.25) inset;
+  }
+  .cast-name{flex:1; font-size:13.5px; font-weight:600; min-width:90px;}
+  select{
+    background:var(--bg-panel-2);
+    color:var(--text);
+    border:1px solid var(--border-soft);
+    border-radius:5px;
+    font-size:12.5px;
+    padding:6px 8px;
+    max-width:170px;
+    flex:1;
+  }
+  .toggle-row{
+    display:flex; align-items:center; gap:8px;
+    font-size:13px; color:var(--text-dim);
+    margin-bottom:12px;
+  }
+  .toggle-row input{accent-color:var(--amber);}
+  #transcript{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    max-height:420px;
+    overflow-y:auto;
+    padding-right:4px;
+  }
+  .line{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    background:var(--bg-row);
+    border:1px solid var(--border-soft);
+    border-radius:6px;
+    padding:9px 10px;
+    transition:border-color .15s, background .15s;
+  }
+  .line.direction{opacity:0.65; font-style:italic;}
+  .line.active{
+    border-color:var(--amber);
+    background:var(--bg-panel-2);
+  }
+  .line .chip{margin-top:5px;}
+  .line .body{flex:1; min-width:0;}
+  .line .speaker{
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    color:var(--text-faint);
+    margin-bottom:2px;
+  }
+  .line .text{font-size:13.5px; line-height:1.45;}
+  .line-actions{display:flex; gap:4px; flex-shrink:0;}
+  .icon-btn{
+    background:transparent;
+    border:1px solid var(--border-soft);
+    width:26px; height:26px;
+    padding:0;
+    border-radius:5px;
+    font-size:12px;
+    line-height:1;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .empty{
+    color:var(--text-faint);
+    font-size:13px;
+    text-align:center;
+    padding:24px 0;
+  }
+  /* sticky control bar */
+  #controlbar{
+    position:fixed;
+    bottom:0; left:0; right:0;
+    background:var(--bg-panel);
+    border-top:1px solid var(--border);
+    padding:12px 16px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .ctrl-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    max-width:720px;
+    margin:0 auto;
+    width:100%;
+    gap:10px;
+  }
+  .transport{display:flex; gap:6px;}
+  .progress-text{font-size:12px; color:var(--text-dim); white-space:nowrap;}
+  .onair{
+    display:flex; align-items:center; gap:6px;
+    font-family:'Oswald',sans-serif;
+    font-size:11px;
+    letter-spacing:0.08em;
+    color:var(--text-faint);
+  }
+  .dot{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--text-faint);
+  }
+  .onair.live .dot{
+    background:var(--red);
+    box-shadow:0 0 0 0 rgba(214,69,69,0.6);
+    animation:pulse 1.2s infinite;
+  }
+  .onair.live{color:var(--red);}
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(214,69,69,0.5);}
+    70%{box-shadow:0 0 0 6px rgba(214,69,69,0);}
+    100%{box-shadow:0 0 0 0 rgba(214,69,69,0);}
+  }
+  .wave{display:flex; align-items:center; gap:2px; height:14px;}
+  .wave span{
+    width:2px; background:var(--amber-dim); height:3px;
+    border-radius:1px;
+  }
+  .wave.live span{animation:wv 0.9s ease-in-out infinite;}
+  .wave span:nth-child(1){animation-delay:0s;}
+  .wave span:nth-child(2){animation-delay:0.12s;}
+  .wave span:nth-child(3){animation-delay:0.24s;}
+  .wave span:nth-child(4){animation-delay:0.36s;}
+  .wave span:nth-child(5){animation-delay:0.48s;}
+  @keyframes wv{
+    0%,100%{height:3px;}
+    50%{height:14px;}
+  }
+  .ctrl-bottom{
+    display:flex; align-items:center; gap:10px;
+    max-width:720px; margin:0 auto; width:100%;
+  }
+  input[type=range]{flex:1; accent-color:var(--amber);}
+  .rate-label{font-size:12px; color:var(--text-dim); white-space:nowrap; width:70px;}
+  @media (max-width:480px){
+    h1{font-size:21px;}
+    .cast-name{min-width:70px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <p class="eyebrow">Arquivo de Trailers — Primal Force</p>
+  <h1>Estúdio de <span>Vozes</span></h1>
+  <p class="sub">Cola um trailer ou um guião completo, atribui uma voz a cada personagem, e ouve a cena a ganhar vida.</p>
+</header>
+
+<main>
+
+  <section class="panel">
+    <h2>Guião</h2>
+    <textarea id="scriptInput" placeholder="Cola aqui o trailer ou o guião..."></textarea>
+    <div class="row">
+      <button class="ghost small" id="loadTrailer">Carregar exemplo: Trailer</button>
+      <button class="ghost small" id="loadEpisode">Carregar exemplo: Episódios 1 &amp; 2</button>
+    </div>
+    <div class="row">
+      <button class="primary" id="parseBtn">Analisar Guião →</button>
+    </div>
+    <p class="note" id="parseNote"></p>
+  </section>
+
+  <section class="panel" id="castPanel" style="display:none;">
+    <h2>Elenco de Vozes</h2>
+    <div class="toggle-row">
+      <input type="checkbox" id="includeDirections">
+      <label for="includeDirections">Incluir direções de cena (narração das ações)</label>
+    </div>
+    <div class="cast-list" id="castList"></div>
+    <p class="note" id="voiceNote"></p>
+  </section>
+
+  <section class="panel" id="transcriptPanel" style="display:none;">
+    <h2>Falas</h2>
+    <div id="transcript"></div>
+  </section>
+
+  <section class="panel" id="emptyPanel">
+    <p class="empty">Ainda sem guião analisado. Cola um texto acima e clica em "Analisar Guião".</p>
+  </section>
+
+</main>
+
+<div id="controlbar">
+  <div class="ctrl-top">
+    <div class="onair" id="onair">
+      <span class="dot"></span><span id="onairLabel">EM SILÊNCIO</span>
+    </div>
+    <div class="wave" id="wave"><span></span><span></span><span></span><span></span><span></span></div>
+    <span class="progress-text" id="progressText">—</span>
+  </div>
+  <div class="ctrl-bottom">
+    <div class="transport">
+      <button class="icon-btn" id="restartBtn" title="Reiniciar">⏮</button>
+      <button class="icon-btn" id="prevBtn" title="Anterior">◀</button>
+      <button class="primary" id="playBtn" disabled>▶ Reproduzir</button>
+      <button class="icon-btn" id="nextBtn" title="Seguinte">▶|</button>
+      <button class="icon-btn" id="stopBtn" title="Parar">⏹</button>
+    </div>
+  </div>
+  <div class="ctrl-bottom">
+    <span class="rate-label" id="rateLabel">Velocidade 1.0x</span>
+    <input type="range" id="rateSlider" min="0.6" max="1.4" step="0.05" value="1">
+  </div>
+</div>
+
+<script>
+// ---------- cores conhecidas do universo Primal Force ----------
+const COLOR_MAP = {
+  'vermelho':'#D6362C','roro':'#D6362C',
+  'rosa':'#E85D9C',
+  'azul':'#2E6FE0','marc':'#2E6FE0',
+  'verde':'#3FA34D',
+  'preto':'#2B2B2E','mar':'#2B2B2E',
+  'laranja':'#E8822E',
+  'dourado':'#D4A017','vido':'#D4A017',
+  'grafite':'#5B6066',
+  'púrpura':'#9B6FC0','purpura':'#9B6FC0','mira':'#9B6FC0',
+  'prateado':'#B8BCC2','zenowing':'#B8BCC2',
+  'roxo':'#5B2C82',
+  'castanho':'#7A5230',
+  'ciano':'#2BB8C4',
+  'vermelho escuro':'#7A1F1F',
+  'amarelo':'#E0C23C',
+  'aqua':'#3FD0C9',
+  'verde lima':'#A8D14A',
+  'branco':'#F2F0E8',
+  'magenta':'#C23B8E',
+  'azul marinho':'#1B3A6B',
+  'maltherion':'#3A2155',
+  'valtherion':'#E8D9A0',
+  'keeper':'#6FA8A0',
+  'alpha':'#8FA0B3',
+  'narração':'#777066','narracao':'#777066',
+  'direção de cena':'#5A4E40','direcao de cena':'#5A4E40',
+};
+const FALLBACK_COLORS = ['#C9683A','#5B8C7B','#A0566B','#6B7DB3','#9B8A4A','#7A9E6E'];
+
+function colorFor(name, fallbackIndex){
+  const key = name.trim().toLowerCase();
+  if(COLOR_MAP[key]) return COLOR_MAP[key];
+  return FALLBACK_COLORS[fallbackIndex % FALLBACK_COLORS.length];
+}
+
+// ---------- exemplos ----------
+const TRAILER_EXAMPLE = `Vermelho: Tiranossauro Rex! Power Ranger Vermelho!
+Rosa: Anquilossauro! Power Ranger Rosa!
+Azul: Triceratops! Power Ranger Azul!
+Verde: Parassauro! Power Ranger Verde!
+Preto: Estegossauro! Power Ranger Preto!
+Dourado: Pterodáctilo! Power Ranger Dourado!
+Ciano: Mosassauro! Power Ranger Ciano!
+Grafite: Paquicefalossauro! Power Ranger Grafite!
+Púrpura: Plesiossauro! Power Ranger Púrpura!
+Todos: Força Primal, Luta Eterna!
+Vermelho: Power Rangers!
+Todos: Primal Force!`;
+
+const EPISODE_EXAMPLE = `**🎬 PRÓLOGO — A CRIAÇÃO**
+
+*Plano aberto da Rede Morphin. Os 20 Mestres Morphin estão reunidos em círculo. A energia flui através dos cristais. No centro, a Coroa brilha intensamente.*
+
+**Narração:** "Há dez anos, a Rede Morphin criou um poder que mudaria o destino do mundo para sempre."
+
+**Narração:** "Vinte estátuas de dinossauros foram criadas. Cada uma contendo uma pedra de poder. E quem conseguisse reunir as vinte pedras na coroa... ganharia o poder absoluto."
+
+**🎬 ATO I — O ATAQUE**
+
+*Exterior da base. O céu está agitado. Vido e Zenowing sentem a ameaça aproximar-se.*
+
+**Vido:** "Eles vêm. Muitos deles."
+
+**Zenowing:** "Estamos prontos."
+
+**Alpha:** "Intrusos detectados na base! Keeper, protege a coroa!"
+
+**Keeper:** "Não os deixarei chegar até ela!"
+
+**Roro:** "Alpha! Keeper! Estou a caminho!"
+
+**🎬 ATO II — O CAOS DAS PEDRAS**
+
+*Uma pedra vermelha voa em direção a Roro e liga-se a ele.*
+
+**Roro:** "O que está a acontecer?!"
+
+**Roro:** "Sou... um Power Ranger?"
+
+**Roro:** "Hengemens — Ativação!"
+
+**🎬 ATO III — A BATALHA NO EXTERIOR**
+
+**Vido:** "Poder Dourado!"
+
+**Zenowing:** "Poder Prateado!"
+
+**🎬 ATO IV — O PORTAL TEMPORAL**
+
+**Mestre Vermelho:** "O poder deles é demasiado forte. Há apenas uma solução."
+
+**Roro:** "O poder absoluto da coroa."
+
+**Mestre Vermelho:** "Precisamos de abrir um portal no tempo e banir a nave deles para sempre."
+
+**Valtherion:** "Idiotas! A coroa é nossa!"
+
+**🎬 ATO V — A SEPARAÇÃO**
+
+**Vido:** "Roro! Keeper! Entrem no portal agora! Recuperem a coroa!"
+
+**Zenowing:** "Nós ficamos aqui e acabamos com os monstros que restam. Vão!"
+
+**Roro:** "Mas vocês—"
+
+**Vido:** "Vai, Roro! Não há tempo!"
+
+**Zenowing:** "Agora... acabemos com isto."
+
+**🎬 ATO VI — 65 MILHÕES DE ANOS ATRÁS**
+
+**Narração:** "65 milhões de anos no passado."
+
+**Keeper:** "Localizei a nave. A coroa está lá dentro."
+
+**Roro:** "Então vamos buscá-la."
+
+**General:** "Pensavam que podiam roubar a nossa coroa? Rendam-se!"
+
+**Keeper:** "Tenho um plano."
+
+**Roro:** *(entregando a caixa ao general)* "Está bem. Aqui está a vossa coroa."
+
+**General:** "Tolos. Apanhem-nos!"
+
+**Valtherion:** *(abrindo a caixa)* "Finalmente... o poder absoluto é—"
+
+**Roro:** "Missão cumprida."
+
+**Keeper:** "Vamos para casa."
+
+**🎬 ATO VII — O REGRESSO**
+
+**Roro:** "Vido! Zenowing! Onde estão?"
+
+**Roro:** "Onde estão eles?"
+
+**Mestre Vermelho:** *(baixando a cabeça)* "Foram enfrentar os generais dos irmãos gémeos... e não voltaram. Não sabemos o que lhes aconteceu."
+
+**Roro:** "Têm de estar em algum lado. Vamos encontrá-los—"
+
+**Mestre Vermelho:** "Roro..."
+
+**Roro:** *(em voz baixa)* "Isto não acabou aqui."`;
+
+// ---------- estado ----------
+let parsedLines = [];     // {speaker, text, isDirection}
+let visibleLines = [];    // subset shown/spoken, respecting include-directions toggle
+let voiceAssignments = {}; // speaker -> voice name
+let availableVoices = [];
+let currentIndex = -1;
+let isPlaying = false;
+
+// ---------- parsing ----------
+function cleanDialogue(s){
+  s = s.trim();
+  s = s.replace(/\*\(.*?\)\*/g,'').trim();
+  s = s.replace(/^"(.*)"$/,'$1').trim();
+  s = s.replace(/\(.*?\)/g,'').trim();
+  s = s.replace(/\*/g,'').trim();
+  return s;
+}
+
+function parseScript(raw){
+  const lines = raw.split('\n');
+  const out = [];
+  for(let rawLine of lines){
+    let line = rawLine.trim();
+    if(!line) continue;
+    if(/^-{3,}$/.test(line)) continue;
+    if(/^[*]{0,2}🎬/.test(line)) continue;
+
+    let m = line.match(/^\*\*(.+?):\*\*\s*(.*)$/);
+    if(m){
+      const speaker = m[1].trim();
+      const dialogue = cleanDialogue(m[2]);
+      if(dialogue) out.push({speaker, text:dialogue, isDirection:false});
+      continue;
+    }
+
+    m = line.match(/^([A-Za-zÀ-ÿ ]{2,30}):\s*(.+)$/);
+    if(m && !line.startsWith('*')){
+      const speaker = m[1].trim();
+      const dialogue = cleanDialogue(m[2]);
+      if(dialogue) out.push({speaker, text:dialogue, isDirection:false});
+      continue;
+    }
+
+    m = line.match(/^\*(.+)\*$/);
+    if(m){
+      const dir = cleanDialogue(m[1]);
+      if(dir) out.push({speaker:'Direção de Cena', text:dir, isDirection:true});
+      continue;
+    }
+
+    if(/^\*\*.*\*\*$/.test(line)) continue;
+
+    const fallback = cleanDialogue(line);
+    if(fallback) out.push({speaker:'Narração', text:fallback, isDirection:false});
+  }
+  return out;
+}
+
+// ---------- vozes ----------
+function loadVoices(){
+  return new Promise(resolve=>{
+    let voices = speechSynthesis.getVoices();
+    if(voices.length){ resolve(voices); return; }
+    speechSynthesis.onvoiceschanged = () => resolve(speechSynthesis.getVoices());
+    setTimeout(()=>resolve(speechSynthesis.getVoices()), 1200);
+  });
+}
+
+function sortedVoices(){
+  const pt = availableVoices.filter(v=>v.lang && v.lang.toLowerCase().startsWith('pt'));
+  const other = availableVoices.filter(v=>!(v.lang && v.lang.toLowerCase().startsWith('pt')));
+  return [...pt, ...other];
+}
+
+function autoAssignVoices(speakers){
+  const voices = sortedVoices();
+  voiceAssignments = {};
+  speakers.forEach((speaker, i)=>{
+    if(voices.length){
+      voiceAssignments[speaker] = voices[i % voices.length].name;
+    }
+  });
+}
+
+function speakText(text, voiceName, rate, onend){
+  const utter = new SpeechSynthesisUtterance(text);
+  const voice = availableVoices.find(v=>v.name===voiceName);
+  if(voice){ utter.voice = voice; utter.lang = voice.lang; }
+  utter.rate = rate;
+  utter.onend = onend;
+  utter.onerror = onend;
+  speechSynthesis.speak(utter);
+}
+
+// ---------- UI: render ----------
+function uniqueSpeakers(lines){
+  const seen = [];
+  lines.forEach(l=>{ if(!seen.includes(l.speaker)) seen.push(l.speaker); });
+  return seen;
+}
+
+function renderCast(){
+  const includeDir = document.getElementById('includeDirections').checked;
+  visibleLines = includeDir ? parsedLines : parsedLines.filter(l=>!l.isDirection);
+  const speakers = uniqueSpeakers(visibleLines);
+
+  if(Object.keys(voiceAssignments).length === 0 || speakers.some(s=>!(s in voiceAssignments))){
+    autoAssignVoices(speakers);
+  }
+
+  const castList = document.getElementById('castList');
+  castList.innerHTML = '';
+  speakers.forEach((speaker, i)=>{
+    const row = document.createElement('div');
+    row.className = 'cast-row';
+
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.style.background = colorFor(speaker, i);
+    row.appendChild(chip);
+
+    const name = document.createElement('div');
+    name.className = 'cast-name';
+    name.textContent = speaker;
+    row.appendChild(name);
+
+    const select = document.createElement('select');
+    const voices = sortedVoices();
+    voices.forEach(v=>{
+      const opt = document.createElement('option');
+      opt.value = v.name;
+      opt.textContent = `${v.name} (${v.lang})`;
+      if(v.name === voiceAssignments[speaker]) opt.selected = true;
+      select.appendChild(opt);
+    });
+    select.addEventListener('change', ()=>{ voiceAssignments[speaker] = select.value; });
+    row.appendChild(select);
+
+    const previewBtn = document.createElement('button');
+    previewBtn.className = 'icon-btn';
+    previewBtn.title = 'Ouvir esta voz';
+    previewBtn.textContent = '▶';
+    previewBtn.addEventListener('click', ()=>{
+      speakText('Esta é a minha voz.', voiceAssignments[speaker], parseFloat(document.getElementById('rateSlider').value), ()=>{});
+    });
+    row.appendChild(previewBtn);
+
+    castList.appendChild(row);
+  });
+
+  const voiceCount = availableVoices.length;
+  const ptCount = availableVoices.filter(v=>v.lang.toLowerCase().startsWith('pt')).length;
+  document.getElementById('voiceNote').textContent =
+    `O teu sistema tem ${voiceCount} vozes disponíveis (${ptCount} em português). Se houver mais personagens do que vozes, algumas vão repetir-se — podes trocar manualmente em cada linha acima.`;
+}
+
+function renderTranscript(){
+  const wrap = document.getElementById('transcript');
+  wrap.innerHTML = '';
+  visibleLines.forEach((line, i)=>{
+    const row = document.createElement('div');
+    row.className = 'line' + (line.isDirection ? ' direction' : '');
+    row.id = 'line-' + i;
+
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.style.background = colorFor(line.speaker, uniqueSpeakers(visibleLines).indexOf(line.speaker));
+    row.appendChild(chip);
+
+    const body = document.createElement('div');
+    body.className = 'body';
+    const sp = document.createElement('div');
+    sp.className = 'speaker';
+    sp.textContent = line.speaker;
+    const tx = document.createElement('div');
+    tx.className = 'text';
+    tx.textContent = line.text;
+    body.appendChild(sp);
+    body.appendChild(tx);
+    row.appendChild(body);
+
+    const actions = document.createElement('div');
+    actions.className = 'line-actions';
+    const playOne = document.createElement('button');
+    playOne.className = 'icon-btn';
+    playOne.title = 'Tocar esta linha';
+    playOne.textContent = '▶';
+    playOne.addEventListener('click', ()=>{
+      speechSynthesis.cancel();
+      speakText(line.text, voiceAssignments[line.speaker], parseFloat(document.getElementById('rateSlider').value), ()=>{});
+    });
+    const del = document.createElement('button');
+    del.className = 'icon-btn';
+    del.title = 'Remover linha';
+    del.textContent = '✕';
+    del.addEventListener('click', ()=>{
+      const realIndex = parsedLines.indexOf(line);
+      if(realIndex > -1) parsedLines.splice(realIndex, 1);
+      renderCast();
+      renderTranscript();
+      updateProgress();
+    });
+    actions.appendChild(playOne);
+    actions.appendChild(del);
+    row.appendChild(actions);
+
+    wrap.appendChild(row);
+  });
+
+  if(visibleLines.length === 0){
+    wrap.innerHTML = '<p class="empty">Nenhuma linha para mostrar.</p>';
+  }
+}
+
+function highlightLine(index){
+  document.querySelectorAll('.line.active').forEach(el=>el.classList.remove('active'));
+  if(index >= 0 && index < visibleLines.length){
+    const el = document.getElementById('line-' + index);
+    if(el){
+      el.classList.add('active');
+      el.scrollIntoView({block:'nearest', behavior:'smooth'});
+    }
+  }
+}
+
+function updateProgress(){
+  const total = visibleLines.length;
+  const pos = currentIndex >= 0 ? currentIndex + 1 : 0;
+  document.getElementById('progressText').textContent = total ? `Linha ${pos} de ${total}` : '—';
+}
+
+function setOnAir(live){
+  const onair = document.getElementById('onair');
+  const wave = document.getElementById('wave');
+  document.getElementById('onairLabel').textContent = live ? 'NO AR' : 'EM SILÊNCIO';
+  onair.classList.toggle('live', live);
+  wave.classList.toggle('live', live);
+}
+
+// ---------- reprodução sequencial ----------
+function playFrom(index){
+  if(index < 0 || index >= visibleLines.length){
+    isPlaying = false;
+    setOnAir(false);
+    currentIndex = -1;
+    highlightLine(-1);
+    updateProgress();
+    document.getElementById('playBtn').textContent = '▶ Reproduzir';
+    return;
+  }
+  currentIndex = index;
+  highlightLine(currentIndex);
+  updateProgress();
+  setOnAir(true);
+  const line = visibleLines[currentIndex];
+  const rate = parseFloat(document.getElementById('rateSlider').value);
+  speakText(line.text, voiceAssignments[line.speaker], rate, ()=>{
+    if(isPlaying) playFrom(currentIndex + 1);
+  });
+}
+
+function togglePlay(){
+  const btn = document.getElementById('playBtn');
+  if(isPlaying){
+    isPlaying = false;
+    speechSynthesis.cancel();
+    setOnAir(false);
+    btn.textContent = '▶ Reproduzir';
+  } else {
+    if(visibleLines.length === 0) return;
+    isPlaying = true;
+    btn.textContent = '⏸ Pausar';
+    const start = (currentIndex === -1) ? 0 : currentIndex;
+    playFrom(start);
+  }
+}
+
+// ---------- eventos ----------
+document.getElementById('loadTrailer').addEventListener('click', ()=>{
+  document.getElementById('scriptInput').value = TRAILER_EXAMPLE;
+});
+document.getElementById('loadEpisode').addEventListener('click', ()=>{
+  document.getElementById('scriptInput').value = EPISODE_EXAMPLE;
+});
+
+document.getElementById('parseBtn').addEventListener('click', ()=>{
+  const raw = document.getElementById('scriptInput').value;
+  if(!raw.trim()){
+    document.getElementById('parseNote').textContent = 'Cola um guião primeiro.';
+    return;
+  }
+  parsedLines = parseScript(raw);
+  voiceAssignments = {};
+  speechSynthesis.cancel();
+  isPlaying = false;
+  currentIndex = -1;
+  document.getElementById('playBtn').textContent = '▶ Reproduzir';
+  document.getElementById('playBtn').disabled = false;
+
+  const dirCount = parsedLines.filter(l=>l.isDirection).length;
+  const speechCount = parsedLines.length - dirCount;
+  document.getElementById('parseNote').textContent =
+    `Detetadas ${speechCount} falas e ${dirCount} direções de cena.`;
+
+  document.getElementById('castPanel').style.display = 'block';
+  document.getElementById('transcriptPanel').style.display = 'block';
+  document.getElementById('emptyPanel').style.display = 'none';
+
+  renderCast();
+  renderTranscript();
+  setOnAir(false);
+  updateProgress();
+});
+
+document.getElementById('includeDirections').addEventListener('change', ()=>{
+  speechSynthesis.cancel();
+  isPlaying = false;
+  currentIndex = -1;
+  document.getElementById('playBtn').textContent = '▶ Reproduzir';
+  renderCast();
+  renderTranscript();
+  updateProgress();
+});
+
+document.getElementById('playBtn').addEventListener('click', togglePlay);
+
+document.getElementById('stopBtn').addEventListener('click', ()=>{
+  isPlaying = false;
+  speechSynthesis.cancel();
+  setOnAir(false);
+  currentIndex = -1;
+  highlightLine(-1);
+  updateProgress();
+  document.getElementById('playBtn').textContent = '▶ Reproduzir';
+});
+
+document.getElementById('restartBtn').addEventListener('click', ()=>{
+  isPlaying = false;
+  speechSynthesis.cancel();
+  setOnAir(false);
+  currentIndex = -1;
+  highlightLine(-1);
+  updateProgress();
+  document.getElementById('playBtn').textContent = '▶ Reproduzir';
+});
+
+document.getElementById('nextBtn').addEventListener('click', ()=>{
+  const wasPlaying = isPlaying;
+  speechSynthesis.cancel();
+  if(wasPlaying){
+    playFrom(currentIndex + 1);
+  } else {
+    currentIndex = Math.min(currentIndex + 1, visibleLines.length - 1);
+    highlightLine(currentIndex);
+    updateProgress();
+  }
+});
+
+document.getElementById('prevBtn').addEventListener('click', ()=>{
+  const wasPlaying = isPlaying;
+  speechSynthesis.cancel();
+  if(wasPlaying){
+    playFrom(Math.max(currentIndex - 1, 0));
+  } else {
+    currentIndex = Math.max(currentIndex - 1, 0);
+    highlightLine(currentIndex);
+    updateProgress();
+  }
+});
+
+document.getElementById('rateSlider').addEventListener('input', (e)=>{
+  document.getElementById('rateLabel').textContent = `Velocidade ${parseFloat(e.target.value).toFixed(2)}x`;
+});
+
+// ---------- arranque ----------
+(async function init(){
+  availableVoices = await loadVoices();
+  if(availableVoices.length === 0){
+    document.getElementById('parseNote').textContent =
+      'O teu browser não devolveu vozes. Tenta noutro browser (Chrome costuma ter mais vozes) ou recarrega a página.';
+  }
+})();
+</script>
+
+</body>
+</html>

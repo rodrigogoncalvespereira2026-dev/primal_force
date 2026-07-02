@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Primal Force — Visualizador 3D</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{width:100%;height:100%;overflow:hidden;background:#0a0a1a;font-family:'Segoe UI',system-ui,sans-serif;color:#fff}
+    #viewport{width:100%;height:100%;display:block}
+
+    /* Loading */
+    #loader{position:fixed;inset:0;background:#0a0a1a;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;transition:opacity .5s}
+    #loader.hidden{opacity:0;pointer-events:none}
+    .loader-spinner{width:48px;height:48px;border:4px solid rgba(255,255,255,.15);border-top-color:#ffd700;border-radius:50%;animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .loader-text{margin-top:16px;font-size:14px;color:#aaa;letter-spacing:2px}
+    .loader-sub{margin-top:8px;font-size:12px;color:#666}
+
+    /* Top bar */
+    #topbar{position:fixed;top:0;left:0;right:0;height:48px;background:rgba(10,10,26,.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,215,0,.15);display:flex;align-items:center;padding:0 12px;z-index:50;gap:8px}
+    #topbar .logo{font-weight:700;font-size:13px;letter-spacing:1px;color:#ffd700;white-space:nowrap}
+    #topbar .logo span{color:#fff;font-weight:400;font-size:11px;margin-left:4px}
+    #topbar .spacer{flex:1}
+    #topbar button{background:none;border:none;color:#ccc;font-size:12px;padding:6px 10px;border-radius:6px;cursor:pointer;transition:background .2s}
+    #topbar button:hover{background:rgba(255,215,0,.15);color:#ffd700}
+
+    /* Info panel */
+    #info-panel{position:fixed;bottom:12px;left:12px;background:rgba(10,10,26,.9);backdrop-filter:blur(12px);border:1px solid rgba(255,215,0,.2);border-radius:10px;padding:12px 16px;z-index:50;max-width:260px;pointer-events:auto}
+    #info-panel h3{font-size:12px;color:#ffd700;letter-spacing:1px;margin-bottom:6px}
+    #info-panel .info-row{font-size:11px;color:#aaa;margin:2px 0}
+    #info-panel .info-row b{color:#fff}
+
+    /* Controls panel */
+    #controls-panel{position:fixed;bottom:12px;right:12px;background:rgba(10,10,26,.9);backdrop-filter:blur(12px);border:1px solid rgba(255,215,0,.2);border-radius:10px;padding:12px 16px;z-index:50;min-width:180px}
+    #controls-panel h3{font-size:12px;color:#ffd700;letter-spacing:1px;margin-bottom:8px}
+    .ctrl-row{display:flex;align-items:center;gap:8px;margin:4px 0}
+    .ctrl-row label{font-size:11px;color:#aaa;min-width:60px}
+    .ctrl-row input[type=range]{flex:1;accent-color:#ffd700;height:4px}
+    .ctrl-row .val{font-size:11px;color:#fff;min-width:32px;text-align:right}
+    .ctrl-btn{background:rgba(255,215,0,.12);border:1px solid rgba(255,215,0,.25);color:#ffd700;font-size:11px;padding:5px 10px;border-radius:6px;cursor:pointer;width:100%;margin-top:6px;transition:background .2s}
+    .ctrl-btn:hover{background:rgba(255,215,0,.25)}
+    .ctrl-btn.active{background:rgba(255,215,0,.3);border-color:#ffd700}
+
+    /* Anim panel */
+    #anim-panel{position:fixed;top:60px;right:12px;background:rgba(10,10,26,.9);backdrop-filter:blur(12px);border:1px solid rgba(255,215,0,.2);border-radius:10px;padding:12px 16px;z-index:50;min-width:200px;display:none}
+    #anim-panel h3{font-size:12px;color:#ffd700;letter-spacing:1px;margin-bottom:8px}
+    .anim-btn{background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.2);color:#ccc;font-size:11px;padding:5px 10px;border-radius:6px;cursor:pointer;width:100%;margin:3px 0;text-align:left;transition:all .2s}
+    .anim-btn:hover{background:rgba(255,215,0,.25);color:#ffd700}
+    .anim-btn.active{background:rgba(255,215,0,.3);border-color:#ffd700;color:#ffd700}
+
+    /* Upload overlay */
+    #upload-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:90}
+    #upload-overlay.hidden{display:none}
+    .upload-box{background:#12122a;border:2px dashed rgba(255,215,0,.3);border-radius:16px;padding:40px 48px;text-align:center;max-width:400px}
+    .upload-box h2{font-size:16px;color:#ffd700;margin-bottom:8px}
+    .upload-box p{font-size:13px;color:#aaa;margin-bottom:16px}
+    .upload-box input[type=file]{margin-bottom:12px}
+    .upload-box .or-text{font-size:12px;color:#666;margin:8px 0}
+
+    /* ── Keyframe Editor (Blender-style) ── */
+    #timeline-bar{position:fixed;bottom:0;left:0;right:0;height:110px;background:rgba(10,10,26,.95);backdrop-filter:blur(12px);border-top:1px solid rgba(255,215,0,.2);z-index:60;display:none;padding:8px 16px 8px 16px;flex-direction:column}
+    #timeline-bar .tl-top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+    #timeline-bar .tl-top .tl-title{font-size:11px;color:#ffd700;font-weight:700;letter-spacing:1px}
+    #timeline-bar .tl-controls{display:flex;gap:4px;margin-left:8px}
+    #timeline-bar .tl-controls button{background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.2);color:#ccc;font-size:14px;width:28px;height:28px;border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+    #timeline-bar .tl-controls button:hover{background:rgba(255,215,0,.25);color:#ffd700}
+    #timeline-bar .tl-controls button.active{background:rgba(255,215,0,.3);border-color:#ffd700;color:#ffd700}
+    #timeline-bar .tl-duration{font-size:10px;color:#888;margin-left:auto;display:flex;align-items:center;gap:4px}
+    #timeline-bar .tl-duration input{width:48px;background:rgba(255,255,255,.08);border:1px solid rgba(255,215,0,.2);color:#fff;font-size:10px;padding:2px 4px;border-radius:4px;text-align:center}
+    #tl-track{position:relative;flex:1;background:rgba(255,255,255,.04);border-radius:6px;cursor:pointer;overflow:visible;margin-top:2px}
+    #tl-track .tl-ruler{position:absolute;top:0;left:0;right:0;height:18px;background:rgba(0,0,0,.3);border-radius:6px 6px 0 0}
+    #tl-track .tl-ruler canvas{width:100%;height:100%}
+    #tl-playhead{position:absolute;top:0;width:2px;background:#ffd700;z-index:5;pointer-events:none;transition:left .05s linear}
+    #tl-playhead::before{content:'';position:absolute;top:0;left:-5px;width:12px;height:12px;background:#ffd700;clip-path:polygon(50% 100%,0 0,100% 0)}
+    #tl-keyframes{position:absolute;top:18px;left:0;right:0;bottom:0}
+    .tl-kf{position:absolute;width:10px;height:10px;background:#ff6b35;border:1px solid #ff9a5c;transform:translate(-50%,-50%) rotate(45deg);cursor:pointer;z-index:3;transition:background .15s}
+    .tl-kf:hover{background:#ffa500}
+    .tl-kf.selected{background:#ffd700;border-color:#fff}
+
+    /* Pose Panel */
+    #pose-panel{position:fixed;top:60px;left:12px;background:rgba(10,10,26,.9);backdrop-filter:blur(12px);border:1px solid rgba(255,215,0,.2);border-radius:10px;padding:12px 16px;z-index:55;min-width:220px;display:none;max-height:calc(100vh - 140px);overflow-y:auto}
+    #pose-panel h3{font-size:12px;color:#ffd700;letter-spacing:1px;margin-bottom:8px}
+    #pose-panel .pose-part-btn{display:inline-block;background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.2);color:#ccc;font-size:10px;padding:4px 8px;border-radius:5px;cursor:pointer;margin:2px;transition:all .15s}
+    #pose-panel .pose-part-btn:hover{background:rgba(255,215,0,.25);color:#ffd700}
+    #pose-panel .pose-part-btn.active{background:rgba(255,215,0,.3);border-color:#ffd700;color:#ffd700}
+    #pose-panel .pose-slider{display:flex;align-items:center;gap:6px;margin:4px 0}
+    #pose-panel .pose-slider label{font-size:10px;color:#888;min-width:40px}
+    #pose-panel .pose-slider input[type=range]{flex:1;accent-color:#ffd700;height:3px}
+    #pose-panel .pose-slider .val{font-size:10px;color:#fff;min-width:28px;text-align:right}
+    #pose-panel .pose-actions{margin-top:8px;border-top:1px solid rgba(255,215,0,.1);padding-top:8px}
+    #pose-panel .pose-actions button{width:100%;margin:3px 0}
+    #pose-kf-list{margin-top:6px;max-height:120px;overflow-y:auto}
+    #pose-kf-list .kf-item{display:flex;align-items:center;gap:6px;font-size:10px;color:#aaa;padding:3px 6px;border-radius:4px;cursor:pointer;transition:background .15s}
+    #pose-kf-list .kf-item:hover{background:rgba(255,215,0,.1)}
+    #pose-kf-list .kf-item.active{background:rgba(255,215,0,.15);color:#ffd700}
+    #pose-kf-list .kf-item .kf-del{margin-left:auto;color:#ff6b6b;cursor:pointer;font-size:12px}
+  </style>
+</head>
+<body>
+
+  <!-- Upload overlay -->
+  <div id="upload-overlay">
+    <div class="upload-box">
+      <h2>Carregar Modelo 3D</h2>
+      <p>Arrasta um ficheiro .GLB ou .GLTF aqui</p>
+      <input type="file" id="file-input" accept=".glb,.gltf">
+      <div class="or-text">ou</div>
+      <button class="ctrl-btn" id="btn-load-sample" style="width:auto;display:inline-block;padding:8px 20px">Carregar sample.glb</button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div id="loader" class="hidden">
+    <div class="loader-spinner"></div>
+    <div class="loader-text">A CARREGAR MODELO...</div>
+    <div class="loader-sub" id="loader-status"></div>
+  </div>
+
+  <!-- Top bar -->
+  <div id="topbar">
+    <button id="btn-back" style="background:none;border:none;color:#ffd700;font-size:14px;cursor:pointer;padding:6px 10px;font-family:'Segoe UI',system-ui,sans-serif">&#8249; Voltar</button>
+    <div class="logo">PRIMAL FORCE<span>Visualizador 3D</span></div>
+    <div class="spacer"></div>
+    <button id="btn-reset-camera">Reset Camera</button>
+    <button id="btn-wireframe">Wireframe</button>
+    <button id="btn-grid" class="active">Grid</button>
+    <button id="btn-fullscreen">Fullscreen</button>
+    <button id="btn-load-new">Carregar Outro</button>
+  </div>
+
+  <!-- Info panel -->
+  <div id="info-panel">
+    <h3>INFORMAÇÕES</h3>
+    <div class="info-row">Modelo: <b id="info-name">—</b></div>
+    <div class="info-row">Triângulos: <b id="info-tris">—</b></div>
+    <div class="info-row">Materiais: <b id="info-mats">—</b></div>
+    <div class="info-row">Animações: <b id="info-anims">—</b></div>
+    <div class="info-row">Bounding Box: <b id="info-bbox">—</b></div>
+  </div>
+
+  <!-- Controls panel -->
+  <div id="controls-panel">
+    <h3>CONTROLOS</h3>
+    <div class="ctrl-row">
+      <label>Rotação X</label>
+      <input type="range" id="rot-x" min="-180" max="180" value="0">
+      <span class="val" id="rot-x-val">0°</span>
+    </div>
+    <div class="ctrl-row">
+      <label>Rotação Y</label>
+      <input type="range" id="rot-y" min="-180" max="180" value="0">
+      <span class="val" id="rot-y-val">0°</span>
+    </div>
+    <div class="ctrl-row">
+      <label>Escala</label>
+      <input type="range" id="scale" min="0.1" max="5" step="0.1" value="1">
+      <span class="val" id="scale-val">1.0</span>
+    </div>
+    <div class="ctrl-row">
+      <label>Luz</label>
+      <input type="range" id="light-intensity" min="0" max="3" step="0.1" value="1">
+      <span class="val" id="light-val">1.0</span>
+    </div>
+    <button class="ctrl-btn" id="btn-auto-rotate">Auto-Rotação</button>
+    <button class="ctrl-btn" id="btn-center">Centrar Modelo</button>
+  </div>
+
+  <!-- Anim panel -->
+  <div id="anim-panel">
+    <h3>ANIMAÇÕES</h3>
+    <div id="anim-list"></div>
+    <div style="margin-top:10px;border-top:1px solid rgba(255,215,0,.15);padding-top:10px">
+      <h3 style="font-size:11px;color:#ffd700;margin-bottom:6px">ANIMAÇÕES PROCEDURAIS</h3>
+      <div id="procedural-anims"></div>
+    </div>
+    <div style="margin-top:10px;border-top:1px solid rgba(255,215,0,.15);padding-top:10px">
+      <div class="ctrl-row">
+        <label>Velocidade</label>
+        <input type="range" id="anim-speed" min="0.1" max="3" step="0.1" value="1">
+        <span class="val" id="anim-speed-val">1.0x</span>
+      </div>
+      <div class="ctrl-row">
+        <label>Loop</label>
+        <button class="ctrl-btn active" id="btn-anim-loop" style="width:auto;padding:4px 12px;margin:0">ON</button>
+      </div>
+      <button class="ctrl-btn" id="btn-anim-pause">Pausar</button>
+      <button class="ctrl-btn" id="btn-anim-stop" style="margin-top:4px">Parar</button>
+    </div>
+    <div style="margin-top:10px;border-top:1px solid rgba(255,215,0,.15);padding-top:10px">
+      <h3 style="font-size:11px;color:#ffd700;margin-bottom:6px">TOON SHADING</h3>
+      <button class="ctrl-btn active" id="btn-toon-toggle">Toon: ON</button>
+      <div class="ctrl-row" style="margin-top:6px">
+        <label>Bandas</label>
+        <input type="range" id="toon-steps" min="2" max="5" step="1" value="3">
+        <span class="val" id="toon-steps-val">3</span>
+      </div>
+      <div class="ctrl-row">
+        <label>Outline</label>
+        <input type="range" id="outline-thickness" min="0" max="0.1" step="0.005" value="0.03">
+        <span class="val" id="outline-val">0.03</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Three.js canvas -->
+  <div id="viewport"></div>
+
+  <!-- Pose Panel (Blender-style bone posing) -->
+  <div id="pose-panel">
+    <h3>POSE EDITOR</h3>
+    <div id="pose-parts"></div>
+    <div id="pose-sliders" style="margin-top:8px;border-top:1px solid rgba(255,215,0,.1);padding-top:8px;display:none">
+      <div class="pose-slider">
+        <label>Rotação X</label>
+        <input type="range" id="pose-rx" min="-180" max="180" value="0" step="1">
+        <span class="val" id="pose-rx-val">0°</span>
+      </div>
+      <div class="pose-slider">
+        <label>Rotação Y</label>
+        <input type="range" id="pose-ry" min="-180" max="180" value="0" step="1">
+        <span class="val" id="pose-ry-val">0°</span>
+      </div>
+      <div class="pose-slider">
+        <label>Rotação Z</label>
+        <input type="range" id="pose-rz" min="-180" max="180" value="0" step="1">
+        <span class="val" id="pose-rz-val">0°</span>
+      </div>
+    </div>
+    <div class="pose-actions">
+      <button class="ctrl-btn" id="btn-pose-keyframe">Adicionar Keyframe</button>
+      <button class="ctrl-btn" id="btn-pose-reset">Reset Pose</button>
+    </div>
+    <div id="pose-kf-list"></div>
+  </div>
+
+  <!-- Timeline Bar (Blender-style dope sheet) -->
+  <div id="timeline-bar">
+    <div class="tl-top">
+      <span class="tl-title">TIMELINE</span>
+      <div class="tl-controls">
+        <button id="tl-btn-start" title="Início">⏮</button>
+        <button id="tl-btn-play" title="Play">▶</button>
+        <button id="tl-btn-stop" title="Parar">⏹</button>
+        <button id="tl-btn-addkf" title="Adicionar Keyframe" style="color:#ff6b35">◆</button>
+        <button id="tl-btn-delkf" title="Apagar Keyframe selecionado" style="color:#ff6b6b">✕</button>
+      </div>
+      <div class="tl-duration">
+        Duração: <input type="number" id="tl-duration-input" value="2" min="0.5" max="10" step="0.5">s
+        <span style="margin-left:8px">Frame: <span id="tl-frame">0</span></span>
+      </div>
+    </div>
+    <div id="tl-track">
+      <div class="tl-ruler"><canvas id="tl-ruler-canvas"></canvas></div>
+      <div id="tl-playhead" style="left:0"></div>
+      <div id="tl-keyframes"></div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="js/core/toonshader.js"></script>
+  <script src="js/core/animationsystem.js"></script>
+  <script>
+    (function(){
+      // ── State ──
+      const state = {
+        scene: null,
+        camera: null,
+        renderer: null,
+        controls: null,
+        model: null,
+        mixer: null,
+        animations: [],
+        clock: new THREE.Clock(),
+        gridHelper: null,
+        lights: [],
+        autoRotate: false,
+        wireframe: false,
+        currentAnim: null,
+        animAction: null,
+        animClip: null
+      };
+
+      // ── Init Three.js ──
+      function init(){
+        const viewport = document.getElementById('viewport');
+
+        // Scene
+        state.scene = new THREE.Scene();
+        state.scene.background = new THREE.Color(0x0a0a1a);
+        state.scene.fog = new THREE.Fog(0x0a0a1a, 30, 80);
+
+        // Camera
+        state.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 200);
+        state.camera.position.set(3, 2, 3);
+
+        // Renderer
+        state.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        state.renderer.setSize(window.innerWidth, window.innerHeight);
+        state.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        state.renderer.outputEncoding = THREE.sRGBEncoding;
+        state.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        state.renderer.toneMappingExposure = 1.2;
+        state.renderer.shadowMap.enabled = true;
+        state.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        viewport.appendChild(state.renderer.domElement);
+
+        // Controls
+        state.controls = new THREE.OrbitControls(state.camera, state.renderer.domElement);
+        state.controls.enableDamping = true;
+        state.controls.dampingFactor = 0.08;
+        state.controls.minDistance = 0.5;
+        state.controls.maxDistance = 50;
+        state.controls.target.set(0, 0.8, 0);
+
+        // Lights
+        const ambientLight = new THREE.AmbientLight(0x404060, 0.6);
+        state.scene.add(ambientLight);
+
+        const hemiLight = new THREE.HemisphereLight(0xffeedd, 0x223344, 0.8);
+        state.scene.add(hemiLight);
+
+        const mainLight = new THREE.DirectionalLight(0xffffff, 1.0);
+        mainLight.position.set(5, 8, 5);
+        mainLight.castShadow = true;
+        mainLight.shadow.mapSize.width = 1024;
+        mainLight.shadow.mapSize.height = 1024;
+        mainLight.shadow.camera.near = 0.1;
+        mainLight.shadow.camera.far = 30;
+        mainLight.shadow.camera.left = -5;
+        mainLight.shadow.camera.right = 5;
+        mainLight.shadow.camera.top = 5;
+        mainLight.shadow.camera.bottom = -5;
+        state.scene.add(mainLight);
+        state.lights.push(mainLight);
+
+        const fillLight = new THREE.DirectionalLight(0x8888ff, 0.3);
+        fillLight.position.set(-3, 4, -3);
+        state.scene.add(fillLight);
+        state.lights.push(fillLight);
+
+        const rimLight = new THREE.PointLight(0xffd700, 0.5, 15);
+        rimLight.position.set(0, 3, -4);
+        state.scene.add(rimLight);
+        state.lights.push(rimLight);
+
+        // Ground
+        const groundGeo = new THREE.PlaneGeometry(40, 40);
+        const groundMat = new THREE.MeshStandardMaterial({ color: 0x111122, roughness: 0.9, metalness: 0.1 });
+        const ground = new THREE.Mesh(groundGeo, groundMat);
+        ground.rotation.x = -Math.PI / 2;
+        ground.position.y = -0.01;
+        ground.receiveShadow = true;
+        state.scene.add(ground);
+
+        // Grid
+        state.gridHelper = new THREE.GridHelper(20, 20, 0x333355, 0x222244);
+        state.scene.add(state.gridHelper);
+
+        // Resize
+        window.addEventListener('resize', onResize);
+        onResize();
+
+        // Animate
+        animate();
+      }
+
+      function onResize(){
+        const w = window.innerWidth, h = window.innerHeight;
+        state.camera.aspect = w / h;
+        state.camera.updateProjectionMatrix();
+        state.renderer.setSize(w, h);
+        if (KF.keyframes.length > 0) {
+          drawRuler();
+          renderKeyframes();
+        }
+      }
+
+      function animate(){
+        requestAnimationFrame(animate);
+        const delta = state.clock.getDelta();
+        if(state.mixer) state.mixer.update(delta);
+        if(state.autoRotate && state.model){
+          state.model.rotation.y += 0.008;
+        }
+        state.controls.update();
+        state.renderer.render(state.scene, state.camera);
+      }
+
+      // ── Load GLB ──
+      function loadGLB(url, filename){
+        showLoader('A carregar modelo...');
+        const loader = new THREE.GLTFLoader();
+        loader.load(
+          url,
+          function(gltf){
+            // Remove previous model
+            if(state.model){
+              state.scene.remove(state.model);
+              state.model = null;
+            }
+            if(state.mixer){
+              state.mixer.stopAllAction();
+              state.mixer = null;
+            }
+
+            state.model = gltf.scene;
+            state.animations = gltf.animations || [];
+
+            // Center and scale model
+            const box = new THREE.Box3().setFromObject(state.model);
+            const center = box.getCenter(new THREE.Vector3());
+            const size = box.getSize(new THREE.Vector3());
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const scale = 2 / maxDim;
+            state.model.scale.setScalar(scale);
+            state.model.position.sub(center.multiplyScalar(scale));
+            state.model.position.y -= (box.min.y * scale);
+
+            // Enable shadows
+            state.model.traverse(function(child){
+              if(child.isMesh){
+                child.castShadow = true;
+                child.receiveShadow = true;
+                if(child.material){
+                  child.material.side = THREE.DoubleSide;
+                }
+              }
+            });
+
+            state.scene.add(state.model);
+
+            // Animations
+            if(state.animations.length > 0){
+              state.mixer = new THREE.AnimationMixer(state.model);
+              updateAnimList();
+            }
+
+            // Always show anim panel for procedural animations
+            showAnimPanel();
+            try { showEditorPanels(); } catch(e) { console.warn('Editor panels error:', e); }
+
+            // Update info
+            updateInfo(filename, size, box);
+
+            // Reset controls
+            resetCamera();
+
+            hideLoader();
+            document.getElementById('upload-overlay').classList.add('hidden');
+          },
+          function(xhr){
+            if(xhr.lengthComputable){
+              const pct = (xhr.loaded / xhr.total * 100).toFixed(0);
+              updateLoaderStatus(pct + '% carregado');
+            }
+          },
+          function(err){
+            console.error('Erro ao carregar GLB:', err);
+            updateLoaderStatus('Erro: ' + err.message);
+            setTimeout(hideLoader, 2000);
+          }
+        );
+      }
+
+      // ── UI Functions ──
+      function showLoader(text){
+        document.getElementById('loader').classList.remove('hidden');
+        document.getElementById('loader-status').textContent = text || '';
+      }
+      function hideLoader(){ document.getElementById('loader').classList.add('hidden'); }
+      function updateLoaderStatus(t){ document.getElementById('loader-status').textContent = t; }
+
+      function updateInfo(name, size, box){
+        document.getElementById('info-name').textContent = name || '—';
+        let tris = 0, mats = new Set();
+        state.model.traverse(function(c){
+          if(c.isMesh){
+            if(c.geometry){
+              const idx = c.geometry.index;
+              if(idx) tris += idx.count / 3;
+              else if(c.geometry.attributes.position) tris += c.geometry.attributes.position.count / 3;
+            }
+            if(c.material) mats.add(c.material.uuid);
+          }
+        });
+        document.getElementById('info-tris').textContent = Math.round(tris).toLocaleString();
+        document.getElementById('info-mats').textContent = mats.size;
+        document.getElementById('info-anims').textContent = state.animations.length;
+        document.getElementById('info-bbox').textContent = size.x.toFixed(1) + ' × ' + size.y.toFixed(1) + ' × ' + size.z.toFixed(1);
+      }
+
+      function resetCamera(){
+        state.camera.position.set(3, 2, 3);
+        state.controls.target.set(0, 0.8, 0);
+        state.controls.update();
+      }
+
+      function showAnimPanel(){
+        document.getElementById('anim-panel').style.display = 'block';
+      }
+
+      function updateAnimList(){
+        const list = document.getElementById('anim-list');
+        list.innerHTML = '';
+        state.animations.forEach(function(clip, i){
+          const btn = document.createElement('button');
+          btn.className = 'anim-btn';
+          btn.textContent = clip.name || ('Animação ' + (i + 1));
+          btn.addEventListener('click', function(){
+            playAnimation(i);
+            list.querySelectorAll('.anim-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+          });
+          list.appendChild(btn);
+        });
+      }
+
+      function playAnimation(index){
+        if(!state.mixer || !state.model) return;
+        state.mixer.stopAllAction();
+        const clip = state.animations[index];
+        if(clip){
+          state.animAction = state.mixer.clipAction(clip);
+          state.animAction.play();
+          state.animClip = clip;
+        }
+      }
+
+      // ── Controls ──
+      // Rotation
+      document.getElementById('rot-x').addEventListener('input', function(){
+        if(!state.model) return;
+        state.model.rotation.x = this.value * Math.PI / 180;
+        document.getElementById('rot-x-val').textContent = this.value + '°';
+      });
+      document.getElementById('rot-y').addEventListener('input', function(){
+        if(!state.model) return;
+        state.model.rotation.y = this.value * Math.PI / 180;
+        document.getElementById('rot-y-val').textContent = this.value + '°';
+      });
+      // Scale
+      document.getElementById('scale').addEventListener('input', function(){
+        if(!state.model) return;
+        state.model.scale.setScalar(parseFloat(this.value));
+        document.getElementById('scale-val').textContent = parseFloat(this.value).toFixed(1);
+      });
+      // Light intensity
+      document.getElementById('light-intensity').addEventListener('input', function(){
+        state.lights.forEach(l => l.intensity = parseFloat(this.value));
+        document.getElementById('light-val').textContent = parseFloat(this.value).toFixed(1);
+      });
+      // Auto-rotate
+      document.getElementById('btn-auto-rotate').addEventListener('click', function(){
+        state.autoRotate = !state.autoRotate;
+        this.classList.toggle('active', state.autoRotate);
+      });
+      // Center
+      document.getElementById('btn-center').addEventListener('click', function(){
+        if(!state.model) return;
+        const box = new THREE.Box3().setFromObject(state.model);
+        const center = box.getCenter(new THREE.Vector3());
+        state.controls.target.copy(center);
+        state.controls.update();
+      });
+      // Wireframe
+      document.getElementById('btn-wireframe').addEventListener('click', function(){
+        state.wireframe = !state.wireframe;
+        if(state.model){
+          state.model.traverse(function(c){
+            if(c.isMesh && c.material){
+              if(Array.isArray(c.material)){
+                c.material.forEach(m => m.wireframe = state.wireframe);
+              } else {
+                c.material.wireframe = state.wireframe;
+              }
+            }
+          });
+        }
+        this.classList.toggle('active', state.wireframe);
+      });
+      // Grid
+      document.getElementById('btn-grid').addEventListener('click', function(){
+        if(state.gridHelper){
+          state.gridHelper.visible = !state.gridHelper.visible;
+          this.classList.toggle('active', state.gridHelper.visible);
+        }
+      });
+      // Fullscreen
+      document.getElementById('btn-fullscreen').addEventListener('click', function(){
+        if(!document.fullscreenElement){
+          document.documentElement.requestFullscreen();
+        } else {
+          document.exitFullscreen();
+        }
+      });
+      // Reset camera
+      document.getElementById('btn-reset-camera').addEventListener('click', resetCamera);
+      // Load new
+      document.getElementById('btn-load-new').addEventListener('click', function(){
+        document.getElementById('upload-overlay').classList.remove('hidden');
+      });
+
+      // ── File Input ──
+      document.getElementById('btn-back').addEventListener('click', function(){ window.close(); if(!window.closed) window.history.back(); });
+      document.getElementById('file-input').addEventListener('change', function(e){
+        const file = e.target.files[0];
+        if(!file) return;
+        const url = URL.createObjectURL(file);
+        loadGLB(url, file.name);
+      });
+
+      // Load sample
+      document.getElementById('btn-load-sample').addEventListener('click', function(){
+        loadGLB('models/sample.glb', 'sample.glb');
+      });
+
+      // ── Procedural Animation Controls ──
+      let currentProceduralType = null;
+      let animPaused = false;
+
+      const proceduralTypes = ['idle', 'walk', 'attack', 'special', 'death', 'victory'];
+      const proceduralNames = {
+        idle: 'Idle (Respiração)',
+        walk: 'Walk (Caminhar)',
+        attack: 'Attack (Ataque)',
+        special: 'Special (Especial)',
+        death: 'Death (Morte)',
+        victory: 'Victory (Vitória)',
+      };
+
+      function buildProceduralAnims(){
+        const container = document.getElementById('procedural-anims');
+        if(!container) return;
+        container.innerHTML = '';
+        proceduralTypes.forEach(type => {
+          const btn = document.createElement('button');
+          btn.className = 'anim-btn';
+          btn.textContent = proceduralNames[type] || type;
+          btn.dataset.type = type;
+          btn.addEventListener('click', function(){
+            playProceduralAnim(type);
+            container.querySelectorAll('.anim-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+          });
+          container.appendChild(btn);
+        });
+      }
+
+      function playProceduralAnim(type){
+        if(!state.model || typeof AnimationSystem === 'undefined') return;
+
+        // Parar animações anteriores
+        AnimationSystem.stop();
+        if(state.mixer){
+          state.mixer.stopAllAction();
+          state.mixer = null;
+        }
+
+        const speed = parseFloat(document.getElementById('anim-speed').value) || 1;
+
+        AnimationSystem.play(state.model, type, { speed: speed });
+
+        currentProceduralType = type;
+        animPaused = false;
+        document.getElementById('btn-anim-pause').textContent = 'Pausar';
+      }
+
+      document.getElementById('anim-speed').addEventListener('input', function(){
+        const val = parseFloat(this.value);
+        document.getElementById('anim-speed-val').textContent = val.toFixed(1) + 'x';
+        // Reiniciar animação com nova velocidade
+        if(currentProceduralType){
+          playProceduralAnim(currentProceduralType);
+        } else if(state.animAction){
+          state.animAction.timeScale = val;
+        }
+      });
+
+      document.getElementById('btn-anim-loop').addEventListener('click', function(){
+        this.classList.toggle('active');
+        this.textContent = this.classList.contains('active') ? 'ON' : 'OFF';
+        if(currentProceduralType){
+          playProceduralAnim(currentProceduralType);
+        }
+      });
+
+      document.getElementById('btn-anim-pause').addEventListener('click', function(){
+        animPaused = AnimationSystem.pause();
+        this.textContent = animPaused ? 'Retomar' : 'Pausar';
+      });
+
+      document.getElementById('btn-anim-stop').addEventListener('click', function(){
+        AnimationSystem.stop();
+        currentProceduralType = null;
+        document.querySelectorAll('#procedural-anims .anim-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('#anim-list .anim-btn').forEach(b => b.classList.remove('active'));
+      });
+
+      // ── Toon Shading Controls ──
+      let toonEnabled = true;
+
+      document.getElementById('btn-toon-toggle').addEventListener('click', function(){
+        toonEnabled = !toonEnabled;
+        this.textContent = toonEnabled ? 'Toon: ON' : 'Toon: OFF';
+        this.classList.toggle('active', toonEnabled);
+        if(state.model && typeof ToonShader !== 'undefined'){
+          if(toonEnabled){
+            applyToonToModel();
+          } else {
+            state.model.traverse(child => {
+              if(child.name && child.name.endsWith('_outline')){
+                child.parent.remove(child);
+              }
+            });
+            state.model.traverse(child => {
+              if(child.isMesh){
+                child.material = new THREE.MeshStandardMaterial({ color: 0xffffff });
+              }
+            });
+          }
+        }
+      });
+
+      document.getElementById('toon-steps').addEventListener('input', function(){
+        document.getElementById('toon-steps-val').textContent = this.value;
+        if(toonEnabled && state.model && typeof ToonShader !== 'undefined'){
+          applyToonToModel();
+        }
+      });
+
+      document.getElementById('outline-thickness').addEventListener('input', function(){
+        document.getElementById('outline-val').textContent = parseFloat(this.value).toFixed(3);
+        if(toonEnabled && state.model && typeof ToonShader !== 'undefined'){
+          applyToonToModel();
+        }
+      });
+
+      function applyToonToModel(){
+        if(!state.model) return;
+        state.model.traverse(child => {
+          if(child.name && child.name.endsWith('_outline')){
+            child.parent.remove(child);
+          }
+        });
+        const steps = parseInt(document.getElementById('toon-steps').value) || 3;
+        const thickness = parseFloat(document.getElementById('outline-thickness').value) || 0.03;
+        ToonShader.applyToModel(state.model, {
+          steps: steps,
+          outlineThickness: thickness,
+          outlineColor: 0x0a0a0a,
+        });
+      }
+
+      buildProceduralAnims();
+
+      // Drag and drop
+      const uploadOverlay = document.getElementById('upload-overlay');
+      uploadOverlay.addEventListener('dragover', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        this.querySelector('.upload-box').style.borderColor = '#ffd700';
+      });
+      uploadOverlay.addEventListener('dragleave', function(e){
+        e.preventDefault();
+        this.querySelector('.upload-box').style.borderColor = 'rgba(255,215,0,.3)';
+      });
+      uploadOverlay.addEventListener('drop', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        this.querySelector('.upload-box').style.borderColor = 'rgba(255,215,0,.3)';
+        const file = e.dataTransfer.files[0];
+        if(!file) return;
+        const url = URL.createObjectURL(file);
+        loadGLB(url, file.name);
+      });
+
+      // ── Keyframe Editor (Blender-style) ──
+      const KF = {
+        duration: 2,        // seconds
+        keyframes: [],      // [{time, parts:{head:{rx,ry,rz},armL:{...},...}}]
+        selectedKF: -1,
+        currentPart: 'head',
+        playing: false,
+        playStartTime: 0,
+        playOffset: 0,
+        _rafId: null,
+      };
+
+      const PARTS = [
+        { id: 'head', name: 'Cabeça', color: '#4fc3f7' },
+        { id: 'torso', name: 'Torso', color: '#81c784' },
+        { id: 'armL', name: 'Braço Esq.', color: '#ffb74d' },
+        { id: 'armR', name: 'Braço Dir.', color: '#ff8a65' },
+        { id: 'legL', name: 'Perna Esq.', color: '#ba68c8' },
+        { id: 'legR', name: 'Perna Dir.', color: '#f06292' },
+      ];
+
+      function defaultPose() {
+        const p = {};
+        PARTS.forEach(pt => { p[pt.id] = { rx: 0, ry: 0, rz: 0 }; });
+        return p;
+      }
+
+      function getCurrentPose() {
+        return {
+          rx: parseFloat(document.getElementById('pose-rx').value) || 0,
+          ry: parseFloat(document.getElementById('pose-ry').value) || 0,
+          rz: parseFloat(document.getElementById('pose-rz').value) || 0,
+        };
+      }
+
+      function setCurrentPose(pose) {
+        document.getElementById('pose-rx').value = pose.rx;
+        document.getElementById('pose-ry').value = pose.ry;
+        document.getElementById('pose-rz').value = pose.rz;
+        document.getElementById('pose-rx-val').textContent = Math.round(pose.rx) + '°';
+        document.getElementById('pose-ry-val').textContent = Math.round(pose.ry) + '°';
+        document.getElementById('pose-rz-val').textContent = Math.round(pose.rz) + '°';
+      }
+
+      function getOrCreateKF(time) {
+        const eps = 0.01;
+        let kf = KF.keyframes.find(k => Math.abs(k.time - time) < eps);
+        if (!kf) {
+          kf = { time: time, parts: defaultPose() };
+          KF.keyframes.push(kf);
+          KF.keyframes.sort((a, b) => a.time - b.time);
+        }
+        return kf;
+      }
+
+      // ── Build Pose Parts UI ──
+      function buildPoseParts() {
+        const container = document.getElementById('pose-parts');
+        container.innerHTML = '';
+        PARTS.forEach(pt => {
+          const btn = document.createElement('button');
+          btn.className = 'pose-part-btn';
+          btn.textContent = pt.name;
+          btn.style.borderColor = pt.color + '40';
+          btn.dataset.part = pt.id;
+          btn.addEventListener('click', () => selectPart(pt.id));
+          container.appendChild(btn);
+        });
+        selectPart('head');
+      }
+
+      function selectPart(partId) {
+        KF.currentPart = partId;
+        document.querySelectorAll('#pose-parts .pose-part-btn').forEach(b => {
+          b.classList.toggle('active', b.dataset.part === partId);
+        });
+        document.getElementById('pose-sliders').style.display = 'block';
+
+        // Load pose from current keyframe or defaults
+        const time = KF.playing ? getCurrentPlayTime() : getScrubTime();
+        const kf = KF.keyframes.find(k => Math.abs(k.time - time) < 0.01);
+        const pose = kf ? kf.parts[partId] : { rx: 0, ry: 0, rz: 0 };
+        setCurrentPose(pose);
+        applyPoseToModel(pose, partId);
+      }
+
+      // ── Timeline ──
+      function getTrackWidth() {
+        return document.getElementById('tl-track').clientWidth;
+      }
+
+      function timeToX(time) {
+        return (time / KF.duration) * getTrackWidth();
+      }
+
+      function xToTime(x) {
+        return Math.max(0, Math.min(KF.duration, (x / getTrackWidth()) * KF.duration));
+      }
+
+      function getScrubTime() {
+        const ph = document.getElementById('tl-playhead');
+        const track = document.getElementById('tl-track');
+        const x = parseFloat(ph.style.left) || 0;
+        return xToTime(x);
+      }
+
+      function setPlayheadTime(time) {
+        const x = timeToX(time);
+        document.getElementById('tl-playhead').style.left = x + 'px';
+        document.getElementById('tl-frame').textContent = (time * 30).toFixed(0);
+      }
+
+      function drawRuler() {
+        const canvas = document.getElementById('tl-ruler-canvas');
+        const track = document.getElementById('tl-track');
+        canvas.width = track.clientWidth;
+        canvas.height = 18;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'rgba(0,0,0,.3)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const step = KF.duration <= 2 ? 0.25 : KF.duration <= 5 ? 0.5 : 1;
+        ctx.font = '9px monospace';
+        ctx.textAlign = 'center';
+        for (let t = 0; t <= KF.duration; t += step) {
+          const x = timeToX(t);
+          ctx.strokeStyle = 'rgba(255,255,255,.2)';
+          ctx.beginPath();
+          ctx.moveTo(x, 10);
+          ctx.lineTo(x, 18);
+          ctx.stroke();
+          ctx.fillStyle = '#888';
+          ctx.fillText(t.toFixed(1) + 's', x, 9);
+        }
+      }
+
+      function renderKeyframes() {
+        const container = document.getElementById('tl-keyframes');
+        container.innerHTML = '';
+        KF.keyframes.forEach((kf, i) => {
+          const dot = document.createElement('div');
+          dot.className = 'tl-kf' + (i === KF.selectedKF ? ' selected' : '');
+          dot.style.left = timeToX(kf.time) + 'px';
+          dot.style.top = '12px';
+          dot.title = kf.time.toFixed(2) + 's';
+          dot.addEventListener('click', (e) => {
+            e.stopPropagation();
+            KF.selectedKF = i;
+            setPlayheadTime(kf.time);
+            selectPart(KF.currentPart);
+            renderKeyframes();
+            renderKFList();
+          });
+          dot.addEventListener('dblclick', (e) => {
+            e.stopPropagation();
+            KF.selectedKF = i;
+            setPlayheadTime(kf.time);
+            selectPart(KF.currentPart);
+            renderKeyframes();
+            renderKFList();
+          });
+          container.appendChild(dot);
+        });
+      }
+
+      function renderKFList() {
+        const list = document.getElementById('pose-kf-list');
+        list.innerHTML = '';
+        KF.keyframes.forEach((kf, i) => {
+          const div = document.createElement('div');
+          div.className = 'kf-item' + (i === KF.selectedKF ? ' active' : '');
+          div.innerHTML = '<span style="color:#ff6b35">◆</span> ' + kf.time.toFixed(2) + 's' +
+            '<span class="kf-del" data-idx="' + i + '">✕</span>';
+          div.addEventListener('click', () => {
+            KF.selectedKF = i;
+            setPlayheadTime(kf.time);
+            selectPart(KF.currentPart);
+            renderKeyframes();
+            renderKFList();
+          });
+          list.appendChild(div);
+        });
+        list.querySelectorAll('.kf-del').forEach(el => {
+          el.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const idx = parseInt(el.dataset.idx);
+            KF.keyframes.splice(idx, 1);
+            KF.selectedKF = Math.min(KF.selectedKF, KF.keyframes.length - 1);
+            renderKeyframes();
+            renderKFList();
+          });
+        });
+      }
+
+      // ── Apply Pose to Model (uses AnimationSystem zones) ──
+      function applyPoseToModel(pose, partId) {
+        if (!state.model || typeof AnimationSystem === 'undefined') return;
+
+        // Ensure zones are built
+        if (!AnimationSystem._zones) {
+          AnimationSystem._saveState(state.model);
+          AnimationSystem._modelRef = state.model;
+          AnimationSystem._savedScene = {
+            position: (state.model.scene || state.model).position.clone(),
+            rotation: (state.model.scene || state.model).rotation.clone(),
+            scale: (state.model.scene || state.model).scale.clone(),
+          };
+          AnimationSystem._buildZones(state.model);
+        }
+
+        const rx = (pose.rx || 0) * Math.PI / 180;
+        const ry = (pose.ry || 0) * Math.PI / 180;
+        const rz = (pose.rz || 0) * Math.PI / 180;
+
+        AnimationSystem._forEachMesh((mesh) => {
+          AnimationSystem._applyZoneRotation(mesh, partId, rx, ry, rz);
+        });
+      }
+
+      function applyFullPose(pose) {
+        if (!state.model || typeof AnimationSystem === 'undefined') return;
+        if (!AnimationSystem._zones) {
+          AnimationSystem._saveState(state.model);
+          AnimationSystem._modelRef = state.model;
+          AnimationSystem._savedScene = {
+            position: (state.model.scene || state.model).position.clone(),
+            rotation: (state.model.scene || state.model).rotation.clone(),
+            scale: (state.model.scene || state.model).scale.clone(),
+          };
+          AnimationSystem._buildZones(state.model);
+        }
+        AnimationSystem._restoreGeometry();
+        PARTS.forEach(pt => {
+          const p = pose[pt.id] || { rx: 0, ry: 0, rz: 0 };
+          const rx = (p.rx || 0) * Math.PI / 180;
+          const ry = (p.ry || 0) * Math.PI / 180;
+          const rz = (p.rz || 0) * Math.PI / 180;
+          AnimationSystem._forEachMesh((mesh) => {
+            AnimationSystem._applyZoneRotation(mesh, pt.id, rx, ry, rz);
+          });
+        });
+      }
+
+      // ── Interpolation ──
+      function lerpPose(a, b, t) {
+        const result = {};
+        PARTS.forEach(pt => {
+          const pa = a[pt.id] || { rx: 0, ry: 0, rz: 0 };
+          const pb = b[pt.id] || { rx: 0, ry: 0, rz: 0 };
+          result[pt.id] = {
+            rx: pa.rx + (pb.rx - pa.rx) * t,
+            ry: pa.ry + (pb.ry - pa.ry) * t,
+            rz: pa.rz + (pb.rz - pa.rz) * t,
+          };
+        });
+        return result;
+      }
+
+      function getInterpolatedPose(time) {
+        if (KF.keyframes.length === 0) return defaultPose();
+        if (KF.keyframes.length === 1) return KF.keyframes[0].parts;
+
+        // Before first keyframe
+        if (time <= KF.keyframes[0].time) return KF.keyframes[0].parts;
+        // After last keyframe
+        if (time >= KF.keyframes[KF.keyframes.length - 1].time) return KF.keyframes[KF.keyframes.length - 1].parts;
+
+        // Find surrounding keyframes
+        let prev = KF.keyframes[0];
+        let next = KF.keyframes[KF.keyframes.length - 1];
+        for (let i = 0; i < KF.keyframes.length - 1; i++) {
+          if (time >= KF.keyframes[i].time && time <= KF.keyframes[i + 1].time) {
+            prev = KF.keyframes[i];
+            next = KF.keyframes[i + 1];
+            break;
+          }
+        }
+
+        const range = next.time - prev.time;
+        const t = range > 0 ? (time - prev.time) / range : 0;
+        // Smooth step
+        const st = t * t * (3 - 2 * t);
+        return lerpPose(prev.parts, next.parts, st);
+      }
+
+      // ── Playback ──
+      function getCurrentPlayTime() {
+        const elapsed = (performance.now() - KF.playStartTime) / 1000;
+        return (KF.playOffset + elapsed) % KF.duration;
+      }
+
+      function startPlayback() {
+        if (KF.keyframes.length < 2) return;
+        KF.playing = true;
+        KF.playStartTime = performance.now();
+        KF.playOffset = getScrubTime();
+        document.getElementById('tl-btn-play').textContent = '⏸';
+        document.getElementById('tl-btn-play').classList.add('active');
+        tickPlayback();
+      }
+
+      function stopPlayback() {
+        KF.playing = false;
+        if (KF._rafId) cancelAnimationFrame(KF._rafId);
+        document.getElementById('tl-btn-play').textContent = '▶';
+        document.getElementById('tl-btn-play').classList.remove('active');
+      }
+
+      function tickPlayback() {
+        if (!KF.playing) return;
+        const time = getCurrentPlayTime();
+        setPlayheadTime(time);
+        const pose = getInterpolatedPose(time);
+        applyFullPose(pose);
+        KF._rafId = requestAnimationFrame(tickPlayback);
+      }
+
+      // ── Event Handlers ──
+
+      // Pose sliders
+      ['pose-rx', 'pose-ry', 'pose-rz'].forEach(id => {
+        document.getElementById(id).addEventListener('input', function() {
+          const valId = id + '-val';
+          document.getElementById(valId).textContent = Math.round(this.value) + '°';
+          const pose = getCurrentPose();
+          applyPoseToModel(pose, KF.currentPart);
+        });
+      });
+
+      // Add keyframe button
+      document.getElementById('btn-pose-keyframe').addEventListener('click', () => {
+        const time = getScrubTime();
+        const kf = getOrCreateKF(time);
+        kf.parts[KF.currentPart] = getCurrentPose();
+        KF.selectedKF = KF.keyframes.indexOf(kf);
+        renderKeyframes();
+        renderKFList();
+      });
+
+      // Reset pose
+      document.getElementById('btn-pose-reset').addEventListener('click', () => {
+        setCurrentPose({ rx: 0, ry: 0, rz: 0 });
+        if (state.model && typeof AnimationSystem !== 'undefined') {
+          AnimationSystem._restoreGeometry();
+        }
+        PARTS.forEach(pt => {
+          applyPoseToModel({ rx: 0, ry: 0, rz: 0 }, pt.id);
+        });
+      });
+
+      // Timeline track click/scrub
+      document.getElementById('tl-track').addEventListener('click', function(e) {
+        const rect = this.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const time = xToTime(x);
+        setPlayheadTime(time);
+        if (!KF.playing) {
+          // Apply interpolated pose at scrub time
+          const pose = getInterpolatedPose(time);
+          applyFullPose(pose);
+          selectPart(KF.currentPart);
+        }
+      });
+
+      // Timeline drag
+      let tlDragging = false;
+      document.getElementById('tl-track').addEventListener('mousedown', function(e) {
+        tlDragging = true;
+        const rect = this.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const time = xToTime(x);
+        setPlayheadTime(time);
+        if (!KF.playing) {
+          const pose = getInterpolatedPose(time);
+          applyFullPose(pose);
+        }
+      });
+      document.addEventListener('mousemove', function(e) {
+        if (!tlDragging) return;
+        const track = document.getElementById('tl-track');
+        const rect = track.getBoundingClientRect();
+        const x = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+        const time = xToTime(x);
+        setPlayheadTime(time);
+        if (!KF.playing) {
+          const pose = getInterpolatedPose(time);
+          applyFullPose(pose);
+        }
+      });
+      document.addEventListener('mouseup', () => { tlDragging = false; });
+
+      // Timeline buttons
+      document.getElementById('tl-btn-start').addEventListener('click', () => {
+        stopPlayback();
+        setPlayheadTime(0);
+        const pose = getInterpolatedPose(0);
+        applyFullPose(pose);
+      });
+      document.getElementById('tl-btn-play').addEventListener('click', () => {
+        if (KF.playing) {
+          stopPlayback();
+        } else {
+          startPlayback();
+        }
+      });
+      document.getElementById('tl-btn-stop').addEventListener('click', () => {
+        stopPlayback();
+        setPlayheadTime(0);
+        AnimationSystem._restoreGeometry();
+      });
+      document.getElementById('tl-btn-addkf').addEventListener('click', () => {
+        const time = getScrubTime();
+        const kf = getOrCreateKF(time);
+        kf.parts = JSON.parse(JSON.stringify(defaultPose()));
+        // Copy current pose for current part
+        kf.parts[KF.currentPart] = getCurrentPose();
+        KF.selectedKF = KF.keyframes.indexOf(kf);
+        renderKeyframes();
+        renderKFList();
+      });
+      document.getElementById('tl-btn-delkf').addEventListener('click', () => {
+        if (KF.selectedKF >= 0 && KF.selectedKF < KF.keyframes.length) {
+          KF.keyframes.splice(KF.selectedKF, 1);
+          KF.selectedKF = Math.min(KF.selectedKF, KF.keyframes.length - 1);
+          renderKeyframes();
+          renderKFList();
+        }
+      });
+
+      // Duration change
+      document.getElementById('tl-duration-input').addEventListener('change', function() {
+        KF.duration = Math.max(0.5, parseFloat(this.value) || 2);
+        drawRuler();
+        renderKeyframes();
+      });
+
+      // Show timeline + pose panel when model loads
+      function showEditorPanels() {
+        document.getElementById('timeline-bar').style.display = 'flex';
+        document.getElementById('pose-panel').style.display = 'block';
+        drawRuler();
+        renderKeyframes();
+        renderKFList();
+        buildPoseParts();
+      }
+
+      // ── Init ──
+      init();
+    })();
+  </script>
+</body>
+</html>

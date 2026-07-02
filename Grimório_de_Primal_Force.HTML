@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grimório — Primal Force</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Cinzel+Decorative:wght@700&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --parchment:#EFE3C2;
+    --parchment-2:#E6D6A8;
+    --ink:#2B1B10;
+    --ink-soft:#5A4530;
+    --leather:#2A1A0F;
+    --leather-2:#3D2615;
+    --gold:#B07F23;
+    --gold-bright:#D9A53B;
+    --crimson:#7A2424;
+    --jade:#3F6B5E;
+    --violet:#5B3B6B;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;
+    height:100%;
+    background:radial-gradient(ellipse at 50% 0%, #1d130b, #0c0805 75%);
+    color:var(--parchment);
+    font-family:'EB Garamond',serif;
+    overflow-x:hidden;
+  }
+  .wrap{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:18px 14px 110px;
+  }
+  .title-row{
+    text-align:center;
+    margin-bottom:14px;
+  }
+  .eyebrow{
+    font-family:'Cinzel',serif;
+    font-size:10.5px;
+    letter-spacing:0.22em;
+    text-transform:uppercase;
+    color:var(--gold-bright);
+    margin:0 0 4px;
+  }
+  .title-row h1{
+    font-family:'Cinzel Decorative',serif;
+    font-size:21px;
+    margin:0;
+    color:var(--parchment);
+    text-shadow:0 1px 0 rgba(0,0,0,0.4);
+  }
+
+  /* ---------- livro ---------- */
+  #stage{
+    position:relative;
+    width:min(94vw, 420px);
+    height:min(78vh, 600px);
+    perspective:1400px;
+  }
+  #leafSlot{
+    position:absolute;
+    inset:0;
+    transition:transform 0.28s ease, opacity 0.28s ease;
+  }
+  #leafSlot.out-next{ transform:rotateY(-80deg); opacity:0; }
+  #leafSlot.out-prev{ transform:rotateY(80deg); opacity:0; }
+  #leafSlot.in-from-prev{ transform:rotateY(80deg); opacity:0; transition:none; }
+  #leafSlot.in-from-next{ transform:rotateY(-80deg); opacity:0; transition:none; }
+  .leaf{
+    background:linear-gradient(160deg, var(--parchment), var(--parchment-2));
+    border:1px solid #8a6a3a;
+    border-radius:4px;
+    overflow:hidden;
+    box-shadow:0 10px 26px rgba(0,0,0,0.5);
+    color:var(--ink);
+    padding:20px 18px 16px;
+    display:flex;
+    flex-direction:column;
+    position:absolute;
+    inset:0;
+  }
+  #pageNumOverlay{
+    position:absolute;
+    bottom:8px; right:14px;
+    font-family:'Cinzel',serif;
+    font-size:10px;
+    letter-spacing:0.1em;
+    color:var(--ink-soft);
+    opacity:0.6;
+    pointer-events:none;
+  }
+  .accent-bar{
+    width:46px; height:3px;
+    margin:6px 0 14px;
+    background:var(--gold);
+  }
+  .leaf--villain .accent-bar{background:var(--crimson);}
+  .leaf--master .accent-bar, .leaf--ally .accent-bar{background:var(--jade);}
+  .leaf--power .accent-bar{background:var(--violet);}
+
+  /* capa */
+  .leaf--cover{
+    background:linear-gradient(160deg, var(--leather-2), var(--leather));
+    color:var(--gold-bright);
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    border:2px solid #5a3c1c;
+  }
+  .leaf--cover h2{
+    font-family:'Cinzel Decorative',serif;
+    font-size:28px;
+    margin:18px 0 6px;
+    letter-spacing:0.02em;
+  }
+  .leaf--cover .sub{
+    font-family:'Cinzel',serif;
+    font-size:11px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:#caa55a;
+  }
+  .leaf--cover .hint{
+    margin-top:28px;
+    font-family:'EB Garamond',serif;
+    font-style:italic;
+    font-size:13px;
+    color:#b9985e;
+  }
+
+  /* divisórias de secção */
+  .leaf--divider{
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+  }
+  .leaf--divider h2{
+    font-family:'Cinzel',serif;
+    font-size:22px;
+    letter-spacing:0.06em;
+    margin:18px 0 8px;
+    text-transform:uppercase;
+  }
+  .leaf--divider p{
+    font-style:italic;
+    font-size:13.5px;
+    color:var(--ink-soft);
+    max-width:260px;
+    line-height:1.5;
+  }
+
+  /* sigilo SVG reutilizável */
+  .sigil{display:block; margin:0 auto;}
+
+  /* índice */
+  .toc-list{list-style:none; margin:0; padding:0; flex:1;}
+  .toc-list li{
+    display:flex; justify-content:space-between;
+    border-bottom:1px dotted #9c7a44;
+    padding:7px 0;
+    font-size:14px;
+    cursor:pointer;
+  }
+  .toc-list li span.n{font-family:'Cinzel',serif; font-size:12px; color:var(--ink-soft);}
+
+  /* cabeçalhos de conteúdo */
+  .leaf h3{
+    font-family:'Cinzel',serif;
+    font-size:16px;
+    letter-spacing:0.03em;
+    margin:0 0 2px;
+    text-transform:uppercase;
+  }
+  .leaf .role{
+    font-style:italic;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin-bottom:8px;
+  }
+  .leaf .desc{
+    font-size:14px;
+    line-height:1.5;
+    overflow-y:auto;
+  }
+
+  /* grelha de rangers */
+  .ranger-entry{
+    display:flex; align-items:flex-start; gap:10px;
+    border-bottom:1px dotted #9c7a44;
+    padding:8px 0;
+  }
+  .ranger-entry:last-child{border-bottom:none;}
+  .chip{
+    width:26px; height:26px; border-radius:50%;
+    flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Cinzel',serif;
+    font-size:11px; font-weight:700;
+    color:#fff;
+    box-shadow:inset 0 0 0 2px rgba(0,0,0,0.25);
+    margin-top:1px;
+  }
+  .ranger-info .name{font-weight:600; font-size:14px;}
+  .ranger-info .meta{font-size:12px; color:var(--ink-soft); font-style:italic;}
+  .unknown{opacity:0.55;}
+
+  /* lista de objetos de poder */
+  .power-entry{margin-bottom:10px;}
+  .power-entry .name{font-family:'Cinzel',serif; font-size:13.5px;}
+  .power-entry .desc{font-size:13.5px; margin-top:1px;}
+
+  /* contra-capa */
+  .leaf--backcover{
+    background:linear-gradient(160deg, var(--leather-2), var(--leather));
+    color:#caa55a;
+    align-items:center; justify-content:center; text-align:center;
+  }
+  .leaf--backcover p{font-style:italic; font-size:13px; max-width:240px; line-height:1.6;}
+
+  /* ---------- controlos ---------- */
+  #controls{
+    position:fixed; bottom:0; left:0; right:0;
+    background:linear-gradient(180deg, transparent, rgba(12,8,5,0.92) 30%);
+    padding:14px 16px 18px;
+    display:flex; align-items:center; justify-content:center; gap:14px;
+  }
+  .ctrl-btn{
+    font-family:'Cinzel',serif;
+    font-size:12px; letter-spacing:0.05em;
+    background:linear-gradient(160deg, var(--leather-2), var(--leather));
+    color:var(--gold-bright);
+    border:1px solid #6a4a22;
+    border-radius:6px;
+    padding:10px 16px;
+    cursor:pointer;
+  }
+  .ctrl-btn:disabled{opacity:0.35; cursor:not-allowed;}
+  .ctrl-btn:focus-visible{outline:2px solid var(--gold-bright); outline-offset:2px;}
+  #pageIndicator{
+    font-family:'Cinzel',serif;
+    font-size:11px; color:var(--gold-bright);
+    min-width:64px; text-align:center;
+  }
+  #tocBtn{
+    position:fixed; top:14px; right:14px;
+    font-family:'Cinzel',serif; font-size:11px;
+    background:linear-gradient(160deg, var(--leather-2), var(--leather));
+    color:var(--gold-bright);
+    border:1px solid #6a4a22; border-radius:6px;
+    padding:7px 11px; cursor:pointer;
+    z-index:50;
+  }
+  #tocOverlay{
+    position:fixed; inset:0;
+    background:rgba(10,7,4,0.82);
+    display:none;
+    align-items:center; justify-content:center;
+    z-index:60;
+    padding:20px;
+  }
+  #tocOverlay.show{display:flex;}
+  #tocPanel{
+    background:var(--parchment);
+    color:var(--ink);
+    border:2px solid #6a4a22;
+    border-radius:6px;
+    max-width:340px; width:100%;
+    max-height:80vh; overflow-y:auto;
+    padding:18px;
+  }
+  #tocPanel h3{font-family:'Cinzel',serif; margin-top:0;}
+
+  @media (max-width:380px){
+    .title-row h1{font-size:18px;}
+    .leaf--cover h2{font-size:23px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="title-row">
+    <p class="eyebrow">Arquivo dos Mestres Morphin</p>
+    <h1>Grimório de Primal Force</h1>
+  </div>
+
+  <div id="stage">
+    <div id="leafSlot"></div>
+    <span id="pageNumOverlay"></span>
+  </div>
+</div>
+
+<button id="tocBtn">☰ Índice</button>
+
+<div id="tocOverlay">
+  <div id="tocPanel">
+    <h3>Índice</h3>
+    <ul class="toc-list" id="tocList"></ul>
+    <button class="ctrl-btn" id="tocClose" style="margin-top:10px;">Fechar</button>
+  </div>
+</div>
+
+<div id="controls">
+  <button class="ctrl-btn" id="prevBtn">◀ Anterior</button>
+  <span id="pageIndicator">—</span>
+  <button class="ctrl-btn" id="nextBtn">Seguinte ▶</button>
+</div>
+
+<script>
+const RANGER_COLORS = {
+  'vermelho':'#D6362C','rosa':'#E85D9C','azul':'#2E6FE0','verde':'#3FA34D','preto':'#2B2B2E',
+  'laranja':'#E8822E','dourado':'#B0860C','grafite':'#5B6066','púrpura claro':'#9B6FC0',
+  'prateado':'#9DA1A8','roxo':'#5B2C82','castanho':'#7A5230','ciano':'#1E9AA6',
+  'vermelho escuro':'#7A1F1F','amarelo':'#C9A227','aqua':'#1FA89F','verde lima':'#7FAF3E',
+  'branco':'#B9AE94','magenta':'#A8327A','azul marinho':'#1B3A6B'
+};
+
+function sigilSVG(color, size){
+  return `<svg class="sigil" width="${size}" height="${size}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="50" r="46" fill="none" stroke="${color}" stroke-width="3"/>
+    <path d="M50 10 L58 28 L50 24 L42 28 Z" fill="${color}"/>
+    <path d="M50 50 L20 35 L33 55 L50 50 L67 55 L80 35 Z" fill="none" stroke="${color}" stroke-width="3" stroke-linejoin="round"/>
+    <circle cx="50" cy="50" r="5" fill="${color}"/>
+  </svg>`;
+}
+
+// ---------- dados ----------
+const RANGERS = [
+  {n:1,name:'Roro',color:'vermelho',zord:'Tiranossauro Rex'},
+  {n:2,name:null,color:'verde',zord:'Parassauro'},
+  {n:3,name:'Mar',color:'preto',zord:'Estegossauro'},
+  {n:4,name:null,color:'laranja',zord:'Velociraptor'},
+  {n:5,name:'Marc',color:'azul',zord:'Triceratops'},
+  {n:6,name:'Vido',color:'dourado',zord:'Pterodáctilo'},
+  {n:7,name:null,color:'rosa',zord:'Anquilossauro'},
+  {n:8,name:null,color:'grafite',zord:'Paquicefalossauro'},
+  {n:9,name:'Mira',color:'púrpura claro',zord:'Plesiossauro'},
+  {n:10,name:'Zenowing',color:'prateado',zord:'Titanossauro'},
+  {n:11,name:null,color:'roxo',zord:'Espinossauro'},
+  {n:12,name:null,color:'castanho',zord:'Dimetrodon'},
+  {n:13,name:null,color:'ciano',zord:'Mosassauro'},
+  {n:14,name:null,color:'vermelho escuro',zord:'Alossauro'},
+  {n:15,name:null,color:'amarelo',zord:'Dilofossauro'},
+  {n:16,name:null,color:'aqua',zord:'Tapejara'},
+  {n:17,name:null,color:'verde lima',zord:'Oviraptor'},
+  {n:18,name:null,color:'branco',zord:'Quetzalcoatlus'},
+  {n:19,name:null,color:'magenta',zord:'Amargasaurus'},
+  {n:20,name:null,color:'azul marinho',zord:'Liopleurodon'},
+];
+
+const VILLAINS = [
+  {name:'Lorde Arcano', role:'Vilão principal', desc:'A ameaça suprema por detrás de tudo. Permanece nas sombras durante a maior parte da série — só aparece pessoalmente no episódio 50.'},
+  {name:'Maltherion 🌑', role:'Robô da Escuridão · irmão gémeo', desc:'Criado para encarnar a escuridão absoluta. Esteve congelado em gelo durante anos após ser derrotado, antes de regressar.'},
+  {name:'Valtherion ☀️', role:'Robô da Pureza · irmão gémeo', desc:'O reflexo oposto de Maltherion — a pureza levada ao extremo e corrompida em arma. Foi ele quem traiu os Rangers no passado e roubou a coroa.'},
+  {name:'Sinowing 🖤', role:'Agente do Lorde Arcano', desc:'Um general sombrio com um segredo terrível — tem o próprio Zenowing aprisionado dentro de si, tal como Vido esteve preso noutro robô.'},
+  {name:'General Magnus', role:'Traidor', desc:'Antigo braço direito do Presidente da Rússia. Trai o seu antigo mestre para tentar tomar o poder para si mesmo.'},
+  {name:'O Presidente da Rússia', role:'Vilão disfarçado de político', desc:'Um líder mundial que esconde a sua verdadeira natureza. Esteve presente na grande batalha antiga e nunca desistiu de procurar a coroa.'},
+];
+
+const ALLIES = [
+  {name:'Keeper', role:'Guardião da Coroa', desc:'Criado pela própria Rede Morphin para um único propósito: proteger a coroa a todo o custo. Esteve ao lado de Roro desde o início.'},
+  {name:'Alpha', role:'Robô assistente', desc:'Versão atualizada do clássico assistente robótico. Mantém a base operacional e avisa os Rangers de qualquer perigo.'},
+  {name:'Mira', role:'Civil · amiga antiga de Roro', desc:'Decide ficar para ajudar a equipa mesmo sem poderes — pelo menos até a pedra púrpura clara a encontrar.'},
+];
+
+const POWER_OBJECTS = [
+  {name:'A Coroa', desc:'Vinte espaços, um para cada pedra de poder. Quem a completar ganha o poder absoluto sobre tudo.'},
+  {name:'As 20 Pedras', desc:'Espalhadas pelo mundo no episódio 8 para proteger a base — cada uma à espera de encontrar o seu Ranger.'},
+  {name:'Os Hengemens', desc:'Soldados ativados por Roro nos momentos de maior necessidade.'},
+  {name:'A Rede Morphin', desc:'A fonte de todo o poder Ranger, protegida pelos 20 Mestres Morphin.'},
+  {name:'O E-Tracer', desc:'Tecnologia criada por Roro capaz de localizar pedras perdidas e Zords desaparecidos.'},
+];
+
+// ---------- construção das páginas ----------
+function rangerRow(r){
+  const known = !!r.name;
+  const hex = RANGER_COLORS[r.color] || '#777';
+  return `<div class="ranger-entry ${known?'':'unknown'}">
+    <div class="chip" style="background:${hex}">${r.n}</div>
+    <div class="ranger-info">
+      <div class="name">${known ? r.name : 'Desconhecido'}</div>
+      <div class="meta">${capitalize(r.color)} · Zord ${r.zord}</div>
+    </div>
+  </div>`;
+}
+function capitalize(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+
+function chunk(arr,size){
+  const out=[];
+  for(let i=0;i<arr.length;i+=size) out.push(arr.slice(i,i+size));
+  return out;
+}
+
+const PAGES = [];
+
+PAGES.push({
+  isSection:false,
+  toc:false,
+  html:`<div class="leaf leaf--cover">
+    ${sigilSVG('#D9A53B', 92)}
+    <h2>Grimório de<br>Primal Force</h2>
+    <p class="sub">Compêndio de Rangers, Mestres e Vilões</p>
+    <p class="hint">vira a página para começar</p>
+  </div>`
+});
+
+PAGES.push({
+  toc:false,
+  html:`<div class="leaf">
+    <h3>Índice</h3>
+    <div class="accent-bar"></div>
+    <ul class="toc-list" id="tocListInline"></ul>
+  </div>`
+});
+
+function dividerPage(title, desc, accentClass){
+  return {
+    isSection:true, sectionTitle:title, toc:true,
+    html:`<div class="leaf leaf--divider ${accentClass}">
+      ${sigilSVG(getAccentHex(accentClass), 64)}
+      <h2>${title}</h2>
+      <p>${desc}</p>
+    </div>`
+  };
+}
+function getAccentHex(cls){
+  if(cls==='leaf--villain') return '#7A2424';
+  if(cls==='leaf--master'||cls==='leaf--ally') return '#3F6B5E';
+  if(cls==='leaf--power') return '#5B3B6B';
+  return '#B07F23';
+}
+
+PAGES.push(dividerPage('Os Rangers','Vinte pedras. Vinte Zords. Vinte destinos ligados à Rede Morphin.',''));
+
+chunk(RANGERS,4).forEach((group)=>{
+  PAGES.push({
+    toc:false,
+    html:`<div class="leaf">
+      <h3>Os Rangers</h3>
+      <div class="accent-bar"></div>
+      <div class="desc">${group.map(rangerRow).join('')}</div>
+    </div>`
+  });
+});
+
+PAGES.push(dividerPage('Os Mestres Morphin','Vinte mentores antigos, um por cada cor, guardiões da Rede.','leaf--master'));
+PAGES.push({
+  toc:false,
+  html:`<div class="leaf leaf--master">
+    <h3>Os Mestres Morphin</h3>
+    <p class="role">Vinte mentores · um por cor</p>
+    <div class="accent-bar"></div>
+    <div class="desc">Existem vinte Mestres Morphin, cada um ligado a uma das cores das pedras de poder. Juntos formam o conselho que protege a Rede Morphin desde tempos imemoriais.<br><br>
+    O <strong>Mestre Vermelho</strong> é o líder do conselho — e o mentor pessoal de Roro, guiando-o desde o dia em que a pedra vermelha o escolheu.</div>
+  </div>`
+});
+
+PAGES.push(dividerPage('Aliados','Quem luta ao lado dos Rangers, com ou sem poderes.','leaf--ally'));
+PAGES.push({
+  toc:false,
+  html:`<div class="leaf leaf--ally">
+    <h3>Aliados</h3>
+    <div class="accent-bar"></div>
+    <div class="desc">${ALLIES.map(a=>`<div class="power-entry"><div class="name">${a.name} — <em>${a.role}</em></div><div class="desc" style="overflow:visible">${a.desc}</div></div>`).join('')}</div>
+  </div>`
+});
+
+PAGES.push(dividerPage('Vilões','Escuridão, pureza corrompida e traição — cada um com a sua própria guerra.','leaf--villain'));
+VILLAINS.forEach(v=>{
+  PAGES.push({
+    toc:false,
+    html:`<div class="leaf leaf--villain">
+      <h3>${v.name}</h3>
+      <p class="role">${v.role}</p>
+      <div class="accent-bar"></div>
+      <div class="desc">${v.desc}</div>
+    </div>`
+  });
+});
+
+PAGES.push(dividerPage('Objetos de Poder','As ferramentas e relíquias que decidem o destino do mundo.','leaf--power'));
+PAGES.push({
+  toc:false,
+  html:`<div class="leaf leaf--power">
+    <h3>Objetos de Poder</h3>
+    <div class="accent-bar"></div>
+    <div class="desc">${POWER_OBJECTS.map(p=>`<div class="power-entry"><div class="name">${p.name}</div><div class="desc" style="overflow:visible">${p.desc}</div></div>`).join('')}</div>
+  </div>`
+});
+
+PAGES.push({
+  toc:false,
+  html:`<div class="leaf leaf--backcover">
+    ${sigilSVG('#caa55a', 70)}
+    <p style="font-family:'Cinzel',serif; letter-spacing:0.08em; text-transform:uppercase; font-size:13px; margin-top:14px;">Fim do Grimório</p>
+    <p>...por agora. Novas páginas serão escritas à medida que a história avançar.</p>
+  </div>`
+});
+
+// ---------- montagem do livro ----------
+const stage = document.getElementById('stage');
+const total = PAGES.length;
+const leafSlot = document.getElementById('leafSlot');
+const pageNumOverlay = document.getElementById('pageNumOverlay');
+
+let current = 0;
+let animating = false;
+
+function showPage(i){
+  leafSlot.innerHTML = PAGES[i].html;
+  pageNumOverlay.textContent = `${i+1} / ${total}`;
+  document.getElementById('pageIndicator').textContent = `${i+1} / ${total}`;
+  document.getElementById('prevBtn').disabled = i<=0;
+  document.getElementById('nextBtn').disabled = i>=total-1;
+}
+
+function goTo(index){
+  const target = Math.max(0, Math.min(total-1, index));
+  if(target === current || animating) return;
+  animating = true;
+  const dir = target > current ? 'next' : 'prev';
+
+  leafSlot.classList.add(dir === 'next' ? 'out-next' : 'out-prev');
+
+  setTimeout(()=>{
+    current = target;
+    showPage(current);
+    leafSlot.classList.remove('out-next','out-prev');
+    leafSlot.classList.add(dir === 'next' ? 'in-from-next' : 'in-from-prev');
+
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        leafSlot.classList.remove('in-from-next','in-from-prev');
+        setTimeout(()=>{ animating = false; }, 300);
+      });
+    });
+  }, 280);
+}
+
+document.getElementById('nextBtn').addEventListener('click', ()=>goTo(current+1));
+document.getElementById('prevBtn').addEventListener('click', ()=>goTo(current-1));
+
+// toque no palco: lado direito avança, lado esquerdo recua
+stage.addEventListener('click', (e)=>{
+  const rect = stage.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  if(x > rect.width/2){ goTo(current+1); } else { goTo(current-1); }
+});
+
+
+// swipe simples
+let touchX = null;
+stage.addEventListener('touchstart', e=>{ touchX = e.touches[0].clientX; });
+stage.addEventListener('touchend', e=>{
+  if(touchX===null) return;
+  const dx = e.changedTouches[0].clientX - touchX;
+  if(Math.abs(dx) > 40){ dx < 0 ? goTo(current+1) : goTo(current-1); }
+  touchX = null;
+});
+
+// índice
+const sectionPages = [];
+PAGES.forEach((p,i)=>{ if(p.toc) sectionPages.push({i, title:p.sectionTitle}); });
+function buildTocList(targetEl){
+  targetEl.innerHTML = '';
+  sectionPages.forEach(s=>{
+    const li = document.createElement('li');
+    li.innerHTML = `<span>${s.title}</span><span class="n">pág. ${s.i+1}</span>`;
+    li.addEventListener('click', ()=>{ goTo(s.i); document.getElementById('tocOverlay').classList.remove('show'); });
+    targetEl.appendChild(li);
+  });
+}
+buildTocList(document.getElementById('tocListInline'));
+buildTocList(document.getElementById('tocList'));
+
+document.getElementById('tocBtn').addEventListener('click', ()=>document.getElementById('tocOverlay').classList.add('show'));
+document.getElementById('tocClose').addEventListener('click', ()=>document.getElementById('tocOverlay').classList.remove('show'));
+document.getElementById('tocOverlay').addEventListener('click', (e)=>{ if(e.target.id==='tocOverlay') e.currentTarget.classList.remove('show'); });
+
+showPage(0);
+</script>
+
+</body>
+</html>
