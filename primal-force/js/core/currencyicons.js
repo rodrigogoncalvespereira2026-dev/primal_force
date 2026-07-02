@@ -1,4 +1,0 @@
-/* Currency SVG icons - inline, no gradient ID conflicts */
-const COIN_SVG = '<svg viewBox="0 0 24 24" width="16" height="16" style="display:inline-block;vertical-align:middle;margin:0 2px;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.4))"><circle cx="12" cy="12" r="10.5" fill="#DAA520" stroke="#996600" stroke-width="1"/><circle cx="12" cy="11" r="8" fill="#FFD700" stroke="#CC9900" stroke-width="0.5"/><text x="12" y="14.5" text-anchor="middle" font-size="10" font-weight="bold" fill="#8B6500">$</text></svg>';
-
-const GEM_SVG = '<svg viewBox="0 0 24 24" width="16" height="16" style="display:inline-block;vertical-align:middle;margin:0 2px;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.4))"><polygon points="12,2 20,9 12,22 4,9" fill="#6A5ACD" stroke="#3A0066" stroke-width="0.8"/><polygon points="12,2 16,9 12,22 8,9" fill="#9B8AFF" opacity="0.5"/></svg>';
