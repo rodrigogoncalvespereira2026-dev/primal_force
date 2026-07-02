@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>WebGL Test</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body style="margin:0;overflow:hidden;background:#000">
+<canvas id="c"></canvas>
+<div id="d" style="position:fixed;top:10px;left:10px;color:#0f0;font:16px monospace;z-index:9">Loading...</div>
+<script>
+var c=document.getElementById('c');
+var d=document.getElementById('d');
+var w=window.innerWidth,h=window.innerHeight;
+c.width=w;c.height=h;
+d.innerHTML='Canvas:'+w+'x'+h+' | THREE:'+(typeof THREE);
+try{
+var r=new THREE.WebGLRenderer({canvas:c,antialias:true});
+r.setSize(w,h);
+d.innerHTML+=' | Renderer:OK';
+var s=new THREE.Scene();
+s.background=new THREE.Color(0x220000);
+var cam=new THREE.PerspectiveCamera(50,w/h,0.1,1000);
+cam.position.z=5;
+s.add(new THREE.Mesh(new THREE.BoxGeometry(2,2,2),new THREE.MeshBasicMaterial({color:0x00ff00})));
+s.add(new THREE.DirectionalLight(0xffffff,1));
+d.innerHTML+=' | Scene:OK';
+function loop(){requestAnimationFrame(loop);r.render(s,cam);}
+loop();
+d.innerHTML+=' | RUNNING';
+}catch(e){d.innerHTML+=' | ERROR:'+e.message;}
+</script>
+</body>
+</html>

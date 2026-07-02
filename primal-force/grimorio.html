@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grimório Primal Force</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --leather-dark: #3b2416;
+    --leather: #5c3a21;
+    --leather-light: #7a4f2c;
+    --gold: #c9a227;
+    --gold-dim: #8a7124;
+    --parchment: #ecdfc0;
+    --parchment-shadow: #d7c49a;
+    --ink: #2b1b12;
+    --ink-faded: #5a4530;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: radial-gradient(ellipse at center, #1a1008 0%, #0b0704 100%);
+    font-family: 'EB Garamond', serif;
+    overflow: hidden;
+  }
+  #stage {
+    width: 100%; height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    perspective: 2400px;
+  }
+  #cover {
+    width: min(420px, 82vw); height: min(600px, 78vh);
+    background: radial-gradient(circle at 30% 20%, var(--leather-light), var(--leather) 55%, var(--leather-dark) 100%);
+    border-radius: 6px 10px 10px 6px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.7), inset 0 0 0 2px rgba(0,0,0,0.35), inset 0 0 40px rgba(0,0,0,0.5);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: pointer; position: relative;
+    transition: transform 0.9s cubic-bezier(.4,.1,.2,1), opacity 0.9s ease;
+    transform-style: preserve-3d;
+  }
+  #cover::before {
+    content: ''; position: absolute; inset: 0; border-radius: inherit;
+    background-image:
+      repeating-linear-gradient(115deg, rgba(0,0,0,0.06) 0px, rgba(0,0,0,0.06) 1px, transparent 2px, transparent 6px),
+      repeating-linear-gradient(25deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 2px, transparent 5px);
+    mix-blend-mode: overlay; pointer-events: none;
+  }
+  #cover.opening { transform: rotateY(-155deg); opacity: 0; pointer-events: none; }
+  .cover-frame {
+    width: 86%; height: 90%;
+    border: 2px solid var(--gold-dim); border-radius: 3px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 24px;
+    box-shadow: inset 0 0 0 6px rgba(0,0,0,0.15), inset 0 0 25px rgba(0,0,0,0.4);
+  }
+  .cover-seal {
+    width: 92px; height: 92px; border-radius: 50%;
+    border: 3px solid var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 28px;
+    box-shadow: 0 0 0 3px var(--leather-dark), 0 0 18px rgba(201,162,39,0.35);
+    background: radial-gradient(circle, rgba(201,162,39,0.12), transparent 70%);
+  }
+  .cover-seal svg { width: 56px; height: 56px; }
+  .cover-title {
+    font-family: 'Cinzel Decorative', serif; font-weight: 700;
+    font-size: clamp(22px, 5vw, 30px); color: var(--gold);
+    text-align: center; letter-spacing: 2px;
+    text-shadow: 0 2px 0 rgba(0,0,0,0.5), 0 0 18px rgba(201,162,39,0.25);
+    line-height: 1.3;
+  }
+  .cover-subtitle {
+    font-family: 'Cinzel', serif; font-size: 12px;
+    letter-spacing: 4px; color: var(--gold-dim);
+    margin-top: 14px; text-transform: uppercase;
+  }
+  .cover-hint {
+    position: absolute; bottom: 22px;
+    font-family: 'EB Garamond', serif; font-style: italic; font-size: 13px;
+    color: rgba(201,162,39,0.55);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100% { opacity: 0.4 } 50% { opacity: 0.9 } }
+
+  #book { width: min(900px, 94vw); height: min(640px, 84vh); display: none; position: relative; }
+  #book.visible { display: block; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; }
+  .pages-wrap {
+    width: 100%; height: 100%; display: flex;
+    background: var(--leather-dark); border-radius: 8px;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.65);
+    padding: 14px; gap: 3px;
+  }
+  .page {
+    flex: 1;
+    background: radial-gradient(ellipse at 20% 15%, rgba(255,255,255,0.25), transparent 60%),
+      linear-gradient(135deg, var(--parchment) 0%, var(--parchment-shadow) 100%);
+    border-radius: 2px; position: relative; overflow: hidden;
+    box-shadow: inset 0 0 30px rgba(120,90,40,0.25);
+    padding: 42px 40px; display: flex; flex-direction: column;
+  }
+  .page::after {
+    content: ''; position: absolute; inset: 0;
+    background-image:
+      radial-gradient(circle at 85% 92%, rgba(120,90,40,0.18), transparent 30%),
+      radial-gradient(circle at 8% 8%, rgba(120,90,40,0.12), transparent 25%);
+    pointer-events: none;
+  }
+  .page.left { border-right: 1px solid rgba(0,0,0,0.08); }
+  .page.right { border-left: 1px solid rgba(0,0,0,0.08); }
+  .page-eyebrow {
+    font-family: 'Cinzel', serif; font-size: 11px;
+    letter-spacing: 3px; text-transform: uppercase;
+    color: var(--ink-faded); margin-bottom: 10px;
+  }
+  .page-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(18px, 2.5vw, 24px); color: var(--ink);
+    margin: 0 0 14px 0; line-height: 1.25;
+  }
+  .page-body {
+    font-family: 'EB Garamond', serif; font-size: 15px;
+    line-height: 1.7; color: var(--ink);
+    overflow-y: auto; flex: 1; padding-right: 6px;
+  }
+  .page-body p { margin: 0 0 12px 0; }
+  .page-body .dropcap {
+    float: left; font-family: 'Cinzel Decorative', serif;
+    font-size: 48px; line-height: 0.8;
+    padding: 4px 6px 0 0; color: var(--gold-dim);
+  }
+  .page-body ul { padding-left: 20px; margin: 0 0 12px 0; }
+  .page-body li { margin-bottom: 5px; }
+  .page-body .ranger-name { font-family: 'Cinzel', serif; font-weight: 600; }
+  .page-body .ranger-red { color: #b71c1c; }
+  .page-body .ranger-black { color: #212121; }
+  .page-body .ranger-blue { color: #1565c0; }
+  .page-body .ranger-gold { color: #c9a227; }
+  .page-body .ranger-purple { color: #6a1b9a; }
+  .page-body .ranger-silver { color: #757575; }
+  .page-body .villain { color: #8b0000; font-style: italic; }
+  .page-body .term { font-family: 'Cinzel', serif; color: var(--gold-dim); }
+  .toc-list { list-style: none; padding: 0; margin: 0; }
+  .toc-list li {
+    display: flex; justify-content: space-between;
+    padding: 8px 0; border-bottom: 1px dotted rgba(43,27,18,0.3);
+    font-size: 14px;
+  }
+  .toc-list .toc-num { font-family: 'Cinzel', serif; color: var(--gold-dim); margin-right: 8px; }
+  .page-number {
+    align-self: center; font-family: 'Cinzel', serif;
+    font-size: 12px; color: var(--ink-faded); margin-top: 10px;
+  }
+  .nav-btn {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 46px; height: 46px; border-radius: 50%;
+    background: rgba(201,162,39,0.12); border: 1px solid var(--gold-dim);
+    color: var(--gold); font-size: 20px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s; z-index: 5; user-select: none;
+  }
+  .nav-btn:hover { background: rgba(201,162,39,0.28); }
+  .nav-btn.disabled { opacity: 0.25; pointer-events: none; }
+  #prevBtn { left: -60px; }
+  #nextBtn { right: -60px; }
+  .close-btn {
+    position: absolute; top: -46px; right: 0;
+    font-family: 'Cinzel', serif; font-size: 12px;
+    letter-spacing: 2px; color: var(--gold-dim);
+    background: none; border: none; cursor: pointer; text-transform: uppercase;
+  }
+  .close-btn:hover { color: var(--gold); }
+  @media (max-width: 640px) {
+    #nextBtn { right: 6px; }
+    #prevBtn { left: 6px; }
+    .pages-wrap { flex-direction: column; overflow-y: auto; }
+    .page.left { border-right: none; border-bottom: 1px solid rgba(0,0,0,0.08); }
+    .page { padding: 28px 24px; }
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="cover">
+    <div class="cover-frame">
+      <div class="cover-seal">
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="46" stroke="#c9a227" stroke-width="1.5" opacity="0.6"/>
+          <g stroke="#c9a227" stroke-width="1.8" fill="none">
+            <path d="M50 12 L58 38 L84 38 L63 54 L71 80 L50 64 L29 80 L37 54 L16 38 L42 38 Z"/>
+          </g>
+        </svg>
+      </div>
+      <div class="cover-title">Grimório<br>Primal Force</div>
+      <div class="cover-subtitle">A Crónica da Rede Morphin</div>
+    </div>
+    <div class="cover-hint">toca para abrir</div>
+  </div>
+  <button class="close-btn" id="backBtn" style="position:fixed;top:16px;left:16px;font-family:'Cinzel',serif;font-size:12px;letter-spacing:2px;color:var(--gold-dim);background:none;border:none;cursor:pointer;text-transform:uppercase;z-index:100">&#8249; Voltar</button>
+  <div id="book">
+    <button class="close-btn" id="closeBtn">fechar livro</button>
+    <div class="pages-wrap">
+      <div class="page left" id="pageLeft"></div>
+      <div class="page right" id="pageRight"></div>
+    </div>
+    <div class="nav-btn disabled" id="prevBtn">&#8249;</div>
+    <div class="nav-btn" id="nextBtn">&#8250;</div>
+  </div>
+</div>
+
+<script>
+const GRIMORIO_SPREADS = [
+
+// ══════════════════════════════════════════════
+//  CAPA / ÍNDICE
+// ══════════════════════════════════════════════
+{
+  left: {
+    eyebrow: "Grimório Primal Force",
+    title: "Índice",
+    html: `
+      <ul class="toc-list">
+        <li><span><span class="toc-num">I.</span> A Era Primordial</span><span>7</span></li>
+        <li><span><span class="toc-num">II.</span> A Fundação</span><span>54</span></li>
+        <li><span><span class="toc-num">III.</span> Os Guardiões</span><span>112</span></li>
+        <li><span><span class="toc-num">IV.</span> A Sombra</span><span>340</span></li>
+        <li><span><span class="toc-num">V.</span> As Crónicas</span><span>512</span></li>
+        <li><span><span class="toc-num">VI.</span> Anexos</span><span>980</span></li>
+      </ul>
+    `,
+    pageNum: "II"
+  },
+  right: {
+    eyebrow: "Parte I · A Era Primordial",
+    title: "Antes de Tudo",
+    html: `
+      <p><span class="dropcap">N</span>o princípio, antes de existirem Rangers, Zords ou Dino Chaves, existia apenas a <span class="term">Rede Morphin</span> — um tecido de energia que atravessava todos os mundos conhecidos e desconhecidos. Não era visível ao olho nu, mas sentia-se como um zumbido nas noites sem lua, como uma vibração nas pedras mais antigas da Terra.</p>
+      <p>Os primeiros a sentirem foram os <span class="term">Mestres Morphin</span>, seres cuja natureza exata ninguém sabe ao certo — se eram humanos que transcenderam, ou entidades que escolheram assumir forma humana. O que se sabe é que foram eles quem deu nome ao poder que corria debaixo da pele do mundo.</p>
+      <p>E foi esse poder que, muito mais tarde, encontrou os seus primeiros guerreiros: os <span class="ranger-name ranger-red">Rangers Primal Force</span>.</p>
+    `,
+    pageNum: "1"
+  }
+},
+
+// ══════════════════════════════════════════════
+//  PARTE I — A ERA PRIMORDIAL
+// ══════════════════════════════════════════════
+{
+  left: {
+    eyebrow: "Parte I · A Era Primordial",
+    title: "Os Mestres Morphin",
+    html: `
+      <p><span class="dropcap">D</span>iz-se que os Mestres Morphin eram vinte — um para cada pedra da Coroa, um para cada espície dinossaúrica que alguma vez caminhou sobre a Terra. Não tinham nomes nos moldes humanos; eram designados por sinais, por vibrações na Rede.</p>
+      <p>Cada Mestre carregava em si a <em>essência</em> de um dinossauro diferente. Não como uma camuflagem, mas como uma segunda esqueletação de energia. Quando um Mestre invocava o seu poder, os ossos de luz emergiam do peito e formavam, por um instante, o esqueleto fantasma de uma criatura extinta há milhões de anos.</p>
+      <p>A sua missão era simples e devastadora: proteger a Rede Morphin de qualquer ameaça — fosse ela de dentro ou de fora do universo. Ao longo de eras, enfrentaram criaturas das <em>Profundezas Morphin</em>, guardaram portais entre dimensões e selaram aberturas que teriam devorado galáxias inteiras.</p>
+      <p>Mas com o tempo, os Mestres compreenderam que não podiam vigiar para sempre. O poder precisaria de herdeiros. E assim nasceu o plano da <span class="term">Coroa das 20 Pedras</span>.</p>
+    `,
+    pageNum: "2"
+  },
+  right: {
+    eyebrow: "Parte I · A Era Primordial",
+    title: "A Rede Morphin",
+    html: `
+      <p><span class="dropcap">A</span> <span class="term">Rede Morphin</span> não é uma coisa que se possa tocar. É mais como uma corrente subterrânea de possibilidades — uma teia invisível que conecta toda a vida, todo o passado e todo o futuro. Os cientistas da Mastodon Base chamam-lhe "o campo morfogenético universal". Os Mestres Morphin chamavam-lhe simplesmente <em>a Voz</em>.</p>
+      <p>A Rede existe em todas as dimensões simultaneamente. É ela que permite a transformação Ranger: quando um guerreiro invoca o seu poder, a Rede responde, canalizando a essência do dinossauro ancestral através do <span class="term">Primal Key Brace</span> e do corpo do herói.</p>
+      <p>Os limites da Rede são desconhecidos. Há registos de anomalias nas suas bordas — zonas onde a realidade começa a dobrar, onde o tempo corre em espiral e as leis da física perdem o sentido. É nessas zonas que nascem as maiores ameaças.</p>
+      <p>E é também nessas zonas que os <span class="villain">Mestres das Sombras</span> encontraram o seu refúgio.</p>
+    `,
+    pageNum: "3"
+  }
+},
+{
+  left: {
+    eyebrow: "Parte I · A Era Primordial",
+    title: "A Coroa das 20 Pedras",
+    html: `
+      <p><span class="dropcap">A</span> Coroa das 20 Pedras é o artefacto mais poderoso já criado pelos Mestres Morphin. Não é uma coroa no sentido tradicional — é um conjunto de vinte cristais orgânicos, cada um com o tamanho de um punho fechado, que emitem uma luz própria e pulsante.</p>
+      <p>Cada pedra contém a essência completa de um dinossauro ancestral. Não apenas a sua imagem, mas a sua <em>memória</em> — cada batida de coração, cada rugido, cada passada que alguma vez ecoou pelos continentes. Quando uma pedra é ativada, essa memória acorda e procura um portador digno.</p>
+      <p>A Coroa foi forjada nas profundezas da <em>Caverna Primordial</em>, num ponto onde a Rede Morphin era mais densa. Os Mestres investiram parte do seu próprio poder na criação das pedras, sabendo que cada pedra usada os enfraqueceria um pouco mais.</p>
+      <p>Diz a lenda que quando as 20 pedras estiverem juntas novamente, o poder da Coroa será absoluto — capaz de reescrever a própria realidade. É esse poder que <span class="villain">Lorde Arcano</span> procura há séculos.</p>
+    `,
+    pageNum: "4"
+  },
+  right: {
+    eyebrow: "Parte I · A Era Primordial",
+    title: "O Despertar dos Rangers",
+    html: `
+      <p><span class="dropcap">Q</span>uando os Mestres Morphin perceberam que estavam a envelhecer — não no corpo, mas na essência, pois a sua energia estava a diluir-se ao longo dos milénios — decidiram que era altura de escolher sucessores.</p>
+      <p>Não escolheram guerreiros por força ou habilidade. Escolheram por <em>coração</em>. As pedras da Coroa reagem àquilo que os Mestres chamavam <em> Resonância Primal</em>: uma qualidade invisível que algumas pessoas possuem, uma conexão instintiva com o passado, com a terra, com o rugido dos dinossauros que outrora foram senhores deste mundo.</p>
+      <p>Vinte pessoas, espalhadas por todo o globo, foram selecionadas. Cada uma recebeu a sua pedra — cada uma uma cor, cada uma um dinossauro. Juntos, formariam os <span class="ranger-name ranger-red">Rangers Primal Force</span>: a primeira e última linha de defesa contra as trevas que se avizinham.</p>
+      <p>Seis deles chegaram primeiro. Os outros quatorze seguem, escondidos à vista de todos, aguardando o momento em que o mundo os chamar.</p>
+    `,
+    pageNum: "5"
+  }
+},
+
+// ══════════════════════════════════════════════
+//  PARTE II — A FUNDAÇÃO
+// ══════════════════════════════════════════════
+{
+  left: {
+    eyebrow: "Parte II · A Fundação",
+    title: "A Dispersão das 20 Pedras",
+    html: `
+      <p><span class="dropcap">Q</span>uando os Mestres Morphin selaram a Coroa original, não a esconderam num só lugar — sabiam demais que um só cofre é um só alvo. Em vez disso,分散aram as vinte pedras por todo o planeta, cada uma escondida num local que só a pessoa certa poderia encontrar.</p>
+      <p>Algumas pedras foram enterradas nas profundezas de vulcões adormecidos. Outras foram levadas para o fundo do oceano, guardadas por correntes que nenhum submarino conseguiria atravessar. Uma foi colocada no topo de uma montanha que só aparece uma vez por século. Outra está, aparentemente, numa caixa de cartão num sótão de suburban, à espera de ser descoberta.</p>
+      <p>O critério era simples: a pedra só se revela a quem tem a <span class="term">Resonância Primal</span> compatível. Para todos os outros, não passa de uma pedra cinzenta e fria.</p>
+      <p>Das vinte pedras, seis já foram encontradas. Os seus portadores são os primeiros Rangers. As restantes quatorze continuam ocultas — e cada uma delas é uma bomba-relógio de poder incontrolável se cair nas mãos erradas.</p>
+    `,
+    pageNum: "6"
+  },
+  right: {
+    eyebrow: "Parte II · A Fundação",
+    title: "As Dino Chaves",
+    html: `
+      <p><span class="dropcap">A</span>s <span class="term">Dino Chaves</span> são os artefactos de transformação dos Rangers. Cada Dino Chave é um recipiente de energia feito à medida da sua pedra correspondente — um invólucro que contém e canaliza o poder da pedra sem a destruir nem ao portador.</p>
+      <p>A Dino Chave não é apenas uma chave. É uma extensão do próprio Ranger. Quando ativada, a pedra dentro dela desperta, e a essência do dinossauro ancestral flui para o guerreiro, transformando-o.</p>
+      <p>A mecânica é engenhosa: a Dino Chave lê a Resonância Primal do portador e calibra a transformação em tempo real. Dois Rangers com o mesmo tipo de dinossauro teriam transformações diferentes, porque a sua Resonância é única.</p>
+      <p>O design das Dino Chaves varia conforme o dinossauro, mas todas partilham uma estrutura base: um corpo metálico com veios luminosos, um mecanismo de rotação que "abre" a chave, e uma cavidade central onde a pedra repousa.</p>
+    `,
+    pageNum: "7"
+  }
+},
+{
+  left: {
+    eyebrow: "Parte II · A Fundação",
+    title: "A Mastodon Base",
+    html: `
+      <p><span class="dropcap">A</span> <span class="term">Mastodon Base</span> é a instalação secreta onde os Rangers Primal Force operam. Disfarçada debaixo de uma montanha remota do norte de Portugal, a base foi construída sobre um ponto de convergência da Rede Morphin — um "nó" onde a energia morfogenética é especialmente intensa.</p>
+      <p>O nome vem do enorme depósito de fósseis de mastodonte encontrado aquando da escavação. Os Mestres, com o seu habitual senso do drama, decidiram manter o nome.</p>
+      <p>A base alberga a <em>Training Room</em>, uma câmara onde a realidade pode ser simulada em 360 graus. Cada Ranger pode treinar contra cenários que reproduzem ameaças reais — desde uma invasão de Hengemons até ao colapso de um portal dimensional.</p>
+      <p>No coração da base encontra-se o <em>Núcleo Morphin</em>, um cristal vivo que amplifica o sinal da Rede Morphin e permite comunicação instantânea entre todos os Rangers, independentemente da distância.</p>
+    `,
+    pageNum: "8"
+  },
+  right: {
+    eyebrow: "Parte II · A Fundação",
+    title: "Os Hengemons",
+    html: `
+      <p><span class="dropcap">O</span>s <span class="term">Hengemons</span> são seres artificiais criados por <span class="villain">Lorde Arcano</span> a partir de fragmentos de energia sombria. Não são verdadeiramente vivos — são construtos, peças de um xadrez cósmico que Arcano move com a mente.</p>
+      <p>Cada Hengemon tem a forma de uma criatura híbrida: metade dinossauro, metade demónio. Uns são rápidos como o vento, outros tão lentos que o chão treme com cada passo. Alguns possuem armas naturais — garras de obsidiana, caudas cortantes,射线 de energia negra.</p>
+      <p>O que torna os Hengemons especialmente perigosos é que se regeneram. Destruam um, e a energia sombria que o compunha reagrupa-se e forma outro. A única forma de os eliminar permanentemente é cortar a ligação à fonte — e essa fonte está em <span class="villain">Lorde Arcano</span>.</p>
+      <p>Quando são derrotados por um Ranger, os Hengemons colapsam num globo de energia negra que é absorvido pelo Primal Key Brace, adicionando poder ao acervo do Ranger.</p>
+    `,
+    pageNum: "9"
+  }
+},
+
+// ══════════════════════════════════════════════
+//  PARTE III — OS GUARDIÕES
+// ══════════════════════════════════════════════
+{
+  left: {
+    eyebrow: "Parte III · Os Guardiões",
+    title: "Roro — Ranger Vermelho",
+    html: `
+      <p><span class="ranger-name ranger-red">Roro</span> é o líder natural do grupo, embora não fosse o primeiro a ser escolhido. A sua pedra — a do <span class="term">T-Rex</span> — encontrou-o quando ele tinha apenas dezassete anos, num dia de chuva, num parque de estacionamento abandonado.</p>
+      <p>O T-Rex é o dinossauro mais temido da história, e a sua essência não podia ter encontrado um portador mais adequado. Roro não é o mais forte nem o mais rápido, mas tem algo que nenhum outro Ranger possui: uma determinação inabalável que faz com que, quando ele decide avançar, nada o detém.</p>
+      <p>Na forma Ranger, o seu traje é vermelho profundo com veios negros que lembram a textura da pele de réptil. O capacete tem a silhueta agressiva de um T-Rex, com olhos luminosos que cortam a escuridão.</p>
+      <p>A sua arma é o <em>T-Rex Fang</em>, uma lâmina curva que vibra com a frequência da Rede Morphin e pode cortar quase qualquer material conhecido.</p>
+    `,
+    pageNum: "10"
+  },
+  right: {
+    eyebrow: "Parte III · Os Guardiões",
+    title: "Mar — Ranger Preto",
+    html: `
+      <p><span class="ranger-name ranger-black">Mar</span> é o estratega do grupo. Enquanto Roro lidera com o coração, Mar lidera com a cabeça. A sua pedra — a do <span class="term">Estegossauro</span> — reagiu à sua capacidade de ver padrões onde ninguém mais vê.</p>
+      <p>O Estegossauro é um herbívoro pacífico, mas quando ameaçado, a sua cauda de espinhos é devastadora. Mar incorpora essa dualidade: é calmo e medido no dia-a-dia, mas em combate torna-se imprevisível e furioso.</p>
+      <p>O traje preto de Mar tem detalhes em azul escuro que simulam as placas dorsais do Estegossauro. As costas do traje possuem um sistema de defesa projetável — espinhos de energia que podem ser lançados em arco.</p>
+      <p>A sua arma é o <em>Stego Mace</em>, um mangual pesado cuja cabeça tem a forma das placas do dinossauro e pode gerar ondas de choque sísmicas.</p>
+    `,
+    pageNum: "11"
+  }
+},
+{
+  left: {
+    eyebrow: "Parte III · Os Guardiões",
+    title: "Marc — Ranger Azul",
+    html: `
+      <p><span class="ranger-name ranger-blue">Marc</span> é o inventor do grupo. A sua pedra — a do <span class="term">Triceratops</span> — encontrou-o num laboratório de engenharia na universidade, quando ele tentava construir um protótipo de armadura energética.</p>
+      <p>O Triceratops é o tanque dos dinossauros — resistente, teimoso, impossível de derrubar quando decide plantar os pés. Marc é exatamente assim: quando tem uma ideia, ninguém o tira dali.</p>
+      <p>O traje azul de Marc tem três chifres luminosos no capacete, inspirados no Triceratops. Os ombros são reforçados com placas de energia que podem absorver impactos devastadores.</p>
+      <p>A sua arma é o <em>Tri-Horn Shield</em>, um escudo que pode transformar-se numa lança de três pontas. Em modo defensivo, o escudo gera um campo de força que protege todo o grupo.</p>
+    `,
+    pageNum: "12"
+  },
+  right: {
+    eyebrow: "Parte III · Os Guardiões",
+    title: "Vido — Ranger Dourado",
+    html: `
+      <p><span class="ranger-name ranger-gold">Vido</span> é o mais misterioso dos seis. A sua pedra — a do <span class="term">Pterodáctilo</span> — escolheu-o sem aviso, durante um voo de parapente nas montanhas da Serra da Estrela. Um momento estava a voar com asas de tecido; no instante seguinte, voava com asas de luz.</p>
+      <p>O Pterodáctilo é o mensageiro dos céus, o olho que vê de cima. Vido é exatamente isso: o observador, o que chega primeiro e avisa os outros. Não é o mais combatente, mas é o mais rápido — tanto no ar como na mente.</p>
+      <p>O traje dourado de Vido tem asas retráteis nas costas que se abrem em modo de combate. O capacete tem um bico aerodinâmico e olhos que brilham como faróis.</p>
+      <p>A sua arma é o <em>Ptero Wing</em>, duas lâminas curvas que podem ser ligadas para formar um boomerang cortante, ou usadas separadamente como espadas leves.</p>
+    `,
+    pageNum: "13"
+  }
+},
+{
+  left: {
+    eyebrow: "Parte III · Os Guardiões",
+    title: "Mira — Ranger Roxa",
+    html: `
+      <p><span class="ranger-name ranger-purple">Mira</span> é a curandeira do grupo. A sua pedra — a do <span class="term">Plesiossauro</span> — encontrou-a quando ela mergulhava nas águas geladas do Atlântico, num treino de resistência extrema.</p>
+      <p>O Plesiossauro é o guardião das águas profundas, sereno e implacável. Mira canaliza essa serenidade: é a voz da calma no meio do caos, a que segura os outros quando tudo parece perdido.</p>
+      <p>O traje roxo de Mira tem detalhes aquáticos — linhas sinuosas que lembram ondas, e um capacete com um design fluido, sem arestas. As mãos do traje brilham com uma luz curativa que pode fezar ferimentos em segundos.</p>
+      <p>A sua arma é o <em>Plesio Staff</em>, um cajado que pode disparar rajadas de energia curativa ou, em modo ofensivo, ondas de pressão aquática que esmagam tudo o que tocam.</p>
+    `,
+    pageNum: "14"
+  },
+  right: {
+    eyebrow: "Parte III · Os Guardiões",
+    title: "Zenowing — Ranger Prateado",
+    html: `
+      <p><span class="ranger-name ranger-silver">Zenowing</span> é o mais jovem dos seis, mas possivelmente o mais poderoso. A sua pedra — a do <span class="term">Titanossauro</span> — escolheu-o quando ele tinha apenas quinze anos, sem aviso, sem cerimónia.</p>
+      <p>O Titanossauro é o maior dinossauro que alguma vez existiu — tão enorme que a sua própria sombra é uma tempestade. Zenowing carrega essa magnitude dentro de si, embora no dia-a-dia seja apenas um rapaz tímido que prefere desenhar a falar.</p>
+      <p>O traje prateado de Zenowing é o mais pesado dos seis, com placas de armadura que brilham como metal líquido. O capacete tem uma crista de cristal que canaliza a energia do Titanossauro em rajadas devastadoras.</p>
+      <p>A sua arma é o <em>Titan Hammer</em, um martelo de guerra que, quando toca o chão, gera um tremor que pode demolir edifícios inteiros.</p>
+    `,
+    pageNum: "15"
+  }
+},
+{
+  left: {
+    eyebrow: "Parte III · Os Guardiões",
+    title: "Os 20 Zords",
+    html: `
+      <p><span class="dropcap">C</span>ada Ranger possui um <span class="term">Zord</span> — uma máquina gigante que replica a forma do seu dinossauro ancestral. Os Zords não são apenas veículos de combate: são extensões vivas da vontade do Ranger, ligadas à Rede Morphin.</p>
+      <p>Os seis Zords conhecidos são:</p>
+      <ul>
+        <li><strong>T-Rex Zord</strong> — o mais feroz, com garras de plasma</li>
+        <li><strong>Stego Zord</strong> — o tanque, com placas blindadas</li>
+        <li><strong>Tri-Cera Zord</strong> — o fortalecido, com chifres de perfuração</li>
+        <li><strong>Ptero Zord</strong> — o aéreo, com envergadura de 40 metros</li>
+        <li><strong>Plesio Zord</strong> — o aquático, com cauda de pressão</li>
+        <li><strong>Titan Zord</strong> — o colossal, tão grande que precisa de dois Rangers para o pilotar</li>
+      </ul>
+      <p>Quando ameaças excessivas surgem, os Zords podem combinar-se no <span class="term">Mega Zord</span> — uma fusão de poder que multiplica a força de todos os Rangers envolvidos.</p>
+    `,
+    pageNum: "16"
+  },
+  right: {
+    eyebrow: "Parte III · Os Guardiões",
+    title: "Primal Key Brace & Super Dino Mode",
+    html: `
+      <p><span class="dropcap">O</span> <span class="term">Primal Key Brace</span> é o dispositivo que cada Ranger usa no pulso. É dele que parte o comando de transformação — quando o Ranger invoca a sua frase, o brace lê a Resonância Primal e ativa a Dino Chave correspondente.</p>
+      <p>O brace também armazena os <em>Fragmentos Morphin</em> — a energia absorvida dos Hengemons derrotados. Quanto mais fragmentos um Ranger acumula, mais poderosa se torna a sua transformação.</p>
+      <p>O <span class="term">Super Dino Mode</span> é a evolução máxima de cada Ranger. Quando o nível de fragmentos atinge o limiar, o brace desbloqueia uma transformação secundária: o traje ganha traços do dinossauro ancestral — presas, garras, escamas, asas. O poder de combate multiplica-se exponencialmente, mas o custo é igual: cada minuto em Super Dino Mode drena a vitalidade do Ranger.</p>
+      <p>Diz-se que quando todos os 20 Rangers estiverem juntos e atingirem Super Dino Mode simultaneamente, o poder resultante poderá enfrentar até a própria morte.</p>
+    `,
+    pageNum: "17"
+  }
+},
+
+// ══════════════════════════════════════════════
+//  PARTE IV — A SOMBRA
+// ══════════════════════════════════════════════
+{
+  left: {
+    eyebrow: "Parte IV · A Sombra",
+    title: "Lorde Arcano",
+    html: `
+      <p><span class="villain">Lorde Arcano</span> é o inimigo que ninguém quer enfrentar — porque ninguém sabe ao certo o que ele é. Os registos mais antigos falam de um Mestre Morphin que se corrompeu, que tentou absorver a Coroa das 20 Pedras para seu uso próprio e foi banido para as <em>Profundezas Morphin</em>.</p>
+      <p>Outros dizem que ele não é um Mestre caído, mas sim uma entidade das Profundezas que assumiu forma humana para manipular os Mestres de dentro. O que é certo é que Arcano possui um poder equivalente ao de vários Mestres combinados — e uma ambição que não conhece limites.</p>
+      <p>O seu objetivo final é reunir as 20 pedras da Coroa e usá-las para rasgar a Rede Morphin, criando uma fenda por onde as Profundezas possam inundar o universo. Para ele, isso não é destruição — é <em>evolução</em>.</p>
+      <p>A sua aparência é a de um homem elegante, com cabelo prateado e olhos que brilham com uma luz não natural. Usa uma capa que parece feita de fumo vivo, e quando se zanga, a realidade ao seu redor começa a rachar-se.</p>
+    `,
+    pageNum: "18"
+  },
+  right: {
+    eyebrow: "Parte IV · A Sombra",
+    title: "Maltherion & Valtherion",
+    html: `
+      <p><span class="dropcap">M</span>altherion e <span class="villain">Valtherion</span> são os gémeos robóticos — duas máquinas de destruição criadas por Lorde Arcano a partir de tecnologia das Profundezas. Não são apenas robots: são consciências digitais transferidas para corpos de metal vivo.</p>
+      <p><strong>Maltherion</strong> é o estratega. É frio, calculista e absolutamente sem emoções. Usa uma espada de energia negra e prefere atacar à noite, quando os Rangers estão mais vulneráveis. O seu design é esguio e aerodinâmico, com garras retráteis nos antebraços.</p>
+      <p><strong>Valtherion</strong> é o brutal. Não pensa — destrói. É maior que o irmão, com um corpo massivo de armadura negra e vermelha. Usa um canhão de plasma montado no ombro e prefere resolver tudo com força bruta.</p>
+      <p>Os gémeos são inseparáveis. Quando estão juntos, a sua sincronização é perfeita — Maltherion prevê, Valtherion executa. A única fraqueza é que, separados, perdem metade do seu poder.</p>
+    `,
+    pageNum: "19"
+  }
+},
+{
+  left: {
+    eyebrow: "Parte IV · A Sombra",
+    title: "Vordax — O Soldado Preso",
+    html: `
+      <p><span class="dropcap">V</span>ordax é o caso mais trágico do universo Primal Force. Era um dos Rangers — o portador da pedra do <span class="term">Vido</span> (Pterodáctilo), antes de Vido a encontrar. Foi capturado por Lorde Arcano e transformado num soldado das trevas, mas não por tortura — por uma técnica ainda mais perversa.</p>
+      <p>Arcano criou uma <em>prisão dimensional</em> dentro do corpo de Vordax, aprisionando a sua consciência numa dimensão bolha enquanto controlava o seu corpo como uma marionete. O Vordax que os Rangers enfrentam não é o inimigo — é a vítima.</p>
+      <p>O verdadeiro Vordax está preso num estado de sonho contíncuo, onde revive repetidamente os seus piores medos. A única forma de o libertar é destruir a prisão dimensional — e para isso, é preciso encontrar a pedra do Pterodáctilo, que ainda está escondida em algum lugar do mundo.</p>
+      <p>Quando (e se) Vordax for libertado, terá o poder de dois Rangers dentro de si — o seu próprio e o do Pterodáctilo. Mas também terá as marcas de anos de tortura, e ninguém sabe se o seu espírito sobreviverá intacto.</p>
+    `,
+    pageNum: "20"
+  },
+  right: {
+    eyebrow: "Parte IV · A Sombra",
+    title: "Outras Ameaças",
+    html: `
+      <p><span class="dropcap">A</span>lem de Lorde Arcano e os seuslugares-tenentes, existem outras ameaças que rondam os Rangers:</p>
+      <ul>
+        <li><strong>Os Devoradores</strong> — criaturas das Profundezas que não têm forma fixa, apenas fome. Enquanto tudo o que encontram.</li>
+        <li><strong>A Cinza</strong> — uma névoa viva que dissolve a matéria orgânica. Aparece sem aviso e desaparece antes de poder ser estudada.</li>
+        <li><strong>Os Eco</strong> — versões alternativas de Rangers que foram "apagados" da realidade. São sombras de quem poderiam ter sido, e atacam com o poder que lhes foi negado.</li>
+        <li><strong>O Vazio</strong> — uma entidade que habita o espaço entre dimensões. Não tem nome verdadeiro, nem forma, nem vontade — é apenas a ausência de tudo, e essa ausência é devastadora.</li>
+      </ul>
+      <p>Cada uma destas ameaças exige uma abordagem diferente. Os Rangers não podem resolver tudo com força bruta — precisam de estratégia, de conhecimento, e às vezes, de sacrifício.</p>
+    `,
+    pageNum: "21"
+  }
+},
+
+// ══════════════════════════════════════════════
+//  PARTE V — AS CRÓNICAS
+// ══════════════════════════════════════════════
+{
+  left: {
+    eyebrow: "Parte V · As Crónicas",
+    title: "Arcos da Série",
+    html: `
+      <p><span class="dropcap">A</span> história dos Rangers Primal Force desenrola-se ao longo de 131 episódios, organizados em arcos narrativos:</p>
+      <ul>
+        <li><strong>Ep. 1–13: Despertar</strong> — Os seis primeiros Rangers encontram as suas pedras, aprendem a usar o poder e enfrentam os primeiros Hengemons.</li>
+        <li><strong>Ep. 14–26: Convergência</strong> — Lorde Arcano revela a existência das outras 14 pedras. Os Rangers partem em busca delas antes que Arcano as encontre.</li>
+        <li><strong>Ep. 27–40: A Prisão</strong> — Vordax é revelado. Os Rangers descobrem que precisam de libertá-lo, mas cada tentativa é emboscada.</li>
+        <li><strong>Ep. 41–55: Fenda</strong> — A primeira fenda para as Profundezas abre-se. Os Rangers enfrentam ameaças que nunca想象aram.</li>
+        <li><strong>Ep. 56–75: Ascensão</strong> — Novos Rangers despertam. O grupo cresce, mas as divisões internas ameaçam destruir tudo.</li>
+        <li><strong>Ep. 76–100: Coroa</strong> — As 14 pedras restantes são encontradas. A batalha final parece imminent.</li>
+        <li><strong>Ep. 101–131: Primal</strong> — O confronto final com Lorde Arcano. O destino da Rede Morphin é decidido.</li>
+      </ul>
+    `,
+    pageNum: "22"
+  },
+  right: {
+    eyebrow: "Parte V · As Crónicas",
+    title: "Eventos-Chave",
+    html: `
+      <p><span class="dropcap">E</span>p. 20 — <em>A Revelação do Guardião do Portal</em>: Descobre-se que os Mestres Morphin não desapareceram — estão guardando os portais entre dimensões, e estão a morrer um a um.</p>
+      <p>Ep. 35 — <em>A Primeira Transformação</em>: Roro atinge Super Dino Mode pela primeira vez, mas quase morre no processo.</p>
+      <p>Ep. 52 — <em>A Traição</em>: Um dos novos Rangers é revelado como espião de Arcano. O grupo desmorona.</p>
+      <p>Ep. 68 — <em>O Sacrifício</em>: Zenowing destrói o Titan Zord para selar uma fenda, ficando sem poder durante 12 episódios.</p>
+      <p>Ep. 89 — <em>A Coroa Completa</strong>: As 20 pedras são finalmente reunidas. Mas quem as segura? Ninguém confia em ninguém.</p>
+      <p>Ep. 115 — <em>O Despertar de Vordax</em>: Vordax é finalmente libertado, mas a sua mente está partida. É aliado ou inimigo?</p>
+      <p>Ep. 131 — <em>Primal Force</em>: A batalha final. Tudo o que os Rangers são e foram se resume a este momento.</p>
+    `,
+    pageNum: "23"
+  }
+},
+
+// ══════════════════════════════════════════════
+//  PARTE VI — ANEXOS
+// ══════════════════════════════════════════════
+{
+  left: {
+    eyebrow: "Parte VI · Anexos",
+    title: "Glossário",
+    html: `
+      <ul>
+        <li><span class="term">Rede Morphin</span> — Tecido de energia que conecta todas as dimensões. Fonte de todo o poder Ranger.</li>
+        <li><span class="term">Mestres Morphin</span> — 20 seres que guardaram a Rede e criaram a Coroa das 20 Pedras.</li>
+        <li><span class="term">Coroa das 20 Pedras</span> — Artefacto composto por 20 cristais, cada um contendo a essência de um dinossauro ancestral.</li>
+        <li><span class="term">Resonância Primal</span> — Qualidade invisible que liga um ser vivo à essência de um dinossauro. Requerida para ser Ranger.</li>
+        <li><span class="term">Dino Chave</span> — Dispositivo de transformação que contém uma pedra da Coroa.</li>
+        <li><span class="term">Primal Key Brace</span> — Bracelete que ativa a Dino Chave e canaliza a transformação.</li>
+        <li><span class="term">Zord</span> — Máquina gigante ligada à Rede, que replica a forma do dinossauro ancestral.</li>
+        <li><span class="term">Mega Zord</span> — Fusão de vários Zords num único guerreiro colosal.</li>
+        <li><span class="term">Super Dino Mode</span> — Transformação avançada que incorpora traços do dinossauro no traje.</li>
+        <li><span class="term">Hengemon</span> — Constructo de energia sombria criado por Lorde Arcano.</li>
+        <li><span class="term">Profundezas Morphin</span> — Dimensão paralela onde habita o caos primordial.</li>
+        <li><span class="term">Mastodon Base</span> — Instalação secreta dos Rangers, debaixo de uma montanha.</li>
+        <li><span class="term">Fragmentos Morphin</span> — Energia absorvida dos Hengemons, armazenada no brace.</li>
+      </ul>
+    `,
+    pageNum: "24"
+  },
+  right: {
+    eyebrow: "Parte VI · Anexos",
+    title: "Cronologia",
+    html: `
+      <p><strong>~65 milhões a.C.</strong> — Extinção dos dinossauros. A Rede Morphin preserva as suas essências.</p>
+      <p><strong>~5000 a.C.</strong> — Os Mestres Morphin surgem pela primeira vez.</p>
+      <p><strong>~3000 a.C.</strong> — A Coroa das 20 Pedras é forjada na Caverna Primordial.</p>
+      <p><strong>~1000 a.C.</strong> — Lorde Arcano é banido para as Profundezas.</p>
+      <p><strong>~500 a.C.</strong> — As pedras são分散adas por todo o planeta.</p>
+      <p><strong>~200 d.C.</strong> — Último registo de um Mestre Morphin em ação.</p>
+      <p><strong>2024</strong> — Roro encontra a pedra do T-Rex. Os Rangers Primal Force despertam.</p>
+      <p><strong>2024–2025</strong> — Os 131 episódios da série. A batalha final contra Lorde Arcano.</p>
+      <p style="margin-top:18px;font-style:italic;color:var(--ink-faded)">Este grimório será actualizado à medida que a história dos Rangers evolui.</p>
+    `,
+    pageNum: "25"
+  }
+}
+
+]; // FIM DOS SPREADS
+
+// ══════════════════════════════════════════════
+//  MOTOR DO LIVRO
+// ══════════════════════════════════════════════
+let currentSpread = 0;
+const cover = document.getElementById('cover');
+const book = document.getElementById('book');
+const pageLeft = document.getElementById('pageLeft');
+const pageRight = document.getElementById('pageRight');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const closeBtn = document.getElementById('closeBtn');
+
+function renderPageContent(el, data) {
+  if (!data) { el.innerHTML = ''; return; }
+  el.innerHTML = `
+    <div class="page-eyebrow">${data.eyebrow || ''}</div>
+    <h2 class="page-title">${data.title || ''}</h2>
+    <div class="page-body">${data.html || ''}</div>
+    <div class="page-number">${data.pageNum || ''}</div>
+  `;
+}
+
+function renderSpread(index) {
+  const spread = GRIMORIO_SPREADS[index];
+  if (!spread) return;
+  renderPageContent(pageLeft, spread.left);
+  renderPageContent(pageRight, spread.right);
+  prevBtn.classList.toggle('disabled', index === 0);
+  nextBtn.classList.toggle('disabled', index === GRIMORIO_SPREADS.length - 1);
+}
+
+document.getElementById('backBtn').addEventListener('click', () => { window.close(); if (!window.closed) window.history.back(); });
+
+cover.addEventListener('click', () => {
+  cover.classList.add('opening');
+  setTimeout(() => {
+    book.classList.add('visible');
+    renderSpread(currentSpread);
+  }, 500);
+});
+
+closeBtn.addEventListener('click', () => {
+  book.classList.remove('visible');
+  cover.classList.remove('opening');
+  currentSpread = 0;
+});
+
+nextBtn.addEventListener('click', () => {
+  if (currentSpread < GRIMORIO_SPREADS.length - 1) {
+    currentSpread++;
+    renderSpread(currentSpread);
+  }
+});
+
+prevBtn.addEventListener('click', () => {
+  if (currentSpread > 0) {
+    currentSpread--;
+    renderSpread(currentSpread);
+  }
+});
+</script>
+</body>
+</html>
