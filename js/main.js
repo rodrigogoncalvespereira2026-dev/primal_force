@@ -74,6 +74,9 @@ const App = {
       const isPortrait = window.matchMedia('(orientation: portrait)').matches;
       document.body.classList.toggle('portrait', isPortrait);
       document.body.classList.toggle('landscape', !isPortrait);
+      if (document.body.classList.contains('is-mobile')) {
+        this._applyMobileMenuLayout();
+      }
     };
     update();
     window.addEventListener('resize', update);
@@ -83,6 +86,9 @@ const App = {
   },
 
   _applyMobileMenuLayout() {
+    const existing = document.getElementById('mobile-menu-layout');
+    if (existing) existing.remove();
+
     if (!window.matchMedia('(orientation: landscape)').matches) return;
 
     const style = document.createElement('style');

@@ -1326,48 +1326,38 @@ body {
   .is-mobile .hud-stat { font-size: 7px; }
 }
 
-/* Portrait - menu responsivo */
+/* Portrait - menu responsivo — SÓ em mobile */
 @media (orientation: portrait) {
-  .menu-content { gap: 12px; }
-  .logo-main { font-size: clamp(22px, 6vw, 36px); }
-  .logo-sub { font-size: 10px; letter-spacing: 4px; }
-  .logo-tagline { font-size: 10px; }
+  .is-mobile .menu-content { gap: 12px; }
+  .is-mobile .logo-main { font-size: clamp(22px, 6vw, 36px); }
+  .is-mobile .logo-sub { font-size: 10px; letter-spacing: 4px; }
+  .is-mobile .logo-tagline { font-size: 10px; }
 
   /* Layout grid para mobile */
-  #screen-menu.active {
+  .is-mobile #screen-menu.active {
     display: grid;
-    grid-template-areas:
-      "trophy  trophy  trophy"
-      "perfil  trofeus opcoes"
-      "loja    center  criar"
-      "ranger  center  grimorio"
-      "passe   center  viewer"
-      "missoes map     jogar"
-      "footer  footer  footer";
     grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: auto auto auto 1fr auto auto auto;
+    grid-template-rows: auto auto auto 1fr auto auto;
     align-items: center;
     justify-items: center;
     padding: 8px;
     gap: 6px;
   }
 
-  .trophy-bar-menu { grid-area: trophy; position: static; transform: none; }
-  #btn-perfil { grid-area: perfil; position: static; }
-  #btn-trofeus { grid-area: trofeus; position: static; }
-  #btn-opcoes { grid-area: opcoes; position: static; }
-  .menu-side-left { grid-area: loja; position: static; transform: none; flex-direction: column; gap: 6px; }
-  .menu-side-right { grid-area: map; position: static; transform: none; flex-direction: column; gap: 6px; }
-  .menu-side-mid { grid-area: criar; position: static; transform: none; flex-direction: column; gap: 6px; }
-  #btn-passe { grid-area: passe; position: static; }
-  #btn-missoes { grid-area: missoes; position: static; }
-  #btn-grimorio { grid-area: grimorio; position: static; }
-  #btn-viewer { grid-area: viewer; position: static; }
-  .menu-content { grid-area: center; }
-  .menu-footer { grid-area: footer; }
+  .is-mobile .trophy-bar-menu { grid-column: 1 / -1; grid-row: 1; position: static; transform: none; }
+  .is-mobile #btn-perfil { grid-column: 1; grid-row: 2; position: static; }
+  .is-mobile #btn-trofeus { grid-column: 2; grid-row: 2; position: static; }
+  .is-mobile #btn-opcoes { grid-column: 3; grid-row: 2; position: static; }
+  .is-mobile .menu-side-left { grid-column: 1; grid-row: 3; position: static; transform: none; flex-direction: column; gap: 6px; }
+  .is-mobile .menu-content { grid-column: 2; grid-row: 3 / 6; position: static; }
+  .is-mobile .menu-side-right { grid-column: 3; grid-row: 3; position: static; transform: none; flex-direction: column; gap: 6px; }
+  .is-mobile .menu-side-mid { grid-column: 1; grid-row: 4; position: static; transform: none; flex-direction: column; gap: 6px; }
+  .is-mobile #btn-passe { grid-column: 1; grid-row: 5; position: static; }
+  .is-mobile #btn-missoes { grid-column: 3; grid-row: 5; position: static; }
+  .is-mobile .menu-footer { grid-column: 1 / -1; grid-row: 6; position: static; }
 
   /* Botões menores */
-  .menu-icon-btn {
+  .is-mobile .menu-icon-btn {
     min-width: 0;
     width: 100%;
     max-width: 140px;
@@ -1375,26 +1365,26 @@ body {
     font-size: 11px;
     gap: 6px;
   }
-  .corner-icon { font-size: 18px; }
-  .corner-label { font-size: 10px; letter-spacing: 1px; }
+  .is-mobile .corner-icon { font-size: 18px; }
+  .is-mobile .corner-label { font-size: 10px; letter-spacing: 1px; }
 
-  .menu-play-btn {
+  .is-mobile .menu-play-btn {
     min-width: 0;
     width: 100%;
     max-width: 140px;
     padding: 10px 14px;
   }
-  .menu-play-btn .corner-icon { font-size: 22px; }
-  .menu-play-btn .corner-label { font-size: 12px; }
+  .is-mobile .menu-play-btn .corner-icon { font-size: 22px; }
+  .is-mobile .menu-play-btn .corner-label { font-size: 12px; }
 
-  #btn-passe, #btn-missoes, #btn-grimorio, #btn-viewer, .menu-side-left .menu-icon-btn, .menu-side-right .menu-icon-btn, .menu-side-mid .menu-icon-btn {
+  .is-mobile #btn-passe, .is-mobile #btn-missoes, .is-mobile #btn-grimorio, .is-mobile #btn-viewer, .is-mobile .menu-side-left .menu-icon-btn, .is-mobile .menu-side-right .menu-icon-btn, .is-mobile .menu-side-mid .menu-icon-btn {
     min-width: 0;
     width: 100%;
     max-width: 130px;
     padding: 8px 8px;
   }
 
-  .menu-footer { font-size: 9px; }
+  .is-mobile .menu-footer { font-size: 9px; }
 }
 
 
