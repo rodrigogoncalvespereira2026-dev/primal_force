@@ -661,7 +661,7 @@ const GameScene = {
   _createPlayerMesh(player) {
     return new Promise((resolve) => {
       const modelPath = player.data.modelPath || 'models/sample.glb';
-      Model3D.createFromGLB(modelPath, { size: 1 }).then((mesh) => {
+      Model3D.createFromGLB(modelPath, { size: 6 }).then((mesh) => {
         mesh.position.set(player.x, 0, player.y);
         this._entityGroup.add(mesh);
         player.mesh3d = mesh;
@@ -683,7 +683,7 @@ const GameScene = {
 
   _createEnemyMesh(enemy) {
     const modelPath = ENEMY_MODELS[enemy.type] || 'models/enemy_normal.glb';
-    Model3D.createFromGLB(modelPath, { size: 0.8 }).then((mesh) => {
+    Model3D.createFromGLB(modelPath, { size: 4.8 }).then((mesh) => {
       mesh.position.set(enemy.x, 0, enemy.y);
       this._entityGroup.add(mesh);
       enemy.mesh3d = mesh;
@@ -703,7 +703,7 @@ const GameScene = {
 
   _createBossMesh(boss) {
     const modelPath = BOSS_MODELS[boss.typeKey] || 'models/boss_dragon.glb';
-    Model3D.createFromGLB(modelPath, { size: 1.5 }).then((mesh) => {
+    Model3D.createFromGLB(modelPath, { size: 9 }).then((mesh) => {
       mesh.position.set(boss.x, 0, boss.y);
       this._entityGroup.add(mesh);
       boss.mesh3d = mesh;
