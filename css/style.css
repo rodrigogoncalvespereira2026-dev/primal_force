@@ -1008,8 +1008,9 @@ body {
   touch-action: none;
 }
 
-/* Mobile: mostrar controlos touch, esconder skill-bar */
+/* Mobile: mostrar controlos touch, esconder skill-bar e d-pad */
 .is-mobile #mobile-controls { display: flex; }
+.is-mobile #dpad { display: none !important; }
 .is-mobile #skill-bar { display: none !important; }
 
 /* Botões de habilidade: touch-action independente do global */
