@@ -307,6 +307,9 @@ const App = {
         if (e.target.closest('.editor-canvas-wrap')) return;
         if (e.target.closest('#screen-creator')) return;
         if (e.target.closest('.account-form')) return;
+        if (e.target.closest('.hscroll-wrap') || e.target.closest('.hscroll')) return;
+        if (e.target.closest('.shop-scroll-wrap') || e.target.closest('.shop-scroll')) return;
+        if (e.target.closest('.shop-grid')) return;
         e.preventDefault();
       }, { passive: false });
     } else {
