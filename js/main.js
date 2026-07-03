@@ -301,16 +301,9 @@ const App = {
       this._trackOrientation();
       this._applyMobileMenuLayout();
       document.addEventListener('touchmove', e => {
-        if (e.target.closest('#mobile-controls') || e.target.closest('#dpad')) return;
-        if (e.target.closest('.editor-sidebar-right') || e.target.closest('.editor-sidebar-left')) return;
-        if (e.target.closest('.editor-palette-bar') || e.target.closest('.mm-body')) return;
-        if (e.target.closest('.editor-canvas-wrap')) return;
-        if (e.target.closest('#screen-creator')) return;
-        if (e.target.closest('.account-form')) return;
-        if (e.target.closest('.hscroll-wrap') || e.target.closest('.hscroll')) return;
-        if (e.target.closest('.shop-scroll-wrap') || e.target.closest('.shop-scroll')) return;
-        if (e.target.closest('.shop-grid')) return;
-        e.preventDefault();
+        if (e.target.closest('#screen-game')) {
+          e.preventDefault();
+        }
       }, { passive: false });
     } else {
       this._trackOrientation();
