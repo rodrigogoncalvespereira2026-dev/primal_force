@@ -1013,6 +1013,7 @@ body {
 .is-mobile #mobile-controls { display: flex; }
 .is-mobile #dpad { display: none !important; }
 .is-mobile #skill-bar { display: none !important; }
+.is-mobile .hscroll-arrow, .is-mobile .shop-arrow { display: none !important; }
 
 /* Botões de habilidade: touch-action independente do global */
 .act-btn, #btn-pause, .menu-btn, .back-btn {
