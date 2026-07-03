@@ -74,7 +74,6 @@ const App = {
       const isPortrait = window.matchMedia('(orientation: portrait)').matches;
       document.body.classList.toggle('portrait', isPortrait);
       document.body.classList.toggle('landscape', !isPortrait);
-      this._applyMobileMenuLayout();
     };
     update();
     window.addEventListener('resize', update);
@@ -84,10 +83,6 @@ const App = {
   },
 
   _applyMobileMenuLayout() {
-    const existing = document.getElementById('mobile-menu-layout');
-    if (existing) existing.remove();
-
-    if (!document.body.classList.contains('is-mobile')) return;
     if (!window.matchMedia('(orientation: landscape)').matches) return;
 
     const style = document.createElement('style');
@@ -143,22 +138,6 @@ const App = {
         position: absolute !important;
         top: 8% !important; left: 22% !important;
         bottom: auto !important; right: auto !important;
-        padding: 6px 10px !important;
-      }
-      #screen-menu.active .menu-side-mid {
-        position: absolute !important;
-        top: 50% !important; left: 22% !important;
-        transform: translateY(-50%) !important;
-        bottom: auto !important; right: auto !important;
-        flex-direction: column !important;
-        gap: 6px !important;
-      }
-      #screen-menu.active #btn-grimorio {
-        position: static !important;
-        padding: 6px 10px !important;
-      }
-      #screen-menu.active #btn-viewer {
-        position: static !important;
         padding: 6px 10px !important;
       }
       #screen-menu.active .menu-content {
@@ -338,9 +317,4 @@ const App = {
   },
 };
 
-window.addEventListener('DOMContentLoaded', () => {
-  App.init();
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./service-worker.js').catch(() => {});
-  }
-});
+window.addEventListener('DOMContentLoaded', () => App.init());
