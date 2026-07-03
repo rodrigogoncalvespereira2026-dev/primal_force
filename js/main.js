@@ -69,6 +69,19 @@ const App = {
     window.addEventListener('load', tryLock);
   },
 
+  _trackOrientation() {
+    const update = () => {
+      const isPortrait = window.matchMedia('(orientation: portrait)').matches;
+      document.body.classList.toggle('portrait', isPortrait);
+      document.body.classList.toggle('landscape', !isPortrait);
+    };
+    update();
+    window.addEventListener('resize', update);
+    if (screen.orientation) {
+      screen.orientation.addEventListener('change', update);
+    }
+  },
+
   _applyMobileMenuLayout() {
     if (!window.matchMedia('(orientation: landscape)').matches) return;
 
@@ -265,6 +278,7 @@ const App = {
     if (isTouch || isUA) {
       document.body.classList.add('is-mobile');
       this._forceLandscape();
+      this._trackOrientation();
       this._applyMobileMenuLayout();
       document.addEventListener('touchmove', e => {
         if (e.target.closest('#mobile-controls') || e.target.closest('#dpad')) return;
@@ -272,8 +286,11 @@ const App = {
         if (e.target.closest('.editor-palette-bar') || e.target.closest('.mm-body')) return;
         if (e.target.closest('.editor-canvas-wrap')) return;
         if (e.target.closest('#screen-creator')) return;
+        if (e.target.closest('.account-form')) return;
         e.preventDefault();
       }, { passive: false });
+    } else {
+      this._trackOrientation();
     }
     Progression.load();
     WorldMap.load();
