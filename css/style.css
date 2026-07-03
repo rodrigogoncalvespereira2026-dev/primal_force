@@ -1336,35 +1336,25 @@ body {
   /* Layout grid para mobile */
   #screen-menu.active {
     display: grid;
-    grid-template-areas:
-      "trophy  trophy  trophy"
-      "perfil  trofeus opcoes"
-      "loja    center  criar"
-      "ranger  center  grimorio"
-      "passe   center  viewer"
-      "missoes map     jogar"
-      "footer  footer  footer";
     grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: auto auto auto 1fr auto auto auto;
+    grid-template-rows: auto auto auto 1fr auto auto;
     align-items: center;
     justify-items: center;
     padding: 8px;
     gap: 6px;
   }
 
-  .trophy-bar-menu { grid-area: trophy; position: static; transform: none; }
-  #btn-perfil { grid-area: perfil; position: static; }
-  #btn-trofeus { grid-area: trofeus; position: static; }
-  #btn-opcoes { grid-area: opcoes; position: static; }
-  .menu-side-left { grid-area: loja; position: static; transform: none; flex-direction: column; gap: 6px; }
-  .menu-side-right { grid-area: map; position: static; transform: none; flex-direction: column; gap: 6px; }
-  .menu-side-mid { grid-area: criar; position: static; transform: none; flex-direction: column; gap: 6px; }
-  #btn-passe { grid-area: passe; position: static; }
-  #btn-missoes { grid-area: missoes; position: static; }
-  #btn-grimorio { grid-area: grimorio; position: static; }
-  #btn-viewer { grid-area: viewer; position: static; }
-  .menu-content { grid-area: center; }
-  .menu-footer { grid-area: footer; }
+  .trophy-bar-menu { grid-column: 1 / -1; grid-row: 1; position: static; transform: none; }
+  #btn-perfil { grid-column: 1; grid-row: 2; position: static; }
+  #btn-trofeus { grid-column: 2; grid-row: 2; position: static; }
+  #btn-opcoes { grid-column: 3; grid-row: 2; position: static; }
+  .menu-side-left { grid-column: 1; grid-row: 3; position: static; transform: none; flex-direction: row; justify-content: center; gap: 6px; }
+  .menu-content { grid-column: 2; grid-row: 3 / 6; position: static; }
+  .menu-side-right { grid-column: 3; grid-row: 3; position: static; transform: none; flex-direction: row; justify-content: center; gap: 6px; }
+  .menu-side-mid { grid-column: 1; grid-row: 4; position: static; transform: none; flex-direction: column; gap: 6px; }
+  #btn-passe { grid-column: 1; grid-row: 5; position: static; }
+  #btn-missoes { grid-column: 3; grid-row: 5; position: static; }
+  .menu-footer { grid-column: 1 / -1; grid-row: 6; position: static; }
 
   /* Botões menores */
   .menu-icon-btn {
