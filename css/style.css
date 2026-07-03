@@ -919,6 +919,7 @@ body {
   align-items: flex-end;
   gap: 8px;
   pointer-events: all;
+  margin-left: auto;
 }
 
 #attack-cluster {
