@@ -87,6 +87,7 @@ const App = {
     const existing = document.getElementById('mobile-menu-layout');
     if (existing) existing.remove();
 
+    if (!document.body.classList.contains('is-mobile')) return;
     if (!window.matchMedia('(orientation: landscape)').matches) return;
 
     const style = document.createElement('style');

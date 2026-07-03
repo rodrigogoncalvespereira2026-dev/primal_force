@@ -1327,65 +1327,63 @@ body {
 }
 
 /* Portrait - menu responsivo */
-@media (orientation: portrait) {
-  .menu-content { gap: 12px; }
-  .logo-main { font-size: clamp(22px, 6vw, 36px); }
-  .logo-sub { font-size: 10px; letter-spacing: 4px; }
-  .logo-tagline { font-size: 10px; }
+.is-mobile.portrait .menu-content { gap: 12px; }
+.is-mobile.portrait .logo-main { font-size: clamp(22px, 6vw, 36px); }
+.is-mobile.portrait .logo-sub { font-size: 10px; letter-spacing: 4px; }
+.is-mobile.portrait .logo-tagline { font-size: 10px; }
 
-  /* Layout grid para mobile */
-  #screen-menu.active {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: auto auto auto 1fr auto auto;
-    align-items: center;
-    justify-items: center;
-    padding: 8px;
-    gap: 6px;
-  }
-
-  .trophy-bar-menu { grid-column: 1 / -1; grid-row: 1; position: static; transform: none; }
-  #btn-perfil { grid-column: 1; grid-row: 2; position: static; }
-  #btn-trofeus { grid-column: 2; grid-row: 2; position: static; }
-  #btn-opcoes { grid-column: 3; grid-row: 2; position: static; }
-  .menu-side-left { grid-column: 1; grid-row: 3; position: static; transform: none; flex-direction: row; justify-content: center; gap: 6px; }
-  .menu-content { grid-column: 2; grid-row: 3 / 6; position: static; }
-  .menu-side-right { grid-column: 3; grid-row: 3; position: static; transform: none; flex-direction: row; justify-content: center; gap: 6px; }
-  .menu-side-mid { grid-column: 1; grid-row: 4; position: static; transform: none; flex-direction: column; gap: 6px; }
-  #btn-passe { grid-column: 1; grid-row: 5; position: static; }
-  #btn-missoes { grid-column: 3; grid-row: 5; position: static; }
-  .menu-footer { grid-column: 1 / -1; grid-row: 6; position: static; }
-
-  /* Botões menores */
-  .menu-icon-btn {
-    min-width: 0;
-    width: 100%;
-    max-width: 140px;
-    padding: 8px 10px;
-    font-size: 11px;
-    gap: 6px;
-  }
-  .corner-icon { font-size: 18px; }
-  .corner-label { font-size: 10px; letter-spacing: 1px; }
-
-  .menu-play-btn {
-    min-width: 0;
-    width: 100%;
-    max-width: 140px;
-    padding: 10px 14px;
-  }
-  .menu-play-btn .corner-icon { font-size: 22px; }
-  .menu-play-btn .corner-label { font-size: 12px; }
-
-  #btn-passe, #btn-missoes, #btn-grimorio, #btn-viewer, .menu-side-left .menu-icon-btn, .menu-side-right .menu-icon-btn, .menu-side-mid .menu-icon-btn {
-    min-width: 0;
-    width: 100%;
-    max-width: 130px;
-    padding: 8px 8px;
-  }
-
-  .menu-footer { font-size: 9px; }
+/* Layout grid para mobile */
+.is-mobile.portrait #screen-menu.active {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: auto auto auto 1fr auto auto;
+  align-items: center;
+  justify-items: center;
+  padding: 8px;
+  gap: 6px;
 }
+
+.is-mobile.portrait .trophy-bar-menu { grid-column: 1 / -1; grid-row: 1; position: static; transform: none; }
+.is-mobile.portrait #btn-perfil { grid-column: 1; grid-row: 2; position: static; }
+.is-mobile.portrait #btn-trofeus { grid-column: 2; grid-row: 2; position: static; }
+.is-mobile.portrait #btn-opcoes { grid-column: 3; grid-row: 2; position: static; }
+.is-mobile.portrait .menu-side-left { grid-column: 1; grid-row: 3; position: static; transform: none; flex-direction: row; justify-content: center; gap: 6px; }
+.is-mobile.portrait .menu-content { grid-column: 2; grid-row: 3 / 6; position: static; }
+.is-mobile.portrait .menu-side-right { grid-column: 3; grid-row: 3; position: static; transform: none; flex-direction: row; justify-content: center; gap: 6px; }
+.is-mobile.portrait .menu-side-mid { grid-column: 1; grid-row: 4; position: static; transform: none; flex-direction: column; gap: 6px; }
+.is-mobile.portrait #btn-passe { grid-column: 1; grid-row: 5; position: static; }
+.is-mobile.portrait #btn-missoes { grid-column: 3; grid-row: 5; position: static; }
+.is-mobile.portrait .menu-footer { grid-column: 1 / -1; grid-row: 6; position: static; }
+
+/* Botões menores */
+.is-mobile.portrait .menu-icon-btn {
+  min-width: 0;
+  width: 100%;
+  max-width: 140px;
+  padding: 8px 10px;
+  font-size: 11px;
+  gap: 6px;
+}
+.is-mobile.portrait .corner-icon { font-size: 18px; }
+.is-mobile.portrait .corner-label { font-size: 10px; letter-spacing: 1px; }
+
+.is-mobile.portrait .menu-play-btn {
+  min-width: 0;
+  width: 100%;
+  max-width: 140px;
+  padding: 10px 14px;
+}
+.is-mobile.portrait .menu-play-btn .corner-icon { font-size: 22px; }
+.is-mobile.portrait .menu-play-btn .corner-label { font-size: 12px; }
+
+.is-mobile.portrait #btn-passe, .is-mobile.portrait #btn-missoes, .is-mobile.portrait #btn-grimorio, .is-mobile.portrait #btn-viewer, .is-mobile.portrait .menu-side-left .menu-icon-btn, .is-mobile.portrait .menu-side-right .menu-icon-btn, .is-mobile.portrait .menu-side-mid .menu-icon-btn {
+  min-width: 0;
+  width: 100%;
+  max-width: 130px;
+  padding: 8px 8px;
+}
+
+.is-mobile.portrait .menu-footer { font-size: 9px; }
 
 
 /* Telemóveis (até 480px) */
