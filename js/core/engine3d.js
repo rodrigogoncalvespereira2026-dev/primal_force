@@ -8,10 +8,10 @@ const Engine3D = {
   // Câmara orbital
   camAngle: 0,
   camPitch: 0.65,
-  camDist: 100,
+  camDist: 50,
   _camAngleTarget: 0,
   _camPitchTarget: 0.65,
-  _camDistTarget: 100,
+  _camDistTarget: 50,
 
   // Look-ahead
   _lookAheadX: 0,
