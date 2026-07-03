@@ -140,10 +140,24 @@ const App = {
         top: auto !important; right: auto !important;
         padding: 6px 10px !important;
       }
-      #screen-menu.active #btn-criar {
+      #screen-menu.active .menu-side-mid {
         position: absolute !important;
-        top: 8% !important; left: 22% !important;
-        bottom: auto !important; right: auto !important;
+        top: 50% !important; right: 2% !important;
+        transform: translateY(-50%) !important;
+        bottom: auto !important; left: auto !important;
+        flex-direction: column !important;
+        gap: 6px !important;
+      }
+      #screen-menu.active #btn-criar {
+        position: static !important;
+        padding: 6px 10px !important;
+      }
+      #screen-menu.active #btn-grimorio {
+        position: static !important;
+        padding: 6px 10px !important;
+      }
+      #screen-menu.active #btn-viewer {
+        position: static !important;
         padding: 6px 10px !important;
       }
       #screen-menu.active .menu-content {
