@@ -40,6 +40,9 @@
     transition: transform 0.9s cubic-bezier(.4,.1,.2,1), opacity 0.9s ease;
     transform-style: preserve-3d;
   }
+  @media (max-width: 640px) {
+    #cover { width: 85vw; height: 70vh; }
+  }
   #cover::before {
     content: ''; position: absolute; inset: 0; border-radius: inherit;
     background-image:
@@ -172,11 +175,47 @@
   }
   .close-btn:hover { color: var(--gold); }
   @media (max-width: 640px) {
-    #nextBtn { right: 6px; }
-    #prevBtn { left: 6px; }
-    .pages-wrap { flex-direction: column; overflow-y: auto; }
+    #book.visible {
+      width: 100vw; height: 100vh;
+      position: fixed; top: 0; left: 0;
+      transform: none; z-index: 10;
+    }
+    .pages-wrap {
+      flex-direction: column; overflow-y: auto;
+      padding: 10px; gap: 2px; border-radius: 0;
+    }
+    .page {
+      padding: 20px 16px; min-height: auto;
+    }
     .page.left { border-right: none; border-bottom: 1px solid rgba(0,0,0,0.08); }
-    .page { padding: 28px 24px; }
+    .page-title { font-size: 16px; margin-bottom: 10px; }
+    .page-body { font-size: 13px; line-height: 1.6; }
+    .page-body .dropcap { font-size: 36px; }
+    .page-eyebrow { font-size: 9px; letter-spacing: 2px; margin-bottom: 6px; }
+    .page-number { font-size: 10px; margin-top: 6px; }
+    #nextBtn { right: 10px; bottom: 10px; top: auto; transform: none; width: 40px; height: 40px; font-size: 18px; }
+    #prevBtn { left: 10px; bottom: 10px; top: auto; transform: none; width: 40px; height: 40px; font-size: 18px; }
+    #closeBtn { top: 8px; right: 8px; font-size: 11px; }
+    #backBtn { top: 8px; left: 8px; font-size: 11px; }
+    .cover-frame { padding: 16px; }
+    .cover-title { font-size: 20px; }
+    .cover-seal { width: 70px; height: 70px; margin-bottom: 16px; }
+    .cover-seal svg { width: 42px; height: 42px; }
+    .toc-list li { font-size: 12px; padding: 6px 0; }
+  }
+  @media (orientation: landscape) and (max-height: 500px) {
+    #book.visible {
+      width: 100vw; height: 100vh;
+      position: fixed; top: 0; left: 0;
+      transform: none;
+    }
+    .pages-wrap { flex-direction: row; padding: 8px; gap: 2px; }
+    .page { padding: 16px 14px; }
+    .page-title { font-size: 14px; }
+    .page-body { font-size: 12px; line-height: 1.5; }
+    .page-body .dropcap { font-size: 28px; }
+    #nextBtn { right: 8px; }
+    #prevBtn { left: 8px; }
   }
 </style>
 </head>
