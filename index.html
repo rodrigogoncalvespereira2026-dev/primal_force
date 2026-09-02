@@ -3,77 +3,434 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#0f1221">
+    <meta name="theme-color" content="#0a0a1a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Primal Force IA">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
     <title>Primal Force — Robôs IA</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=">
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nMNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
-        :root { color-scheme: dark; }
-        body { background: #0f1221; color: #e8e8f0; height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
-        header { background: #171b30; padding: 12px 20px; padding-top: max(12px, env(safe-area-inset-top)); display: flex; align-items: center; gap: 14px; border-bottom: 1px solid #2a2f4a; flex-wrap: wrap; }
-        header h1 { font-size: 18px; white-space: nowrap; }
-        header .robot-dot { width: 14px; height: 14px; border-radius: 50%; background: #ff3b5c; display: inline-block; flex-shrink: 0; }
-        #robot-list { display: flex; gap: 8px; margin-left: auto; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 4px 0; flex-wrap: nowrap; }
-        #robot-list::-webkit-scrollbar { display: none; }
-        .secao-titulo { font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #6a7090; padding: 4px 8px; flex-shrink: 0; align-self: center; border-left: 1px solid #2a2f4a; margin-left: 6px; }
-        .secao-titulo:first-child { border-left: none; margin-left: 0; }
-        #robot-list button {
-            padding: 8px 14px; border-radius: 20px; border: 1px solid #2a2f4a;
-            background: #1c2138; color: #e8e8f0; cursor: pointer; font-size: 13px; transition: all .2s;
-            flex-shrink: 0; min-height: 36px; font-weight: 600; white-space: nowrap;
-        }
-        #robot-list button:hover { border-color: var(--cor-robot); }
-        #robot-list button.ativo { background: var(--cor-robot); border-color: var(--cor-robot); color: #fff; }
-        #main { flex: 1; display: flex; overflow: hidden; }
-        #face-panel { width: 200px; background: #0a0a1a; border-right: 1px solid #2a2f4a; display: flex; flex-direction: column; align-items: center; padding: 20px; gap: 10px; }
-        #face-panel .robot-avatar {
-            width: 140px; height: 140px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 60px; font-weight: 800; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,.5);
-            animation: robot-flutuar 3s ease-in-out infinite, robot-brilho 3.5s ease-in-out infinite;
-        }
-        @keyframes robot-flutuar { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        @keyframes robot-brilho { 0%,100% { box-shadow: 0 0 14px 2px color-mix(in srgb, var(--robot-cor) 55%, transparent); } 50% { box-shadow: 0 0 26px 8px color-mix(in srgb, var(--robot-cor) 85%, transparent); } }
-        @keyframes robot-falar { 0%,100% { transform: translateY(0) scale(1); } 40% { transform: translateY(-5px) scale(1.06, 0.96); } 70% { transform: translateY(-3px) scale(0.97, 1.04); } }
-        @keyframes robot-ouvir { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-        #face-panel[data-estado="ouvir"] .robot-avatar { animation: robot-ouvir 1.6s ease-in-out infinite, robot-brilho 2s ease-in-out infinite; }
-        #face-panel[data-estado="pensar"] .robot-avatar { animation: robot-flutuar 2.4s ease-in-out infinite, robot-brilho 2.8s ease-in-out infinite; }
-        #face-panel[data-estado="falar"] .robot-avatar { animation: robot-falar 0.55s ease-in-out infinite, robot-brilho 1.2s ease-in-out infinite; }
-        #face-panel .robot-info { text-align: center; margin-top: 8px; }
-        #face-panel .robot-nome { font-size: 16px; font-weight: 700; }
-        #face-panel .robot-ranger { font-size: 12px; color: #9aa2c0; margin-top: 2px; }
-        #face-panel .robot-suporte { font-size: 11px; color: #6a7090; margin-top: 4px; padding: 3px 10px; border-radius: 10px; background: #1c2138; border: 1px solid #2a2f4a; }
-        #face-panel .estado-label { font-size: 13px; color: #9aa2c0; margin-top: 6px; }
-        #chat { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 24px; display: flex; flex-direction: column; gap: 14px; }
-        .msg { max-width: 75%; padding: 12px 16px; border-radius: 16px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
-        .msg.user { align-self: flex-end; background: var(--robot-cor); color: #fff; border-bottom-right-radius: 4px; }
-        .msg.robot { align-self: flex-start; background: #1c2138; border: 1px solid #2a2f4a; border-bottom-left-radius: 4px; }
-        .msg.robot .linha-robot { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
-        .msg.robot .avatar-mini { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0; }
-        .msg.robot .nome-robot { font-weight: 600; font-size: 12px; }
-        .msg.sistema { align-self: center; background: #252a45; color: #9aa2c0; font-size: 12px; padding: 8px 14px; border-radius: 10px; text-align: center; }
-        .digitando { align-self: flex-start; background: #1c2138; border: 1px solid #2a2f4a; padding: 12px 16px; border-radius: 16px; }
-        .digitando span { animation: piscar 1s infinite; }
-        @keyframes piscar { 0%,100% { opacity: .2; } 50% { opacity: 1; } }
-        footer { display: flex; gap: 10px; padding: 14px 20px; padding-bottom: max(14px, env(safe-area-inset-bottom)); background: #171b30; border-top: 1px solid #2a2f4a; }
-        #input { flex: 1; background: #1c2138; border: 1px solid #2a2f4a; color: #e8e8f0; padding: 12px 16px; border-radius: 20px; outline: none; font-size: 16px; min-width: 0; transition: border-color .2s, box-shadow .2s, background .2s; caret-color: var(--robot-cor); }
-        #input::placeholder { color: #7a82a5; }
-        #input:focus { border-color: var(--robot-cor); box-shadow: 0 0 0 3px color-mix(in srgb, var(--robot-cor) 35%, transparent); background: #202540; }
-        #enviar { background: var(--robot-cor); color: #fff; border: none; padding: 12px 22px; border-radius: 20px; cursor: pointer; font-size: 16px; flex-shrink: 0; }
-        #enviar:disabled { opacity: .5; cursor: not-allowed; }
-        #voz-toggle, #microfone { background: #1c2138; border: 1px solid #2a2f4a; color: #e8e8f0; width: 48px; height: 48px; border-radius: 50%; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; transition: all .2s; flex-shrink: 0; }
-        #voz-toggle:hover, #microfone:hover { border-color: var(--robot-cor); }
-        #voz-toggle.desligado { opacity: .4; }
-        #microfone.ouvindo { background: #00ff88; border-color: #00ff88; color: #0a0a1a; animation: pulsar 1s infinite; }
-        @keyframes pulsar { 0%,100% { box-shadow: 0 0 0 0 rgba(0,255,136,0.4); } 50% { box-shadow: 0 0 0 10px rgba(0,255,136,0); } }
-        #btn-hamburger { display: none; background: none; border: none; color: #e8e8f0; font-size: 22px; cursor: pointer; padding: 4px 8px; flex-shrink: 0; }
-        .drawer-overlay, .drawer { display: none; }
-        .erro { color: #ff8fa3; }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
 
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Rajdhani', sans-serif; -webkit-tap-highlight-color: transparent; }
+        :root {
+            color-scheme: dark;
+            --power-gold: #FFD700;
+            --power-red: #FF1744;
+            --power-blue: #2979FF;
+            --power-green: #00E676;
+            --power-yellow: #FFEA00;
+            --power-pink: #FF4081;
+            --power-purple: #D500F9;
+            --power-black: #0a0a1a;
+            --power-silver: #B0BEC5;
+            --grid-line: rgba(255,215,0,0.06);
+        }
+        body {
+            background: var(--power-black);
+            color: #e8e8f0;
+            height: 100vh; height: 100dvh;
+            display: flex; flex-direction: column;
+            overflow: hidden;
+            background-image:
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 40px 40px;
+            animation: gridScroll 20s linear infinite;
+        }
+        @keyframes gridScroll { 0% { background-position: 0 0; } 100% { background-position: 40px 40px; } }
+
+        /* ============ HEADER ============ */
+        header {
+            background: linear-gradient(135deg, #0d0d2b 0%, #1a0a2e 50%, #0d0d2b 100%);
+            padding: 12px 20px;
+            padding-top: max(12px, env(safe-area-inset-top));
+            display: flex; align-items: center; gap: 14px;
+            border-bottom: 2px solid;
+            border-image: linear-gradient(90deg, transparent, var(--power-gold), var(--power-red), var(--power-gold), transparent) 1;
+            flex-wrap: wrap;
+            position: relative;
+            overflow: hidden;
+        }
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 200%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,215,0,0.03), transparent);
+            animation: headerSweep 4s ease-in-out infinite;
+        }
+        @keyframes headerSweep { 0%,100% { transform: translateX(-50%); } 50% { transform: translateX(50%); } }
+
+        .logo-bolt {
+            width: 36px; height: 36px;
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+        }
+        .logo-bolt svg { width: 32px; height: 32px; filter: drop-shadow(0 0 8px var(--power-gold)); }
+        header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 17px; font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, var(--power-gold), #fff, var(--power-gold));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-shadow: none;
+            white-space: nowrap;
+        }
+        .header-tag {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 8px; letter-spacing: 0.15em;
+            color: var(--power-gold); opacity: 0.6;
+            text-transform: uppercase;
+            position: absolute; top: 6px; right: 20px;
+        }
+
+        #robot-list {
+            display: flex; gap: 6px; margin-left: auto; overflow-x: auto;
+            -webkit-overflow-scrolling: touch; scrollbar-width: none;
+            padding: 4px 0; flex-wrap: nowrap;
+        }
+        #robot-list::-webkit-scrollbar { display: none; }
+        .secao-titulo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 8px; font-weight: 700; letter-spacing: 0.12em;
+            text-transform: uppercase; color: var(--power-gold); opacity: 0.5;
+            padding: 4px 8px; flex-shrink: 0; align-self: center;
+            border-left: 1px solid rgba(255,215,0,0.15);
+            margin-left: 6px;
+        }
+        .secao-titulo:first-child { border-left: none; margin-left: 0; }
+
+        #robot-list button {
+            padding: 7px 14px; border-radius: 4px;
+            border: 1px solid rgba(255,215,0,0.15);
+            background: rgba(255,215,0,0.04);
+            color: #c0c0d0; cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px; font-weight: 600;
+            letter-spacing: 0.06em; text-transform: uppercase;
+            transition: all 0.3s;
+            flex-shrink: 0; min-height: 32px;
+            white-space: nowrap;
+            position: relative;
+            clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+        }
+        #robot-list button::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: var(--cor-robot);
+            opacity: 0; transition: opacity 0.3s;
+            clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+        }
+        #robot-list button:hover::before { opacity: 0.15; }
+        #robot-list button.ativo {
+            color: #fff;
+            border-color: var(--cor-robot);
+            box-shadow: 0 0 12px color-mix(in srgb, var(--cor-robot) 40%, transparent),
+                        inset 0 0 20px color-mix(in srgb, var(--cor-robot) 20%, transparent);
+        }
+        #robot-list button.ativo::before { opacity: 0.25; }
+        #robot-list button span { position: relative; z-index: 1; }
+
+        /* ============ MAIN LAYOUT ============ */
+        #main { flex: 1; display: flex; overflow: hidden; }
+
+        /* ============ FACE PANEL ============ */
+        #face-panel {
+            width: 220px;
+            background: linear-gradient(180deg, #0a0a2a 0%, #0d0d2b 50%, #0a0a1a 100%);
+            border-right: 2px solid;
+            border-image: linear-gradient(180deg, var(--power-gold), transparent) 1;
+            display: flex; flex-direction: column; align-items: center;
+            padding: 20px 16px; gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        #face-panel::before {
+            content: '';
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 200px; height: 200px;
+            background: radial-gradient(circle, color-mix(in srgb, var(--robot-cor) 12%, transparent) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .viewer-3d {
+            width: 160px; height: 160px;
+            position: relative;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .viewer-3d canvas {
+            width: 100% !important;
+            height: 100% !important;
+            border-radius: 50%;
+        }
+        .morphin-badge {
+            width: 150px; height: 150px;
+            position: relative;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .morphin-badge .ring {
+            position: absolute; inset: 0;
+            border: 2px solid var(--cor-robot);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            animation: hexRotate 8s linear infinite;
+        }
+        .morphin-badge .ring::before {
+            content: '';
+            position: absolute; inset: 4px;
+            border: 1px solid color-mix(in srgb, var(--cor-robot) 40%, transparent);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+        }
+        @keyframes hexRotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .robot-avatar {
+            width: 120px; height: 120px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 48px; font-weight: 900;
+            color: #fff;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+            animation: robotFlutuar 3s ease-in-out infinite, robotBrilho 3.5s ease-in-out infinite;
+        }
+        .robot-avatar img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .robot-avatar .load-3d {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px;
+            letter-spacing: 0.08em;
+            color: var(--power-gold);
+            text-transform: uppercase;
+            position: absolute;
+            bottom: 10px;
+            text-shadow: 0 0 8px rgba(255,215,0,0.5);
+        }
+        .robot-avatar::after {
+            content: '';
+            position: absolute; inset: -4px;
+            border-radius: 50%;
+            border: 2px solid var(--cor-robot);
+            opacity: 0.4;
+            animation: ringPulse 2s ease-in-out infinite;
+        }
+        @keyframes ringPulse { 0%,100% { transform: scale(1); opacity: 0.4; } 50% { transform: scale(1.05); opacity: 0.7; } }
+
+        @keyframes robotFlutuar { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        @keyframes robotBrilho {
+            0%,100% { box-shadow: 0 0 20px 4px color-mix(in srgb, var(--robot-cor) 40%, transparent); }
+            50% { box-shadow: 0 0 40px 12px color-mix(in srgb, var(--robot-cor) 70%, transparent); }
+        }
+        @keyframes robotFalar {
+            0%,100% { transform: translateY(0) scale(1); }
+            25% { transform: translateY(-4px) scale(1.04, 0.97); }
+            50% { transform: translateY(-2px) scale(0.97, 1.03); }
+            75% { transform: translateY(-3px) scale(1.02, 0.98); }
+        }
+        @keyframes robotOuvir { 0%,100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+
+        #face-panel[data-estado="ouvir"] .robot-avatar { animation: robotOuvir 1.6s ease-in-out infinite, robotBrilho 2s ease-in-out infinite; }
+        #face-panel[data-estado="pensar"] .robot-avatar { animation: robotFlutuar 2s ease-in-out infinite, robotBrilho 2.5s ease-in-out infinite; }
+        #face-panel[data-estado="falar"] .robot-avatar { animation: robotFalar 0.5s ease-in-out infinite, robotBrilho 1s ease-in-out infinite; }
+
+        .robot-info { text-align: center; margin-top: 4px; position: relative; z-index: 1; }
+        .robot-nome {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px; font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .robot-ranger {
+            font-size: 12px; color: #8090b0;
+            margin-top: 2px; letter-spacing: 0.04em;
+        }
+        .robot-suporte {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 9px; letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-top: 6px;
+            padding: 4px 12px;
+            border-radius: 2px;
+            background: rgba(255,215,0,0.06);
+            border: 1px solid color-mix(in srgb, var(--cor-robot) 30%, transparent);
+            display: inline-block;
+        }
+        .estado-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px; letter-spacing: 0.1em;
+            color: var(--power-gold); opacity: 0.7;
+            margin-top: 8px;
+            text-transform: uppercase;
+        }
+
+        /* ============ CHAT ============ */
+        #chat {
+            flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+            padding: 24px; display: flex; flex-direction: column; gap: 14px;
+        }
+
+        .msg {
+            max-width: 75%; padding: 14px 18px;
+            border-radius: 4px; line-height: 1.5;
+            white-space: pre-wrap; word-break: break-word;
+            position: relative;
+        }
+        .msg.user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, var(--robot-cor), color-mix(in srgb, var(--robot-cor) 70%, #000));
+            color: #fff;
+            border: 1px solid color-mix(in srgb, var(--robot-cor) 60%, transparent);
+            clip-path: polygon(0% 0%, calc(100% - 10px) 0%, 100% 10px, 100% 100%, 0% 100%);
+        }
+        .msg.robot {
+            align-self: flex-start;
+            background: rgba(15,15,40,0.9);
+            border: 1px solid rgba(255,215,0,0.1);
+            clip-path: polygon(10px 0%, 100% 0%, 100% 100%, 0% 100%, 0% 10px);
+        }
+        .msg.robot::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, var(--cor-robot), transparent);
+            opacity: 0.4;
+        }
+        .msg.robot .linha-robot { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+        .msg.robot .avatar-mini {
+            width: 26px; height: 26px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px; font-weight: 800; color: #fff;
+            flex-shrink: 0;
+            overflow: hidden;
+            box-shadow: 0 0 8px color-mix(in srgb, var(--cor-robot) 40%, transparent);
+        }
+        .msg.robot .avatar-mini img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .msg.robot .nome-robot {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700; font-size: 11px;
+            letter-spacing: 0.06em; text-transform: uppercase;
+        }
+        .msg.sistema {
+            align-self: center;
+            background: rgba(255,215,0,0.06);
+            color: var(--power-gold);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px; letter-spacing: 0.08em;
+            padding: 8px 16px; border-radius: 2px;
+            text-align: center;
+            border: 1px solid rgba(255,215,0,0.1);
+            text-transform: uppercase;
+        }
+        .digitando {
+            align-self: flex-start;
+            background: rgba(15,15,40,0.9);
+            border: 1px solid rgba(255,215,0,0.1);
+            padding: 14px 18px; border-radius: 4px;
+            clip-path: polygon(10px 0%, 100% 0%, 100% 100%, 0% 100%, 0% 10px);
+        }
+        .digitando span {
+            font-family: 'Orbitron', sans-serif;
+            animation: piscar 1s infinite;
+        }
+        @keyframes piscar { 0%,100% { opacity: 0.2; } 50% { opacity: 1; } }
+
+        /* ============ FOOTER ============ */
+        footer {
+            display: flex; gap: 10px;
+            padding: 14px 20px;
+            padding-bottom: max(14px, env(safe-area-inset-bottom));
+            background: linear-gradient(0deg, #0a0a2a, #0d0d2b);
+            border-top: 2px solid;
+            border-image: linear-gradient(90deg, transparent, var(--power-gold), var(--power-red), var(--power-gold), transparent) 1;
+            position: relative;
+        }
+        footer::before {
+            content: '';
+            position: absolute; top: -20px; left: 0; right: 0; height: 20px;
+            background: linear-gradient(0deg, transparent, rgba(255,215,0,0.02));
+            pointer-events: none;
+        }
+
+        #input {
+            flex: 1;
+            background: rgba(15,15,40,0.8);
+            border: 1px solid rgba(255,215,0,0.12);
+            color: #e8e8f0;
+            padding: 12px 18px; border-radius: 4px;
+            outline: none; font-size: 15px; min-width: 0;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 500;
+            transition: all 0.3s;
+            caret-color: var(--power-gold);
+        }
+        #input::placeholder { color: #5a6080; font-weight: 400; }
+        #input:focus {
+            border-color: var(--power-gold);
+            box-shadow: 0 0 0 2px rgba(255,215,0,0.1), 0 0 20px rgba(255,215,0,0.05);
+            background: rgba(20,20,50,0.9);
+        }
+
+        #enviar {
+            background: linear-gradient(135deg, var(--power-red), #b71c1c);
+            color: #fff; border: none;
+            padding: 12px 24px; border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px; font-weight: 700;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        #enviar::before {
+            content: '';
+            position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.5s;
+        }
+        #enviar:hover::before { left: 100%; }
+        #enviar:hover { box-shadow: 0 0 20px rgba(255,23,68,0.4); transform: translateY(-1px); }
+        #enviar:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+        #voz-toggle, #microfone {
+            background: rgba(15,15,40,0.8);
+            border: 1px solid rgba(255,215,0,0.12);
+            color: #e8e8f0;
+            width: 46px; height: 46px; border-radius: 50%;
+            cursor: pointer; font-size: 18px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s; flex-shrink: 0;
+        }
+        #voz-toggle:hover, #microfone:hover { border-color: var(--power-gold); box-shadow: 0 0 12px rgba(255,215,0,0.15); }
+        #voz-toggle.desligado { opacity: 0.3; }
+        #microfone.ouvindo {
+            background: var(--power-green);
+            border-color: var(--power-green);
+            color: #0a0a1a;
+            animation: morphinPulse 1s infinite;
+        }
+        @keyframes morphinPulse {
+            0%,100% { box-shadow: 0 0 0 0 rgba(0,230,118,0.4); }
+            50% { box-shadow: 0 0 0 12px rgba(0,230,118,0); }
+        }
+
+        #btn-hamburger { display: none; background: none; border: none; color: var(--power-gold); font-size: 22px; cursor: pointer; padding: 4px 8px; flex-shrink: 0; }
+        .drawer-overlay, .drawer { display: none; }
+        .erro { color: var(--power-red); }
+
+        /* ============ MOBILE ============ */
         @media (max-width: 600px) {
             #btn-hamburger { display: flex !important; }
             #robot-list { display: none !important; }
@@ -83,46 +440,109 @@
             .msg { max-width: 85%; }
             footer { gap: 8px; padding: 10px 10px; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
             #voz-toggle { display: none !important; }
-            #microfone { display: flex !important; width: 44px; height: 44px; }
-            #input { font-size: 16px; flex: 1; min-width: 0; }
-            #enviar { padding: 12px 18px; font-size: 15px; }
+            #microfone { display: flex !important; width: 42px; height: 42px; }
+            #input { font-size: 15px; flex: 1; min-width: 0; }
+            #enviar { padding: 12px 16px; font-size: 10px; }
             header { padding: 10px 12px; padding-top: max(10px, env(safe-area-inset-top)); }
-            .drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 998; }
+            .drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 998; }
             .drawer-overlay.aberto { display: block; }
-            .drawer { position: fixed; left: -280px; top: 0; bottom: 0; width: 280px; background: #0f1221; z-index: 999; display: flex; flex-direction: column; transition: left 0.25s ease; overflow-y: auto; }
+            .drawer {
+                position: fixed; left: -280px; top: 0; bottom: 0; width: 280px;
+                background: linear-gradient(180deg, #0d0d2b, #0a0a1a);
+                z-index: 999; display: flex; flex-direction: column;
+                transition: left 0.3s ease; overflow-y: auto;
+                border-right: 2px solid var(--power-gold);
+            }
             .drawer.aberto { left: 0; }
-            .drawer-header { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid #2a2f4a; }
-            .drawer-header h2 { font-size: 15px; font-weight: 700; }
+            .drawer-header {
+                display: flex; align-items: center; gap: 10px;
+                padding: 14px 16px;
+                border-bottom: 1px solid rgba(255,215,0,0.15);
+            }
+            .drawer-header h2 {
+                font-family: 'Orbitron', sans-serif;
+                font-size: 13px; font-weight: 700; letter-spacing: 0.08em;
+                color: var(--power-gold);
+            }
             .drawer-robot-list { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 16px; }
-            .drawer-robot-list button { padding: 6px 14px; border-radius: 16px; border: 1px solid #2a2f4a; background: #1c2138; color: #e8e8f0; font-size: 12px; font-weight: 600; cursor: pointer; flex-shrink: 0; min-height: 32px; transition: all .2s; }
-            .drawer-robot-list button.ativo { background: var(--cor-robot); border-color: var(--cor-robot); color: #fff; }
+            .drawer-robot-list button {
+                padding: 6px 12px; border-radius: 3px;
+                border: 1px solid rgba(255,215,0,0.12);
+                background: rgba(255,215,0,0.04);
+                color: #c0c0d0; font-family: 'Orbitron', sans-serif;
+                font-size: 9px; font-weight: 600; letter-spacing: 0.06em;
+                text-transform: uppercase; cursor: pointer;
+                flex-shrink: 0; min-height: 30px; transition: all 0.2s;
+            }
+            .drawer-robot-list button.ativo {
+                background: var(--cor-robot); border-color: var(--cor-robot);
+                color: #fff;
+                box-shadow: 0 0 12px color-mix(in srgb, var(--cor-robot) 40%, transparent);
+            }
             .drawer-secao { flex: 0 0 100%; }
-            .drawer-secao-titulo { font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; padding: 12px 0 6px; border-bottom: 1px solid #232845; margin-bottom: 8px; }
+            .drawer-secao-titulo {
+                font-family: 'Orbitron', sans-serif;
+                font-size: 9px; font-weight: 700; letter-spacing: 0.12em;
+                text-transform: uppercase; color: var(--power-gold); opacity: 0.5;
+                padding: 12px 0 6px; border-bottom: 1px solid rgba(255,215,0,0.08); margin-bottom: 8px;
+            }
             .drawer-secao-grupo { display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 6px; }
-            .drawer-secao + .drawer-secao { border-top: 1px solid #1a1e35; margin-top: 4px; }
+            .drawer-secao + .drawer-secao { border-top: 1px solid rgba(255,215,0,0.06); margin-top: 4px; }
+        }
+
+        /* ============ LIGHTNING EFFECT ============ */
+        .lightning-flash {
+            position: fixed; inset: 0;
+            background: rgba(255,215,0,0.05);
+            pointer-events: none;
+            opacity: 0;
+            animation: lightningFlash 6s ease-in-out infinite;
+            z-index: 9999;
+        }
+        @keyframes lightningFlash {
+            0%,94%,96%,98%,100% { opacity: 0; }
+            95% { opacity: 1; }
+            97% { opacity: 0.5; }
         }
     </style>
 </head>
 <body>
+    <div class="lightning-flash"></div>
+
     <header>
         <button id="btn-hamburger" title="Menu">☰</button>
-        <span class="robot-dot"></span>
-        <h1>Primal Force IA</h1>
+        <div class="logo-bolt">
+            <svg viewBox="0 0 24 24" fill="none">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="url(#boltGrad)" stroke="var(--power-gold)" stroke-width="0.5"/>
+                <defs><linearGradient id="boltGrad" x1="3" y1="2" x2="22" y2="22"><stop offset="0%" stop-color="var(--power-gold)"/><stop offset="100%" stop-color="var(--power-red)"/></linearGradient></defs>
+            </svg>
+        </div>
+        <div>
+            <h1>Primal Force IA</h1>
+        </div>
+        <span class="header-tag">MORPHIN GRID</span>
         <div id="robot-list"></div>
     </header>
 
     <div class="drawer-overlay" id="drawer-overlay"></div>
     <div class="drawer" id="drawer">
         <div class="drawer-header">
-            <span class="robot-dot"></span>
-            <h2>Primal Force IA</h2>
+            <div class="logo-bolt">
+                <svg viewBox="0 0 24 24" fill="none" width="24" height="24">
+                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="var(--power-gold)"/>
+                </svg>
+            </div>
+            <h2>PRIMAL FORCE</h2>
         </div>
         <div class="drawer-robot-list" id="drawer-robot-list"></div>
     </div>
 
     <div id="main">
         <div id="face-panel">
-            <div class="robot-avatar" id="robot-avatar">?</div>
+            <div class="morphin-badge">
+                <div class="ring"></div>
+                <div class="robot-avatar" id="robot-avatar">?</div>
+            </div>
             <div class="robot-info">
                 <div class="robot-nome" id="robot-nome">—</div>
                 <div class="robot-ranger" id="robot-ranger">Companheiro de —</div>
@@ -137,9 +557,17 @@
         <button id="voz-toggle" title="Ligar/Desligar voz">🔊</button>
         <input id="input" type="text" inputmode="text" enterkeyhint="send" placeholder="Fala com um robô..." autocomplete="off">
         <button id="microfone" title="Falar com microfone">🎤</button>
-        <button id="enviar">Enviar</button>
+        <button id="enviar">MORPHIN</button>
     </footer>
 
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
     <script src="config.js"></script>
     <script src="primalforce-robots.js"></script>
     <script src="robot-base.js"></script>
@@ -174,7 +602,6 @@
         const input = document.getElementById("input");
         const enviar = document.getElementById("enviar");
 
-        // Construir botões do header
         function construirHeader() {
             const lista = document.getElementById("robot-list");
             lista.innerHTML = "";
@@ -189,7 +616,7 @@
                 const btn = document.createElement("button");
                 btn.dataset.robot = id;
                 btn.style.setProperty("--cor-robot", r.cor);
-                btn.textContent = r.nome;
+                btn.innerHTML = `<span>${r.nome}</span>`;
                 if (id === atual) btn.classList.add("ativo");
                 btn.addEventListener("click", () => selecionarRobot(id));
                 lista.appendChild(btn);
@@ -205,14 +632,13 @@
                 const btn = document.createElement("button");
                 btn.dataset.robot = id;
                 btn.style.setProperty("--cor-robot", r.cor);
-                btn.textContent = r.nome;
+                btn.innerHTML = `<span>${r.nome}</span>`;
                 if (id === atual) btn.classList.add("ativo");
                 btn.addEventListener("click", () => selecionarRobot(id));
                 lista.appendChild(btn);
             });
         }
 
-        // Construir drawer (mobile)
         function construirDrawer() {
             const lista = document.getElementById("drawer-robot-list");
             lista.innerHTML = "";
@@ -234,9 +660,7 @@
                 btn.addEventListener("click", () => { selecionarRobot(id); fecharDrawer(); });
                 grp1.appendChild(btn);
             });
-            sec1.appendChild(tit1);
-            sec1.appendChild(grp1);
-            lista.appendChild(sec1);
+            sec1.appendChild(tit1); sec1.appendChild(grp1); lista.appendChild(sec1);
 
             const sec2 = document.createElement("div");
             sec2.className = "drawer-secao";
@@ -255,9 +679,7 @@
                 btn.addEventListener("click", () => { selecionarRobot(id); fecharDrawer(); });
                 grp2.appendChild(btn);
             });
-            sec2.appendChild(tit2);
-            sec2.appendChild(grp2);
-            lista.appendChild(sec2);
+            sec2.appendChild(tit2); sec2.appendChild(grp2); lista.appendChild(sec2);
         }
 
         function selecionarRobot(id) {
@@ -272,14 +694,19 @@
             });
 
             const avatar = document.getElementById("robot-avatar");
-            avatar.style.background = r.cor;
-            avatar.textContent = r.nome[0];
+            avatar.style.background = `linear-gradient(135deg, ${r.cor}, color-mix(in srgb, ${r.cor} 60%, #000))`;
+            if (r.imagem) {
+                avatar.innerHTML = `<img src="${r.imagem}" alt="${r.nome}">`;
+            } else {
+                avatar.textContent = r.nome[0];
+            }
 
             document.getElementById("robot-nome").textContent = r.nome;
             document.getElementById("robot-nome").style.color = r.cor;
             document.getElementById("robot-ranger").textContent = `Companheiro do ${r.ranger}`;
             document.getElementById("robot-suporte").textContent = `${r.suporte.toUpperCase()} • ${r.dino}`;
             document.getElementById("robot-suporte").style.color = r.cor;
+            document.getElementById("robot-suporte").style.borderColor = `color-mix(in srgb, ${r.cor} 30%, transparent)`;
 
             document.documentElement.style.setProperty("--robot-cor", r.cor);
             input.placeholder = `Fala com ${r.nome}...`;
@@ -308,7 +735,11 @@
                 const avatarMini = document.createElement("div");
                 avatarMini.className = "avatar-mini";
                 avatarMini.style.background = cor || r.cor;
-                avatarMini.textContent = r.nome[0];
+                if (r.imagem) {
+                    avatarMini.innerHTML = `<img src="${r.imagem}" alt="${r.nome}">`;
+                } else {
+                    avatarMini.textContent = r.nome[0];
+                }
                 const nomeEl = document.createElement("div");
                 nomeEl.className = "nome-robot";
                 nomeEl.textContent = r.nome;
@@ -370,7 +801,6 @@
         enviar.addEventListener("click", enviarMensagem);
         input.addEventListener("keydown", (e) => { if (e.key === "Enter") enviarMensagem(); });
 
-        // Voz
         const vozToggle = document.getElementById("voz-toggle");
         vozToggle.addEventListener("click", () => {
             CONFIG.vozAtivada = !CONFIG.vozAtivada;
@@ -378,7 +808,6 @@
             vozToggle.classList.toggle("desligado", !CONFIG.vozAtivada);
         });
 
-        // Microfone
         const microfone = document.getElementById("microfone");
         let reconhecimento = null;
         if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
@@ -408,7 +837,6 @@
             }
         });
 
-        // Drawer mobile
         const hamburger = document.getElementById("btn-hamburger");
         const drawerOverlay = document.getElementById("drawer-overlay");
         hamburger.addEventListener("click", () => {
@@ -421,14 +849,12 @@
             drawerOverlay.classList.remove("aberto");
         }
 
-        // Service Worker
         if ("serviceWorker" in navigator) {
             navigator.serviceWorker.register("sw.js", { updateViaCache: 'none' }).catch(e => {
                 console.warn("Erro ao registar service worker:", e);
             });
         }
 
-        // Audio unlock
         function desbloquearAudio() {
             if (!window._audioCtx) {
                 const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -444,7 +870,126 @@
             document.addEventListener(ev, desbloquearAudio);
         });
 
-        // Init
+        // ============ 3D MODEL VIEWER ============
+        let viewer3D = { scene: null, camera: null, renderer: null, controls: null, model: null, animFrame: null, container: null };
+        let THREE = null, GLTFLoader = null, OrbitControls = null;
+
+        async function initThreeJS() {
+            if (THREE) return;
+            const mod = await import('three');
+            THREE = mod;
+            const { GLTFLoader: GL } = await import('three/addons/loaders/GLTFLoader.js');
+            const { OrbitControls: OC } = await import('three/addons/controls/OrbitControls.js');
+            GLTFLoader = GL;
+            OrbitControls = OC;
+        }
+
+        async function criarViewer3D(container) {
+            await initThreeJS();
+            const w = 150, h = 150;
+            viewer3D.scene = new THREE.Scene();
+            viewer3D.camera = new THREE.PerspectiveCamera(40, w / h, 0.1, 100);
+            viewer3D.camera.position.set(0, 1, 3);
+
+            viewer3D.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            viewer3D.renderer.setSize(w, h);
+            viewer3D.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            viewer3D.renderer.outputColorSpace = THREE.SRGBColorSpace;
+            viewer3D.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            viewer3D.renderer.toneMappingExposure = 1.8;
+            container.appendChild(viewer3D.renderer.domElement);
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
+            viewer3D.scene.add(ambientLight);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 2.0);
+            dirLight.position.set(3, 5, 3);
+            viewer3D.scene.add(dirLight);
+            const dirLight2 = new THREE.DirectionalLight(0xffffff, 1.5);
+            dirLight2.position.set(-3, 3, -1);
+            viewer3D.scene.add(dirLight2);
+            const rimLight = new THREE.DirectionalLight(0x6688ff, 1.0);
+            rimLight.position.set(-3, 2, -3);
+            viewer3D.scene.add(rimLight);
+            const bottomLight = new THREE.DirectionalLight(0xffd700, 0.8);
+            bottomLight.position.set(0, -2, 2);
+            viewer3D.scene.add(bottomLight);
+            const fillLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            fillLight.position.set(0, 5, -3);
+            viewer3D.scene.add(fillLight);
+
+            viewer3D.controls = new OrbitControls(viewer3D.camera, viewer3D.renderer.domElement);
+            viewer3D.controls.enableDamping = true;
+            viewer3D.controls.dampingFactor = 0.08;
+            viewer3D.controls.enablePan = false;
+            viewer3D.controls.enableZoom = false;
+            viewer3D.controls.autoRotate = true;
+            viewer3D.controls.autoRotateSpeed = 2;
+            viewer3D.controls.minPolarAngle = Math.PI / 4;
+            viewer3D.controls.maxPolarAngle = Math.PI / 1.8;
+            viewer3D.container = container;
+        }
+
+        function carregarModelo3D(url) {
+            if (viewer3D.model) { viewer3D.scene.remove(viewer3D.model); viewer3D.model = null; }
+            if (viewer3D.animFrame) cancelAnimationFrame(viewer3D.animFrame);
+
+            const loader = new GLTFLoader();
+            loader.load(url, (gltf) => {
+                const model = gltf.scene;
+                const box = new THREE.Box3().setFromObject(model);
+                const center = box.getCenter(new THREE.Vector3());
+                const size = box.getSize(new THREE.Vector3());
+                const maxDim = Math.max(size.x, size.y, size.z);
+                const scale = 2.2 / maxDim;
+                model.scale.setScalar(scale);
+                model.position.sub(center.multiplyScalar(scale));
+                model.position.y -= size.y * scale * 0.15;
+
+                viewer3D.scene.add(model);
+                viewer3D.model = model;
+
+                function animar() {
+                    viewer3D.animFrame = requestAnimationFrame(animar);
+                    viewer3D.controls.update();
+                    viewer3D.renderer.render(viewer3D.scene, viewer3D.camera);
+                }
+                animar();
+            }, undefined, (err) => console.warn("Erro ao carregar modelo 3D:", err));
+        }
+
+        function destruirViewer3D() {
+            if (viewer3D.animFrame) cancelAnimationFrame(viewer3D.animFrame);
+            if (viewer3D.model) { viewer3D.scene.remove(viewer3D.model); viewer3D.model = null; }
+            if (viewer3D.renderer) { viewer3D.renderer.dispose(); viewer3D.renderer.domElement?.remove(); }
+            viewer3D.scene = null; viewer3D.camera = null; viewer3D.renderer = null;
+            viewer3D.controls = null; viewer3D.container = null;
+        }
+
+        const _selecionarRobotOriginal = selecionarRobot;
+        selecionarRobot = function(id) {
+            _selecionarRobotOriginal(id);
+            const r = PRIMAL_FORCE[id];
+            const avatar = document.getElementById("robot-avatar");
+            destruirViewer3D();
+
+            if (r.modelo3D) {
+                avatar.innerHTML = '<div style="font-family:Orbitron;font-size:8px;color:var(--power-gold);text-transform:uppercase;letter-spacing:0.1em;">A carregar 3D...</div>';
+                const badge = avatar.closest('.morphin-badge') || avatar.parentElement;
+                const viewerDiv = document.createElement('div');
+                viewerDiv.className = 'viewer-3d';
+                badge.replaceChild(viewerDiv, avatar);
+                badge.appendChild(avatar);
+                avatar.style.display = 'none';
+                criarViewer3D(viewerDiv).then(() => carregarModelo3D(r.modelo3D));
+            } else if (r.imagem) {
+                avatar.style.display = '';
+                avatar.innerHTML = `<img src="${r.imagem}" alt="${r.nome}">`;
+            } else {
+                avatar.style.display = '';
+                avatar.textContent = r.nome[0];
+            }
+        };
+
         construirHeader();
         construirDrawer();
         selecionarRobot("rex");
