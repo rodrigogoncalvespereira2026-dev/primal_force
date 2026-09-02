@@ -1,0 +1,13 @@
+{
+    "name": "Primal Force IA",
+    "short_name": "Primal Force",
+    "description": "Fala com os 20 robôs companheiros dos Power Rangers Primal Force",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0f1221",
+    "theme_color": "#0f1221",
+    "icons": [
+        { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+        { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+    ]
+}

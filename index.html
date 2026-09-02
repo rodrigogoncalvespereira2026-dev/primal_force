@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0f1221">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Primal Force IA">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <title>Primal Force — Robôs IA</title>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+        :root { color-scheme: dark; }
+        body { background: #0f1221; color: #e8e8f0; height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+        header { background: #171b30; padding: 12px 20px; padding-top: max(12px, env(safe-area-inset-top)); display: flex; align-items: center; gap: 14px; border-bottom: 1px solid #2a2f4a; flex-wrap: wrap; }
+        header h1 { font-size: 18px; white-space: nowrap; }
+        header .robot-dot { width: 14px; height: 14px; border-radius: 50%; background: #ff3b5c; display: inline-block; flex-shrink: 0; }
+        #robot-list { display: flex; gap: 8px; margin-left: auto; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 4px 0; flex-wrap: nowrap; }
+        #robot-list::-webkit-scrollbar { display: none; }
+        .secao-titulo { font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #6a7090; padding: 4px 8px; flex-shrink: 0; align-self: center; border-left: 1px solid #2a2f4a; margin-left: 6px; }
+        .secao-titulo:first-child { border-left: none; margin-left: 0; }
+        #robot-list button {
+            padding: 8px 14px; border-radius: 20px; border: 1px solid #2a2f4a;
+            background: #1c2138; color: #e8e8f0; cursor: pointer; font-size: 13px; transition: all .2s;
+            flex-shrink: 0; min-height: 36px; font-weight: 600; white-space: nowrap;
+        }
+        #robot-list button:hover { border-color: var(--cor-robot); }
+        #robot-list button.ativo { background: var(--cor-robot); border-color: var(--cor-robot); color: #fff; }
+        #main { flex: 1; display: flex; overflow: hidden; }
+        #face-panel { width: 200px; background: #0a0a1a; border-right: 1px solid #2a2f4a; display: flex; flex-direction: column; align-items: center; padding: 20px; gap: 10px; }
+        #face-panel .robot-avatar {
+            width: 140px; height: 140px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 60px; font-weight: 800; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,.5);
+            animation: robot-flutuar 3s ease-in-out infinite, robot-brilho 3.5s ease-in-out infinite;
+        }
+        @keyframes robot-flutuar { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes robot-brilho { 0%,100% { box-shadow: 0 0 14px 2px color-mix(in srgb, var(--robot-cor) 55%, transparent); } 50% { box-shadow: 0 0 26px 8px color-mix(in srgb, var(--robot-cor) 85%, transparent); } }
+        @keyframes robot-falar { 0%,100% { transform: translateY(0) scale(1); } 40% { transform: translateY(-5px) scale(1.06, 0.96); } 70% { transform: translateY(-3px) scale(0.97, 1.04); } }
+        @keyframes robot-ouvir { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        #face-panel[data-estado="ouvir"] .robot-avatar { animation: robot-ouvir 1.6s ease-in-out infinite, robot-brilho 2s ease-in-out infinite; }
+        #face-panel[data-estado="pensar"] .robot-avatar { animation: robot-flutuar 2.4s ease-in-out infinite, robot-brilho 2.8s ease-in-out infinite; }
+        #face-panel[data-estado="falar"] .robot-avatar { animation: robot-falar 0.55s ease-in-out infinite, robot-brilho 1.2s ease-in-out infinite; }
+        #face-panel .robot-info { text-align: center; margin-top: 8px; }
+        #face-panel .robot-nome { font-size: 16px; font-weight: 700; }
+        #face-panel .robot-ranger { font-size: 12px; color: #9aa2c0; margin-top: 2px; }
+        #face-panel .robot-suporte { font-size: 11px; color: #6a7090; margin-top: 4px; padding: 3px 10px; border-radius: 10px; background: #1c2138; border: 1px solid #2a2f4a; }
+        #face-panel .estado-label { font-size: 13px; color: #9aa2c0; margin-top: 6px; }
+        #chat { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 24px; display: flex; flex-direction: column; gap: 14px; }
+        .msg { max-width: 75%; padding: 12px 16px; border-radius: 16px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+        .msg.user { align-self: flex-end; background: var(--robot-cor); color: #fff; border-bottom-right-radius: 4px; }
+        .msg.robot { align-self: flex-start; background: #1c2138; border: 1px solid #2a2f4a; border-bottom-left-radius: 4px; }
+        .msg.robot .linha-robot { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+        .msg.robot .avatar-mini { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0; }
+        .msg.robot .nome-robot { font-weight: 600; font-size: 12px; }
+        .msg.sistema { align-self: center; background: #252a45; color: #9aa2c0; font-size: 12px; padding: 8px 14px; border-radius: 10px; text-align: center; }
+        .digitando { align-self: flex-start; background: #1c2138; border: 1px solid #2a2f4a; padding: 12px 16px; border-radius: 16px; }
+        .digitando span { animation: piscar 1s infinite; }
+        @keyframes piscar { 0%,100% { opacity: .2; } 50% { opacity: 1; } }
+        footer { display: flex; gap: 10px; padding: 14px 20px; padding-bottom: max(14px, env(safe-area-inset-bottom)); background: #171b30; border-top: 1px solid #2a2f4a; }
+        #input { flex: 1; background: #1c2138; border: 1px solid #2a2f4a; color: #e8e8f0; padding: 12px 16px; border-radius: 20px; outline: none; font-size: 16px; min-width: 0; transition: border-color .2s, box-shadow .2s, background .2s; caret-color: var(--robot-cor); }
+        #input::placeholder { color: #7a82a5; }
+        #input:focus { border-color: var(--robot-cor); box-shadow: 0 0 0 3px color-mix(in srgb, var(--robot-cor) 35%, transparent); background: #202540; }
+        #enviar { background: var(--robot-cor); color: #fff; border: none; padding: 12px 22px; border-radius: 20px; cursor: pointer; font-size: 16px; flex-shrink: 0; }
+        #enviar:disabled { opacity: .5; cursor: not-allowed; }
+        #voz-toggle, #microfone { background: #1c2138; border: 1px solid #2a2f4a; color: #e8e8f0; width: 48px; height: 48px; border-radius: 50%; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; transition: all .2s; flex-shrink: 0; }
+        #voz-toggle:hover, #microfone:hover { border-color: var(--robot-cor); }
+        #voz-toggle.desligado { opacity: .4; }
+        #microfone.ouvindo { background: #00ff88; border-color: #00ff88; color: #0a0a1a; animation: pulsar 1s infinite; }
+        @keyframes pulsar { 0%,100% { box-shadow: 0 0 0 0 rgba(0,255,136,0.4); } 50% { box-shadow: 0 0 0 10px rgba(0,255,136,0); } }
+        #btn-hamburger { display: none; background: none; border: none; color: #e8e8f0; font-size: 22px; cursor: pointer; padding: 4px 8px; flex-shrink: 0; }
+        .drawer-overlay, .drawer { display: none; }
+        .erro { color: #ff8fa3; }
+
+        @media (max-width: 600px) {
+            #btn-hamburger { display: flex !important; }
+            #robot-list { display: none !important; }
+            #main #face-panel { display: none !important; }
+            #main { flex-direction: column; }
+            #main > #chat { width: 100% !important; }
+            .msg { max-width: 85%; }
+            footer { gap: 8px; padding: 10px 10px; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
+            #voz-toggle { display: none !important; }
+            #microfone { display: flex !important; width: 44px; height: 44px; }
+            #input { font-size: 16px; flex: 1; min-width: 0; }
+            #enviar { padding: 12px 18px; font-size: 15px; }
+            header { padding: 10px 12px; padding-top: max(10px, env(safe-area-inset-top)); }
+            .drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 998; }
+            .drawer-overlay.aberto { display: block; }
+            .drawer { position: fixed; left: -280px; top: 0; bottom: 0; width: 280px; background: #0f1221; z-index: 999; display: flex; flex-direction: column; transition: left 0.25s ease; overflow-y: auto; }
+            .drawer.aberto { left: 0; }
+            .drawer-header { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid #2a2f4a; }
+            .drawer-header h2 { font-size: 15px; font-weight: 700; }
+            .drawer-robot-list { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 16px; }
+            .drawer-robot-list button { padding: 6px 14px; border-radius: 16px; border: 1px solid #2a2f4a; background: #1c2138; color: #e8e8f0; font-size: 12px; font-weight: 600; cursor: pointer; flex-shrink: 0; min-height: 32px; transition: all .2s; }
+            .drawer-robot-list button.ativo { background: var(--cor-robot); border-color: var(--cor-robot); color: #fff; }
+            .drawer-secao { flex: 0 0 100%; }
+            .drawer-secao-titulo { font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; padding: 12px 0 6px; border-bottom: 1px solid #232845; margin-bottom: 8px; }
+            .drawer-secao-grupo { display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 6px; }
+            .drawer-secao + .drawer-secao { border-top: 1px solid #1a1e35; margin-top: 4px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <button id="btn-hamburger" title="Menu">☰</button>
+        <span class="robot-dot"></span>
+        <h1>Primal Force IA</h1>
+        <div id="robot-list"></div>
+    </header>
+
+    <div class="drawer-overlay" id="drawer-overlay"></div>
+    <div class="drawer" id="drawer">
+        <div class="drawer-header">
+            <span class="robot-dot"></span>
+            <h2>Primal Force IA</h2>
+        </div>
+        <div class="drawer-robot-list" id="drawer-robot-list"></div>
+    </div>
+
+    <div id="main">
+        <div id="face-panel">
+            <div class="robot-avatar" id="robot-avatar">?</div>
+            <div class="robot-info">
+                <div class="robot-nome" id="robot-nome">—</div>
+                <div class="robot-ranger" id="robot-ranger">Companheiro de —</div>
+                <div class="robot-suporte" id="robot-suporte">—</div>
+            </div>
+            <div class="estado-label">À espera...</div>
+        </div>
+        <div id="chat"></div>
+    </div>
+
+    <footer>
+        <button id="voz-toggle" title="Ligar/Desligar voz">🔊</button>
+        <input id="input" type="text" inputmode="text" enterkeyhint="send" placeholder="Fala com um robô..." autocomplete="off">
+        <button id="microfone" title="Falar com microfone">🎤</button>
+        <button id="enviar">Enviar</button>
+    </footer>
+
+    <script src="config.js"></script>
+    <script src="primalforce-robots.js"></script>
+    <script src="robot-base.js"></script>
+    <script src="rex-ai.js"></script>
+    <script src="spike-ai.js"></script>
+    <script src="tri-ai.js"></script>
+    <script src="pluma-ai.js"></script>
+    <script src="nuck-ai.js"></script>
+    <script src="bolha-ai.js"></script>
+    <script src="anka-ai.js"></script>
+    <script src="crista-ai.js"></script>
+    <script src="blitz-ai.js"></script>
+    <script src="testa-ai.js"></script>
+    <script src="mare-ai.js"></script>
+    <script src="garra-ai.js"></script>
+    <script src="brisa-ai.js"></script>
+    <script src="vela-ai.js"></script>
+    <script src="fin-ai.js"></script>
+    <script src="ninho-ai.js"></script>
+    <script src="sol-ai.js"></script>
+    <script src="frill-ai.js"></script>
+    <script src="abismo-ai.js"></script>
+    <script src="alado-ai.js"></script>
+    <script>
+        const robots = { rex, spike, tri, pluma, nuck, bolha, anka, crista, blitz, testa, mare, garra, brisa, vela, fin, ninho, sol, frill, abismo, alado };
+        Object.values(robots).forEach((r) => { r.primalForce = PRIMAL_FORCE; });
+
+        var atual = "rex";
+        let estado = "espera";
+
+        const chat = document.getElementById("chat");
+        const input = document.getElementById("input");
+        const enviar = document.getElementById("enviar");
+
+        // Construir botões do header
+        function construirHeader() {
+            const lista = document.getElementById("robot-list");
+            lista.innerHTML = "";
+
+            const sep1 = document.createElement("span");
+            sep1.className = "secao-titulo";
+            sep1.textContent = "PRINCIPAIS";
+            lista.appendChild(sep1);
+
+            RANGERS_PRINCIPAIS.forEach(id => {
+                const r = PRIMAL_FORCE[id];
+                const btn = document.createElement("button");
+                btn.dataset.robot = id;
+                btn.style.setProperty("--cor-robot", r.cor);
+                btn.textContent = r.nome;
+                if (id === atual) btn.classList.add("ativo");
+                btn.addEventListener("click", () => selecionarRobot(id));
+                lista.appendChild(btn);
+            });
+
+            const sep2 = document.createElement("span");
+            sep2.className = "secao-titulo";
+            sep2.textContent = "OUTROS";
+            lista.appendChild(sep2);
+
+            OUTROS_RANGERS.forEach(id => {
+                const r = PRIMAL_FORCE[id];
+                const btn = document.createElement("button");
+                btn.dataset.robot = id;
+                btn.style.setProperty("--cor-robot", r.cor);
+                btn.textContent = r.nome;
+                if (id === atual) btn.classList.add("ativo");
+                btn.addEventListener("click", () => selecionarRobot(id));
+                lista.appendChild(btn);
+            });
+        }
+
+        // Construir drawer (mobile)
+        function construirDrawer() {
+            const lista = document.getElementById("drawer-robot-list");
+            lista.innerHTML = "";
+
+            const sec1 = document.createElement("div");
+            sec1.className = "drawer-secao";
+            const tit1 = document.createElement("div");
+            tit1.className = "drawer-secao-titulo";
+            tit1.textContent = "Rangers Principais";
+            const grp1 = document.createElement("div");
+            grp1.className = "drawer-secao-grupo";
+            RANGERS_PRINCIPAIS.forEach(id => {
+                const r = PRIMAL_FORCE[id];
+                const btn = document.createElement("button");
+                btn.dataset.robot = id;
+                btn.style.setProperty("--cor-robot", r.cor);
+                btn.textContent = r.nome;
+                if (id === atual) btn.classList.add("ativo");
+                btn.addEventListener("click", () => { selecionarRobot(id); fecharDrawer(); });
+                grp1.appendChild(btn);
+            });
+            sec1.appendChild(tit1);
+            sec1.appendChild(grp1);
+            lista.appendChild(sec1);
+
+            const sec2 = document.createElement("div");
+            sec2.className = "drawer-secao";
+            const tit2 = document.createElement("div");
+            tit2.className = "drawer-secao-titulo";
+            tit2.textContent = "Outros Rangers";
+            const grp2 = document.createElement("div");
+            grp2.className = "drawer-secao-grupo";
+            OUTROS_RANGERS.forEach(id => {
+                const r = PRIMAL_FORCE[id];
+                const btn = document.createElement("button");
+                btn.dataset.robot = id;
+                btn.style.setProperty("--cor-robot", r.cor);
+                btn.textContent = r.nome;
+                if (id === atual) btn.classList.add("ativo");
+                btn.addEventListener("click", () => { selecionarRobot(id); fecharDrawer(); });
+                grp2.appendChild(btn);
+            });
+            sec2.appendChild(tit2);
+            sec2.appendChild(grp2);
+            lista.appendChild(sec2);
+        }
+
+        function selecionarRobot(id) {
+            atual = id;
+            const r = PRIMAL_FORCE[id];
+
+            document.querySelectorAll('#robot-list button').forEach(b => {
+                b.classList.toggle("ativo", b.dataset.robot === id);
+            });
+            document.querySelectorAll('#drawer-robot-list button').forEach(b => {
+                b.classList.toggle("ativo", b.dataset.robot === id);
+            });
+
+            const avatar = document.getElementById("robot-avatar");
+            avatar.style.background = r.cor;
+            avatar.textContent = r.nome[0];
+
+            document.getElementById("robot-nome").textContent = r.nome;
+            document.getElementById("robot-nome").style.color = r.cor;
+            document.getElementById("robot-ranger").textContent = `Companheiro do ${r.ranger}`;
+            document.getElementById("robot-suporte").textContent = `${r.suporte.toUpperCase()} • ${r.dino}`;
+            document.getElementById("robot-suporte").style.color = r.cor;
+
+            document.documentElement.style.setProperty("--robot-cor", r.cor);
+            input.placeholder = `Fala com ${r.nome}...`;
+
+            chat.innerHTML = "";
+            adicionarMensagem("robot", r.frase, r.cor);
+        }
+
+        function definirEstado(novoEstado) {
+            estado = novoEstado;
+            const textos = { "espera": "À espera...", "ouvir": "A ouvir...", "pensar": "A pensar...", "falar": "A falar..." };
+            document.querySelectorAll(".estado-label").forEach(l => {
+                l.textContent = textos[novoEstado];
+                l.style.color = PRIMAL_FORCE[atual].cor;
+            });
+            document.getElementById("face-panel").setAttribute("data-estado", novoEstado);
+        }
+
+        function adicionarMensagem(quem, texto, cor) {
+            const div = document.createElement("div");
+            div.className = "msg " + quem;
+            if (quem === "robot") {
+                const r = PRIMAL_FORCE[atual];
+                const linha = document.createElement("div");
+                linha.className = "linha-robot";
+                const avatarMini = document.createElement("div");
+                avatarMini.className = "avatar-mini";
+                avatarMini.style.background = cor || r.cor;
+                avatarMini.textContent = r.nome[0];
+                const nomeEl = document.createElement("div");
+                nomeEl.className = "nome-robot";
+                nomeEl.textContent = r.nome;
+                nomeEl.style.color = cor || r.cor;
+                linha.appendChild(avatarMini);
+                linha.appendChild(nomeEl);
+                div.appendChild(linha);
+            }
+            div.appendChild(document.createTextNode(texto));
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        function adicionarSistema(texto) {
+            const div = document.createElement("div");
+            div.className = "msg sistema";
+            div.textContent = texto;
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+        }
+        window.adicionarSistema = adicionarSistema;
+
+        function mostrarDigitando() {
+            const div = document.createElement("div");
+            div.className = "digitando";
+            const span = document.createElement("span");
+            span.textContent = PRIMAL_FORCE[atual].nome;
+            div.appendChild(span);
+            div.appendChild(document.createTextNode(" está a pensar..."));
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+            return div;
+        }
+
+        async function enviarMensagem() {
+            const texto = input.value.trim();
+            if (!texto || estado === "pensar") return;
+
+            input.value = "";
+            adicionarMensagem("user", texto);
+            definirEstado("pensar");
+            const digitando = mostrarDigitando();
+
+            try {
+                const robot = robots[atual];
+                const resposta = await robot.responde(texto);
+                digitando.remove();
+                definirEstado("falar");
+                adicionarMensagem("robot", resposta, PRIMAL_FORCE[atual].cor);
+                await robot.falar(resposta);
+                definirEstado("espera");
+            } catch (e) {
+                digitando.remove();
+                adicionarSistema("⚠️ Erro: " + e.message);
+                definirEstado("espera");
+            }
+        }
+
+        enviar.addEventListener("click", enviarMensagem);
+        input.addEventListener("keydown", (e) => { if (e.key === "Enter") enviarMensagem(); });
+
+        // Voz
+        const vozToggle = document.getElementById("voz-toggle");
+        vozToggle.addEventListener("click", () => {
+            CONFIG.vozAtivada = !CONFIG.vozAtivada;
+            vozToggle.textContent = CONFIG.vozAtivada ? "🔊" : "🔇";
+            vozToggle.classList.toggle("desligado", !CONFIG.vozAtivada);
+        });
+
+        // Microfone
+        const microfone = document.getElementById("microfone");
+        let reconhecimento = null;
+        if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            reconhecimento = new SpeechRecognition();
+            reconhecimento.lang = "pt-PT";
+            reconhecimento.continuous = false;
+            reconhecimento.interimResults = false;
+            reconhecimento.onresult = (e) => {
+                const texto = e.results[0][0].transcript;
+                input.value = texto;
+                enviarMensagem();
+                microfone.classList.remove("ouvindo");
+            };
+            reconhecimento.onerror = () => microfone.classList.remove("ouvindo");
+            reconhecimento.onend = () => microfone.classList.remove("ouvindo");
+        }
+        microfone.addEventListener("click", () => {
+            if (!reconhecimento) { adicionarSistema("🎤 Reconhecimento de voz não disponível neste navegador."); return; }
+            microfone.classList.toggle("ouvindo");
+            if (microfone.classList.contains("ouvindo")) {
+                reconhecimento.start();
+                definirEstado("ouvir");
+            } else {
+                reconhecimento.stop();
+                definirEstado("espera");
+            }
+        });
+
+        // Drawer mobile
+        const hamburger = document.getElementById("btn-hamburger");
+        const drawerOverlay = document.getElementById("drawer-overlay");
+        hamburger.addEventListener("click", () => {
+            document.getElementById("drawer").classList.add("aberto");
+            drawerOverlay.classList.add("aberto");
+        });
+        drawerOverlay.addEventListener("click", fecharDrawer);
+        function fecharDrawer() {
+            document.getElementById("drawer").classList.remove("aberto");
+            drawerOverlay.classList.remove("aberto");
+        }
+
+        // Service Worker
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("sw.js", { updateViaCache: 'none' }).catch(e => {
+                console.warn("Erro ao registar service worker:", e);
+            });
+        }
+
+        // Audio unlock
+        function desbloquearAudio() {
+            if (!window._audioCtx) {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                window._audioCtx = new AudioCtx();
+            }
+            if (window._audioCtx.state === "suspended") {
+                window._audioCtx.resume().catch(() => {});
+            }
+        }
+        ["touchstart", "click", "keydown"].forEach((ev) => {
+            document.addEventListener(ev, desbloquearAudio, { once: true });
+            document.addEventListener(ev, desbloquearAudio);
+        });
+
+        // Init
+        construirHeader();
+        construirDrawer();
+        selecionarRobot("rex");
+    </script>
+</body>
+</html>
