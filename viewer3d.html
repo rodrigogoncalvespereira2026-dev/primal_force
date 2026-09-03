@@ -382,6 +382,158 @@
             letter-spacing: 0.06em;
             text-transform: uppercase;
         }
+
+        /* ============ VOICE CHAT ============ */
+        .voice-chat {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            z-index: 15;
+            width: 90%;
+            max-width: 500px;
+        }
+        .voice-bubble {
+            background: rgba(10,10,26,0.92);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,215,0,0.15);
+            border-radius: 8px;
+            padding: 12px 18px;
+            max-width: 100%;
+            text-align: center;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #e8e8f0;
+            transition: all 0.3s;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        .voice-bubble.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .voice-bubble .vb-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .voice-bubble.user-bubble {
+            border-color: rgba(255,215,0,0.3);
+        }
+        .voice-bubble.user-bubble .vb-text {
+            color: var(--power-gold);
+        }
+
+        .voice-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .mic-btn {
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            border: 2px solid var(--power-gold);
+            background: rgba(10,10,26,0.9);
+            color: var(--power-gold);
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center; justify-content: center;
+            transition: all 0.3s;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .mic-btn:hover {
+            box-shadow: 0 0 20px rgba(255,215,0,0.3);
+            transform: scale(1.05);
+        }
+        .mic-btn.ouvindo {
+            background: var(--power-red);
+            border-color: var(--power-red);
+            color: #fff;
+            animation: micPulse 1.2s infinite;
+        }
+        .mic-btn.pensando {
+            background: rgba(255,215,0,0.15);
+            border-color: var(--power-gold);
+            animation: micSpin 1.5s linear infinite;
+        }
+        .mic-btn.falando {
+            background: rgba(0,230,118,0.2);
+            border-color: var(--power-green);
+            color: var(--power-green);
+            animation: micSpeak 0.6s ease-in-out infinite;
+        }
+        @keyframes micPulse {
+            0%,100% { box-shadow: 0 0 0 0 rgba(255,23,68,0.4); }
+            50% { box-shadow: 0 0 0 16px rgba(255,23,68,0); }
+        }
+        @keyframes micSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes micSpeak {
+            0%,100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .mic-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 9px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--power-gold);
+            opacity: 0.7;
+            text-align: center;
+        }
+
+        /* ============ VOICE FLOATING BTN (bottom-right) ============ */
+        .voice-fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            border: 2px solid var(--power-gold);
+            background: rgba(10,10,26,0.95);
+            color: var(--power-gold);
+            font-size: 22px;
+            cursor: pointer;
+            display: none;
+            align-items: center; justify-content: center;
+            z-index: 50;
+            transition: all 0.3s;
+            box-shadow: 0 0 16px rgba(255,215,0,0.2);
+        }
+        .voice-fab:hover { transform: scale(1.1); box-shadow: 0 0 24px rgba(255,215,0,0.4); }
+        .voice-fab.ouvindo {
+            background: var(--power-red);
+            border-color: var(--power-red);
+            color: #fff;
+            animation: micPulse 1.2s infinite;
+        }
+        .voice-fab.falando {
+            background: rgba(0,230,118,0.2);
+            border-color: var(--power-green);
+            color: var(--power-green);
+            animation: micSpeak 0.6s ease-in-out infinite;
+        }
+        .voice-fab.pensando {
+            background: rgba(255,215,0,0.15);
+            border-color: var(--power-gold);
+        }
+
+        @media (max-width: 700px) {
+            .voice-chat { bottom: 80px; }
+            .voice-fab { display: flex !important; bottom: 16px; right: 16px; }
+            .voice-controls { display: none !important; }
+        }
     </style>
 </head>
 <body>
@@ -399,6 +551,7 @@
         </div>
         <div class="header-spacer"></div>
         <a href="index.html" class="back-btn">💬 Chat</a>
+        <a href="index.html" class="back-btn" style="border-color: rgba(0,230,118,0.3); color: #00E676;">🎤 VOZ</a>
         <span class="header-tag">MORPHIN GRID</span>
     </header>
 
@@ -437,6 +590,19 @@
         </div>
     </div>
 
+    <div class="voice-chat" id="voice-chat" style="display:none;">
+        <div class="voice-bubble" id="voice-bubble">
+            <div class="vb-name" id="vb-name"></div>
+            <div class="vb-text" id="vb-text"></div>
+        </div>
+        <div class="voice-controls">
+            <div class="mic-label" id="mic-label">Pressiona para falar</div>
+            <button class="mic-btn" id="mic-btn" title="Falar com o robô">🎤</button>
+        </div>
+    </div>
+
+    <button class="voice-fab" id="voice-fab" title="Falar com o robô">🎤</button>
+
     <script type="importmap">
         {
             "imports": {
@@ -447,6 +613,27 @@
     </script>
     <script src="config.js"></script>
     <script src="primalforce-robots.js"></script>
+    <script src="robot-base.js"></script>
+    <script src="rex-ai.js"></script>
+    <script src="spike-ai.js"></script>
+    <script src="tri-ai.js"></script>
+    <script src="pluma-ai.js"></script>
+    <script src="nuck-ai.js"></script>
+    <script src="bolha-ai.js"></script>
+    <script src="anka-ai.js"></script>
+    <script src="crista-ai.js"></script>
+    <script src="blitz-ai.js"></script>
+    <script src="testa-ai.js"></script>
+    <script src="mare-ai.js"></script>
+    <script src="garra-ai.js"></script>
+    <script src="brisa-ai.js"></script>
+    <script src="vela-ai.js"></script>
+    <script src="fin-ai.js"></script>
+    <script src="ninho-ai.js"></script>
+    <script src="sol-ai.js"></script>
+    <script src="frill-ai.js"></script>
+    <script src="abismo-ai.js"></script>
+    <script src="alado-ai.js"></script>
     <script>
         // Build robot list from PRIMAL_FORCE
         const modelRobots = [];
@@ -639,10 +826,134 @@
             loadModel(r.modelo3D);
         }
 
+        // ============ VOICE CHAT ============
+        const robots = { rex, spike, tri, pluma, nuck, bolha, anka, crista, blitz, testa, mare, garra, brisa, vela, fin, ninho, sol, frill, abismo, alado };
+        Object.values(robots).forEach((r) => { r.primalForce = PRIMAL_FORCE; });
+
+        let currentRobotId = null;
+        let voiceState = 'idle'; // idle | ouvindo | pensando | falando
+        let reconhecimento = null;
+
+        const voiceChat = document.getElementById('voice-chat');
+        const voiceBubble = document.getElementById('voice-bubble');
+        const vbName = document.getElementById('vb-name');
+        const vbText = document.getElementById('vb-text');
+        const micBtn = document.getElementById('mic-btn');
+        const micLabel = document.getElementById('mic-label');
+        const voiceFab = document.getElementById('voice-fab');
+
+        function setVoiceState(newState) {
+            voiceState = newState;
+            micBtn.className = 'mic-btn' + (newState !== 'idle' ? ' ' + newState : '');
+            voiceFab.className = 'voice-fab' + (newState !== 'idle' ? ' ' + newState : '');
+            const labels = { idle: 'Pressiona para falar', ouvindo: 'A ouvir...', pensando: 'A pensar...', falando: 'A falar...' };
+            micLabel.textContent = labels[newState] || '';
+        }
+
+        function showBubble(name, text, color, isUser) {
+            vbName.textContent = name;
+            vbName.style.color = color;
+            vbText.textContent = text;
+            voiceBubble.style.borderColor = isUser ? 'rgba(255,215,0,0.3)' : color || 'rgba(255,215,0,0.15)';
+            voiceBubble.classList.add('visible');
+        }
+
+        function hideBubble() {
+            voiceBubble.classList.remove('visible');
+        }
+
+        async function voiceSend() {
+            if (voiceState !== 'idle' || !currentRobotId) return;
+
+            // Start listening
+            if (!reconhecimento) {
+                if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+                    showBubble('Sistema', '🎤 Reconhecimento de voz não disponível neste navegador.', '#FFD700', false);
+                    setTimeout(hideBubble, 4000);
+                    return;
+                }
+                const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+                reconhecimento = new SR();
+                reconhecimento.lang = 'pt-PT';
+                reconhecimento.continuous = false;
+                reconhecimento.interimResults = false;
+            }
+
+            setVoiceState('ouvindo');
+            const r = PRIMAL_FORCE[currentRobotId];
+            showBubble('Tu', 'A ouvir...', r.cor, true);
+
+            return new Promise((resolve) => {
+                let resolvido = false;
+
+                reconhecimento.onresult = async (e) => {
+                    if (resolvido) return;
+                    resolvido = true;
+                    const texto = e.results[0][0].transcript;
+                    showBubble('Tu', texto, r.cor, true);
+                    await processVoiceMessage(texto);
+                    resolve();
+                };
+
+                reconhecimento.onerror = () => {
+                    if (resolvido) return;
+                    resolvido = true;
+                    setVoiceState('idle');
+                    hideBubble();
+                    resolve();
+                };
+
+                reconhecimento.onend = () => {
+                    if (resolvido) return;
+                    resolvido = true;
+                    setVoiceState('idle');
+                    hideBubble();
+                    resolve();
+                };
+
+                reconhecimento.start();
+            });
+        }
+
+        async function processVoiceMessage(texto) {
+            const r = PRIMAL_FORCE[currentRobotId];
+            setVoiceState('pensando');
+            showBubble(r.nome, 'A pensar...', r.cor, false);
+
+            try {
+                CONFIG.vozAtivada = true;
+                const robot = robots[currentRobotId];
+                const resposta = await robot.responde(texto);
+                showBubble(r.nome, resposta, r.cor, false);
+                setVoiceState('falando');
+                await robot.falar(resposta);
+                setTimeout(() => {
+                    setVoiceState('idle');
+                    hideBubble();
+                }, 1500);
+            } catch (e) {
+                showBubble('Erro', e.message, '#FF1744', false);
+                setTimeout(() => { setVoiceState('idle'); hideBubble(); }, 4000);
+            }
+        }
+
+        micBtn.addEventListener('click', voiceSend);
+        voiceFab.addEventListener('click', voiceSend);
+
+        // Override selectRobot to show voice controls
+        const _selectRobotOrig = selectRobot;
+        selectRobot = function(id) {
+            _selectRobotOrig(id);
+            currentRobotId = id;
+            voiceChat.style.display = '';
+            voiceFab.style.display = '';
+            hideBubble();
+            setVoiceState('idle');
+        };
+
         // Initialize
         initThreeJS().then(() => {
             setupScene();
-            // Auto-select first model robot
             if (modelRobots.length > 0) {
                 selectRobot(modelRobots[0].id);
             }
