@@ -35,6 +35,7 @@ def chat():
         headers={
             "Content-Type": "application/json",
             "Authorization": f"Bearer {GROQ_API_KEY}",
+            "User-Agent": "PrimalForce/1.0",
         },
         method="POST",
     )
