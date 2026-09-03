@@ -214,43 +214,7 @@
             display: block;
         }
 
-        /* ============ MODEL INFO OVERLAY ============ */
-        .model-info {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            background: rgba(10,10,26,0.92);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255,215,0,0.15);
-            border-radius: 6px;
-            padding: 12px 20px;
-            text-align: left;
-            z-index: 10;
-        }
-        .model-info h2 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 20px; font-weight: 800;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-        }
-        .model-info p {
-            font-size: 13px;
-            color: #8090b0;
-            margin-top: 4px;
-        }
-        .model-info .tags {
-            display: flex; gap: 8px; justify-content: center;
-            margin-top: 8px;
-        }
-        .model-info .tag {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 8px; letter-spacing: 0.1em;
-            text-transform: uppercase;
-            padding: 3px 10px;
-            border-radius: 2px;
-            background: rgba(255,215,0,0.06);
-            border: 1px solid rgba(255,215,0,0.12);
-        }
+
 
         /* ============ CONTROLS HINT ============ */
         .controls-hint {
@@ -371,9 +335,6 @@
             .robot-item-thumb .badge-3d { width: 14px; height: 14px; font-size: 7px; }
 
             #main { flex-direction: column; }
-            .model-info { bottom: 80px; left: 50%; transform: translateX(-50%); padding: 10px 16px; text-align: center; }
-            .model-info h2 { font-size: 16px; }
-            .model-info p { font-size: 12px; }
             .controls-hint { display: none; }
             .voice-chat { bottom: 100px; }
         }
@@ -603,14 +564,7 @@
                 ↻ Arrastar para rodar<br>
                 ⚡ Rotação automática
             </div>
-            <div class="model-info hidden" id="model-info">
-                <h2 id="mi-name">—</h2>
-                <p id="mi-sub">—</p>
-                <div class="tags">
-                    <span class="tag" id="mi-role">—</span>
-                    <span class="tag" id="mi-dino">—</span>
-                </div>
-            </div>
+
         </div>
     </div>
 
@@ -710,7 +664,6 @@
         const container = document.getElementById('three-container');
         const loadingEl = document.getElementById('loading');
         const emptyState = document.getElementById('empty-state');
-        const modelInfo = document.getElementById('model-info');
         const controlsHint = document.getElementById('controls-hint');
 
         async function initThreeJS() {
@@ -835,14 +788,6 @@
             // Update info
             emptyState.style.display = 'none';
             controlsHint.style.display = '';
-            modelInfo.classList.remove('hidden');
-            document.getElementById('mi-name').textContent = r.nome;
-            document.getElementById('mi-name').style.color = r.cor;
-            document.getElementById('mi-sub').textContent = `Companheiro do ${r.ranger}`;
-            document.getElementById('mi-role').textContent = r.suporte.toUpperCase();
-            document.getElementById('mi-role').style.borderColor = `color-mix(in srgb, ${r.cor} 30%, transparent)`;
-            document.getElementById('mi-dino').textContent = r.dino;
-            document.getElementById('mi-dino').style.borderColor = `color-mix(in srgb, ${r.cor} 30%, transparent)`;
 
             document.documentElement.style.setProperty('--robot-cor', r.cor);
 
