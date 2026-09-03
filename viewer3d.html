@@ -2,7 +2,7 @@
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#0a0a1a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -27,6 +27,7 @@
             height: 100vh; height: 100dvh;
             display: flex; flex-direction: column;
             overflow: hidden;
+            touch-action: manipulation;
             background-image:
                 linear-gradient(var(--grid-line) 1px, transparent 1px),
                 linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
@@ -490,7 +491,7 @@
             color: var(--power-gold);
             font-size: 22px;
             cursor: pointer;
-            display: none;
+            display: flex;
             align-items: center; justify-content: center;
             z-index: 50;
             transition: all 0.3s;
@@ -515,9 +516,9 @@
         }
 
         @media (max-width: 700px) {
-            .voice-fab { display: flex !important; bottom: 16px; right: 16px; }
+            .voice-fab { display: flex !important; bottom: 16px; right: 16px; z-index: 100; }
             .voice-controls { display: none !important; }
-            .voice-chat { bottom: 90px; }
+            .voice-chat { bottom: 90px; visibility: visible !important; }
         }
     </style>
 </head>
@@ -568,7 +569,7 @@
         </div>
     </div>
 
-    <div class="voice-chat" id="voice-chat" style="display:none;">
+    <div class="voice-chat" id="voice-chat" style="visibility:hidden;">
         <div class="voice-bubble" id="voice-bubble">
             <div class="vb-name" id="vb-name"></div>
             <div class="vb-text" id="vb-text"></div>
@@ -830,6 +831,7 @@
         function hideBubble() {
             voiceBubble.classList.remove('visible');
         }
+        function showVoiceChat() { voiceChat.style.visibility = 'visible'; }
 
         async function voiceSend() {
             if (voiceState !== 'idle' || !currentRobotId) return;
@@ -914,7 +916,7 @@
         selectRobot = function(id) {
             _selectRobotOrig(id);
             currentRobotId = id;
-            voiceChat.style.display = '';
+            voiceChat.style.visibility = 'visible';
             voiceFab.style.display = '';
             hideBubble();
             setVoiceState('idle');
