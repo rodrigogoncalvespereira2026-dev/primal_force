@@ -58,6 +58,7 @@ const PRIMAL_FORCE = {
     nuck: {
         nome: "Nuck",
         imagem: "assets/img/nuck.png",
+        modelo3D: "assets/models/nuck.glb",
         ranger: "Zenowing",
         dino: "Titanossauro",
         cor: "#546E7A",
@@ -71,6 +72,7 @@ const PRIMAL_FORCE = {
     bolha: {
         nome: "Bolha",
         imagem: "assets/img/bolha.png",
+        modelo3D: "assets/models/bolha.glb",
         ranger: "Mira",
         dino: "Plesiossauro",
         cor: "#CE93D8",
@@ -84,6 +86,7 @@ const PRIMAL_FORCE = {
     anka: {
         nome: "Anka",
         imagem: "assets/img/anka.png",
+        modelo3D: "assets/models/anka.glb",
         ranger: "Rosa",
         dino: "Anquilossauro",
         cor: "#E91E63",
@@ -97,6 +100,7 @@ const PRIMAL_FORCE = {
     crista: {
         nome: "Crista",
         imagem: "assets/img/crista.png",
+        modelo3D: "assets/models/crista.glb",
         ranger: "Verde",
         dino: "Parassauro",
         cor: "#2E7D32",
@@ -110,6 +114,7 @@ const PRIMAL_FORCE = {
     blitz: {
         nome: "Blitz",
         imagem: "assets/img/blitz.png",
+        modelo3D: "assets/models/blitz.glb",
         ranger: "Laranja",
         dino: "Velociraptor",
         cor: "#E65100",
@@ -123,6 +128,7 @@ const PRIMAL_FORCE = {
     testa: {
         nome: "Testa",
         imagem: "assets/img/testa.png",
+        modelo3D: "assets/models/testa.glb",
         ranger: "Grafite",
         dino: "Paquicefalossauro",
         cor: "#424242",
@@ -136,6 +142,7 @@ const PRIMAL_FORCE = {
     mare: {
         nome: "Maré",
         imagem: "assets/img/mare.png",
+        modelo3D: "assets/models/mare.glb",
         ranger: "Ciano",
         dino: "Mosassauro",
         cor: "#00838F",
@@ -149,6 +156,7 @@ const PRIMAL_FORCE = {
     garra: {
         nome: "Garra",
         imagem: "assets/img/garra.png",
+        modelo3D: "assets/models/garra.glb",
         ranger: "Vermelho Escuro",
         dino: "Alossauro",
         cor: "#B71C1C",
@@ -162,6 +170,7 @@ const PRIMAL_FORCE = {
     brisa: {
         nome: "Brisa",
         imagem: "assets/img/brisa.png",
+        modelo3D: "assets/models/brisa.glb",
         ranger: "Aqua",
         dino: "Tapejara",
         cor: "#00897B",
@@ -175,6 +184,7 @@ const PRIMAL_FORCE = {
     vela: {
         nome: "Vela",
         imagem: "assets/img/vela.png",
+        modelo3D: "assets/models/vela.glb",
         ranger: "Magenta",
         dino: "Amargasaurus",
         cor: "#AD1457",
@@ -188,6 +198,7 @@ const PRIMAL_FORCE = {
     fin: {
         nome: "Fin",
         imagem: "assets/img/fin.png",
+        modelo3D: "assets/models/fin.glb",
         ranger: "Roxo",
         dino: "Espinossauro",
         cor: "#4A148C",
@@ -201,6 +212,7 @@ const PRIMAL_FORCE = {
     ninho: {
         nome: "Ninho",
         imagem: "assets/img/ninho.png",
+        modelo3D: "assets/models/ninho.glb",
         ranger: "Verde Lima",
         dino: "Oviraptor",
         cor: "#7CB342",
@@ -214,6 +226,7 @@ const PRIMAL_FORCE = {
     sol: {
         nome: "Sol",
         imagem: "assets/img/sol.png",
+        modelo3D: "assets/models/sol.glb",
         ranger: "Castanho",
         dino: "Dimetrodon",
         cor: "#795548",
@@ -227,6 +240,7 @@ const PRIMAL_FORCE = {
     frill: {
         nome: "Frill",
         imagem: "assets/img/frill.png",
+        modelo3D: "assets/models/frill.glb",
         ranger: "Amarelo",
         dino: "Dilofossauro",
         cor: "#FDD835",
@@ -240,6 +254,7 @@ const PRIMAL_FORCE = {
     abismo: {
         nome: "Abismo",
         imagem: "assets/img/abismo.png",
+        modelo3D: "assets/models/abismo.glb",
         ranger: "Azul Marinho",
         dino: "Liopleurodon",
         cor: "#0D47A1",
@@ -253,6 +268,7 @@ const PRIMAL_FORCE = {
     alado: {
         nome: "Alado",
         imagem: "assets/img/alado.png",
+        modelo3D: "assets/models/alado.glb",
         ranger: "Branco",
         dino: "Quetzalcoatlus",
         cor: "#ECEFF1",

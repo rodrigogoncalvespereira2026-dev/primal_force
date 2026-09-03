@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0a0a1a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Primal Force 3D">
+    <link rel="manifest" href="manifest.json">
+    <title>Primal Force — Modelos 3D</title>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nMNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Rajdhani', sans-serif; }
+        :root {
+            color-scheme: dark;
+            --power-gold: #FFD700;
+            --power-red: #FF1744;
+            --power-black: #0a0a1a;
+            --grid-line: rgba(255,215,0,0.06);
+        }
+        body {
+            background: var(--power-black);
+            color: #e8e8f0;
+            height: 100vh; height: 100dvh;
+            display: flex; flex-direction: column;
+            overflow: hidden;
+            background-image:
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 40px 40px;
+            animation: gridScroll 20s linear infinite;
+        }
+        @keyframes gridScroll { 0% { background-position: 0 0; } 100% { background-position: 40px 40px; } }
+
+        /* ============ HEADER ============ */
+        header {
+            background: linear-gradient(135deg, #0d0d2b 0%, #1a0a2e 50%, #0d0d2b 100%);
+            padding: 12px 20px;
+            padding-top: max(12px, env(safe-area-inset-top));
+            display: flex; align-items: center; gap: 14px;
+            border-bottom: 2px solid;
+            border-image: linear-gradient(90deg, transparent, var(--power-gold), var(--power-red), var(--power-gold), transparent) 1;
+            position: relative;
+        }
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 200%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,215,0,0.03), transparent);
+            animation: headerSweep 4s ease-in-out infinite;
+        }
+        @keyframes headerSweep { 0%,100% { transform: translateX(-50%); } 50% { transform: translateX(50%); } }
+
+        .logo-bolt { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; }
+        .logo-bolt svg { width: 32px; height: 32px; filter: drop-shadow(0 0 8px var(--power-gold)); }
+
+        header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 17px; font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, var(--power-gold), #fff, var(--power-gold));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            white-space: nowrap;
+        }
+
+        .back-btn {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 9px; letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--power-gold);
+            text-decoration: none;
+            padding: 6px 12px;
+            border: 1px solid rgba(255,215,0,0.2);
+            border-radius: 3px;
+            background: rgba(255,215,0,0.04);
+            transition: all 0.3s;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+        .back-btn:hover { border-color: var(--power-gold); box-shadow: 0 0 12px rgba(255,215,0,0.2); }
+
+        .header-spacer { flex: 1; }
+
+        .header-tag {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 8px; letter-spacing: 0.15em;
+            color: var(--power-gold); opacity: 0.6;
+            text-transform: uppercase;
+            position: absolute; top: 6px; right: 20px;
+        }
+
+        /* ============ MAIN ============ */
+        #main {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* ============ SIDEBAR - ROBOT LIST ============ */
+        #sidebar {
+            width: 220px;
+            background: linear-gradient(180deg, #0a0a2a 0%, #0d0d2b 50%, #0a0a1a 100%);
+            border-right: 2px solid;
+            border-image: linear-gradient(180deg, var(--power-gold), transparent) 1;
+            display: flex; flex-direction: column;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,215,0,0.2) transparent;
+        }
+        #sidebar::-webkit-scrollbar { width: 4px; }
+        #sidebar::-webkit-scrollbar-thumb { background: rgba(255,215,0,0.2); border-radius: 2px; }
+
+        .sidebar-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px; font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--power-gold);
+            opacity: 0.5;
+            padding: 16px 16px 8px;
+            border-bottom: 1px solid rgba(255,215,0,0.08);
+        }
+
+        .robot-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 1px solid rgba(255,215,0,0.04);
+            position: relative;
+        }
+        .robot-item:hover { background: rgba(255,215,0,0.04); }
+        .robot-item.ativo {
+            background: rgba(255,215,0,0.08);
+        }
+        .robot-item.ativo::after {
+            content: '';
+            position: absolute; left: 0; top: 0; bottom: 0;
+            width: 3px;
+            background: var(--cor-robot);
+            box-shadow: 0 0 8px var(--cor-robot);
+        }
+
+        .robot-item-thumb {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid rgba(255,215,0,0.15);
+            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255,215,0,0.04);
+            position: relative;
+        }
+        .robot-item-thumb img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+        }
+        .robot-item-thumb .thumb-letter {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px; font-weight: 800;
+            color: #fff;
+        }
+        .robot-item-thumb .badge-3d {
+            position: absolute; bottom: -2px; right: -2px;
+            width: 16px; height: 16px;
+            background: var(--power-gold);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 8px;
+            color: #000;
+            font-weight: 800;
+            box-shadow: 0 0 6px rgba(255,215,0,0.5);
+        }
+
+        .robot-item-info { overflow: hidden; }
+        .robot-item-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px; font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .robot-item-sub {
+            font-size: 11px;
+            color: #607090;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ============ VIEWER AREA ============ */
+        #viewer-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #three-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        #three-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+            display: block;
+        }
+
+        /* ============ MODEL INFO OVERLAY ============ */
+        .model-info {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(10,10,26,0.92);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,215,0,0.15);
+            border-radius: 6px;
+            padding: 16px 28px;
+            text-align: center;
+            z-index: 10;
+            min-width: 280px;
+        }
+        .model-info h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 20px; font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .model-info p {
+            font-size: 13px;
+            color: #8090b0;
+            margin-top: 4px;
+        }
+        .model-info .tags {
+            display: flex; gap: 8px; justify-content: center;
+            margin-top: 8px;
+        }
+        .model-info .tag {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 8px; letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 3px 10px;
+            border-radius: 2px;
+            background: rgba(255,215,0,0.06);
+            border: 1px solid rgba(255,215,0,0.12);
+        }
+
+        /* ============ CONTROLS HINT ============ */
+        .controls-hint {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 9px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--power-gold);
+            opacity: 0.4;
+            z-index: 10;
+            text-align: right;
+            line-height: 1.8;
+        }
+
+        /* ============ LOADING ============ */
+        .loading-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(10,10,26,0.8);
+            z-index: 20;
+            transition: opacity 0.5s;
+        }
+        .loading-overlay.hidden { opacity: 0; pointer-events: none; }
+        .loading-spinner {
+            width: 60px; height: 60px;
+            border: 3px solid rgba(255,215,0,0.1);
+            border-top-color: var(--power-gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .loading-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--power-gold);
+            margin-top: 16px;
+        }
+
+        /* ============ EMPTY STATE ============ */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            padding: 40px;
+        }
+        .empty-state .icon { font-size: 64px; margin-bottom: 16px; }
+        .empty-state h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px; font-weight: 700;
+            letter-spacing: 0.08em;
+            color: var(--power-gold);
+        }
+        .empty-state p {
+            font-size: 14px;
+            color: #607090;
+            margin-top: 8px;
+            max-width: 300px;
+        }
+
+        /* ============ LIGHTNING EFFECT ============ */
+        .lightning-flash {
+            position: fixed; inset: 0;
+            background: rgba(255,215,0,0.05);
+            pointer-events: none;
+            opacity: 0;
+            animation: lightningFlash 6s ease-in-out infinite;
+            z-index: 9999;
+        }
+        @keyframes lightningFlash {
+            0%,94%,96%,98%,100% { opacity: 0; }
+            95% { opacity: 1; }
+            97% { opacity: 0.5; }
+        }
+
+        /* ============ MOBILE ============ */
+        @media (max-width: 700px) {
+            #sidebar { width: 100%; height: 120px; border-right: none; border-bottom: 2px solid; border-image: linear-gradient(90deg, transparent, var(--power-gold), transparent) 1; flex-direction: row; overflow-x: auto; overflow-y: hidden; flex-shrink: 0; scrollbar-width: none; }
+            #sidebar::-webkit-scrollbar { display: none; }
+            .sidebar-title { display: none; }
+            .robot-item { flex-direction: column; min-width: 70px; padding: 8px; text-align: center; border-bottom: none; border-right: 1px solid rgba(255,215,0,0.04); }
+            .robot-item.ativo::after { left: 0; right: 0; top: auto; bottom: 0; width: auto; height: 3px; }
+            .robot-item-info { display: none; }
+            .robot-item-thumb { width: 48px; height: 48px; }
+            #main { flex-direction: column; }
+            .model-info { bottom: 10px; padding: 12px 20px; min-width: auto; width: 90%; }
+            .model-info h2 { font-size: 16px; }
+            .controls-hint { display: none; }
+        }
+
+        /* ============ NO-MODEL LIST ============ */
+        .no-models-section {
+            padding: 8px 16px;
+            border-top: 1px solid rgba(255,215,0,0.06);
+        }
+        .no-models-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 8px; font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #607090;
+            padding: 8px 0 4px;
+        }
+        .no-models-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 6px 0;
+            opacity: 0.4;
+        }
+        .no-models-item img {
+            width: 28px; height: 28px; border-radius: 50%;
+            object-fit: cover;
+        }
+        .no-models-item span {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 9px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="lightning-flash"></div>
+
+    <header>
+        <div class="logo-bolt">
+            <svg viewBox="0 0 24 24" fill="none">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="url(#boltGrad2)" stroke="var(--power-gold)" stroke-width="0.5"/>
+                <defs><linearGradient id="boltGrad2" x1="3" y1="2" x2="22" y2="22"><stop offset="0%" stop-color="var(--power-gold)"/><stop offset="100%" stop-color="var(--power-red)"/></linearGradient></defs>
+            </svg>
+        </div>
+        <div>
+            <h1>Modelos 3D</h1>
+        </div>
+        <div class="header-spacer"></div>
+        <a href="index.html" class="back-btn">💬 Chat</a>
+        <span class="header-tag">MORPHIN GRID</span>
+    </header>
+
+    <div id="main">
+        <div id="sidebar">
+            <div class="sidebar-title">COM MODELOS 3D</div>
+            <div id="model-list"></div>
+            <div class="no-models-section">
+                <div class="no-models-title">SEM MODELO 3D</div>
+                <div id="no-model-list"></div>
+            </div>
+        </div>
+        <div id="viewer-area">
+            <div class="empty-state" id="empty-state">
+                <div class="icon">🤖</div>
+                <h2>Seleciona um Robô</h2>
+                <p>Escolhe um robô com modelo 3D na barra lateral para começar a explorar</p>
+            </div>
+            <div id="three-container"></div>
+            <div class="loading-overlay hidden" id="loading">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">A carregar modelo 3D...</div>
+            </div>
+            <div class="controls-hint" id="controls-hint" style="display:none;">
+                ↻ Arrastar para rodar<br>
+                ⚡ Rotação automática
+            </div>
+            <div class="model-info hidden" id="model-info">
+                <h2 id="mi-name">—</h2>
+                <p id="mi-sub">—</p>
+                <div class="tags">
+                    <span class="tag" id="mi-role">—</span>
+                    <span class="tag" id="mi-dino">—</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script src="config.js"></script>
+    <script src="primalforce-robots.js"></script>
+    <script>
+        // Build robot list from PRIMAL_FORCE
+        const modelRobots = [];
+        const noModelRobots = [];
+
+        Object.entries(PRIMAL_FORCE).forEach(([id, r]) => {
+            if (r.modelo3D) {
+                modelRobots.push({ id, ...r });
+            } else if (r.imagem) {
+                noModelRobots.push({ id, ...r });
+            }
+        });
+
+        const modelList = document.getElementById('model-list');
+        const noModelList = document.getElementById('no-model-list');
+
+        modelRobots.forEach(r => {
+            const item = document.createElement('div');
+            item.className = 'robot-item';
+            item.dataset.robot = r.id;
+            item.style.setProperty('--cor-robot', r.cor);
+            item.innerHTML = `
+                <div class="robot-item-thumb" style="border-color: ${r.cor}">
+                    <img src="${r.imagem}" alt="${r.nome}">
+                    <div class="badge-3d">3D</div>
+                </div>
+                <div class="robot-item-info">
+                    <div class="robot-item-name" style="color: ${r.cor}">${r.nome}</div>
+                    <div class="robot-item-sub">${r.suporte.toUpperCase()} • ${r.dino}</div>
+                </div>
+            `;
+            item.addEventListener('click', () => selectRobot(r.id));
+            modelList.appendChild(item);
+        });
+
+        noModelRobots.forEach(r => {
+            const item = document.createElement('div');
+            item.className = 'no-models-item';
+            item.innerHTML = `
+                <img src="${r.imagem}" alt="${r.nome}">
+                <span>${r.nome}</span>
+            `;
+            noModelList.appendChild(item);
+        });
+
+        // Three.js viewer
+        let THREE = null, GLTFLoader = null, OrbitControls = null;
+        let scene, camera, renderer, controls, currentModel, animFrame;
+
+        const container = document.getElementById('three-container');
+        const loadingEl = document.getElementById('loading');
+        const emptyState = document.getElementById('empty-state');
+        const modelInfo = document.getElementById('model-info');
+        const controlsHint = document.getElementById('controls-hint');
+
+        async function initThreeJS() {
+            if (THREE) return;
+            const mod = await import('three');
+            THREE = mod;
+            const { GLTFLoader: GL } = await import('three/addons/loaders/GLTFLoader.js');
+            const { OrbitControls: OC } = await import('three/addons/controls/OrbitControls.js');
+            GLTFLoader = GL;
+            OrbitControls = OC;
+        }
+
+        function setupScene() {
+            if (renderer) return; // already setup
+
+            scene = new THREE.Scene();
+
+            const w = container.clientWidth;
+            const h = container.clientHeight;
+            camera = new THREE.PerspectiveCamera(35, w / h, 0.1, 100);
+            camera.position.set(0, 1.5, 5);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(w, h);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.outputColorSpace = THREE.SRGBColorSpace;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.5;
+            container.appendChild(renderer.domElement);
+
+            // Lighting rig
+            scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+
+            const key = new THREE.DirectionalLight(0xffffff, 2.0);
+            key.position.set(4, 6, 4);
+            scene.add(key);
+
+            const fill = new THREE.DirectionalLight(0xffffff, 1.2);
+            fill.position.set(-4, 3, -2);
+            scene.add(fill);
+
+            const rim = new THREE.DirectionalLight(0x4488ff, 1.0);
+            rim.position.set(-2, 2, -4);
+            scene.add(rim);
+
+            const bottom = new THREE.DirectionalLight(0xffd700, 0.6);
+            bottom.position.set(0, -3, 3);
+            scene.add(bottom);
+
+            const back = new THREE.DirectionalLight(0xffffff, 0.8);
+            back.position.set(0, 4, -5);
+            scene.add(back);
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.06;
+            controls.enablePan = false;
+            controls.enableZoom = true;
+            controls.minDistance = 2;
+            controls.maxDistance = 10;
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 1.5;
+            controls.minPolarAngle = Math.PI / 6;
+            controls.maxPolarAngle = Math.PI / 1.6;
+
+            window.addEventListener('resize', () => {
+                const w = container.clientWidth;
+                const h = container.clientHeight;
+                camera.aspect = w / h;
+                camera.updateProjectionMatrix();
+                renderer.setSize(w, h);
+            });
+
+            function animate() {
+                animFrame = requestAnimationFrame(animate);
+                controls.update();
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+
+        function loadModel(url) {
+            if (currentModel) {
+                scene.remove(currentModel);
+                currentModel = null;
+            }
+
+            loadingEl.classList.remove('hidden');
+
+            const loader = new GLTFLoader();
+            loader.load(url, (gltf) => {
+                const model = gltf.scene;
+                const box = new THREE.Box3().setFromObject(model);
+                const center = box.getCenter(new THREE.Vector3());
+                const size = box.getSize(new THREE.Vector3());
+                const maxDim = Math.max(size.x, size.y, size.z);
+                const scale = 3.0 / maxDim;
+                model.scale.setScalar(scale);
+                model.position.sub(center.multiplyScalar(scale));
+                model.position.y -= size.y * scale * 0.1;
+
+                scene.add(model);
+                currentModel = model;
+                loadingEl.classList.add('hidden');
+            }, (progress) => {
+                // progress
+            }, (err) => {
+                console.warn('Error loading 3D model:', err);
+                loadingEl.classList.add('hidden');
+            });
+        }
+
+        function selectRobot(id) {
+            const r = PRIMAL_FORCE[id];
+            if (!r || !r.modelo3D) return;
+
+            // Update sidebar selection
+            document.querySelectorAll('.robot-item').forEach(el => {
+                el.classList.toggle('ativo', el.dataset.robot === id);
+            });
+
+            // Update info
+            emptyState.style.display = 'none';
+            controlsHint.style.display = '';
+            modelInfo.classList.remove('hidden');
+            document.getElementById('mi-name').textContent = r.nome;
+            document.getElementById('mi-name').style.color = r.cor;
+            document.getElementById('mi-sub').textContent = `Companheiro do ${r.ranger}`;
+            document.getElementById('mi-role').textContent = r.suporte.toUpperCase();
+            document.getElementById('mi-role').style.borderColor = `color-mix(in srgb, ${r.cor} 30%, transparent)`;
+            document.getElementById('mi-dino').textContent = r.dino;
+            document.getElementById('mi-dino').style.borderColor = `color-mix(in srgb, ${r.cor} 30%, transparent)`;
+
+            document.documentElement.style.setProperty('--robot-cor', r.cor);
+
+            // Load model
+            loadModel(r.modelo3D);
+        }
+
+        // Initialize
+        initThreeJS().then(() => {
+            setupScene();
+            // Auto-select first model robot
+            if (modelRobots.length > 0) {
+                selectRobot(modelRobots[0].id);
+            }
+        });
+    </script>
+</body>
+</html>
