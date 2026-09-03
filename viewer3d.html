@@ -218,16 +218,14 @@
         .model-info {
             position: absolute;
             bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
+            left: 20px;
             background: rgba(10,10,26,0.92);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255,215,0,0.15);
             border-radius: 6px;
-            padding: 16px 28px;
-            text-align: center;
+            padding: 12px 20px;
+            text-align: left;
             z-index: 10;
-            min-width: 280px;
         }
         .model-info h2 {
             font-family: 'Orbitron', sans-serif;
@@ -373,7 +371,7 @@
             .robot-item-thumb .badge-3d { width: 14px; height: 14px; font-size: 7px; }
 
             #main { flex-direction: column; }
-            .model-info { bottom: 80px; padding: 10px 16px; min-width: auto; width: 80%; }
+            .model-info { bottom: 80px; left: 50%; transform: translateX(-50%); padding: 10px 16px; text-align: center; }
             .model-info h2 { font-size: 16px; }
             .model-info p { font-size: 12px; }
             .controls-hint { display: none; }
@@ -412,7 +410,7 @@
         /* ============ VOICE CHAT ============ */
         .voice-chat {
             position: absolute;
-            bottom: 100px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
