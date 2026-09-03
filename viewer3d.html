@@ -341,17 +341,43 @@
 
         /* ============ MOBILE ============ */
         @media (max-width: 700px) {
-            #sidebar { width: 100%; height: 120px; border-right: none; border-bottom: 2px solid; border-image: linear-gradient(90deg, transparent, var(--power-gold), transparent) 1; flex-direction: row; overflow-x: auto; overflow-y: hidden; flex-shrink: 0; scrollbar-width: none; }
+            header { padding: 8px 10px; gap: 8px; }
+            .logo-bolt { width: 28px; height: 28px; }
+            .logo-bolt svg { width: 24px; height: 24px; }
+            header h1 { font-size: 13px; letter-spacing: 0.06em; }
+            .header-tag { display: none; }
+            .back-btn { font-size: 8px; padding: 5px 8px; }
+
+            #sidebar {
+                width: 100%; height: auto; min-height: 60px; max-height: 70px;
+                border-right: none; border-bottom: 2px solid;
+                border-image: linear-gradient(90deg, transparent, var(--power-gold), transparent) 1;
+                flex-direction: row; flex-wrap: nowrap;
+                overflow-x: auto; overflow-y: hidden;
+                flex-shrink: 0; scrollbar-width: none;
+                align-items: center;
+            }
             #sidebar::-webkit-scrollbar { display: none; }
             .sidebar-title { display: none; }
-            .robot-item { flex-direction: column; min-width: 70px; padding: 8px; text-align: center; border-bottom: none; border-right: 1px solid rgba(255,215,0,0.04); }
+            .no-models-section { display: none; }
+            #model-list { display: flex; flex-direction: row; gap: 0; flex-shrink: 0; }
+            .robot-item {
+                flex-direction: column; min-width: 56px; max-width: 56px;
+                padding: 6px 4px; text-align: center;
+                border-bottom: none; border-right: 1px solid rgba(255,215,0,0.04);
+                gap: 4px;
+            }
             .robot-item.ativo::after { left: 0; right: 0; top: auto; bottom: 0; width: auto; height: 3px; }
             .robot-item-info { display: none; }
-            .robot-item-thumb { width: 48px; height: 48px; }
+            .robot-item-thumb { width: 40px; height: 40px; }
+            .robot-item-thumb .badge-3d { width: 14px; height: 14px; font-size: 7px; }
+
             #main { flex-direction: column; }
-            .model-info { bottom: 10px; padding: 12px 20px; min-width: auto; width: 90%; }
+            .model-info { bottom: 80px; padding: 10px 16px; min-width: auto; width: 80%; }
             .model-info h2 { font-size: 16px; }
+            .model-info p { font-size: 12px; }
             .controls-hint { display: none; }
+            .voice-chat { bottom: 100px; }
         }
 
         /* ============ NO-MODEL LIST ============ */
@@ -530,9 +556,9 @@
         }
 
         @media (max-width: 700px) {
-            .voice-chat { bottom: 80px; }
             .voice-fab { display: flex !important; bottom: 16px; right: 16px; }
             .voice-controls { display: none !important; }
+            .voice-chat { bottom: 90px; }
         }
     </style>
 </head>
