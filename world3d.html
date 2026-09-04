@@ -288,6 +288,52 @@
         /* ============ LIGHTNING ============ */
         .lightning-flash { position: fixed; inset: 0; background: rgba(255,215,0,0.05); pointer-events: none; opacity: 0; animation: lightningFlash 8s ease-in-out infinite; z-index: 9998; }
         @keyframes lightningFlash { 0%,94%,96%,98%,100% { opacity: 0; } 95% { opacity: 1; } 97% { opacity: 0.5; } }
+
+        /* ============ INTERACTION BUBBLES ============ */
+        .robot-bubble {
+            position: fixed;
+            pointer-events: none;
+            z-index: 90;
+            background: rgba(255,215,0,0.12);
+            border: 1px solid rgba(255,215,0,0.35);
+            border-radius: 12px;
+            padding: 4px 10px;
+            font-size: 16px;
+            white-space: nowrap;
+            transform: translate(-50%, -100%);
+            transition: opacity 0.3s;
+            animation: bubblePop 0.3s ease-out;
+            backdrop-filter: blur(4px);
+        }
+        .robot-bubble .bubble-names {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 7px;
+            letter-spacing: 0.08em;
+            color: rgba(255,215,0,0.6);
+            text-align: center;
+            margin-bottom: 2px;
+        }
+        .robot-bubble .bubble-emoji {
+            font-size: 22px;
+            text-align: center;
+            line-height: 1.1;
+        }
+        @keyframes bubblePop {
+            0% { transform: translate(-50%, -100%) scale(0.3); opacity: 0; }
+            60% { transform: translate(-50%, -100%) scale(1.15); }
+            100% { transform: translate(-50%, -100%) scale(1); opacity: 1; }
+        }
+        .robot-bubble .bubble-pulse {
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--power-gold);
+            animation: bubblePulse 0.6s ease-in-out infinite alternate;
+        }
+        @keyframes bubblePulse { 0% { opacity: 0.4; transform: translateX(-50%) scale(0.8); } 100% { opacity: 1; transform: translateX(-50%) scale(1.2); } }
     </style>
 </head>
 <body>
@@ -355,6 +401,7 @@
     </div>
 
     <div id="three-container"></div>
+    <div id="bubbles-container"></div>
 
     <script src="https://unpkg.com/three@0.160.0/build/three.module.js" type="importmap-shim"></script>
     <script type="importmap">
@@ -373,6 +420,8 @@
         const WORLD_SIZE = 200;
         const GRID_DIVISIONS = 40;
         const SAFE_MARGIN = 85; // Robots stay within this radius from center
+        const INTERACT_RADIUS = 8; // Distance to trigger interaction
+        const INTERACT_DURATION = [3, 7]; // Min/max interaction time in seconds
         const MOVE_SPEED = 0.4;
         const FAST_SPEED = 0.8;
         const FLY_SPEED = 0.3;
@@ -1022,6 +1071,26 @@
                 fast ? 'Velocidade: Rápido ⚡' : (isFlying ? 'Velocidade: Voo 🚀' : 'Velocidade: Normal');
         }
 
+        // ============ SOCIAL INTERACTION SYSTEM ============
+        const activeBubbles = new Map();
+        const busyRobots = new Set();
+
+        function createBubble(robotId, partnerId, emoji, label, duration) {
+            const container = document.getElementById('bubbles-container');
+            const el = document.createElement('div');
+            el.className = 'robot-bubble';
+            const robot = ROBOTS.find(r => r.id === robotId);
+            const partner = ROBOTS.find(r => r.id === partnerId);
+            el.innerHTML = `
+                <div class="bubble-names">${robot?.name || ''} \u2194 ${partner?.name || ''}</div>
+                <div class="bubble-emoji">${emoji}</div>
+                <div class="bubble-pulse"></div>
+            `;
+            el.style.borderColor = robot?.color || 'var(--power-gold)';
+            container.appendChild(el);
+            activeBubbles.set(robotId, { el, partner: partnerId, timer: duration, type: emoji });
+        }
+
         // ============ ANIMATE WORLD ============
         const clock = new THREE.Clock();
 
@@ -1054,25 +1123,102 @@
             }
             particles.geometry.attributes.position.needsUpdate = true;
 
-            // Wandering AI for non-active robots
+            // ============ WANDERING AI + SOCIAL INTERACTIONS ============
+
             ROBOTS.forEach(robot => {
                 if (robot.id === activeRobotId) return;
                 const mesh = robotMeshes[robot.id];
                 if (!mesh) return;
                 const ud = mesh.userData;
 
+                // If currently interacting, just idle and face partner
+                if (ud.interacting) {
+                    ud.interactTimer -= dt;
+                    if (ud.interactTimer <= 0) {
+                        // Interaction done
+                        ud.interacting = false;
+                        ud.interactPartner = null;
+                    } else {
+                        // Face partner
+                        const partner = robotMeshes[ud.interactPartner];
+                        if (partner) {
+                            const dx = partner.position.x - mesh.position.x;
+                            const dz = partner.position.z - mesh.position.z;
+                            const targetAngle = Math.atan2(dx, dz);
+                            let angleDiff = targetAngle - mesh.rotation.y;
+                            while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+                            while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+                            mesh.rotation.y += angleDiff * 0.05;
+                        }
+                        // Gentle bob in place
+                        ud.bobPhase += dt * 2;
+                        const floatY = Math.sin(ud.bobPhase) * 0.08;
+                        const baseY = robot.flyer ? 2 : 0;
+                        mesh.position.y += (baseY + floatY - mesh.position.y) * 0.1;
+                        return; // Don't wander while interacting
+                    }
+                }
+
                 // Countdown to pick new target
                 ud.wanderTimer -= dt;
                 if (ud.wanderTimer <= 0) {
-                    // Pick new random wander target
                     const angle = Math.random() * Math.PI * 2;
-                    const dist = 8 + Math.random() * 25;
+                    const dist = 8 + Math.random() * 20;
                     ud.wanderX = mesh.position.x + Math.cos(angle) * dist;
                     ud.wanderZ = mesh.position.z + Math.sin(angle) * dist;
-                    // Clamp to safe platform bounds
                     ud.wanderX = Math.max(-SAFE_MARGIN, Math.min(SAFE_MARGIN, ud.wanderX));
                     ud.wanderZ = Math.max(-SAFE_MARGIN, Math.min(SAFE_MARGIN, ud.wanderZ));
                     ud.wanderTimer = 4 + Math.random() * 10;
+                }
+
+                // Check for nearby robots to interact with
+                let nearPartner = null;
+                let nearDist = Infinity;
+                ROBOTS.forEach(other => {
+                    if (other.id === robot.id || other.id === activeRobotId) return;
+                    if (busyRobots.has(other.id)) return;
+                    const otherMesh = robotMeshes[other.id];
+                    if (!otherMesh) return;
+                    const dx = otherMesh.position.x - mesh.position.x;
+                    const dz = otherMesh.position.z - mesh.position.z;
+                    const d = Math.sqrt(dx * dx + dz * dz);
+                    if (d < INTERACT_RADIUS && d < nearDist) {
+                        nearDist = d;
+                        nearPartner = other.id;
+                    }
+                });
+
+                // Start interaction if close enough
+                if (nearPartner && Math.random() < 0.01) { // 1% chance per frame when near
+                    ud.interacting = true;
+                    ud.interactPartner = nearPartner;
+                    ud.interactTimer = INTERACT_DURATION[0] + Math.random() * (INTERACT_DURATION[1] - INTERACT_DURATION[0]);
+                    busyRobots.add(robot.id);
+                    busyRobots.add(nearPartner);
+
+                    // Also set partner to interact
+                    const partnerUd = robotMeshes[nearPartner]?.userData;
+                    if (partnerUd) {
+                        partnerUd.interacting = true;
+                        partnerUd.interactPartner = robot.id;
+                        partnerUd.interactTimer = ud.interactTimer;
+                    }
+
+                    // Pick random interaction type
+                    const types = [
+                        { emoji: ['💬', '🗣️', '💭', '🗨️'], label: 'Conversando' },
+                        { emoji: ['⚔️', '🛡️', '💪', '👊'], label: 'Treinando' },
+                        { emoji: ['🎵', '🎶', '🎸', '🥁'], label: 'Música' },
+                        { emoji: ['❤️', '🤝', '👍', '✨'], label: 'Amizade' },
+                        { emoji: ['🔥', '⚡', '💥', '🌀'], label: 'Poder' },
+                        { emoji: ['😂', '🤣', '😆', '😎'], label: 'Rindo' }
+                    ];
+                    const chosen = types[Math.floor(Math.random() * types.length)];
+                    ud.interactType = chosen.emoji[Math.floor(Math.random() * chosen.emoji.length)];
+                    ud.interactLabel = chosen.label;
+
+                    // Create bubbles for both
+                    createBubble(robot.id, nearPartner, ud.interactType, ud.interactLabel, ud.interactTimer);
                 }
 
                 // Move toward wander target
@@ -1081,28 +1227,22 @@
                 const distToTarget = Math.sqrt(dx * dx + dz * dz);
 
                 if (distToTarget > 1.0) {
-                    // Walking toward target
                     ud.isWandering = true;
                     const speed = ud.wanderSpeed * dt * 15;
                     mesh.position.x += (dx / distToTarget) * speed;
                     mesh.position.z += (dz / distToTarget) * speed;
 
-                    // Face direction of movement
                     const targetAngle = Math.atan2(dx, dz);
-                    // Smooth rotation toward target
                     let angleDiff = targetAngle - mesh.rotation.y;
                     while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
                     while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
                     mesh.rotation.y += angleDiff * 0.08;
 
-                    // Walking bob
                     ud.walkBob += dt * 10;
                     const bob = Math.sin(ud.walkBob) * 0.12;
                     const baseY = robot.flyer ? 2 : 0;
-                    mesh.position.y += (baseY + bob - mesh.position.y) * 0.1;
                     mesh.position.y = baseY + bob;
                 } else {
-                    // Standing still, gentle idle
                     ud.isWandering = false;
                     ud.walkBob *= 0.9;
                     const floatY = Math.sin(ud.bobPhase) * 0.15;
@@ -1112,9 +1252,62 @@
                     mesh.rotation.y += 0.003;
                 }
 
-                // Clamp to platform
                 mesh.position.x = Math.max(-SAFE_MARGIN, Math.min(SAFE_MARGIN, mesh.position.x));
                 mesh.position.z = Math.max(-SAFE_MARGIN, Math.min(SAFE_MARGIN, mesh.position.z));
+            });
+
+            // Also let active robot interact when near idle robots
+            const activeMesh = robotMeshes[activeRobotId];
+            if (activeMesh && !activeMesh.userData.interacting) {
+                ROBOTS.forEach(other => {
+                    if (other.id === activeRobotId) return;
+                    const otherMesh = robotMeshes[other.id];
+                    if (!otherMesh || otherMesh.userData.interacting) return;
+                    const dx = otherMesh.position.x - activeMesh.position.x;
+                    const dz = otherMesh.position.z - activeMesh.position.z;
+                    const d = Math.sqrt(dx * dx + dz * dz);
+                    if (d < INTERACT_RADIUS * 0.6 && Math.random() < 0.005) {
+                        const types = [
+                            { emoji: ['💬', '🗣️', '⚡', '💪'], label: 'Comando' },
+                            { emoji: ['✨', '🔥', '🛡️', '👊'], label: 'Treino' }
+                        ];
+                        const chosen = types[Math.floor(Math.random() * types.length)];
+                        const emoji = chosen.emoji[Math.floor(Math.random() * chosen.emoji.length)];
+                        createBubble(activeRobotId, other.id, emoji, chosen.label, 3);
+                    }
+                });
+            }
+
+            // ============ UPDATE BUBBLE POSITIONS ============
+            activeBubbles.forEach((bubble, robotId) => {
+                const mesh = robotMeshes[robotId];
+                if (!mesh || !bubble.el) {
+                    if (bubble.el) bubble.el.remove();
+                    activeBubbles.delete(robotId);
+                    return;
+                }
+                // Project 3D position to screen
+                const pos = mesh.position.clone();
+                pos.y += 5; // Above robot
+                pos.project(camera);
+                const x = (pos.x * 0.5 + 0.5) * window.innerWidth;
+                const y = (-pos.y * 0.5 + 0.5) * window.innerHeight;
+                bubble.el.style.left = x + 'px';
+                bubble.el.style.top = y + 'px';
+
+                // Remove if behind camera or timer expired
+                if (pos.z > 1 || bubble.timer <= 0) {
+                    bubble.el.style.opacity = '0';
+                    setTimeout(() => bubble.el.remove(), 300);
+                    activeBubbles.delete(robotId);
+                }
+                bubble.timer -= dt;
+            });
+
+            // Cleanup busy set for robots that finished
+            ROBOTS.forEach(r => {
+                const ud = robotMeshes[r.id]?.userData;
+                if (!ud || !ud.interacting) busyRobots.delete(r.id);
             });
 
             // Move active robot
