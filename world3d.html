@@ -372,6 +372,7 @@
         // ============ CONFIG ============
         const WORLD_SIZE = 200;
         const GRID_DIVISIONS = 40;
+        const SAFE_MARGIN = 85; // Robots stay within this radius from center
         const MOVE_SPEED = 0.4;
         const FAST_SPEED = 0.8;
         const FLY_SPEED = 0.3;
@@ -735,10 +736,9 @@
                     // Wrap in group for easier manipulation
                     const wrapper = new THREE.Group();
                     wrapper.add(model);
-                    wrapper.position.y = 0;
-                    // Pick a random wander target for idle movement
+                    wrapper.position.y = 0;                    // Pick a random wander target for idle movement
                     const wanderAngle = Math.random() * Math.PI * 2;
-                    const wanderDist = 5 + Math.random() * 20;
+                    const wanderDist = 3 + Math.random() * 12;
                     wrapper.userData = {
                         robotId: robot.id,
                         flyer: robot.flyer,
@@ -997,8 +997,8 @@
             mesh.position.y += (mesh.userData.targetY - mesh.position.y) * 0.08;
 
             // Keep in bounds
-            mesh.position.x = Math.max(-WORLD_SIZE/2 + 2, Math.min(WORLD_SIZE/2 - 2, mesh.position.x));
-            mesh.position.z = Math.max(-WORLD_SIZE/2 + 2, Math.min(WORLD_SIZE/2 - 2, mesh.position.z));
+            mesh.position.x = Math.max(-SAFE_MARGIN, Math.min(SAFE_MARGIN, mesh.position.x));
+            mesh.position.z = Math.max(-SAFE_MARGIN, Math.min(SAFE_MARGIN, mesh.position.z));
 
             // Walking bob
             const model = loadedModels[activeRobotId];
@@ -1069,9 +1069,9 @@
                     const dist = 8 + Math.random() * 25;
                     ud.wanderX = mesh.position.x + Math.cos(angle) * dist;
                     ud.wanderZ = mesh.position.z + Math.sin(angle) * dist;
-                    // Clamp to world bounds
-                    ud.wanderX = Math.max(-WORLD_SIZE/2 + 5, Math.min(WORLD_SIZE/2 - 5, ud.wanderX));
-                    ud.wanderZ = Math.max(-WORLD_SIZE/2 + 5, Math.min(WORLD_SIZE/2 - 5, ud.wanderZ));
+                    // Clamp to safe platform bounds
+                    ud.wanderX = Math.max(-SAFE_MARGIN, Math.min(SAFE_MARGIN, ud.wanderX));
+                    ud.wanderZ = Math.max(-SAFE_MARGIN, Math.min(SAFE_MARGIN, ud.wanderZ));
                     ud.wanderTimer = 4 + Math.random() * 10;
                 }
 
@@ -1112,9 +1112,9 @@
                     mesh.rotation.y += 0.003;
                 }
 
-                // Clamp to world
-                mesh.position.x = Math.max(-WORLD_SIZE/2 + 2, Math.min(WORLD_SIZE/2 - 2, mesh.position.x));
-                mesh.position.z = Math.max(-WORLD_SIZE/2 + 2, Math.min(WORLD_SIZE/2 - 2, mesh.position.z));
+                // Clamp to platform
+                mesh.position.x = Math.max(-SAFE_MARGIN, Math.min(SAFE_MARGIN, mesh.position.x));
+                mesh.position.z = Math.max(-SAFE_MARGIN, Math.min(SAFE_MARGIN, mesh.position.z));
             });
 
             // Move active robot
