@@ -415,7 +415,7 @@
         // ============ THREE.JS SETUP ============
         const container = document.getElementById('three-container');
         const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x0a0a1a, 0.008);
+        scene.fog = new THREE.FogExp2(0x0a0a2a, 0.004);
 
         const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 500);
         camera.position.set(0, 8, 15);
@@ -427,14 +427,25 @@
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.1;
+        renderer.toneMappingExposure = 1.8;
         container.appendChild(renderer.domElement);
 
         // ============ LIGHTS ============
-        const ambientLight = new THREE.AmbientLight(0x2a2a50, 0.6);
+        const ambientLight = new THREE.AmbientLight(0x6060a0, 1.2);
         scene.add(ambientLight);
 
-        const sunLight = new THREE.DirectionalLight(0xfff0dd, 1.2);
+        const fillLight1 = new THREE.HemisphereLight(0xffd700, 0x1a1a3a, 0.8);
+        scene.add(fillLight1);
+
+        const fillLight2 = new THREE.DirectionalLight(0xffffff, 0.6);
+        fillLight2.position.set(-30, 20, -10);
+        scene.add(fillLight2);
+
+        const fillLight3 = new THREE.PointLight(0x4488ff, 0.4, 100);
+        fillLight3.position.set(0, 30, 0);
+        scene.add(fillLight3);
+
+        const sunLight = new THREE.DirectionalLight(0xfff0dd, 2.0);
         sunLight.position.set(30, 50, 20);
         sunLight.castShadow = true;
         sunLight.shadow.mapSize.set(2048, 2048);
@@ -444,34 +455,34 @@
         sunLight.shadow.camera.bottom = -60;
         scene.add(sunLight);
 
-        const rimLight = new THREE.DirectionalLight(0x4466ff, 0.4);
+        const rimLight = new THREE.DirectionalLight(0x4466ff, 0.8);
         rimLight.position.set(-20, 10, -20);
         scene.add(rimLight);
 
-        const goldFill = new THREE.PointLight(0xffd700, 0.5, 80);
-        goldFill.position.set(0, 15, 0);
+        const goldFill = new THREE.PointLight(0xffd700, 1.5, 120);
+        goldFill.position.set(0, 20, 0);
         scene.add(goldFill);
 
         // ============ MORPHIN GRID FLOOR ============
         // Main grid
-        const gridHelper = new THREE.GridHelper(WORLD_SIZE, GRID_DIVISIONS, 0xffd700, 0x1a1a3a);
-        gridHelper.material.opacity = 0.25;
+        const gridHelper = new THREE.GridHelper(WORLD_SIZE, GRID_DIVISIONS, 0xffd700, 0x2a2a5a);
+        gridHelper.material.opacity = 0.5;
         gridHelper.material.transparent = true;
         scene.add(gridHelper);
 
         // Sub-grid
-        const subGrid = new THREE.GridHelper(WORLD_SIZE, GRID_DIVISIONS * 4, 0x1a1a3a, 0x0d0d2b);
+        const subGrid = new THREE.GridHelper(WORLD_SIZE, GRID_DIVISIONS * 4, 0x2a2a5a, 0x1a1a3a);
         subGrid.position.y = -0.01;
-        subGrid.material.opacity = 0.1;
+        subGrid.material.opacity = 0.2;
         subGrid.material.transparent = true;
         scene.add(subGrid);
 
         // Ground plane
         const groundGeo = new THREE.PlaneGeometry(WORLD_SIZE, WORLD_SIZE);
         const groundMat = new THREE.MeshStandardMaterial({
-            color: 0x0a0a1a,
-            roughness: 0.9,
-            metalness: 0.1
+            color: 0x12122e,
+            roughness: 0.8,
+            metalness: 0.2
         });
         const ground = new THREE.Mesh(groundGeo, groundMat);
         ground.rotation.x = -Math.PI / 2;
@@ -480,7 +491,7 @@
         scene.add(ground);
 
         // Energy lines on the grid
-        const energyLinesMat = new THREE.LineBasicMaterial({ color: 0xffd700, opacity: 0.15, transparent: true });
+        const energyLinesMat = new THREE.LineBasicMaterial({ color: 0xffd700, opacity: 0.4, transparent: true });
         for (let i = -WORLD_SIZE/2; i <= WORLD_SIZE/2; i += GRID_DIVISIONS) {
             const points1 = [new THREE.Vector3(i, 0.01, -WORLD_SIZE/2), new THREE.Vector3(i, 0.01, WORLD_SIZE/2)];
             const points2 = [new THREE.Vector3(-WORLD_SIZE/2, 0.01, i), new THREE.Vector3(WORLD_SIZE/2, 0.01, i)];
@@ -496,7 +507,7 @@
 
             // Pillar
             const pillarGeo = new THREE.CylinderGeometry(0.5, 0.8, height, 6);
-            const pillarMat = new THREE.MeshStandardMaterial({ color: 0x1a1a3a, metalness: 0.6, roughness: 0.3 });
+            const pillarMat = new THREE.MeshStandardMaterial({ color: 0x2a2a5a, metalness: 0.7, roughness: 0.2 });
             const pillar = new THREE.Mesh(pillarGeo, pillarMat);
             pillar.position.y = height / 2;
             pillar.castShadow = true;
@@ -504,20 +515,20 @@
 
             // Glowing top
             const topGeo = new THREE.OctahedronGeometry(1, 0);
-            const topMat = new THREE.MeshStandardMaterial({ color: color, emissive: color, emissiveIntensity: 0.5, metalness: 0.8, roughness: 0.2 });
+            const topMat = new THREE.MeshStandardMaterial({ color: color, emissive: color, emissiveIntensity: 1.0, metalness: 0.8, roughness: 0.2 });
             const top = new THREE.Mesh(topGeo, topMat);
             top.position.y = height + 1.5;
             top.castShadow = true;
             group.add(top);
 
             // Light
-            const light = new THREE.PointLight(color, 0.8, 20);
+            const light = new THREE.PointLight(color, 1.5, 35);
             light.position.y = height + 1.5;
             group.add(light);
 
             // Ring at base
             const ringGeo = new THREE.TorusGeometry(1.5, 0.08, 8, 24);
-            const ringMat = new THREE.MeshStandardMaterial({ color: color, emissive: color, emissiveIntensity: 0.3 });
+            const ringMat = new THREE.MeshStandardMaterial({ color: color, emissive: color, emissiveIntensity: 0.8 });
             const ring = new THREE.Mesh(ringGeo, ringMat);
             ring.rotation.x = Math.PI / 2;
             ring.position.y = 0.1;
@@ -558,7 +569,7 @@
 
             // Outer ring
             const ringGeo = new THREE.TorusGeometry(3, 0.15, 16, 32);
-            const ringMat = new THREE.MeshStandardMaterial({ color: 0xffd700, emissive: 0xffd700, emissiveIntensity: 0.8, metalness: 0.9 });
+            const ringMat = new THREE.MeshStandardMaterial({ color: 0xffd700, emissive: 0xffd700, emissiveIntensity: 1.5, metalness: 0.9 });
             const ring = new THREE.Mesh(ringGeo, ringMat);
             ring.rotation.x = Math.PI / 2;
             ring.position.y = 4;
@@ -585,7 +596,7 @@
                 const px = Math.cos(angle) * 3.5;
                 const pz = Math.sin(angle) * 3.5;
                 const pilGeo = new THREE.CylinderGeometry(0.2, 0.3, 8, 6);
-                const pilMat = new THREE.MeshStandardMaterial({ color: 0x1a1a3a, metalness: 0.5 });
+                const pilMat = new THREE.MeshStandardMaterial({ color: 0x2a2a5a, metalness: 0.6, emissive: 0x111133, emissiveIntensity: 0.3 });
                 const pil = new THREE.Mesh(pilGeo, pilMat);
                 pil.position.set(px, 4, pz);
                 pil.castShadow = true;
@@ -593,7 +604,7 @@
             }
 
             // Light
-            const light = new THREE.PointLight(0xffd700, 1.5, 30);
+            const light = new THREE.PointLight(0xffd700, 3.0, 50);
             light.position.y = 4;
             group.add(light);
 
@@ -627,8 +638,8 @@
         const skyGeo = new THREE.SphereGeometry(200, 32, 16);
         const skyMat = new THREE.ShaderMaterial({
             uniforms: {
-                topColor: { value: new THREE.Color(0x0a0a2a) },
-                bottomColor: { value: new THREE.Color(0x0d0d2b) },
+                topColor: { value: new THREE.Color(0x1a1a4a) },
+                bottomColor: { value: new THREE.Color(0x151535) },
                 offset: { value: 10 },
                 exponent: { value: 0.4 }
             },
@@ -669,7 +680,7 @@
             );
         }
         starsGeo.setAttribute('position', new THREE.Float32BufferAttribute(starsVerts, 3));
-        const starsMat = new THREE.PointsMaterial({ color: 0xffd700, size: 0.3, transparent: true, opacity: 0.6 });
+        const starsMat = new THREE.PointsMaterial({ color: 0xffd700, size: 0.5, transparent: true, opacity: 0.9 });
         scene.add(new THREE.Points(starsGeo, starsMat));
 
         // ============ PARTICLES (MORPHIN ENERGY) ============
@@ -685,7 +696,7 @@
         }
         particleGeo.setAttribute('position', new THREE.Float32BufferAttribute(particlePositions, 3));
         const particleMat = new THREE.PointsMaterial({
-            color: 0xffd700, size: 0.15, transparent: true, opacity: 0.4,
+            color: 0xffd700, size: 0.25, transparent: true, opacity: 0.7,
             blending: THREE.AdditiveBlending
         });
         const particles = new THREE.Points(particleGeo, particleMat);
