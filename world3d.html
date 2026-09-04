@@ -709,34 +709,40 @@
             ROBOTS.forEach(robot => {
                 loader.load(robot.model, (gltf) => {
                     const model = gltf.scene;
-                    // Scale and center
+
+                    // Recompute box after applying transforms
+                    model.updateMatrixWorld(true);
                     const box = new THREE.Box3().setFromObject(model);
                     const size = box.getSize(new THREE.Vector3());
                     const maxDim = Math.max(size.x, size.y, size.z);
-                    const scale = 4 / maxDim;
-                    model.scale.setScalar(scale);
+                    const targetHeight = 4;
+                    const s = targetHeight / maxDim;
+                    model.scale.setScalar(s);
 
-                    // Offset to stand on ground
-                    const minY = box.min.y * scale;
-                    model.position.y = -minY;
+                    // Reposition after scale
+                    model.updateMatrixWorld(true);
+                    const scaledBox = new THREE.Box3().setFromObject(model);
+                    const footY = -scaledBox.min.y;
+                    model.position.y = footY;
 
                     // Random starting position
                     const angle = Math.random() * Math.PI * 2;
                     const dist = 10 + Math.random() * 30;
                     model.position.x = Math.cos(angle) * dist;
                     model.position.z = Math.sin(angle) * dist;
-
                     model.rotation.y = Math.random() * Math.PI * 2;
 
                     // Wrap in group for easier manipulation
                     const wrapper = new THREE.Group();
                     wrapper.add(model);
+                    wrapper.position.y = 0;
                     wrapper.userData = {
                         robotId: robot.id,
                         flyer: robot.flyer,
                         targetY: 0,
                         bobPhase: Math.random() * Math.PI * 2,
-                        walkBob: 0
+                        walkBob: 0,
+                        baseModelY: footY
                     };
 
                     robotMeshes[robot.id] = wrapper;
@@ -821,6 +827,13 @@
             const mesh = robotMeshes[id];
             if (mesh) {
                 cameraTarget.copy(mesh.position);
+                // Snap camera immediately
+                camera.position.set(
+                    mesh.position.x + Math.sin(cameraAngle) * cameraDist,
+                    mesh.position.y + cameraHeight,
+                    mesh.position.z + Math.cos(cameraAngle) * cameraDist
+                );
+                camera.lookAt(cameraTarget);
             }
         }
 
@@ -837,26 +850,25 @@
         }
 
         // ============ CAMERA CONTROLS ============
-        const cameraTarget = new THREE.Vector3();
+        const cameraTarget = new THREE.Vector3(0, 0, 0);
         const cameraOffset = new THREE.Vector3(0, 8, 15);
         let cameraAngle = 0;
-        let cameraDist = 15;
-        let cameraHeight = 8;
+        let cameraDist = 20;
+        let cameraHeight = 10;
 
         function updateCamera() {
             const mesh = robotMeshes[activeRobotId];
             if (!mesh) return;
 
-            // Smooth follow
-            const targetPos = mesh.position.clone();
-            cameraTarget.lerp(targetPos, 0.05);
+            // Direct follow (no lag)
+            cameraTarget.copy(mesh.position);
 
             // Orbit camera
             const camX = cameraTarget.x + Math.sin(cameraAngle) * cameraDist;
             const camZ = cameraTarget.z + Math.cos(cameraAngle) * cameraDist;
             const camY = cameraTarget.y + cameraHeight;
 
-            camera.position.lerp(new THREE.Vector3(camX, camY, camZ), 0.08);
+            camera.position.lerp(new THREE.Vector3(camX, camY, camZ), 0.15);
             camera.lookAt(cameraTarget);
         }
 
@@ -972,21 +984,24 @@
                 mesh.userData.targetY = 0;
             }
 
-            // Smooth Y
-            mesh.position.y += (mesh.userData.targetY - mesh.position.y) * 0.05;
+            // Smooth Y (wrapper handles height)
+            mesh.position.y += (mesh.userData.targetY - mesh.position.y) * 0.08;
 
             // Keep in bounds
             mesh.position.x = Math.max(-WORLD_SIZE/2 + 2, Math.min(WORLD_SIZE/2 - 2, mesh.position.x));
             mesh.position.z = Math.max(-WORLD_SIZE/2 + 2, Math.min(WORLD_SIZE/2 - 2, mesh.position.z));
 
             // Walking bob
-            if (moved && !isFlying) {
-                mesh.userData.walkBob += dt * 12;
-                const bob = Math.sin(mesh.userData.walkBob) * 0.15;
-                const model = loadedModels[activeRobotId];
-                if (model) {
-                    model.position.y = -new THREE.Box3().setFromObject(model).min.y * model.scale.y + bob;
+            const model = loadedModels[activeRobotId];
+            if (model) {
+                if (moved && !isFlying) {
+                    mesh.userData.walkBob += dt * 12;
+                    const bob = Math.sin(mesh.userData.walkBob) * 0.15;
+                    model.position.y = mesh.userData.baseModelY + bob;
                     model.rotation.z = Math.sin(mesh.userData.walkBob) * 0.05;
+                } else if (!isFlying) {
+                    model.rotation.z *= 0.9;
+                    model.position.y = mesh.userData.baseModelY;
                 }
             }
 
