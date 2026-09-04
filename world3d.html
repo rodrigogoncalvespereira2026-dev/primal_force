@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0a0a1a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Primal Force World">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <title>Primal Force — Mundo 3D</title>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nMNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Rajdhani', sans-serif; }
+        :root {
+            color-scheme: dark;
+            --power-gold: #FFD700;
+            --power-red: #FF1744;
+            --power-blue: #2979FF;
+            --power-green: #00E676;
+            --power-black: #0a0a1a;
+        }
+        body {
+            background: var(--power-black);
+            color: #e8e8f0;
+            height: 100vh; height: 100dvh;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        #three-container {
+            width: 100%; height: 100%;
+            position: absolute; inset: 0;
+        }
+        #three-container canvas { width: 100% !important; height: 100% !important; display: block; }
+
+        /* ============ HEADER HUD ============ */
+        .hud-header {
+            position: fixed; top: 0; left: 0; right: 0;
+            padding: 10px 16px;
+            padding-top: max(10px, env(safe-area-inset-top));
+            background: linear-gradient(180deg, rgba(10,10,26,0.95) 0%, rgba(10,10,26,0) 100%);
+            display: flex; align-items: center; gap: 12px;
+            z-index: 100;
+            pointer-events: none;
+        }
+        .hud-header > * { pointer-events: all; }
+        .hud-logo {
+            width: 28px; height: 28px;
+            filter: drop-shadow(0 0 6px var(--power-gold));
+        }
+        .hud-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px; font-weight: 800;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            background: linear-gradient(135deg, var(--power-gold), #fff, var(--power-gold));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            white-space: nowrap;
+        }
+        .hud-spacer { flex: 1; }
+        .hud-btn {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 8px; letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--power-gold);
+            background: rgba(255,215,0,0.06);
+            border: 1px solid rgba(255,215,0,0.2);
+            padding: 5px 10px; border-radius: 3px;
+            cursor: pointer; text-decoration: none;
+            transition: all 0.3s;
+        }
+        .hud-btn:hover { border-color: var(--power-gold); box-shadow: 0 0 12px rgba(255,215,0,0.2); }
+        .hud-btn.active { background: rgba(255,215,0,0.15); border-color: var(--power-gold); }
+
+        /* ============ SIDE ROBOT LIST ============ */
+        .robot-sidebar {
+            position: fixed; left: 10px; top: 50%;
+            transform: translateY(-50%);
+            display: flex; flex-direction: column; gap: 6px;
+            z-index: 100;
+        }
+        .robot-thumb {
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,215,0,0.15);
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(10,10,26,0.8);
+            position: relative;
+        }
+        .robot-thumb:hover { border-color: var(--power-gold); transform: scale(1.1); }
+        .robot-thumb.active {
+            border-color: var(--power-gold);
+            box-shadow: 0 0 12px rgba(255,215,0,0.4);
+        }
+        .robot-thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .robot-thumb .fly-icon {
+            position: absolute; bottom: -1px; right: -1px;
+            width: 14px; height: 14px;
+            background: var(--power-gold);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 8px;
+        }
+
+        /* ============ BOTTOM HUD ============ */
+        .hud-bottom {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            padding: 10px 16px;
+            padding-bottom: max(10px, env(safe-area-inset-bottom));
+            background: linear-gradient(0deg, rgba(10,10,26,0.95) 0%, rgba(10,10,26,0) 100%);
+            display: flex; align-items: center; gap: 10px;
+            z-index: 100;
+            pointer-events: none;
+        }
+        .hud-bottom > * { pointer-events: all; }
+
+        .mode-badge {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 9px; font-weight: 700;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            padding: 5px 12px; border-radius: 3px;
+            border: 1px solid;
+        }
+        .mode-walk {
+            color: var(--power-green);
+            border-color: rgba(0,230,118,0.3);
+            background: rgba(0,230,118,0.08);
+        }
+        .mode-fly {
+            color: var(--power-blue);
+            border-color: rgba(41,121,255,0.3);
+            background: rgba(41,121,255,0.08);
+        }
+
+        .energy-bar {
+            flex: 1; max-width: 200px;
+            height: 6px;
+            background: rgba(255,215,0,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .energy-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--power-gold), var(--power-red));
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+
+        .speed-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 8px; letter-spacing: 0.1em;
+            color: rgba(255,215,0,0.5);
+            text-transform: uppercase;
+        }
+
+        /* ============ CONTROLS INFO ============ */
+        .controls-info {
+            position: fixed; bottom: 50px; right: 16px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 8px; letter-spacing: 0.08em;
+            color: rgba(255,215,0,0.3);
+            text-transform: uppercase;
+            z-index: 100;
+            text-align: right;
+            line-height: 1.8;
+        }
+
+        /* ============ ROBOT NAME TAG ============ */
+        .robot-nametag {
+            position: fixed; top: 50px; left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px; font-weight: 800;
+            letter-spacing: 0.12em; text-transform: uppercase;
+            color: var(--power-gold);
+            text-shadow: 0 0 20px rgba(255,215,0,0.4);
+            z-index: 100;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        .robot-nametag.visible { opacity: 1; }
+
+        /* ============ MOBILE TOUCH CONTROLS ============ */
+        .touch-controls {
+            position: fixed; bottom: 60px; left: 16px;
+            z-index: 100;
+            display: none;
+        }
+        .touch-dpad {
+            width: 120px; height: 120px;
+            position: relative;
+        }
+        .dpad-btn {
+            position: absolute;
+            width: 36px; height: 36px;
+            background: rgba(255,215,0,0.1);
+            border: 1px solid rgba(255,215,0,0.2);
+            border-radius: 4px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; color: var(--power-gold);
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .dpad-btn:active { background: rgba(255,215,0,0.3); }
+        .dpad-up { top: 0; left: 50%; transform: translateX(-50%); }
+        .dpad-down { bottom: 0; left: 50%; transform: translateX(-50%); }
+        .dpad-left { left: 0; top: 50%; transform: translateY(-50%); }
+        .dpad-right { right: 0; top: 50%; transform: translateY(-50%); }
+
+        .touch-fly-btn {
+            position: fixed; bottom: 80px; left: 150px;
+            width: 50px; height: 50px;
+            background: rgba(41,121,255,0.15);
+            border: 1px solid rgba(41,121,255,0.3);
+            border-radius: 50%;
+            display: none; align-items: center; justify-content: center;
+            font-size: 22px; cursor: pointer; z-index: 100;
+        }
+        .touch-fly-btn:active { background: rgba(41,121,255,0.4); }
+
+        /* ============ MOBILE ============ */
+        @media (max-width: 700px) {
+            .hud-header { padding: 6px 10px; gap: 8px; }
+            .hud-title { font-size: 11px; }
+            .hud-btn { font-size: 7px; padding: 4px 8px; }
+            .robot-sidebar { left: auto; right: 6px; top: auto; bottom: 130px; transform: none; flex-direction: row; flex-wrap: wrap; gap: 4px; max-width: 200px; justify-content: flex-end; }
+            .robot-thumb { width: 34px; height: 34px; }
+            .controls-info { display: none; }
+            .touch-controls { display: block; }
+            .touch-fly-btn { display: flex; }
+            .hud-bottom { gap: 6px; padding: 8px 10px; }
+        }
+
+        /* ============ SPLASH SCREEN ============ */
+        #splash {
+            position: fixed; inset: 0;
+            background: #0a0a1a;
+            z-index: 99999;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            transition: opacity 0.8s ease, visibility 0.8s;
+            overflow: hidden;
+        }
+        #splash.hide { opacity: 0; visibility: hidden; pointer-events: none; }
+        #splash::before {
+            content: '';
+            position: absolute; inset: 0;
+            background:
+                linear-gradient(rgba(255,215,0,0.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,215,0,0.06) 1px, transparent 1px);
+            background-size: 40px 40px;
+            animation: gridScroll 4s linear infinite;
+            opacity: 0.5;
+        }
+        @keyframes gridScroll { 0% { background-position: 0 0; } 100% { background-position: 40px 40px; } }
+        #splash::after {
+            content: '';
+            position: absolute;
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(255,215,0,0.08) 0%, transparent 70%);
+            animation: splashPulse 2s ease-in-out infinite;
+        }
+        @keyframes splashPulse { 0%,100% { transform: scale(0.8); opacity: 0.5; } 50% { transform: scale(1.2); opacity: 1; } }
+        .splash-content { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        .splash-bolt { width: 120px; height: 120px; animation: boltAppear 1s ease-out forwards, boltFloat 2s ease-in-out 1s infinite; opacity: 0; filter: drop-shadow(0 0 20px rgba(255,215,0,0.6)); }
+        @keyframes boltAppear { 0% { opacity: 0; transform: scale(0.3) rotate(-30deg); } 60% { opacity: 1; transform: scale(1.1) rotate(5deg); } 100% { opacity: 1; transform: scale(1) rotate(0deg); } }
+        @keyframes boltFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .splash-title { font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 900; letter-spacing: 0.15em; text-transform: uppercase; background: linear-gradient(135deg, var(--power-gold), #fff, var(--power-gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: titleSlide 0.8s ease-out 0.4s forwards; opacity: 0; transform: translateY(20px); }
+        @keyframes titleSlide { to { opacity: 1; transform: translateY(0); } }
+        .splash-sub { font-family: 'Orbitron', sans-serif; font-size: 10px; letter-spacing: 0.2em; color: var(--power-gold); opacity: 0; text-transform: uppercase; animation: titleSlide 0.6s ease-out 0.8s forwards; }
+        .splash-ring { position: absolute; width: 200px; height: 200px; border: 2px solid var(--power-gold); clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); animation: ringExpand 1.5s ease-out 0.2s forwards; opacity: 0; }
+        .splash-ring:nth-child(2) { animation-delay: 0.5s; width: 300px; height: 300px; }
+        .splash-ring:nth-child(3) { animation-delay: 0.8s; width: 400px; height: 400px; }
+        @keyframes ringExpand { 0% { opacity: 0; transform: scale(0.5) rotate(0deg); } 50% { opacity: 0.4; } 100% { opacity: 0; transform: scale(1.5) rotate(60deg); } }
+        .splash-bar-c { position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); width: 200px; height: 3px; background: rgba(255,215,0,0.1); border-radius: 2px; overflow: hidden; z-index: 2; }
+        .splash-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--power-gold), var(--power-red)); border-radius: 2px; animation: barFill 2s ease-in-out forwards; }
+        @keyframes barFill { 0% { width: 0%; } 30% { width: 40%; } 60% { width: 70%; } 100% { width: 100%; } }
+        .splash-flash { position: absolute; inset: 0; background: var(--power-gold); opacity: 0; z-index: 10; animation: splashBolt 0.3s ease-out 0.6s forwards; pointer-events: none; }
+        @keyframes splashBolt { 0% { opacity: 0; } 20% { opacity: 0.3; } 100% { opacity: 0; } }
+        .splash-ver { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); font-family: 'Orbitron', sans-serif; font-size: 8px; letter-spacing: 0.15em; color: rgba(255,215,0,0.3); text-transform: uppercase; z-index: 2; }
+
+        /* ============ LIGHTNING ============ */
+        .lightning-flash { position: fixed; inset: 0; background: rgba(255,215,0,0.05); pointer-events: none; opacity: 0; animation: lightningFlash 8s ease-in-out infinite; z-index: 9998; }
+        @keyframes lightningFlash { 0%,94%,96%,98%,100% { opacity: 0; } 95% { opacity: 1; } 97% { opacity: 0.5; } }
+    </style>
+</head>
+<body>
+    <!-- SPLASH SCREEN -->
+    <div id="splash">
+        <div class="splash-flash"></div>
+        <div class="splash-ring"></div>
+        <div class="splash-ring"></div>
+        <div class="splash-ring"></div>
+        <div class="splash-content">
+            <svg class="splash-bolt" viewBox="0 0 24 24" fill="none">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="url(#sbGrad)" stroke="#FFD700" stroke-width="0.3"/>
+                <defs><linearGradient id="sbGrad" x1="3" y1="2" x2="22" y2="22"><stop offset="0%" stop-color="#FFD700"/><stop offset="100%" stop-color="#FF1744"/></linearGradient></defs>
+            </svg>
+            <div class="splash-title">Mundo 3D</div>
+            <div class="splash-sub">⚡ Primal Force — Morphin Grid ⚡</div>
+        </div>
+        <div class="splash-bar-c"><div class="splash-bar"></div></div>
+        <div class="splash-ver">v2.0 — Power Rangers</div>
+    </div>
+
+    <div class="lightning-flash"></div>
+
+    <!-- HUD -->
+    <div class="hud-header">
+        <svg class="hud-logo" viewBox="0 0 24 24" fill="none">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="url(#hGrad)" stroke="#FFD700" stroke-width="0.5"/>
+            <defs><linearGradient id="hGrad" x1="3" y1="2" x2="22" y2="22"><stop offset="0%" stop-color="#FFD700"/><stop offset="100%" stop-color="#FF1744"/></linearGradient></defs>
+        </svg>
+        <div class="hud-title">Mundo 3D</div>
+        <div class="hud-spacer"></div>
+        <a href="viewer3d.html" class="hud-btn">🏛️ Galeria</a>
+        <a href="index.html" class="hud-btn">💬 Chat</a>
+    </div>
+
+    <div class="robot-nametag" id="nametag"></div>
+
+    <!-- ROBOT SIDEBAR -->
+    <div class="robot-sidebar" id="robot-sidebar"></div>
+
+    <!-- TOUCH CONTROLS (mobile) -->
+    <div class="touch-controls" id="touch-controls">
+        <div class="touch-dpad">
+            <div class="dpad-btn dpad-up" data-dir="up">▲</div>
+            <div class="dpad-btn dpad-down" data-dir="down">▼</div>
+            <div class="dpad-btn dpad-left" data-dir="left">◀</div>
+            <div class="dpad-btn dpad-right" data-dir="right">▶</div>
+        </div>
+    </div>
+    <div class="touch-fly-btn" id="touch-fly">🚀</div>
+
+    <!-- BOTTOM HUD -->
+    <div class="hud-bottom">
+        <div class="mode-badge mode-walk" id="mode-badge">🚶 ANDAR</div>
+        <div class="energy-bar"><div class="energy-fill" id="energy-fill" style="width:100%"></div></div>
+        <div class="speed-label" id="speed-label">Velocidade: Normal</div>
+    </div>
+
+    <div class="controls-info">
+        WASD / Setas — Mover<br>
+        ESPAÇO — Voar / Descer<br>
+        SHIFT — Acelerar<br>
+        Q / E — Rodar<br>
+        1-9 — Selecionar robô
+    </div>
+
+    <div id="three-container"></div>
+
+    <script src="https://unpkg.com/three@0.160.0/build/three.module.js" type="importmap-shim"></script>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+        // ============ CONFIG ============
+        const WORLD_SIZE = 200;
+        const GRID_DIVISIONS = 40;
+        const MOVE_SPEED = 0.4;
+        const FAST_SPEED = 0.8;
+        const FLY_SPEED = 0.3;
+        const ROTATE_SPEED = 0.04;
+        const FLY_HEIGHT = 4;
+        const MAX_ENERGY = 100;
+
+        // Robot definitions
+        const ROBOTS = [
+            { id: 'rex', name: 'Rex', color: '#FF1744', model: 'assets/models/rex.glb', flyer: false },
+            { id: 'spike', name: 'Spike', color: '#2979FF', model: 'assets/models/spike.glb', flyer: false },
+            { id: 'tri', name: 'Tri', color: '#FFD700', model: 'assets/models/tri.glb', flyer: false },
+            { id: 'pluma', name: 'Pluma', color: '#E040FB', model: 'assets/models/pluma.glb', flyer: true },
+            { id: 'nuck', name: 'Nuck', color: '#00E676', model: 'assets/models/nuck.glb', flyer: false },
+            { id: 'bolha', name: 'Bolha', color: '#00BCD4', model: 'assets/models/bolha.glb', flyer: false },
+            { id: 'anka', name: 'Anka', color: '#FF9800', model: 'assets/models/anka.glb', flyer: false },
+            { id: 'crista', name: 'Crista', color: '#4CAF50', model: 'assets/models/crista.glb', flyer: false },
+            { id: 'blitz', name: 'Blitz', color: '#F44336', model: 'assets/models/blitz.glb', flyer: false },
+            { id: 'testa', name: 'Testa', color: '#795548', model: 'assets/models/testa.glb', flyer: false },
+            { id: 'mare', name: 'Maré', color: '#0097A7', model: 'assets/models/mare.glb', flyer: false },
+            { id: 'garra', name: 'Garra', color: '#D32F2F', model: 'assets/models/garra.glb', flyer: false },
+            { id: 'brisa', name: 'Brisa', color: '#8BC34A', model: 'assets/models/brisa.glb', flyer: true },
+            { id: 'vela', name: 'Vela', color: '#FF5722', model: 'assets/models/vela.glb', flyer: false },
+            { id: 'fin', name: 'Fin', color: '#3F51B5', model: 'assets/models/fin.glb', flyer: false },
+            { id: 'ninho', name: 'Ninho', color: '#009688', model: 'assets/models/ninho.glb', flyer: false },
+            { id: 'sol', name: 'Sol', color: '#FFC107', model: 'assets/models/sol.glb', flyer: false },
+            { id: 'frill', name: 'Frill', color: '#9C27B0', model: 'assets/models/frill.glb', flyer: false },
+            { id: 'abismo', name: 'Abismo', color: '#1A237E', model: 'assets/models/abismo.glb', flyer: false },
+            { id: 'alado', name: 'Alado', color: '#B0BEC5', model: 'assets/models/alado.glb', flyer: true }
+        ];
+
+        // ============ STATE ============
+        let activeRobotId = 'rex';
+        let isFlying = false;
+        let energy = MAX_ENERGY;
+        let keys = {};
+        let mobileDir = {};
+        const loadedModels = {};
+        const robotMeshes = {};
+
+        // ============ THREE.JS SETUP ============
+        const container = document.getElementById('three-container');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x0a0a1a, 0.008);
+
+        const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 500);
+        camera.position.set(0, 8, 15);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.1;
+        container.appendChild(renderer.domElement);
+
+        // ============ LIGHTS ============
+        const ambientLight = new THREE.AmbientLight(0x2a2a50, 0.6);
+        scene.add(ambientLight);
+
+        const sunLight = new THREE.DirectionalLight(0xfff0dd, 1.2);
+        sunLight.position.set(30, 50, 20);
+        sunLight.castShadow = true;
+        sunLight.shadow.mapSize.set(2048, 2048);
+        sunLight.shadow.camera.left = -60;
+        sunLight.shadow.camera.right = 60;
+        sunLight.shadow.camera.top = 60;
+        sunLight.shadow.camera.bottom = -60;
+        scene.add(sunLight);
+
+        const rimLight = new THREE.DirectionalLight(0x4466ff, 0.4);
+        rimLight.position.set(-20, 10, -20);
+        scene.add(rimLight);
+
+        const goldFill = new THREE.PointLight(0xffd700, 0.5, 80);
+        goldFill.position.set(0, 15, 0);
+        scene.add(goldFill);
+
+        // ============ MORPHIN GRID FLOOR ============
+        // Main grid
+        const gridHelper = new THREE.GridHelper(WORLD_SIZE, GRID_DIVISIONS, 0xffd700, 0x1a1a3a);
+        gridHelper.material.opacity = 0.25;
+        gridHelper.material.transparent = true;
+        scene.add(gridHelper);
+
+        // Sub-grid
+        const subGrid = new THREE.GridHelper(WORLD_SIZE, GRID_DIVISIONS * 4, 0x1a1a3a, 0x0d0d2b);
+        subGrid.position.y = -0.01;
+        subGrid.material.opacity = 0.1;
+        subGrid.material.transparent = true;
+        scene.add(subGrid);
+
+        // Ground plane
+        const groundGeo = new THREE.PlaneGeometry(WORLD_SIZE, WORLD_SIZE);
+        const groundMat = new THREE.MeshStandardMaterial({
+            color: 0x0a0a1a,
+            roughness: 0.9,
+            metalness: 0.1
+        });
+        const ground = new THREE.Mesh(groundGeo, groundMat);
+        ground.rotation.x = -Math.PI / 2;
+        ground.position.y = -0.05;
+        ground.receiveShadow = true;
+        scene.add(ground);
+
+        // Energy lines on the grid
+        const energyLinesMat = new THREE.LineBasicMaterial({ color: 0xffd700, opacity: 0.15, transparent: true });
+        for (let i = -WORLD_SIZE/2; i <= WORLD_SIZE/2; i += GRID_DIVISIONS) {
+            const points1 = [new THREE.Vector3(i, 0.01, -WORLD_SIZE/2), new THREE.Vector3(i, 0.01, WORLD_SIZE/2)];
+            const points2 = [new THREE.Vector3(-WORLD_SIZE/2, 0.01, i), new THREE.Vector3(WORLD_SIZE/2, 0.01, i)];
+            scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(points1), energyLinesMat));
+            scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(points2), energyLinesMat));
+        }
+
+        // ============ ENVIRONMENT OBJECTS ============
+        const envObjects = [];
+
+        function createTower(x, z, height, color) {
+            const group = new THREE.Group();
+
+            // Pillar
+            const pillarGeo = new THREE.CylinderGeometry(0.5, 0.8, height, 6);
+            const pillarMat = new THREE.MeshStandardMaterial({ color: 0x1a1a3a, metalness: 0.6, roughness: 0.3 });
+            const pillar = new THREE.Mesh(pillarGeo, pillarMat);
+            pillar.position.y = height / 2;
+            pillar.castShadow = true;
+            group.add(pillar);
+
+            // Glowing top
+            const topGeo = new THREE.OctahedronGeometry(1, 0);
+            const topMat = new THREE.MeshStandardMaterial({ color: color, emissive: color, emissiveIntensity: 0.5, metalness: 0.8, roughness: 0.2 });
+            const top = new THREE.Mesh(topGeo, topMat);
+            top.position.y = height + 1.5;
+            top.castShadow = true;
+            group.add(top);
+
+            // Light
+            const light = new THREE.PointLight(color, 0.8, 20);
+            light.position.y = height + 1.5;
+            group.add(light);
+
+            // Ring at base
+            const ringGeo = new THREE.TorusGeometry(1.5, 0.08, 8, 24);
+            const ringMat = new THREE.MeshStandardMaterial({ color: color, emissive: color, emissiveIntensity: 0.3 });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.rotation.x = Math.PI / 2;
+            ring.position.y = 0.1;
+            group.add(ring);
+
+            group.position.set(x, 0, z);
+            group.userData.topMesh = top;
+            scene.add(group);
+            envObjects.push(group);
+        }
+
+        function createRockCluster(x, z, scale) {
+            const group = new THREE.Group();
+            const rockCount = 3 + Math.floor(Math.random() * 4);
+            for (let i = 0; i < rockCount; i++) {
+                const geo = new THREE.DodecahedronGeometry(0.5 + Math.random() * 0.8, 0);
+                const mat = new THREE.MeshStandardMaterial({
+                    color: new THREE.Color().setHSL(0.6, 0.1, 0.15 + Math.random() * 0.1),
+                    roughness: 0.8, metalness: 0.2
+                });
+                const rock = new THREE.Mesh(geo, mat);
+                rock.position.set(
+                    (Math.random() - 0.5) * 3 * scale,
+                    Math.random() * 0.5,
+                    (Math.random() - 0.5) * 3 * scale
+                );
+                rock.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
+                rock.scale.setScalar(scale * (0.5 + Math.random() * 0.5));
+                rock.castShadow = true;
+                group.add(rock);
+            }
+            group.position.set(x, 0, z);
+            scene.add(group);
+        }
+
+        function createEnergyPortal(x, z) {
+            const group = new THREE.Group();
+
+            // Outer ring
+            const ringGeo = new THREE.TorusGeometry(3, 0.15, 16, 32);
+            const ringMat = new THREE.MeshStandardMaterial({ color: 0xffd700, emissive: 0xffd700, emissiveIntensity: 0.8, metalness: 0.9 });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.rotation.x = Math.PI / 2;
+            ring.position.y = 4;
+            group.add(ring);
+
+            // Inner ring
+            const innerRingGeo = new THREE.TorusGeometry(2.2, 0.08, 16, 32);
+            const innerRing = new THREE.Mesh(innerRingGeo, ringMat.clone());
+            innerRing.material.color.set(0xff1744);
+            innerRing.material.emissive.set(0xff1744);
+            innerRing.rotation.x = Math.PI / 2;
+            innerRing.position.y = 4;
+            group.add(innerRing);
+
+            // Vertical ring
+            const vRingGeo = new THREE.TorusGeometry(2.8, 0.1, 16, 32);
+            const vRing = new THREE.Mesh(vRingGeo, ringMat.clone());
+            vRing.position.y = 4;
+            group.add(vRing);
+
+            // Pillars
+            for (let i = 0; i < 4; i++) {
+                const angle = (i / 4) * Math.PI * 2;
+                const px = Math.cos(angle) * 3.5;
+                const pz = Math.sin(angle) * 3.5;
+                const pilGeo = new THREE.CylinderGeometry(0.2, 0.3, 8, 6);
+                const pilMat = new THREE.MeshStandardMaterial({ color: 0x1a1a3a, metalness: 0.5 });
+                const pil = new THREE.Mesh(pilGeo, pilMat);
+                pil.position.set(px, 4, pz);
+                pil.castShadow = true;
+                group.add(pil);
+            }
+
+            // Light
+            const light = new THREE.PointLight(0xffd700, 1.5, 30);
+            light.position.y = 4;
+            group.add(light);
+
+            group.position.set(x, 0, z);
+            group.userData.type = 'portal';
+            scene.add(group);
+            envObjects.push(group);
+        }
+
+        // Place environment
+        createTower(25, 25, 12, 0xffd700);
+        createTower(-25, 25, 10, 0xff1744);
+        createTower(25, -25, 14, 0x2979ff);
+        createTower(-25, -25, 11, 0x00e676);
+        createTower(0, 40, 16, 0xffd700);
+        createTower(40, 0, 13, 0xe040fb);
+        createTower(-40, 0, 10, 0x00bcd4);
+
+        createEnergyPortal(0, 0);
+        createEnergyPortal(30, -15);
+        createEnergyPortal(-30, 15);
+
+        createRockCluster(15, 10, 1.5);
+        createRockCluster(-20, -15, 2);
+        createRockCluster(35, 5, 1);
+        createRockCluster(-10, 30, 1.8);
+        createRockCluster(-35, -20, 1.2);
+        createRockCluster(10, -35, 1.5);
+
+        // ============ SKYBOX ============
+        const skyGeo = new THREE.SphereGeometry(200, 32, 16);
+        const skyMat = new THREE.ShaderMaterial({
+            uniforms: {
+                topColor: { value: new THREE.Color(0x0a0a2a) },
+                bottomColor: { value: new THREE.Color(0x0d0d2b) },
+                offset: { value: 10 },
+                exponent: { value: 0.4 }
+            },
+            vertexShader: `
+                varying vec3 vWorldPosition;
+                void main() {
+                    vec4 worldPos = modelMatrix * vec4(position, 1.0);
+                    vWorldPosition = worldPos.xyz;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform vec3 topColor;
+                uniform vec3 bottomColor;
+                uniform float offset;
+                uniform float exponent;
+                varying vec3 vWorldPosition;
+                void main() {
+                    float h = normalize(vWorldPosition + offset).y;
+                    gl_FragColor = vec4(mix(bottomColor, topColor, max(pow(max(h, 0.0), exponent), 0.0)), 1.0);
+                }
+            `,
+            side: THREE.BackSide
+        });
+        scene.add(new THREE.Mesh(skyGeo, skyMat));
+
+        // Stars
+        const starsGeo = new THREE.BufferGeometry();
+        const starsVerts = [];
+        for (let i = 0; i < 2000; i++) {
+            const r = 150 + Math.random() * 50;
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.random() * Math.PI * 0.6;
+            starsVerts.push(
+                r * Math.sin(phi) * Math.cos(theta),
+                r * Math.cos(phi) + 20,
+                r * Math.sin(phi) * Math.sin(theta)
+            );
+        }
+        starsGeo.setAttribute('position', new THREE.Float32BufferAttribute(starsVerts, 3));
+        const starsMat = new THREE.PointsMaterial({ color: 0xffd700, size: 0.3, transparent: true, opacity: 0.6 });
+        scene.add(new THREE.Points(starsGeo, starsMat));
+
+        // ============ PARTICLES (MORPHIN ENERGY) ============
+        const particleCount = 500;
+        const particleGeo = new THREE.BufferGeometry();
+        const particlePositions = new Float32Array(particleCount * 3);
+        const particleSpeeds = [];
+        for (let i = 0; i < particleCount; i++) {
+            particlePositions[i * 3] = (Math.random() - 0.5) * WORLD_SIZE;
+            particlePositions[i * 3 + 1] = Math.random() * 30;
+            particlePositions[i * 3 + 2] = (Math.random() - 0.5) * WORLD_SIZE;
+            particleSpeeds.push(0.01 + Math.random() * 0.03);
+        }
+        particleGeo.setAttribute('position', new THREE.Float32BufferAttribute(particlePositions, 3));
+        const particleMat = new THREE.PointsMaterial({
+            color: 0xffd700, size: 0.15, transparent: true, opacity: 0.4,
+            blending: THREE.AdditiveBlending
+        });
+        const particles = new THREE.Points(particleGeo, particleMat);
+        scene.add(particles);
+
+        // ============ LOAD ROBOT MODELS ============
+        const loader = new GLTFLoader();
+
+        function loadAllRobots() {
+            ROBOTS.forEach(robot => {
+                loader.load(robot.model, (gltf) => {
+                    const model = gltf.scene;
+                    // Scale and center
+                    const box = new THREE.Box3().setFromObject(model);
+                    const size = box.getSize(new THREE.Vector3());
+                    const maxDim = Math.max(size.x, size.y, size.z);
+                    const scale = 4 / maxDim;
+                    model.scale.setScalar(scale);
+
+                    // Offset to stand on ground
+                    const minY = box.min.y * scale;
+                    model.position.y = -minY;
+
+                    // Random starting position
+                    const angle = Math.random() * Math.PI * 2;
+                    const dist = 10 + Math.random() * 30;
+                    model.position.x = Math.cos(angle) * dist;
+                    model.position.z = Math.sin(angle) * dist;
+
+                    model.rotation.y = Math.random() * Math.PI * 2;
+
+                    // Wrap in group for easier manipulation
+                    const wrapper = new THREE.Group();
+                    wrapper.add(model);
+                    wrapper.userData = {
+                        robotId: robot.id,
+                        flyer: robot.flyer,
+                        targetY: 0,
+                        bobPhase: Math.random() * Math.PI * 2,
+                        walkBob: 0
+                    };
+
+                    robotMeshes[robot.id] = wrapper;
+                    loadedModels[robot.id] = model;
+                    scene.add(wrapper);
+
+                    // Auto-select first robot
+                    if (robot.id === activeRobotId) {
+                        selectRobot(robot.id);
+                    }
+                }, undefined, (err) => {
+                    console.warn(`Failed to load ${robot.id}:`, err);
+                });
+            });
+        }
+
+        loadAllRobots();
+
+        // ============ BUILD SIDEBAR ============
+        function buildSidebar() {
+            const sidebar = document.getElementById('robot-sidebar');
+            sidebar.innerHTML = '';
+            ROBOTS.forEach((robot, idx) => {
+                const thumb = document.createElement('div');
+                thumb.className = 'robot-thumb' + (robot.id === activeRobotId ? ' active' : '');
+                thumb.dataset.robot = robot.id;
+                thumb.style.borderColor = robot.id === activeRobotId ? robot.color : '';
+
+                const img = document.createElement('img');
+                img.src = `assets/img/${robot.id}.png`;
+                img.alt = robot.name;
+                thumb.appendChild(img);
+
+                if (robot.flyer) {
+                    const flyIcon = document.createElement('div');
+                    flyIcon.className = 'fly-icon';
+                    flyIcon.textContent = '🚀';
+                    thumb.appendChild(flyIcon);
+                }
+
+                thumb.addEventListener('click', () => selectRobot(robot.id));
+
+                // Keyboard shortcut (1-9, 0 for 10)
+                if (idx < 10) {
+                    const key = idx === 9 ? '0' : String(idx + 1);
+                    thumb.title = `${robot.name} (${key})`;
+                }
+
+                sidebar.appendChild(thumb);
+            });
+        }
+        buildSidebar();
+
+        // ============ SELECT ROBOT ============
+        function selectRobot(id) {
+            activeRobotId = id;
+            const robot = ROBOTS.find(r => r.id === id);
+            if (!robot) return;
+
+            // Reset flying when switching to non-flyer
+            if (!robot.flyer && isFlying) {
+                isFlying = false;
+            }
+
+            // Update sidebar
+            document.querySelectorAll('.robot-thumb').forEach(t => {
+                t.classList.toggle('active', t.dataset.robot === id);
+                t.style.borderColor = t.dataset.robot === id ? robot.color : '';
+            });
+
+            // Update nametag
+            const nametag = document.getElementById('nametag');
+            nametag.textContent = robot.name;
+            nametag.style.color = robot.color;
+            nametag.classList.add('visible');
+            setTimeout(() => nametag.classList.remove('visible'), 2000);
+
+            // Update mode badge
+            updateModeBadge();
+
+            // Center camera on robot
+            const mesh = robotMeshes[id];
+            if (mesh) {
+                cameraTarget.copy(mesh.position);
+            }
+        }
+
+        function updateModeBadge() {
+            const badge = document.getElementById('mode-badge');
+            const robot = ROBOTS.find(r => r.id === activeRobotId);
+            if (isFlying) {
+                badge.className = 'mode-badge mode-fly';
+                badge.textContent = '🚀 VOAR';
+            } else {
+                badge.className = 'mode-badge mode-walk';
+                badge.textContent = '🚶 ANDAR';
+            }
+        }
+
+        // ============ CAMERA CONTROLS ============
+        const cameraTarget = new THREE.Vector3();
+        const cameraOffset = new THREE.Vector3(0, 8, 15);
+        let cameraAngle = 0;
+        let cameraDist = 15;
+        let cameraHeight = 8;
+
+        function updateCamera() {
+            const mesh = robotMeshes[activeRobotId];
+            if (!mesh) return;
+
+            // Smooth follow
+            const targetPos = mesh.position.clone();
+            cameraTarget.lerp(targetPos, 0.05);
+
+            // Orbit camera
+            const camX = cameraTarget.x + Math.sin(cameraAngle) * cameraDist;
+            const camZ = cameraTarget.z + Math.cos(cameraAngle) * cameraDist;
+            const camY = cameraTarget.y + cameraHeight;
+
+            camera.position.lerp(new THREE.Vector3(camX, camY, camZ), 0.08);
+            camera.lookAt(cameraTarget);
+        }
+
+        // ============ INPUT ============
+        window.addEventListener('keydown', (e) => {
+            keys[e.key.toLowerCase()] = true;
+
+            // Number keys to select robot
+            const num = parseInt(e.key);
+            if (num >= 1 && num <= 9 && num <= ROBOTS.length) {
+                selectRobot(ROBOTS[num - 1].id);
+            }
+            if (e.key === '0' && ROBOTS.length >= 10) {
+                selectRobot(ROBOTS[9].id);
+            }
+
+            // Space to toggle fly
+            if (e.key === ' ') {
+                e.preventDefault();
+                const robot = ROBOTS.find(r => r.id === activeRobotId);
+                if (robot && robot.flyer) {
+                    isFlying = !isFlying;
+                    updateModeBadge();
+                    if (isFlying) {
+                        const mesh = robotMeshes[activeRobotId];
+                        if (mesh) mesh.userData.targetY = FLY_HEIGHT;
+                    } else {
+                        const mesh = robotMeshes[activeRobotId];
+                        if (mesh) mesh.userData.targetY = 0;
+                    }
+                }
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            keys[e.key.toLowerCase()] = false;
+        });
+
+        // Mobile touch controls
+        document.querySelectorAll('.dpad-btn').forEach(btn => {
+            const dir = btn.dataset.dir;
+            btn.addEventListener('touchstart', (e) => { e.preventDefault(); mobileDir[dir] = true; });
+            btn.addEventListener('touchend', (e) => { e.preventDefault(); mobileDir[dir] = false; });
+            btn.addEventListener('mousedown', () => mobileDir[dir] = true);
+            btn.addEventListener('mouseup', () => mobileDir[dir] = false);
+        });
+
+        document.getElementById('touch-fly').addEventListener('click', () => {
+            const robot = ROBOTS.find(r => r.id === activeRobotId);
+            if (robot && robot.flyer) {
+                isFlying = !isFlying;
+                updateModeBadge();
+                const mesh = robotMeshes[activeRobotId];
+                if (mesh) mesh.userData.targetY = isFlying ? FLY_HEIGHT : 0;
+            }
+        });
+
+        // ============ MOVE ROBOTS ============
+        function updateRobotMovement(dt) {
+            const mesh = robotMeshes[activeRobotId];
+            if (!mesh) return;
+
+            const fast = keys['shift'];
+            const speed = fast ? FAST_SPEED : MOVE_SPEED;
+            let moved = false;
+
+            // Movement relative to camera
+            const forward = new THREE.Vector3();
+            camera.getWorldDirection(forward);
+            forward.y = 0;
+            forward.normalize();
+
+            const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
+
+            // WASD / Arrows
+            if (keys['w'] || keys['arrowup'] || mobileDir.up) {
+                mesh.position.add(forward.clone().multiplyScalar(speed));
+                moved = true;
+            }
+            if (keys['s'] || keys['arrowdown'] || mobileDir.down) {
+                mesh.position.add(forward.clone().multiplyScalar(-speed));
+                moved = true;
+            }
+            if (keys['a'] || keys['arrowleft'] || mobileDir.left) {
+                mesh.position.add(right.clone().multiplyScalar(-speed));
+                moved = true;
+            }
+            if (keys['d'] || keys['arrowright'] || mobileDir.right) {
+                mesh.position.add(right.clone().multiplyScalar(speed));
+                moved = true;
+            }
+
+            // Rotate
+            if (keys['q']) {
+                mesh.rotation.y += ROTATE_SPEED;
+            }
+            if (keys['e']) {
+                mesh.rotation.y -= ROTATE_SPEED;
+            }
+
+            // Flying
+            if (isFlying) {
+                mesh.userData.targetY = FLY_HEIGHT + (keys[' '] ? FLY_SPEED * 5 : 0) - (keys['c'] ? FLY_SPEED * 5 : 0);
+                mesh.userData.targetY = Math.max(1, Math.min(20, mesh.userData.targetY));
+                energy = Math.max(0, energy - 0.05);
+                if (energy <= 0) {
+                    isFlying = false;
+                    mesh.userData.targetY = 0;
+                    updateModeBadge();
+                }
+            } else {
+                energy = Math.min(MAX_ENERGY, energy + 0.1);
+                mesh.userData.targetY = 0;
+            }
+
+            // Smooth Y
+            mesh.position.y += (mesh.userData.targetY - mesh.position.y) * 0.05;
+
+            // Keep in bounds
+            mesh.position.x = Math.max(-WORLD_SIZE/2 + 2, Math.min(WORLD_SIZE/2 - 2, mesh.position.x));
+            mesh.position.z = Math.max(-WORLD_SIZE/2 + 2, Math.min(WORLD_SIZE/2 - 2, mesh.position.z));
+
+            // Walking bob
+            if (moved && !isFlying) {
+                mesh.userData.walkBob += dt * 12;
+                const bob = Math.sin(mesh.userData.walkBob) * 0.15;
+                const model = loadedModels[activeRobotId];
+                if (model) {
+                    model.position.y = -new THREE.Box3().setFromObject(model).min.y * model.scale.y + bob;
+                    model.rotation.z = Math.sin(mesh.userData.walkBob) * 0.05;
+                }
+            }
+
+            // Update energy bar
+            document.getElementById('energy-fill').style.width = (energy / MAX_ENERGY * 100) + '%';
+
+            // Speed label
+            document.getElementById('speed-label').textContent =
+                fast ? 'Velocidade: Rápido ⚡' : (isFlying ? 'Velocidade: Voo 🚀' : 'Velocidade: Normal');
+        }
+
+        // ============ ANIMATE WORLD ============
+        const clock = new THREE.Clock();
+
+        function animateWorld() {
+            const dt = clock.getDelta();
+            const time = clock.getElapsedTime();
+
+            // Animate env objects
+            envObjects.forEach(obj => {
+                if (obj.userData.topMesh) {
+                    obj.userData.topMesh.rotation.y += 0.01;
+                    obj.userData.topMesh.rotation.x = Math.sin(time * 0.5) * 0.2;
+                }
+                if (obj.userData.type === 'portal') {
+                    obj.children.forEach(child => {
+                        if (child.geometry && child.geometry.type === 'TorusGeometry') {
+                            child.rotation.z += 0.005;
+                        }
+                    });
+                }
+            });
+
+            // Animate particles
+            const positions = particles.geometry.attributes.position.array;
+            for (let i = 0; i < particleCount; i++) {
+                positions[i * 3 + 1] += particleSpeeds[i];
+                if (positions[i * 3 + 1] > 30) {
+                    positions[i * 3 + 1] = 0;
+                }
+            }
+            particles.geometry.attributes.position.needsUpdate = true;
+
+            // Idle animation for non-active robots
+            ROBOTS.forEach(robot => {
+                if (robot.id === activeRobotId) return;
+                const mesh = robotMeshes[robot.id];
+                if (!mesh) return;
+                const model = loadedModels[robot.id];
+                if (!model) return;
+                // Gentle floating
+                mesh.userData.bobPhase += dt * 0.8;
+                const floatY = Math.sin(mesh.userData.bobPhase) * 0.2;
+                const baseY = robot.flyer ? 3 : 0;
+                mesh.position.y += (baseY + floatY - mesh.position.y) * 0.02;
+                // Slow rotation
+                mesh.rotation.y += 0.002;
+            });
+
+            // Move active robot
+            updateRobotMovement(dt);
+
+            // Update camera
+            updateCamera();
+
+            // Camera rotation with mouse drag
+            renderer.render(scene, camera);
+        }
+
+        // ============ MOUSE CAMERA ORBIT ============
+        let isDragging = false;
+        let lastMouseX = 0;
+
+        renderer.domElement.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            lastMouseX = e.clientX;
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const dx = e.clientX - lastMouseX;
+            cameraAngle += dx * 0.005;
+            lastMouseX = e.clientX;
+        });
+        window.addEventListener('mouseup', () => isDragging = false);
+
+        // Touch orbit
+        let touchStartX = 0;
+        renderer.domElement.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                touchStartX = e.touches[0].clientX;
+            }
+        });
+        renderer.domElement.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 1) {
+                const dx = e.touches[0].clientX - touchStartX;
+                cameraAngle += dx * 0.005;
+                touchStartX = e.touches[0].clientX;
+            }
+        });
+
+        // Scroll to zoom
+        renderer.domElement.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            cameraDist = Math.max(5, Math.min(40, cameraDist + e.deltaY * 0.02));
+            cameraHeight = Math.max(3, Math.min(25, cameraHeight + e.deltaY * 0.01));
+        }, { passive: false });
+
+        // ============ RESIZE ============
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // ============ SPLASH ============
+        function hideSplash() {
+            const splash = document.getElementById('splash');
+            if (splash) { splash.classList.add('hide'); setTimeout(() => splash.remove(), 1000); }
+        }
+        setTimeout(hideSplash, 2500);
+        document.fonts.ready.then(() => { if (document.getElementById('splash')) setTimeout(hideSplash, 800); });
+
+        // ============ ANIMATION LOOP ============
+        function animate() {
+            requestAnimationFrame(animate);
+            animateWorld();
+        }
+        animate();
+    </script>
+</body>
+</html>

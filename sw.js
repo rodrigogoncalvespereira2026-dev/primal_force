@@ -3,6 +3,7 @@ const CORE_ASSETS = [
     "/",
     "/index.html",
     "/viewer3d.html",
+    "/world3d.html",
     "/config.js",
     "/primalforce-robots.js",
     "/robot-base.js",
