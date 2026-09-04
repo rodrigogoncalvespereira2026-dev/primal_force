@@ -736,13 +736,22 @@
                     const wrapper = new THREE.Group();
                     wrapper.add(model);
                     wrapper.position.y = 0;
+                    // Pick a random wander target for idle movement
+                    const wanderAngle = Math.random() * Math.PI * 2;
+                    const wanderDist = 5 + Math.random() * 20;
                     wrapper.userData = {
                         robotId: robot.id,
                         flyer: robot.flyer,
                         targetY: 0,
                         bobPhase: Math.random() * Math.PI * 2,
                         walkBob: 0,
-                        baseModelY: footY
+                        baseModelY: footY,
+                        // Wander AI
+                        wanderX: wrapper.position.x + Math.cos(wanderAngle) * wanderDist,
+                        wanderZ: wrapper.position.z + Math.sin(wanderAngle) * wanderDist,
+                        wanderTimer: 3 + Math.random() * 8,
+                        wanderSpeed: 0.3 + Math.random() * 0.5,
+                        isWandering: false
                     };
 
                     robotMeshes[robot.id] = wrapper;
@@ -1045,20 +1054,67 @@
             }
             particles.geometry.attributes.position.needsUpdate = true;
 
-            // Idle animation for non-active robots
+            // Wandering AI for non-active robots
             ROBOTS.forEach(robot => {
                 if (robot.id === activeRobotId) return;
                 const mesh = robotMeshes[robot.id];
                 if (!mesh) return;
-                const model = loadedModels[robot.id];
-                if (!model) return;
-                // Gentle floating
-                mesh.userData.bobPhase += dt * 0.8;
-                const floatY = Math.sin(mesh.userData.bobPhase) * 0.2;
-                const baseY = robot.flyer ? 3 : 0;
-                mesh.position.y += (baseY + floatY - mesh.position.y) * 0.02;
-                // Slow rotation
-                mesh.rotation.y += 0.002;
+                const ud = mesh.userData;
+
+                // Countdown to pick new target
+                ud.wanderTimer -= dt;
+                if (ud.wanderTimer <= 0) {
+                    // Pick new random wander target
+                    const angle = Math.random() * Math.PI * 2;
+                    const dist = 8 + Math.random() * 25;
+                    ud.wanderX = mesh.position.x + Math.cos(angle) * dist;
+                    ud.wanderZ = mesh.position.z + Math.sin(angle) * dist;
+                    // Clamp to world bounds
+                    ud.wanderX = Math.max(-WORLD_SIZE/2 + 5, Math.min(WORLD_SIZE/2 - 5, ud.wanderX));
+                    ud.wanderZ = Math.max(-WORLD_SIZE/2 + 5, Math.min(WORLD_SIZE/2 - 5, ud.wanderZ));
+                    ud.wanderTimer = 4 + Math.random() * 10;
+                }
+
+                // Move toward wander target
+                const dx = ud.wanderX - mesh.position.x;
+                const dz = ud.wanderZ - mesh.position.z;
+                const distToTarget = Math.sqrt(dx * dx + dz * dz);
+
+                if (distToTarget > 1.0) {
+                    // Walking toward target
+                    ud.isWandering = true;
+                    const speed = ud.wanderSpeed * dt * 15;
+                    mesh.position.x += (dx / distToTarget) * speed;
+                    mesh.position.z += (dz / distToTarget) * speed;
+
+                    // Face direction of movement
+                    const targetAngle = Math.atan2(dx, dz);
+                    // Smooth rotation toward target
+                    let angleDiff = targetAngle - mesh.rotation.y;
+                    while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+                    while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+                    mesh.rotation.y += angleDiff * 0.08;
+
+                    // Walking bob
+                    ud.walkBob += dt * 10;
+                    const bob = Math.sin(ud.walkBob) * 0.12;
+                    const baseY = robot.flyer ? 2 : 0;
+                    mesh.position.y += (baseY + bob - mesh.position.y) * 0.1;
+                    mesh.position.y = baseY + bob;
+                } else {
+                    // Standing still, gentle idle
+                    ud.isWandering = false;
+                    ud.walkBob *= 0.9;
+                    const floatY = Math.sin(ud.bobPhase) * 0.15;
+                    ud.bobPhase += dt * 0.5;
+                    const baseY = robot.flyer ? 3 : 0;
+                    mesh.position.y += (baseY + floatY - mesh.position.y) * 0.05;
+                    mesh.rotation.y += 0.003;
+                }
+
+                // Clamp to world
+                mesh.position.x = Math.max(-WORLD_SIZE/2 + 2, Math.min(WORLD_SIZE/2 - 2, mesh.position.x));
+                mesh.position.z = Math.max(-WORLD_SIZE/2 + 2, Math.min(WORLD_SIZE/2 - 2, mesh.position.z));
             });
 
             // Move active robot
