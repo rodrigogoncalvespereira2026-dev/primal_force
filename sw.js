@@ -1,10 +1,14 @@
-const CACHE_NAME = "primalforce-v1";
-const ASSETS = [
+const CACHE_NAME = "primalforce-v2";
+const CORE_ASSETS = [
     "/",
     "/index.html",
+    "/viewer3d.html",
     "/config.js",
     "/primalforce-robots.js",
     "/robot-base.js",
+    "/manifest.json",
+    "/icon-192.png",
+    "/icon-512.png",
     "/rex-ai.js",
     "/spike-ai.js",
     "/tri-ai.js",
@@ -24,7 +28,10 @@ const ASSETS = [
     "/sol-ai.js",
     "/frill-ai.js",
     "/abismo-ai.js",
-    "/alado-ai.js",
+    "/alado-ai.js"
+];
+
+const IMAGE_ASSETS = [
     "/assets/img/rex.png",
     "/assets/img/spike.png",
     "/assets/img/tri.png",
@@ -44,15 +51,44 @@ const ASSETS = [
     "/assets/img/sol.png",
     "/assets/img/frill.png",
     "/assets/img/abismo.png",
-    "/assets/img/alado.png",
+    "/assets/img/alado.png"
+];
+
+const MODEL_ASSETS = [
     "/assets/models/rex.glb",
     "/assets/models/spike.glb",
     "/assets/models/tri.glb",
-    "/assets/models/pluma.glb"
+    "/assets/models/pluma.glb",
+    "/assets/models/nuck.glb",
+    "/assets/models/bolha.glb",
+    "/assets/models/anka.glb",
+    "/assets/models/crista.glb",
+    "/assets/models/blitz.glb",
+    "/assets/models/testa.glb",
+    "/assets/models/mare.glb",
+    "/assets/models/garra.glb",
+    "/assets/models/brisa.glb",
+    "/assets/models/vela.glb",
+    "/assets/models/fin.glb",
+    "/assets/models/ninho.glb",
+    "/assets/models/sol.glb",
+    "/assets/models/frill.glb",
+    "/assets/models/abismo.glb",
+    "/assets/models/alado.glb"
 ];
 
 self.addEventListener("install", (e) => {
-    e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(ASSETS)));
+    e.waitUntil(
+        caches.open(CACHE_NAME).then(c =>
+            c.addAll(CORE_ASSETS).then(() => {
+                // Cache images in background (don't fail install if images fail)
+                return Promise.allSettled([
+                    ...IMAGE_ASSETS.map(url => c.add(url)),
+                    ...MODEL_ASSETS.map(url => c.add(url))
+                ]);
+            })
+        )
+    );
     self.skipWaiting();
 });
 

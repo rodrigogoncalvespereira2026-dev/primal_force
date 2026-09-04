@@ -1,13 +1,42 @@
 {
-    "name": "Primal Force IA",
+    "name": "Primal Force IA — Robôs Power Rangers",
     "short_name": "Primal Force",
     "description": "Fala com os 20 robôs companheiros dos Power Rangers Primal Force",
     "start_url": "/",
+    "scope": "/",
     "display": "standalone",
+    "orientation": "portrait",
     "background_color": "#0f1221",
     "theme_color": "#0f1221",
+    "categories": ["entertainment", "education"],
+    "lang": "pt",
+    "dir": "ltr",
     "icons": [
-        { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
-        { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+        {
+            "src": "icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Chat com Robôs",
+            "short_name": "Chat",
+            "url": "/",
+            "description": "Abre o chat com os robôs"
+        },
+        {
+            "name": "Modelos 3D",
+            "short_name": "3D",
+            "url": "/viewer3d.html",
+            "description": "Explora os modelos 3D dos robôs"
+        }
     ]
 }

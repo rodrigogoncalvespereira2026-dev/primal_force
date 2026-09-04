@@ -8,6 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Primal Force 3D">
     <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
     <title>Primal Force — Modelos 3D</title>
     <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nMNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=">
     <style>
@@ -520,10 +521,74 @@
             .voice-controls { display: none !important; }
             .voice-chat { bottom: 90px; visibility: visible !important; }
         }
+        /* ============ INSTALL BANNER ============ */
+        #install-banner {
+            display: none;
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: linear-gradient(135deg, #0d0d2b, #1a0a2e);
+            border-top: 2px solid var(--power-gold);
+            padding: 14px 20px;
+            padding-bottom: max(14px, env(safe-area-inset-bottom));
+            z-index: 1000;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 -4px 20px rgba(255,215,0,0.15);
+        }
+        #install-banner.mostrar { display: flex; }
+        #install-banner .install-text {
+            flex: 1;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px;
+            letter-spacing: 0.08em;
+            color: #e8e8f0;
+            text-transform: uppercase;
+        }
+        #install-banner .install-text span {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--power-gold);
+            margin-bottom: 2px;
+        }
+        #install-btn {
+            background: linear-gradient(135deg, var(--power-gold), #b8860b);
+            color: #0a0a1a;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        #install-dismiss {
+            background: none;
+            border: 1px solid rgba(255,215,0,0.2);
+            color: var(--power-gold);
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
     </style>
 </head>
 <body>
     <div class="lightning-flash"></div>
+
+    <div id="install-banner">
+        <div class="install-text">
+            <span>⚡ Instalar Primal Force</span>
+            Adiciona ao ecrã principal
+        </div>
+        <button id="install-btn">Instalar</button>
+        <button id="install-dismiss">✕</button>
+    </div>
 
     <header>
         <div class="logo-bolt">
@@ -928,6 +993,39 @@
             if (modelRobots.length > 0) {
                 selectRobot(modelRobots[0].id);
             }
+        });
+    </script>
+    <script>
+        // ============ PWA INSTALL PROMPT ============
+        let deferredPrompt = null;
+        const installBanner = document.getElementById('install-banner');
+        const installBtn = document.getElementById('install-btn');
+        const installDismiss = document.getElementById('install-dismiss');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            if (!sessionStorage.getItem('installDismissed')) {
+                installBanner.classList.add('mostrar');
+            }
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            deferredPrompt = null;
+            installBanner.classList.remove('mostrar');
+        });
+
+        installDismiss.addEventListener('click', () => {
+            installBanner.classList.remove('mostrar');
+            sessionStorage.setItem('installDismissed', '1');
+        });
+
+        window.addEventListener('appinstalled', () => {
+            installBanner.classList.remove('mostrar');
+            deferredPrompt = null;
         });
     </script>
 </body>
