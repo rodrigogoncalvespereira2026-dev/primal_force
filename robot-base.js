@@ -1,5 +1,5 @@
 class RobotAI {
-    constructor(nome, personalidade, objetivo, cor, suporte, frase, ranger, dino) {
+    constructor(nome, personalidade, objetivo, cor, suporte, frase, ranger, dino, voz) {
         this.nome = nome;
         this.personalidade = personalidade;
         this.objetivo = objetivo;
@@ -8,10 +8,20 @@ class RobotAI {
         this.frase = frase || "";
         this.ranger = ranger || "";
         this.dino = dino || "";
+        this.vozConfig = voz || null;
         this.maxHistorico = 10;
         this.primalForce = null;
         this._filaRequisicoes = [];
         this._processandoFila = false;
+    }
+
+    _obterVoz() {
+        if (this.vozConfig) return this.vozConfig;
+        if (this.primalForce) {
+            const dados = this.primalForce[this.nome.toLowerCase()];
+            if (dados && dados.voz) return dados.voz;
+        }
+        return { nome: "pt-PT-DuarteNeural", rate: "-15%", pitch: 0.9 };
     }
 
     pararVozAtual() {
@@ -272,7 +282,7 @@ class RobotAI {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 signal: controller.signal,
-                body: JSON.stringify({ texto: textoVoz, voz: "pt-PT-DuarteNeural", rate: "-15%" })
+                body: JSON.stringify({ texto: textoVoz, voz: this._obterVoz().nome, rate: this._obterVoz().rate })
             });
             clearTimeout(timeout);
 
@@ -316,7 +326,7 @@ class RobotAI {
             utterance.rate = CONFIG.velocidadeVoz || 1.0;
 
             const idx = this._indiceVoz();
-            utterance.pitch = 0.85 + (idx % 5) * 0.1;
+            utterance.pitch = this._obterVoz().pitch || 0.9;
             utterance.volume = 1.0;
 
             let resolvido = false;

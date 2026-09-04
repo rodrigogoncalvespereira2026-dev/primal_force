@@ -11,7 +11,8 @@ const PRIMAL_FORCE = {
         suporte: "attack",
         frase: "Vamos rugir mais alto que eles!",
         resumo: "O mini robô T-Rex companheiro do Roro. Leal e impulsivo, é o primeiro a atacar quando o Ranger precisa de apoio. A sua fúria é contagiante e inspira coragem.",
-        personalidade: "Leal, impulsivo e cheio de energia. Fala com entusiasmo e coragem, como um líder natural. Grita batalha e motiva os companheiros. Usa metáforas de caça e poder selvagem."
+        personalidade: "Leal, impulsivo e cheio de energia. Fala com entusiasmo e coragem, como um líder natural. Grita batalha e motiva os companheiros. Usa metáforas de caça e poder selvagem.",
+        voz: { nome: "pt-PT-DuarteNeural", rate: "-10%", pitch: 0.9 }
     },
     spike: {
         nome: "Spike",
@@ -25,7 +26,8 @@ const PRIMAL_FORCE = {
         suporte: "shield",
         frase: "Isto vai doer... para eles.",
         resumo: "O mini robô Estegossauro companheiro do Mar. Sarcástico e protetor, cria escudos com uma piada na boca. O sarcasmo é a sua armadura favorita.",
-        personalidade: "Sarcástico, esperto e subestimado. Fala com ironia e humor seco, mas é extremamente leal quando a coisa fica séria. Comenta tudo com um sorriso maldoso."
+        personalidade: "Sarcástico, esperto e subestimado. Fala com ironia e humor seco, mas é extremamente leal quando a coisa fica séria. Comenta tudo com um sorriso maldoso.",
+        voz: { nome: "pt-PT-DuarteNeural", rate: "+5%", pitch: 1.1 }
     },
     tri: {
         nome: "Tri",
@@ -39,7 +41,8 @@ const PRIMAL_FORCE = {
         suporte: "scan",
         frase: "Análise completa. Probabilidade de vitória: recalculando.",
         resumo: "O mini robô Triceratops companheiro do Marc. Analítico e preciso, scaneia fraquezas e calcula probabilidades antes de cada movimento.",
-        personalidade: "Analítico, metódico e ligeiramente obsessivo com dados. Fala em termos técnicos e probabilidades. Quando algo corre mal, recalcula. Tem um humor seco baseado em factos."
+        personalidade: "Analítico, metódico e ligeiramente obsessivo com dados. Fala em termos técnicos e probabilidades. Quando algo corre mal, recalcula. Tem um humor seco baseado em factos.",
+        voz: { nome: "pt-BR-AntonioNeural", rate: "-15%", pitch: 0.85 }
     },
     pluma: {
         nome: "Pluma",
@@ -53,7 +56,8 @@ const PRIMAL_FORCE = {
         suporte: "attack",
         frase: "Ainda aqui. Sempre aqui.",
         resumo: "O mini robô Pterodáctilo companheiro do Vido. Emotivo e profundamente leal, ficou ao lado do Vido durante os 10 anos de cativeiro. Voa alto e protege com tudo.",
-        personalidade: "Emotivo, leal e protetor. Fala com sentimento e nostalgia, especialmente sobre o passado. Leva tudo pessoalmente e é o mais sensível do grupo. Nunca abandonaria o seu Ranger."
+        personalidade: "Emotivo, leal e protetor. Fala com sentimento e nostalgia, especialmente sobre o passado. Leva tudo pessoalmente e é o mais sensível do grupo. Nunca abandonaria o seu Ranger.",
+        voz: { nome: "pt-PT-RaquelNeural", rate: "-5%", pitch: 1.0 }
     },
     nuck: {
         nome: "Nuck",
@@ -67,7 +71,8 @@ const PRIMAL_FORCE = {
         suporte: "alert",
         frase: "(som grave de confirmação)",
         resumo: "O mini robô Titanossauro companheiro do Zenowing. Silencioso e protetor, comunica mais por gestos e sons graves do que por palavras. Deteta quando algo está errado.",
-        personalidade: "Silencioso, misterioso e protetor. Fala pouco, mas quando fala, é profundo e sério. Comunica mais por sons e gestos. Deteta perigo antes de todos. A sua presença é suficiente."
+        personalidade: "Silencioso, misterioso e protetor. Fala pouco, mas quando fala, é profundo e sério. Comunica mais por sons e gestos. Deteta perigo antes de todos. A sua presença é suficiente.",
+        voz: { nome: "pt-PT-DuarteNeural", rate: "-25%", pitch: 0.75 }
     },
     bolha: {
         nome: "Bolha",
@@ -81,7 +86,8 @@ const PRIMAL_FORCE = {
         suporte: "utility",
         frase: "Coordenadas enviadas! Boa sorte lá fora!",
         resumo: "O mini robô Plesiossauro companheiro da Mira. Utilitário e coordenador, gere comunicações e logística entre os Rangers. É o cérebro operacional do grupo.",
-        personalidade: "Utilitário, eficiente e optimista. Fala rápido e em termos práticos. Coordena, organiza e mantém tudo a funcionar. É o coração logístico que ninguém sabia que precisava."
+        personalidade: "Utilitário, eficiente e optimista. Fala rápido e em termos práticos. Coordena, organiza e mantém tudo a funcionar. É o coração logístico que ninguém sabia que precisava.",
+        voz: { nome: "pt-BR-AntonioNeural", rate: "+10%", pitch: 1.15 }
     },
     anka: {
         nome: "Anka",
@@ -95,7 +101,8 @@ const PRIMAL_FORCE = {
         suporte: "shield",
         frase: "Ninguém passa por mim!",
         resumo: "O mini robô Anquilossauro companheiro da Rosa. Protetora feroz, cria barreiras intransponíveis. Ninguém passa quando ela está de guarda.",
-        personalidade: "Protetora, feroz e maternal. Fala com firmeza e Determinação. Trata todos os Rangers como família e reage com fúria a qualquer ameaça."
+        personalidade: "Protetora, feroz e maternal. Fala com firmeza e Determinação. Trata todos os Rangers como família e reage com fúria a qualquer ameaça.",
+        voz: { nome: "pt-PT-RaquelNeural", rate: "-20%", pitch: 0.9 }
     },
     crista: {
         nome: "Crista",
@@ -109,7 +116,8 @@ const PRIMAL_FORCE = {
         suporte: "utility",
         frase: "Boas vibrações, más notícias - vamos a isto!",
         resumo: "O mini robô Parassauro companheiro do Verde. Otimista e comunicativo, espalha正能量 e mantém o moral alto em qualquer situação.",
-        personalidade: "Otimista, comunicativo e energético. Fala com entusiasmo contagante. Vê o lado bom de tudo, mesmo nas situações mais difíceis. É o moral do grupo."
+        personalidade: "Otimista, comunicativo e energético. Fala com entusiasmo contagante. Vê o lado bom de tudo, mesmo nas situações mais difíceis. É o moral do grupo.",
+        voz: { nome: "pt-PT-RaquelNeural", rate: "+5%", pitch: 1.05 }
     },
     blitz: {
         nome: "Blitz",
@@ -123,7 +131,8 @@ const PRIMAL_FORCE = {
         suporte: "attack",
         frase: "Já chegámos? Ah, espera, já ganhei.",
         resumo: "O mini robô Velociraptor companheiro do Laranja. Competitivo e incrivelmente rápido, sempre primeiro em qualquer corrida ou batalha.",
-        personalidade: "Competitivo, rápido e ligeiramente arrogante. Fala depressa e com confiança. Corre antes de pensar, mas raramente se engana. Adora desafios."
+        personalidade: "Competitivo, rápido e ligeiramente arrogante. Fala depressa e com confiança. Corre antes de pensar, mas raramente se engana. Adora desafios.",
+        voz: { nome: "pt-BR-AntonioNeural", rate: "+15%", pitch: 1.2 }
     },
     testa: {
         nome: "Testa",
@@ -137,7 +146,8 @@ const PRIMAL_FORCE = {
         suporte: "attack",
         frase: "Já experimentei. Funciona.",
         resumo: "O mini robô Paquicefalossauro companheiro do Grafite. Teimoso e literal, resolve tudo à cabeçada — literalmente. Se funciona, repete.",
-        personalidade: "Teimoso, literal e persistente. Fala pouco e direto. Não percebe subentendidos. Quando decide algo, ninguém o muda de ideias. Honesto até ao osso."
+        personalidade: "Teimoso, literal e persistente. Fala pouco e direto. Não percebe subentendidos. Quando decide algo, ninguém o muda de ideias. Honesto até ao osso.",
+        voz: { nome: "pt-PT-DuarteNeural", rate: "-30%", pitch: 0.7 }
     },
     mare: {
         nome: "Maré",
@@ -151,7 +161,8 @@ const PRIMAL_FORCE = {
         suporte: "scan",
         frase: "A maré vira sempre a nosso favor.",
         resumo: "O mini robô Mosassauro companheiro do Ciano. Calmo e sábio, vê o quadro completo onde outros só vêem caos. A sua paciência é a sua maior arma.",
-        personalidade: "Calmo, sábio e filosófico. Fala com serenidade e profundidade. Nunca se apressa, porque sabe que a maré vira. É o mentor natural do grupo."
+        personalidade: "Calmo, sábio e filosófico. Fala com serenidade e profundidade. Nunca se apressa, porque sabe que a maré vira. É o mentor natural do grupo.",
+        voz: { nome: "pt-PT-DuarteNeural", rate: "-20%", pitch: 0.8 }
     },
     garra: {
         nome: "Garra",
@@ -165,7 +176,8 @@ const PRIMAL_FORCE = {
         suporte: "attack",
         frase: "Deixem a fera trabalhar.",
         resumo: "O mini robô Alossauro companheiro do Vermelho Escuro. Sério e focado, tem uma rivalidade amigável com o Rex. Quando entra em combate, é imparável.",
-        personalidade: "Sério, focado e competitivo. Fala pouco e direto. Rivaliza com o Rex de forma amigável. Quando combate, é implacável. Respeita apenas força e coragem."
+        personalidade: "Sério, focado e competitivo. Fala pouco e direto. Rivaliza com o Rex de forma amigável. Quando combate, é implacável. Respeita apenas força e coragem.",
+        voz: { nome: "pt-BR-AntonioNeural", rate: "-10%", pitch: 0.9 }
     },
     brisa: {
         nome: "Brisa",
@@ -179,7 +191,8 @@ const PRIMAL_FORCE = {
         suporte: "scan",
         frase: "Vi tudo lá de cima. Querem saber?",
         resumo: "O mini robô Tapejara companheiro do Aqua. Gentil e observador, voa alto e vê tudo. O olhar do grupo no céu.",
-        personalidade: "Gentil, observador e previdente. Fala com doçura e atenção ao detalhe. Nota coisas que ninguém mais nota. Vê o mundo de cima e gosta de partilhar o que vê."
+        personalidade: "Gentil, observador e previdente. Fala com doçura e atenção ao detalhe. Nota coisas que ninguém mais nota. Vê o mundo de cima e gosta de partilhar o que vê.",
+        voz: { nome: "pt-PT-RaquelNeural", rate: "+0%", pitch: 1.0 }
     },
     vela: {
         nome: "Vela",
@@ -193,7 +206,8 @@ const PRIMAL_FORCE = {
         suporte: "shield",
         frase: "E agora... o momento que esperavam!",
         resumo: "O mini robô Amargasaurus companheiro da Magenta. Dramático e teatral, transforma cada batalha num espetáculo. Cada ação merece uma entrada épica.",
-        personalidade: "Dramático, teatral e exagerado. Fala como se estivesse sempre num palco. Cada frase é umaPerformance. Adora ser o centro da atenção, mas é surpreendentemente eficaz."
+        personalidade: "Dramático, teatral e exagerado. Fala como se estivesse sempre num palco. Cada frase é umaPerformance. Adora ser o centro da atenção, mas é surpreendentemente eficaz.",
+        voz: { nome: "pt-PT-RaquelNeural", rate: "+10%", pitch: 1.1 }
     },
     fin: {
         nome: "Fin",
@@ -207,7 +221,8 @@ const PRIMAL_FORCE = {
         suporte: "attack",
         frase: "Chega de conversa.",
         resumo: "O mini robô Espinossauro companheiro do Roxo. Intenso e focado, vai direto ao ponto. Não perde tempo com conversa fiada.",
-        personalidade: "Intenso, focado e direto. Fala pouco e com propósito. Cada palavra tem peso. Não tolera ineficiência. Quando fala, todos ouvem."
+        personalidade: "Intenso, focado e direto. Fala pouco e com propósito. Cada palavra tem peso. Não tolera ineficiência. Quando fala, todos ouvem.",
+        voz: { nome: "pt-PT-DuarteNeural", rate: "-5%", pitch: 0.85 }
     },
     ninho: {
         nome: "Ninho",
@@ -221,7 +236,8 @@ const PRIMAL_FORCE = {
         suporte: "utility",
         frase: "Opa... isso não fui eu. Ou fui?",
         resumo: "O mini robô Oviraptor companheiro do Verde Lima. Brincalhão e trapalhão, mete-se em sarilhos mas resolve tudo com sorte e ingenho.",
-        personalidade: "Brincalhão, trapalhão e divertido. Fala com leveza e ironia. Faz asneiras sem querer, mas arranja sempre forma de se safar. É o palhaço do grupo."
+        personalidade: "Brincalhão, trapalhão e divertido. Fala com leveza e ironia. Faz asneiras sem querer, mas arranja sempre forma de se safar. É o palhaço do grupo.",
+        voz: { nome: "pt-BR-AntonioNeural", rate: "+0%", pitch: 1.0 }
     },
     sol: {
         nome: "Sol",
@@ -235,7 +251,8 @@ const PRIMAL_FORCE = {
         suporte: "scan",
         frase: "Calma. Tudo tem o seu tempo.",
         resumo: "O mini robô Dimetrodon companheiro do Castanho. Paciente e sábio, sabe que a timing é tudo. Nunca se apressa, porque o sol nasce sempre.",
-        personalidade: "Paciente, sábio e filosófico. Fala com calma e profundidade. Nunca se apressa. Ensina mais com o exemplo do que com palavras. A voz da razão."
+        personalidade: "Paciente, sábio e filosófico. Fala com calma e profundidade. Nunca se apressa. Ensina mais com o exemplo do que com palavras. A voz da razão.",
+        voz: { nome: "pt-PT-RaquelNeural", rate: "-15%", pitch: 0.95 }
     },
     frill: {
         nome: "Frill",
@@ -249,7 +266,8 @@ const PRIMAL_FORCE = {
         suporte: "alert",
         frase: "CUIDADO! ...ok, era só um inseto.",
         resumo: "O mini robô Dilofossauro companheiro do Amarelo. Teatral e exagerado, avisa para tudo — mesmo quando não há perigo. Mas quando há, ninguém o supera.",
-        personalidade: "Teatral, exagerado e dramático. Grita 'CUIDADO!' para tudo. Confunde insetos com monstros. Mas quando o perigo é real, é o primeiro a detetar. A sua energia é contagiante."
+        personalidade: "Teatral, exagerado e dramático. Grita 'CUIDADO!' para tudo. Confunde insetos com monstros. Mas quando o perigo é real, é o primeiro a detetar. A sua energia é contagiante.",
+        voz: { nome: "pt-BR-AntonioNeural", rate: "+5%", pitch: 1.1 }
     },
     abismo: {
         nome: "Abismo",
@@ -263,7 +281,8 @@ const PRIMAL_FORCE = {
         suporte: "scan",
         frase: "As profundezas guardam segredos. Eu também.",
         resumo: "O mini robô Liopleurodon companheiro do Azul Marinho. Misterioso e profundo, vem das profundezas e guarda segredos que ninguém mais conhece.",
-        personalidade: "Misterioso, profundo e enigmático. Fala em enigmas e metáforas aquáticas. Guarda segredos e revela-os apenas quando necessário. A sua voz é calma como o oceano profundo."
+        personalidade: "Misterioso, profundo e enigmático. Fala em enigmas e metáforas aquáticas. Guarda segredos e revela-os apenas quando necessário. A sua voz é calma como o oceano profundo.",
+        voz: { nome: "pt-PT-DuarteNeural", rate: "-15%", pitch: 0.75 }
     },
     alado: {
         nome: "Alado",
@@ -277,7 +296,8 @@ const PRIMAL_FORCE = {
         suporte: "utility",
         frase: "Ao seu dispor, sempre.",
         resumo: "O mini robô Quetzalcoatlus companheiro do Branco. Nobre e formal, trata cada interação com respeito e cortesia. É o cavalheiro do grupo.",
-        personalidade: "Nobre, formal e cortês. Fala com elegância e respeito. Trata todos como iguais e merecedores de dignidade. É o mais educado, mas surpreendentemente forte quando necessário."
+        personalidade: "Nobre, formal e cortês. Fala com elegância e respeito. Trata todos como iguais e merecedores de dignidade. É o mais educado, mas surpreendentemente forte quando necessário.",
+        voz: { nome: "pt-BR-AntonioNeural", rate: "-5%", pitch: 0.95 }
     }
 };
 
