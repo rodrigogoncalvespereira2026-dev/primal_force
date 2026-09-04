@@ -4,6 +4,9 @@ import json
 import urllib.request
 from flask import Flask, Response, jsonify, request, send_from_directory
 
+from dotenv import load_dotenv
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env'))
+
 app = Flask(__name__, static_folder=None)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
