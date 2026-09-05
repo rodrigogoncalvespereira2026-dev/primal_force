@@ -8,11 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --power-dark: #0a0a1a;
-            --power-gold: #FFD700;
-            --power-red: #C62828;
-        }
+        :root { --power-dark: #0a0a1a; --power-gold: #FFD700; }
         html, body { height: 100%; overflow: hidden; }
         body {
             font-family: 'Rajdhani', sans-serif;
@@ -21,164 +17,13 @@
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
             background-image:
-                radial-gradient(ellipse at center, rgba(255,215,0,0.04) 0%, transparent 60%),
-                linear-gradient(rgba(255,215,0,0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,215,0,0.02) 1px, transparent 1px);
-            background-size: 100% 100%, 50px 50px, 50px 50px;
-            perspective: 800px;
+                radial-gradient(ellipse at center, rgba(255,215,0,0.04) 0%, transparent 55%),
+                linear-gradient(rgba(255,215,0,0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,215,0,0.015) 1px, transparent 1px);
+            background-size: 100% 100%, 45px 45px, 45px 45px;
+            user-select: none; -webkit-user-select: none;
         }
 
-        .wheel-container {
-            position: relative;
-            width: 100%; max-width: 600px;
-            height: 420px;
-            display: flex; align-items: center; justify-content: center;
-        }
-
-        /* Primal Core - núcleo central */
-        .primal-core {
-            position: absolute;
-            width: 100px; height: 100px;
-            border-radius: 50%;
-            background: radial-gradient(circle, #ffffff 0%, #c0c0c0 30%, #808080 60%, #404040 100%);
-            box-shadow:
-                0 0 25px rgba(255,255,255,0.3),
-                0 0 50px rgba(255,215,0,0.15),
-                inset 0 0 15px rgba(255,255,255,0.3);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 5;
-            animation: corePulse 3s ease-in-out infinite;
-        }
-        .primal-core::before {
-            content: '';
-            position: absolute; inset: -6px;
-            border-radius: 50%;
-            border: 2px solid rgba(255,215,0,0.25);
-            animation: coreRing 5s linear infinite;
-        }
-        .core-symbol {
-            font-size: 32px;
-            filter: drop-shadow(0 0 8px rgba(255,215,0,0.4));
-        }
-
-        @keyframes corePulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.04); }
-        }
-        @keyframes coreRing {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        /* Carousel track */
-        .carousel {
-            position: relative;
-            width: 100%; height: 260px;
-            display: flex; align-items: center; justify-content: center;
-            transform-style: preserve-3d;
-        }
-
-        .robot-card {
-            position: absolute;
-            width: 70px; height: 70px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
-            transition: all 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            border: 3px solid transparent;
-            background: rgba(15,15,35,0.95);
-            font-size: 11px; font-weight: 800;
-            font-family: 'Orbitron', sans-serif;
-            color: #fff;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
-            user-select: none;
-            -webkit-user-select: none;
-            will-change: transform, opacity;
-        }
-        .robot-card img {
-            width: 100%; height: 100%;
-            border-radius: 50%; object-fit: cover;
-        }
-        .robot-card:hover {
-            z-index: 20 !important;
-        }
-
-        /* Info do robô selecionado */
-        .selected-info {
-            position: absolute;
-            bottom: -10px;
-            text-align: center;
-            z-index: 10;
-            transition: all 0.3s ease;
-        }
-        .selected-name {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 22px; font-weight: 900;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            transition: color 0.3s;
-        }
-        .selected-ranger {
-            font-size: 13px;
-            color: rgba(255,255,255,0.5);
-            margin-top: 2px;
-        }
-        .selected-dino {
-            font-size: 10px;
-            color: rgba(255,215,0,0.5);
-            margin-top: 2px;
-            font-family: 'Orbitron', sans-serif;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-        }
-        .selected-hint {
-            font-size: 11px;
-            color: rgba(255,255,255,0.3);
-            margin-top: 10px;
-            animation: hintPulse 2s ease-in-out infinite;
-        }
-        @keyframes hintPulse {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 0.7; }
-        }
-
-        /* Botões de seta */
-        .arrow-btn {
-            position: absolute;
-            top: 40%;
-            width: 44px; height: 44px;
-            border-radius: 50%;
-            background: rgba(255,215,0,0.08);
-            border: 1px solid rgba(255,215,0,0.25);
-            color: var(--power-gold);
-            font-size: 18px;
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.2s;
-            z-index: 20;
-        }
-        .arrow-btn:hover {
-            background: rgba(255,215,0,0.18);
-            box-shadow: 0 0 12px rgba(255,215,0,0.2);
-        }
-        .arrow-left { left: 10px; }
-        .arrow-right { right: 10px; }
-
-        /* Flash de invocação */
-        .summon-flash {
-            position: fixed; inset: 0;
-            opacity: 0; pointer-events: none;
-            z-index: 100;
-        }
-        .summon-flash.ativo {
-            animation: flashAnim 0.7s ease-out forwards;
-        }
-        @keyframes flashAnim {
-            0% { opacity: 0.85; }
-            100% { opacity: 0; }
-        }
-
-        /* Header */
         .header {
             position: fixed; top: 0; left: 0; right: 0;
             padding: 14px 20px;
@@ -190,57 +35,244 @@
         .header h1 {
             font-family: 'Orbitron', sans-serif;
             font-size: 13px; font-weight: 700;
-            letter-spacing: 0.1em;
-            color: var(--power-gold);
+            letter-spacing: 0.1em; color: var(--power-gold);
         }
         .header a {
             margin-left: auto;
             font-family: 'Orbitron', sans-serif;
             font-size: 10px; font-weight: 700;
-            color: var(--power-gold);
-            text-decoration: none;
+            color: var(--power-gold); text-decoration: none;
             padding: 7px 14px;
             border: 1px solid rgba(255,215,0,0.25);
-            border-radius: 4px;
-            transition: all 0.2s;
+            border-radius: 4px; transition: all 0.2s;
         }
         .header a:hover { background: rgba(255,215,0,0.1); }
 
-        /* Counter */
-        .counter {
-            position: fixed; top: 60px; right: 20px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 10px;
-            color: rgba(255,255,255,0.35);
-            z-index: 50;
+        /* Wheel wrapper */
+        .wheel-wrapper {
+            position: relative;
+            width: 360px; height: 360px;
+            display: flex; align-items: center; justify-content: center;
         }
 
-        /* Partículas no core */
-        .particles {
+        /* Outer ring glow */
+        .wheel-wrapper::before {
+            content: '';
             position: absolute;
+            width: 340px; height: 340px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,215,0,0.12);
+            box-shadow: 0 0 30px rgba(255,215,0,0.06), inset 0 0 30px rgba(255,215,0,0.04);
+        }
+
+        /* The spinning disc */
+        .wheel-disc {
+            position: absolute;
+            width: 300px; height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(20,20,50,0.9) 0%, rgba(10,10,26,0.95) 70%);
+            border: 1px solid rgba(255,215,0,0.1);
+            transition: none;
+        }
+        .wheel-disc.spinning {
+            transition: none;
+        }
+
+        /* Robot icons on the disc */
+        .wheel-icon {
+            position: absolute;
+            width: 52px; height: 52px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            background: rgba(15,15,35,0.95);
+            font-size: 10px; font-weight: 800;
+            font-family: 'Orbitron', sans-serif;
+            color: #fff;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .wheel-icon img {
+            width: 100%; height: 100%;
+            border-radius: 50%; object-fit: cover;
+        }
+        .wheel-icon.active {
+            border-color: var(--power-gold) !important;
+            box-shadow: 0 0 15px var(--power-gold), 0 0 30px rgba(255,215,0,0.3);
+        }
+
+        /* Pointer / selector at top */
+        .selector {
+            position: absolute;
+            top: -8px;
+            width: 0; height: 0;
+            border-left: 14px solid transparent;
+            border-right: 14px solid transparent;
+            border-top: 22px solid var(--power-gold);
+            filter: drop-shadow(0 0 8px rgba(255,215,0,0.5));
+            z-index: 20;
+        }
+        .selector-glow {
+            position: absolute;
+            top: -14px; left: -18px;
+            width: 36px; height: 30px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,215,0,0.3), transparent);
+            z-index: 19;
+            animation: selectorPulse 1.5s ease-in-out infinite;
+        }
+        @keyframes selectorPulse {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Center hub */
+        .center-hub {
+            position: absolute;
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #fff 0%, #c0c0c0 30%, #606060 70%, #303030 100%);
+            box-shadow: 0 0 20px rgba(255,255,255,0.2), 0 0 40px rgba(255,215,0,0.15);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 10;
+        }
+        .center-hub::before {
+            content: '';
+            position: absolute; inset: -5px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(255,215,0,0.2);
+        }
+        .center-symbol {
+            font-size: 28px;
+            filter: drop-shadow(0 0 6px rgba(255,215,0,0.4));
+        }
+
+        /* Info panel */
+        .info-panel {
+            position: absolute;
+            bottom: -70px;
+            text-align: center;
+            width: 100%;
+        }
+        .info-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 20px; font-weight: 900;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            transition: color 0.2s;
+        }
+        .info-sub {
+            font-size: 12px;
+            color: rgba(255,255,255,0.45);
+            margin-top: 2px;
+        }
+        .info-hint {
+            font-size: 11px;
+            color: rgba(255,255,255,0.25);
+            margin-top: 8px;
+            animation: hintPulse 2s ease-in-out infinite;
+        }
+        .info-hint.spinning { display: none; }
+        @keyframes hintPulse {
+            0%, 100% { opacity: 0.25; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Spin button */
+        .spin-btn {
+            position: absolute;
+            bottom: -120px;
+            padding: 14px 44px;
+            background: linear-gradient(135deg, var(--power-gold), #FFA000);
+            color: #0a0a1a; border: none; border-radius: 6px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px; font-weight: 800;
+            letter-spacing: 0.12em; text-transform: uppercase;
+            cursor: pointer; transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(255,215,0,0.3);
+        }
+        .spin-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 30px rgba(255,215,0,0.5); }
+        .spin-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* Reveal overlay */
+        .reveal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0);
+            display: none; align-items: center; justify-content: center;
+            z-index: 100;
+            transition: background 0.4s;
+        }
+        .reveal-overlay.ativo {
+            display: flex;
+            background: rgba(0,0,0,0.85);
+        }
+        .reveal-card {
+            text-align: center;
+            animation: revealPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        .reveal-avatar {
             width: 120px; height: 120px;
             border-radius: 50%;
-            pointer-events: none;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 48px; font-weight: 900;
+            font-family: 'Orbitron', sans-serif;
+            color: #fff;
+            box-shadow: 0 0 40px var(--reveal-color), 0 0 80px var(--reveal-color);
         }
-        .particle {
-            position: absolute;
-            width: 2px; height: 2px;
-            background: var(--power-gold);
-            border-radius: 50%;
-            animation: particleFloat 3s ease-in-out infinite;
+        .reveal-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        .reveal-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 28px; font-weight: 900;
+            letter-spacing: 0.12em; text-transform: uppercase;
+            color: var(--reveal-color);
+            text-shadow: 0 0 20px var(--reveal-color);
         }
-        @keyframes particleFloat {
-            0%, 100% { opacity: 0; transform: translateY(0) scale(0); }
-            50% { opacity: 0.8; transform: translateY(-25px) scale(1); }
+        .reveal-ranger {
+            font-size: 14px; color: rgba(255,255,255,0.5);
+            margin-top: 4px;
+        }
+        .reveal-dino {
+            font-size: 11px; color: rgba(255,215,0,0.5);
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            margin-top: 6px;
+        }
+        .reveal-enter {
+            margin-top: 24px; padding: 12px 36px;
+            background: var(--reveal-color);
+            color: #fff; border: none; border-radius: 6px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px; font-weight: 800;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 4px 20px var(--reveal-color);
+        }
+        @keyframes revealPop {
+            0% { transform: scale(0.3); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
         }
 
-        @media (max-width: 540px) {
-            .wheel-container { height: 340px; }
-            .robot-card { width: 54px; height: 54px; font-size: 9px; }
-            .primal-core { width: 80px; height: 80px; }
-            .core-symbol { font-size: 26px; }
-            .selected-name { font-size: 18px; }
-            .arrow-btn { width: 38px; height: 38px; font-size: 16px; }
+        /* Flash */
+        .flash {
+            position: fixed; inset: 0;
+            background: #fff; opacity: 0;
+            pointer-events: none; z-index: 99;
+        }
+        .flash.ativo { animation: flashAnim 0.5s ease-out forwards; }
+        @keyframes flashAnim {
+            0% { opacity: 0.9; }
+            100% { opacity: 0; }
+        }
+
+        /* Click tick sound via Web Audio */
+        @media (max-width: 400px) {
+            .wheel-wrapper { width: 300px; height: 300px; }
+            .wheel-disc { width: 250px; height: 250px; }
+            .wheel-icon { width: 44px; height: 44px; font-size: 9px; }
+            .center-hub { width: 66px; height: 66px; }
+            .center-symbol { font-size: 22px; }
+            .info-name { font-size: 17px; }
         }
     </style>
 </head>
@@ -250,204 +282,424 @@
         <a href="index.html">VOLTAR</a>
     </div>
 
-    <div class="counter" id="counter">1 / 20</div>
-
-    <div class="wheel-container" id="wheel-container">
-        <div class="carousel" id="carousel"></div>
-        <div class="primal-core" id="primal-core">
-            <div class="particles" id="particles"></div>
-            <span class="core-symbol">⚡</span>
+    <div class="wheel-wrapper" id="wheel-wrapper">
+        <div class="selector-glow"></div>
+        <div class="selector"></div>
+        <div class="wheel-disc" id="wheel-disc"></div>
+        <div class="center-hub">
+            <span class="center-symbol">⚡</span>
         </div>
-        <div class="selected-info">
-            <div class="selected-name" id="selected-name">A carregar...</div>
-            <div class="selected-ranger" id="selected-ranger"></div>
-            <div class="selected-dino" id="selected-dino"></div>
-            <div class="selected-hint">Toca num robô para invocar</div>
+        <div class="info-panel">
+            <div class="info-name" id="info-name">Primal Force</div>
+            <div class="info-sub" id="info-sub">20 robôs te esperam</div>
+            <div class="info-hint" id="info-hint">Carrega em RODAR ou arrasta a roda</div>
         </div>
-        <button class="arrow-btn arrow-left" id="arrow-left">◀</button>
-        <button class="arrow-btn arrow-right" id="arrow-right">▶</button>
+        <button class="spin-btn" id="spin-btn">⚡ RODAR</button>
     </div>
 
-    <div class="summon-flash" id="summon-flash"></div>
+    <div class="flash" id="flash"></div>
+    <div class="reveal-overlay" id="reveal-overlay">
+        <div class="reveal-card">
+            <div class="reveal-avatar" id="reveal-avatar"></div>
+            <div class="reveal-name" id="reveal-name"></div>
+            <div class="reveal-ranger" id="reveal-ranger"></div>
+            <div class="reveal-dino" id="reveal-dino"></div>
+            <button class="reveal-enter" id="reveal-enter">ENTRAR NO CHAT</button>
+        </div>
+    </div>
 
     <script src="primalforce-robots.js"></script>
     <script>
-        const carousel = document.getElementById('carousel');
-        const selectedName = document.getElementById('selected-name');
-        const selectedRanger = document.getElementById('selected-ranger');
-        const selectedDino = document.getElementById('selected-dino');
-        const counter = document.getElementById('counter');
-        const flash = document.getElementById('summon-flash');
-        const core = document.getElementById('primal-core');
-        const container = document.getElementById('wheel-container');
+        const disc = document.getElementById('wheel-disc');
+        const spinBtn = document.getElementById('spin-btn');
+        const infoName = document.getElementById('info-name');
+        const infoSub = document.getElementById('info-sub');
+        const infoHint = document.getElementById('info-hint');
+        const flash = document.getElementById('flash');
+        const revealOverlay = document.getElementById('reveal-overlay');
 
         const allRobots = [...RANGERS_PRINCIPAIS, ...OUTROS_RANGERS];
         const total = allRobots.length;
-        let currentIndex = 0;
-        let isAnimating = false;
+        const ANGLE_PER_ITEM = 360 / total;
+        const DISC_SIZE = 300;
+        const ORBIT_RADIUS = DISC_SIZE / 2 - 32;
 
-        const ICON_SIZE = 70;
-        const VISIBLE_COUNT = 9;
-        const ANGLE_STEP = 360 / total;
+        let currentAngle = 0;
+        let currentVelocity = 0;
+        let isSpinning = false;
+        let animFrame = null;
+        let audioCtx = null;
+        let lastTickIndex = -1;
 
-        function criarParticulas() {
-            const c = document.getElementById('particles');
-            for (let i = 0; i < 10; i++) {
-                const p = document.createElement('div');
-                p.className = 'particle';
-                const angle = (Math.PI * 2 / 10) * i;
-                p.style.left = (60 + Math.cos(angle) * 35) + 'px';
-                p.style.top = (60 + Math.sin(angle) * 35) + 'px';
-                p.style.animationDelay = (i * 0.3) + 's';
-                c.appendChild(p);
-            }
+        // Audio context for tick sounds
+        function getAudioCtx() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            return audioCtx;
         }
 
-        function criarCards() {
-            carousel.innerHTML = '';
+        function playTick() {
+            try {
+                const ctx = getAudioCtx();
+                if (ctx.state === 'suspended') ctx.resume();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.05);
+                gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + 0.08);
+            } catch {}
+        }
+
+        function playSummonSound() {
+            try {
+                const ctx = getAudioCtx();
+                if (ctx.state === 'suspended') ctx.resume();
+                const notes = [523, 659, 784, 1047];
+                notes.forEach((freq, i) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0.12, ctx.currentTime + i * 0.1);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.1 + 0.3);
+                    osc.start(ctx.currentTime + i * 0.1);
+                    osc.stop(ctx.currentTime + i * 0.1 + 0.3);
+                });
+            } catch {}
+        }
+
+        // Create icons on disc
+        function criarIcones() {
+            disc.innerHTML = '';
             allRobots.forEach((id, i) => {
                 const r = PRIMAL_FORCE[id];
-                const card = document.createElement('div');
-                card.className = 'robot-card';
-                card.style.setProperty('--cor-robot', r.cor);
-                card.dataset.index = i;
-                card.dataset.id = id;
+                const angle = (ANGLE_PER_ITEM * i) * Math.PI / 180;
+                const x = DISC_SIZE / 2 + Math.cos(angle) * ORBIT_RADIUS - 26;
+                const y = DISC_SIZE / 2 + Math.sin(angle) * ORBIT_RADIUS - 26;
+
+                const icon = document.createElement('div');
+                icon.className = 'wheel-icon';
+                icon.style.left = x + 'px';
+                icon.style.top = y + 'px';
+                icon.style.borderColor = r.cor;
+                icon.dataset.index = i;
 
                 if (r.imagem) {
                     const img = document.createElement('img');
                     img.src = r.imagem;
                     img.alt = r.nome;
-                    img.onerror = () => { card.textContent = r.nome[0]; };
-                    card.appendChild(img);
+                    img.onerror = () => { icon.textContent = r.nome[0]; };
+                    icon.appendChild(img);
                 } else {
-                    card.textContent = r.nome[0];
+                    icon.textContent = r.nome[0];
                 }
 
-                card.addEventListener('click', () => invocarRobot(i));
-                carousel.appendChild(card);
+                icon.addEventListener('click', () => {
+                    if (!isSpinning) {
+                        selecionarEInvocar(i);
+                    }
+                });
+
+                disc.appendChild(icon);
             });
         }
 
-        function getAngleDistance(a, b) {
-            let diff = Math.abs(a - b);
-            if (diff > total / 2) diff = total - diff;
-            return diff;
+        function getSelectedIndex() {
+            let normalized = ((-currentAngle % 360) + 360) % 360;
+            let index = Math.round(normalized / ANGLE_PER_ITEM) % total;
+            return index;
         }
 
-        function atualizarCarousel() {
-            const cards = carousel.querySelectorAll('.robot-card');
-            const containerW = container.offsetWidth;
-            const centerX = containerW / 2;
+        function updateVisuals() {
+            disc.style.transform = `rotate(${currentAngle}deg)`;
 
-            cards.forEach((card, i) => {
-                const dist = getAngleDistance(i, currentIndex);
-                const normalizedDist = dist / (total / 2);
-
-                const scale = 1.0 - normalizedDist * 0.55;
-                const alpha = 1.0 - normalizedDist * 0.6;
-                const zIndex = Math.round((1 - normalizedDist) * 10);
-
-                const spread = 80;
-                const x = centerX + (dist <= currentIndex ? -dist : dist) * spread * (i < currentIndex ? -1 : 1);
-                const arcX = (i - currentIndex);
-                const xOffset = arcX * 65;
-
-                card.style.left = (centerX + xOffset - ICON_SIZE / 2) + 'px';
-                card.style.top = (90 - (1 - normalizedDist) * 15) + 'px';
-                card.style.width = (ICON_SIZE * scale) + 'px';
-                card.style.height = (ICON_SIZE * scale) + 'px';
-                card.style.opacity = alpha;
-                card.style.zIndex = zIndex;
-                card.style.borderColor = i === currentIndex ? PRIMAL_FORCE[allRobots[i]].cor : 'transparent';
-                card.style.boxShadow = i === currentIndex
-                    ? `0 0 20px ${PRIMAL_FORCE[allRobots[i]].cor}, 0 0 40px ${PRIMAL_FORCE[allRobots[i]].cor}40`
-                    : 'none';
-                card.style.transform = `scale(1)`;
+            // Counter-rotate icons so they stay upright
+            const icons = disc.querySelectorAll('.wheel-icon');
+            icons.forEach(icon => {
+                icon.style.transform = `rotate(${-currentAngle}deg)`;
             });
 
-            const robot = PRIMAL_FORCE[allRobots[currentIndex]];
-            selectedName.textContent = robot.nome;
-            selectedName.style.color = robot.cor;
-            selectedRanger.textContent = `Ranger: ${robot.ranger}`;
-            selectedDino.textContent = `${robot.supportType.toUpperCase()} • ${robot.dino}`;
-            counter.textContent = `${currentIndex + 1} / ${total}`;
+            const idx = getSelectedIndex();
+            icons.forEach((icon, i) => {
+                icon.classList.toggle('active', i === idx);
+            });
+
+            const r = PRIMAL_FORCE[allRobots[idx]];
+            infoName.textContent = r.nome;
+            infoName.style.color = r.cor;
+            infoSub.textContent = `Ranger: ${r.ranger} • ${r.dino}`;
         }
 
-        function rotarPara(offset) {
-            if (isAnimating) return;
-            currentIndex = ((currentIndex + offset) % total + total) % total;
-            atualizarCarousel();
+        // Spin physics
+        function spin() {
+            if (isSpinning) return;
+            isSpinning = true;
+            spinBtn.disabled = true;
+            infoHint.classList.add('spinning');
+
+            // Random velocity between 15-25 deg/frame
+            currentVelocity = 15 + Math.random() * 10;
+            lastTickIndex = -1;
+
+            let frame = 0;
+            function animate() {
+                currentAngle += currentVelocity;
+
+                // Tick sound
+                const idx = getSelectedIndex();
+                if (idx !== lastTickIndex) {
+                    playTick();
+                    lastTickIndex = idx;
+                }
+
+                // Friction
+                currentVelocity *= 0.985;
+                frame++;
+
+                updateVisuals();
+
+                if (currentVelocity > 0.15) {
+                    animFrame = requestAnimationFrame(animate);
+                } else {
+                    currentVelocity = 0;
+                    isSpinning = false;
+                    spinBtn.disabled = false;
+                    infoHint.classList.remove('spinning');
+                    onSpinStop();
+                }
+            }
+            animFrame = requestAnimationFrame(animate);
         }
 
-        // Setas
-        document.getElementById('arrow-left').addEventListener('click', () => rotarPara(-1));
-        document.getElementById('arrow-right').addEventListener('click', () => rotarPara(1));
-
-        // Teclado
-        document.addEventListener('keydown', (e) => {
-            if (isAnimating) return;
-            if (e.key === 'ArrowLeft') rotarPara(-1);
-            else if (e.key === 'ArrowRight') rotarPara(1);
-        });
-
-        // Touch/swipe
-        let touchStartX = 0;
-        container.addEventListener('touchstart', (e) => {
-            touchStartX = e.touches[0].clientX;
-        }, { passive: true });
-        container.addEventListener('touchmove', (e) => {
-            const diff = e.touches[0].clientX - touchStartX;
-            if (Math.abs(diff) > 40) {
-                rotarPara(diff > 0 ? -1 : 1);
-                touchStartX = e.touches[0].clientX;
-            }
-        }, { passive: true });
-
-        // Invocação direta por clique
-        function invocarRobot(index) {
-            if (isAnimating) return;
-            if (index !== currentIndex) {
-                currentIndex = index;
-                atualizarCarousel();
-                return;
-            }
-
-            isAnimating = true;
-            const robot = PRIMAL_FORCE[allRobots[index]];
-            const card = carousel.querySelectorAll('.robot-card')[index];
-            const coreRect = core.getBoundingClientRect();
-            const cardRect = card.getBoundingClientRect();
-
-            // Animação: card voa para o core
-            const dx = coreRect.left + coreRect.width / 2 - (cardRect.left + cardRect.width / 2);
-            const dy = coreRect.top + coreRect.height / 2 - (cardRect.top + cardRect.height / 2);
-
-            card.style.transition = 'all 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-            card.style.transform = `translate(${dx}px, ${dy}px) scale(1.6)`;
-            card.style.opacity = '1';
-            card.style.zIndex = '50';
-            card.style.border = `3px solid ${robot.cor}`;
-            card.style.boxShadow = `0 0 30px ${robot.cor}, 0 0 60px ${robot.cor}80`;
+        function onSpinStop() {
+            const idx = getSelectedIndex();
+            const r = PRIMAL_FORCE[allRobots[idx]];
+            playSummonSound();
 
             // Flash
-            flash.style.background = robot.cor;
+            flash.style.background = r.cor;
+            flash.classList.add('ativo');
+            setTimeout(() => flash.classList.remove('ativo'), 500);
 
-            setTimeout(() => {
-                flash.classList.add('ativo');
-                core.style.boxShadow = `0 0 60px ${robot.cor}, 0 0 120px ${robot.cor}80`;
-            }, 200);
-
-            setTimeout(() => {
-                flash.classList.remove('ativo');
-                localStorage.setItem('summonedRobot', allRobots[index]);
-                window.location.href = `index.html?robot=${allRobots[index]}`;
-            }, 650);
+            // Reveal
+            setTimeout(() => showReveal(idx), 400);
         }
 
+        function showReveal(index) {
+            const r = PRIMAL_FORCE[allRobots[index]];
+            const avatar = document.getElementById('reveal-avatar');
+            avatar.style.setProperty('--reveal-color', r.cor);
+            avatar.style.background = r.cor;
+            avatar.innerHTML = '';
+            if (r.imagem) {
+                const img = document.createElement('img');
+                img.src = r.imagem;
+                img.onerror = () => { avatar.textContent = r.nome[0]; };
+                avatar.appendChild(img);
+            } else {
+                avatar.textContent = r.nome[0];
+            }
+
+            document.getElementById('reveal-name').textContent = r.nome;
+            document.getElementById('reveal-name').style.color = r.cor;
+            document.getElementById('reveal-name').style.setProperty('--reveal-color', r.cor);
+            document.getElementById('reveal-ranger').textContent = `Ranger: ${r.ranger}`;
+            document.getElementById('reveal-dino').textContent = `${r.supportType.toUpperCase()} • ${r.dino}`;
+            document.querySelector('.reveal-enter').style.background = r.cor;
+            document.querySelector('.reveal-enter').style.boxShadow = `0 4px 20px ${r.cor}`;
+
+            revealOverlay.classList.add('ativo');
+
+            document.getElementById('reveal-enter').onclick = () => {
+                localStorage.setItem('summonedRobot', allRobots[index]);
+                window.location.href = `index.html?robot=${allRobots[index]}`;
+            };
+        }
+
+        function selecionarEInvocar(index) {
+            const r = PRIMAL_FORCE[allRobots[index]];
+            const targetAngle = -index * ANGLE_PER_ITEM;
+
+            let diff = targetAngle - currentAngle;
+            diff = ((diff % 360) + 540) % 360 - 180;
+
+            isSpinning = true;
+            spinBtn.disabled = true;
+            infoHint.classList.add('spinning');
+
+            const startAngle = currentAngle;
+            const endAngle = currentAngle + diff;
+            const duration = 600;
+            const startTime = performance.now();
+
+            function animateTo(time) {
+                const elapsed = time - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const ease = 1 - Math.pow(1 - progress, 3);
+                currentAngle = startAngle + diff * ease;
+
+                const idx = getSelectedIndex();
+                if (idx !== lastTickIndex) {
+                    playTick();
+                    lastTickIndex = idx;
+                }
+
+                updateVisuals();
+
+                if (progress < 1) {
+                    animFrame = requestAnimationFrame(animateTo);
+                } else {
+                    currentAngle = endAngle;
+                    isSpinning = false;
+                    spinBtn.disabled = false;
+                    infoHint.classList.remove('spinning');
+                    updateVisuals();
+                    onSpinStop();
+                }
+            }
+            animFrame = requestAnimationFrame(animateTo);
+        }
+
+        // Drag to spin
+        let dragStartAngle = 0;
+        let dragStartX = 0;
+        let isDragging = false;
+        let dragVelocity = 0;
+        let lastDragX = 0;
+        let lastDragTime = 0;
+
+        function getAngleFromX(clientX) {
+            const rect = disc.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            return Math.atan2(0, clientX - cx) * 180 / Math.PI;
+        }
+
+        disc.addEventListener('mousedown', (e) => {
+            if (isSpinning) return;
+            isDragging = true;
+            dragStartX = e.clientX;
+            dragStartAngle = currentAngle;
+            lastDragX = e.clientX;
+            lastDragTime = performance.now();
+            disc.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const dx = e.clientX - dragStartX;
+            currentAngle = dragStartAngle + dx * 0.8;
+            updateVisuals();
+
+            const now = performance.now();
+            const dt = now - lastDragTime;
+            if (dt > 0) {
+                dragVelocity = (e.clientX - lastDragX) / dt * 16;
+            }
+            lastDragX = e.clientX;
+            lastDragTime = now;
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (!isDragging) return;
+            isDragging = false;
+            disc.style.cursor = '';
+
+            if (Math.abs(dragVelocity) > 2) {
+                currentVelocity = dragVelocity * 1.5;
+                isSpinning = true;
+                spinBtn.disabled = true;
+                infoHint.classList.add('spinning');
+                lastTickIndex = -1;
+
+                function animateDrag() {
+                    currentAngle += currentVelocity;
+                    const idx = getSelectedIndex();
+                    if (idx !== lastTickIndex) {
+                        playTick();
+                        lastTickIndex = idx;
+                    }
+                    currentVelocity *= 0.985;
+                    updateVisuals();
+                    if (currentVelocity > 0.15) {
+                        animFrame = requestAnimationFrame(animateDrag);
+                    } else {
+                        currentVelocity = 0;
+                        isSpinning = false;
+                        spinBtn.disabled = false;
+                        infoHint.classList.remove('spinning');
+                        onSpinStop();
+                    }
+                }
+                animFrame = requestAnimationFrame(animateDrag);
+            }
+        });
+
+        // Touch
+        disc.addEventListener('touchstart', (e) => {
+            if (isSpinning) return;
+            isDragging = true;
+            dragStartX = e.touches[0].clientX;
+            dragStartAngle = currentAngle;
+            lastDragX = dragStartX;
+            lastDragTime = performance.now();
+        }, { passive: true });
+
+        document.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            const x = e.touches[0].clientX;
+            const dx = x - dragStartX;
+            currentAngle = dragStartAngle + dx * 0.8;
+            updateVisuals();
+
+            const now = performance.now();
+            const dt = now - lastDragTime;
+            if (dt > 0) dragVelocity = (x - lastDragX) / dt * 16;
+            lastDragX = x;
+            lastDragTime = now;
+        }, { passive: true });
+
+        document.addEventListener('touchend', () => {
+            if (!isDragging) return;
+            isDragging = false;
+            if (Math.abs(dragVelocity) > 2) {
+                currentVelocity = dragVelocity * 1.5;
+                isSpinning = true;
+                spinBtn.disabled = true;
+                infoHint.classList.add('spinning');
+                lastTickIndex = -1;
+
+                function animateTouch() {
+                    currentAngle += currentVelocity;
+                    const idx = getSelectedIndex();
+                    if (idx !== lastTickIndex) { playTick(); lastTickIndex = idx; }
+                    currentVelocity *= 0.985;
+                    updateVisuals();
+                    if (currentVelocity > 0.15) {
+                        animFrame = requestAnimationFrame(animateTouch);
+                    } else {
+                        currentVelocity = 0;
+                        isSpinning = false;
+                        spinBtn.disabled = false;
+                        infoHint.classList.remove('spinning');
+                        onSpinStop();
+                    }
+                }
+                animFrame = requestAnimationFrame(animateTouch);
+            }
+        });
+
+        spinBtn.addEventListener('click', spin);
+
         // Init
-        criarParticulas();
-        criarCards();
-        atualizarCarousel();
+        criarIcones();
+        updateVisuals();
     </script>
 </body>
 </html>
