@@ -12,8 +12,7 @@
         html, body { height: 100%; overflow: hidden; }
         body {
             font-family: 'Rajdhani', sans-serif;
-            background: var(--power-dark);
-            color: #e8e8f0;
+            background: var(--power-dark); color: #e8e8f0;
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
             background-image:
@@ -26,229 +25,197 @@
 
         .header {
             position: fixed; top: 0; left: 0; right: 0;
-            padding: 14px 20px;
-            display: flex; align-items: center; gap: 12px;
+            padding: 14px 20px; display: flex; align-items: center; gap: 12px;
             background: rgba(10,10,26,0.92);
-            border-bottom: 1px solid rgba(255,215,0,0.1);
-            z-index: 50;
+            border-bottom: 1px solid rgba(255,215,0,0.1); z-index: 50;
         }
         .header h1 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 13px; font-weight: 700;
-            letter-spacing: 0.1em; color: var(--power-gold);
+            font-family: 'Orbitron', sans-serif; font-size: 13px;
+            font-weight: 700; letter-spacing: 0.1em; color: var(--power-gold);
         }
         .header a {
-            margin-left: auto;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 10px; font-weight: 700;
-            color: var(--power-gold); text-decoration: none;
-            padding: 7px 14px;
-            border: 1px solid rgba(255,215,0,0.25);
-            border-radius: 4px; transition: all 0.2s;
+            margin-left: auto; font-family: 'Orbitron', sans-serif;
+            font-size: 10px; font-weight: 700; color: var(--power-gold);
+            text-decoration: none; padding: 7px 14px;
+            border: 1px solid rgba(255,215,0,0.25); border-radius: 4px;
+            transition: all 0.2s;
         }
         .header a:hover { background: rgba(255,215,0,0.1); }
 
-        /* Wheel wrapper */
-        .wheel-wrapper {
+        /* Wheel */
+        .wheel-area {
             position: relative;
+            width: 380px; height: 380px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* Outer decorative ring */
+        .outer-ring {
+            position: absolute;
             width: 360px; height: 360px;
-            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%;
+            border: 1.5px solid rgba(255,215,0,0.1);
+            pointer-events: none;
         }
-
-        /* Outer ring glow */
-        .wheel-wrapper::before {
+        .outer-ring::before {
             content: '';
-            position: absolute;
-            width: 340px; height: 340px;
+            position: absolute; inset: -8px;
             border-radius: 50%;
-            border: 2px solid rgba(255,215,0,0.12);
-            box-shadow: 0 0 30px rgba(255,215,0,0.06), inset 0 0 30px rgba(255,215,0,0.04);
+            border: 1px solid rgba(255,215,0,0.05);
         }
 
-        /* The spinning disc */
-        .wheel-disc {
+        /* Spinning disc */
+        .disc {
             position: absolute;
-            width: 300px; height: 300px;
+            width: 320px; height: 320px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(20,20,50,0.9) 0%, rgba(10,10,26,0.95) 70%);
-            border: 1px solid rgba(255,215,0,0.1);
-            transition: none;
+            cursor: grab;
         }
-        .wheel-disc.spinning {
-            transition: none;
-        }
+        .disc:active { cursor: grabbing; }
 
-        /* Robot icons on the disc */
-        .wheel-icon {
+        /* Icons */
+        .icon {
             position: absolute;
-            width: 52px; height: 52px;
+            width: 50px; height: 50px;
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
+            background: rgba(12,12,30,0.95);
+            border: 2px solid rgba(255,255,255,0.1);
             cursor: pointer;
-            border: 2px solid transparent;
-            background: rgba(15,15,35,0.95);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+                        opacity 0.4s ease,
+                        border-color 0.3s,
+                        box-shadow 0.3s;
             font-size: 10px; font-weight: 800;
-            font-family: 'Orbitron', sans-serif;
-            color: #fff;
-            transition: border-color 0.3s, box-shadow 0.3s;
+            font-family: 'Orbitron', sans-serif; color: #fff;
+            opacity: 0;
+            transform: scale(0.3);
         }
-        .wheel-icon img {
+        .icon.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .icon.selected {
+            border-color: var(--power-gold) !important;
+            box-shadow: 0 0 18px var(--power-gold), 0 0 35px rgba(255,215,0,0.25);
+            transform: scale(1.25) !important;
+            z-index: 10;
+        }
+        .icon img {
             width: 100%; height: 100%;
             border-radius: 50%; object-fit: cover;
         }
-        .wheel-icon.active {
-            border-color: var(--power-gold) !important;
-            box-shadow: 0 0 15px var(--power-gold), 0 0 30px rgba(255,215,0,0.3);
-        }
-
-        /* Pointer / selector at top */
-        .selector {
-            position: absolute;
-            top: -8px;
-            width: 0; height: 0;
-            border-left: 14px solid transparent;
-            border-right: 14px solid transparent;
-            border-top: 22px solid var(--power-gold);
-            filter: drop-shadow(0 0 8px rgba(255,215,0,0.5));
-            z-index: 20;
-        }
-        .selector-glow {
-            position: absolute;
-            top: -14px; left: -18px;
-            width: 36px; height: 30px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(255,215,0,0.3), transparent);
-            z-index: 19;
-            animation: selectorPulse 1.5s ease-in-out infinite;
-        }
-        @keyframes selectorPulse {
-            0%, 100% { opacity: 0.5; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.2); }
-        }
 
         /* Center hub */
-        .center-hub {
+        .hub {
             position: absolute;
-            width: 80px; height: 80px;
+            width: 72px; height: 72px;
             border-radius: 50%;
-            background: radial-gradient(circle, #fff 0%, #c0c0c0 30%, #606060 70%, #303030 100%);
-            box-shadow: 0 0 20px rgba(255,255,255,0.2), 0 0 40px rgba(255,215,0,0.15);
+            background: radial-gradient(circle, #fff 0%, #bbb 35%, #666 70%, #333 100%);
+            box-shadow: 0 0 20px rgba(255,255,255,0.2), 0 0 40px rgba(255,215,0,0.12);
             display: flex; align-items: center; justify-content: center;
-            z-index: 10;
+            z-index: 5; pointer-events: none;
         }
-        .center-hub::before {
-            content: '';
-            position: absolute; inset: -5px;
+        .hub::before {
+            content: ''; position: absolute; inset: -5px;
             border-radius: 50%;
             border: 1.5px solid rgba(255,215,0,0.2);
+            animation: hubRing 6s linear infinite;
         }
-        .center-symbol {
-            font-size: 28px;
-            filter: drop-shadow(0 0 6px rgba(255,215,0,0.4));
+        @keyframes hubRing { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .hub-symbol { font-size: 26px; filter: drop-shadow(0 0 6px rgba(255,215,0,0.4)); }
+
+        /* Selector arrow */
+        .arrow {
+            position: absolute; top: -6px;
+            width: 0; height: 0;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-top: 20px solid var(--power-gold);
+            filter: drop-shadow(0 0 6px rgba(255,215,0,0.5));
+            z-index: 20; pointer-events: none;
         }
 
-        /* Info panel */
-        .info-panel {
-            position: absolute;
-            bottom: -70px;
-            text-align: center;
-            width: 100%;
+        /* Info */
+        .info {
+            position: absolute; bottom: -65px;
+            text-align: center; width: 100%;
         }
         .info-name {
             font-family: 'Orbitron', sans-serif;
             font-size: 20px; font-weight: 900;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
+            letter-spacing: 0.1em; text-transform: uppercase;
             transition: color 0.2s;
         }
-        .info-sub {
-            font-size: 12px;
-            color: rgba(255,255,255,0.45);
-            margin-top: 2px;
-        }
+        .info-sub { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 2px; }
         .info-hint {
-            font-size: 11px;
-            color: rgba(255,255,255,0.25);
-            margin-top: 8px;
-            animation: hintPulse 2s ease-in-out infinite;
+            font-size: 11px; color: rgba(255,255,255,0.25);
+            margin-top: 8px; transition: opacity 0.3s;
         }
-        .info-hint.spinning { display: none; }
-        @keyframes hintPulse {
-            0%, 100% { opacity: 0.25; }
-            50% { opacity: 0.6; }
-        }
+        .info-hint.hidden { opacity: 0; }
 
-        /* Spin button */
-        .spin-btn {
-            position: absolute;
-            bottom: -120px;
-            padding: 14px 44px;
-            background: linear-gradient(135deg, var(--power-gold), #FFA000);
-            color: #0a0a1a; border: none; border-radius: 6px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 13px; font-weight: 800;
-            letter-spacing: 0.12em; text-transform: uppercase;
-            cursor: pointer; transition: all 0.3s;
-            box-shadow: 0 4px 20px rgba(255,215,0,0.3);
+        /* Action buttons */
+        .actions {
+            position: absolute; bottom: -115px;
+            display: flex; gap: 10px;
         }
-        .spin-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 30px rgba(255,215,0,0.5); }
-        .spin-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-spin, .btn-summon {
+            padding: 12px 28px; border: none; border-radius: 5px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px; font-weight: 800;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            cursor: pointer; transition: all 0.25s;
+        }
+        .btn-spin {
+            background: rgba(255,215,0,0.12);
+            border: 1px solid rgba(255,215,0,0.3);
+            color: var(--power-gold);
+        }
+        .btn-spin:hover { background: rgba(255,215,0,0.2); }
+        .btn-summon {
+            background: linear-gradient(135deg, var(--power-gold), #FFA000);
+            color: #0a0a1a;
+            box-shadow: 0 4px 18px rgba(255,215,0,0.3);
+            display: none;
+        }
+        .btn-summon.visible { display: block; }
+        .btn-summon:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(255,215,0,0.45); }
+        .btn-summon:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
 
         /* Reveal overlay */
-        .reveal-overlay {
+        .reveal {
             position: fixed; inset: 0;
             background: rgba(0,0,0,0);
             display: none; align-items: center; justify-content: center;
-            z-index: 100;
-            transition: background 0.4s;
+            z-index: 100; transition: background 0.4s;
         }
-        .reveal-overlay.ativo {
-            display: flex;
-            background: rgba(0,0,0,0.85);
-        }
-        .reveal-card {
-            text-align: center;
-            animation: revealPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
+        .reveal.on { display: flex; background: rgba(0,0,0,0.88); }
+        .reveal-card { text-align: center; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .reveal-avatar {
-            width: 120px; height: 120px;
-            border-radius: 50%;
+            width: 110px; height: 110px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 16px;
-            font-size: 48px; font-weight: 900;
-            font-family: 'Orbitron', sans-serif;
-            color: #fff;
-            box-shadow: 0 0 40px var(--reveal-color), 0 0 80px var(--reveal-color);
+            margin: 0 auto 14px; font-size: 44px; font-weight: 900;
+            font-family: 'Orbitron', sans-serif; color: #fff;
         }
         .reveal-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
         .reveal-name {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 28px; font-weight: 900;
-            letter-spacing: 0.12em; text-transform: uppercase;
-            color: var(--reveal-color);
-            text-shadow: 0 0 20px var(--reveal-color);
+            font-family: 'Orbitron', sans-serif; font-size: 26px;
+            font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase;
         }
-        .reveal-ranger {
-            font-size: 14px; color: rgba(255,255,255,0.5);
-            margin-top: 4px;
-        }
+        .reveal-ranger { font-size: 13px; color: rgba(255,255,255,0.45); margin-top: 3px; }
         .reveal-dino {
-            font-size: 11px; color: rgba(255,215,0,0.5);
-            font-family: 'Orbitron', sans-serif;
-            letter-spacing: 0.08em; text-transform: uppercase;
-            margin-top: 6px;
+            font-size: 10px; font-family: 'Orbitron', sans-serif;
+            letter-spacing: 0.08em; text-transform: uppercase; margin-top: 5px;
         }
         .reveal-enter {
-            margin-top: 24px; padding: 12px 36px;
-            background: var(--reveal-color);
-            color: #fff; border: none; border-radius: 6px;
+            margin-top: 22px; padding: 12px 34px;
+            border: none; border-radius: 5px;
             font-family: 'Orbitron', sans-serif;
             font-size: 12px; font-weight: 800;
             letter-spacing: 0.1em; text-transform: uppercase;
-            cursor: pointer;
-            box-shadow: 0 4px 20px var(--reveal-color);
+            cursor: pointer; color: #fff;
         }
-        @keyframes revealPop {
+        @keyframes popIn {
             0% { transform: scale(0.3); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
@@ -256,22 +223,17 @@
         /* Flash */
         .flash {
             position: fixed; inset: 0;
-            background: #fff; opacity: 0;
-            pointer-events: none; z-index: 99;
+            pointer-events: none; z-index: 99; opacity: 0;
         }
-        .flash.ativo { animation: flashAnim 0.5s ease-out forwards; }
-        @keyframes flashAnim {
-            0% { opacity: 0.9; }
-            100% { opacity: 0; }
-        }
+        .flash.on { animation: flashFx 0.5s ease-out forwards; }
+        @keyframes flashFx { 0% { opacity: 0.85; } 100% { opacity: 0; } }
 
-        /* Click tick sound via Web Audio */
-        @media (max-width: 400px) {
-            .wheel-wrapper { width: 300px; height: 300px; }
-            .wheel-disc { width: 250px; height: 250px; }
-            .wheel-icon { width: 44px; height: 44px; font-size: 9px; }
-            .center-hub { width: 66px; height: 66px; }
-            .center-symbol { font-size: 22px; }
+        @media (max-width: 420px) {
+            .wheel-area { width: 310px; height: 310px; }
+            .disc { width: 260px; height: 260px; }
+            .icon { width: 42px; height: 42px; font-size: 8px; }
+            .hub { width: 60px; height: 60px; }
+            .hub-symbol { font-size: 20px; }
             .info-name { font-size: 17px; }
         }
     </style>
@@ -282,424 +244,353 @@
         <a href="index.html">VOLTAR</a>
     </div>
 
-    <div class="wheel-wrapper" id="wheel-wrapper">
-        <div class="selector-glow"></div>
-        <div class="selector"></div>
-        <div class="wheel-disc" id="wheel-disc"></div>
-        <div class="center-hub">
-            <span class="center-symbol">⚡</span>
-        </div>
-        <div class="info-panel">
+    <div class="wheel-area" id="wheel-area">
+        <div class="outer-ring"></div>
+        <div class="arrow"></div>
+        <div class="disc" id="disc"></div>
+        <div class="hub"><span class="hub-symbol">⚡</span></div>
+        <div class="info">
             <div class="info-name" id="info-name">Primal Force</div>
-            <div class="info-sub" id="info-sub">20 robôs te esperam</div>
-            <div class="info-hint" id="info-hint">Carrega em RODAR ou arrasta a roda</div>
+            <div class="info-sub" id="info-sub">Arrasta para rodar</div>
+            <div class="info-hint" id="info-hint">ou toca num robô</div>
         </div>
-        <button class="spin-btn" id="spin-btn">⚡ RODAR</button>
+        <div class="actions">
+            <button class="btn-spin" id="btn-spin">⚡ RODAR</button>
+            <button class="btn-summon" id="btn-summon">⚡ INVOCAR</button>
+        </div>
     </div>
 
     <div class="flash" id="flash"></div>
-    <div class="reveal-overlay" id="reveal-overlay">
+    <div class="reveal" id="reveal">
         <div class="reveal-card">
-            <div class="reveal-avatar" id="reveal-avatar"></div>
-            <div class="reveal-name" id="reveal-name"></div>
-            <div class="reveal-ranger" id="reveal-ranger"></div>
-            <div class="reveal-dino" id="reveal-dino"></div>
-            <button class="reveal-enter" id="reveal-enter">ENTRAR NO CHAT</button>
+            <div class="reveal-avatar" id="rev-avatar"></div>
+            <div class="reveal-name" id="rev-name"></div>
+            <div class="reveal-ranger" id="rev-ranger"></div>
+            <div class="reveal-dino" id="rev-dino"></div>
+            <button class="reveal-enter" id="rev-enter">ENTRAR NO CHAT</button>
         </div>
     </div>
 
     <script src="primalforce-robots.js"></script>
     <script>
-        const disc = document.getElementById('wheel-disc');
-        const spinBtn = document.getElementById('spin-btn');
+        const disc = document.getElementById('disc');
+        const btnSpin = document.getElementById('btn-spin');
+        const btnSummon = document.getElementById('btn-summon');
         const infoName = document.getElementById('info-name');
         const infoSub = document.getElementById('info-sub');
         const infoHint = document.getElementById('info-hint');
-        const flash = document.getElementById('flash');
-        const revealOverlay = document.getElementById('reveal-overlay');
+        const flashEl = document.getElementById('flash');
+        const revealEl = document.getElementById('reveal');
 
         const allRobots = [...RANGERS_PRINCIPAIS, ...OUTROS_RANGERS];
         const total = allRobots.length;
-        const ANGLE_PER_ITEM = 360 / total;
-        const DISC_SIZE = 300;
-        const ORBIT_RADIUS = DISC_SIZE / 2 - 32;
+        const STEP = 360 / total;
+        const DISC_R = 140;
+        const ICON_R = 25;
 
-        let currentAngle = 0;
-        let currentVelocity = 0;
-        let isSpinning = false;
-        let animFrame = null;
+        let angle = 0;
+        let velocity = 0;
+        let spinning = false;
+        let stopped = true;
+        let selectedIndex = 0;
+        let icons = [];
+        let revealed = new Set();
         let audioCtx = null;
-        let lastTickIndex = -1;
+        let lastTickIdx = -1;
 
-        // Audio context for tick sounds
-        function getAudioCtx() {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        // Audio
+        function getAudio() {
+            if (!audioCtx) audioCtx = new (window.webkitAudioContext || window.AudioContext)();
             return audioCtx;
         }
-
-        function playTick() {
+        function tick() {
             try {
-                const ctx = getAudioCtx();
+                const ctx = getAudio();
                 if (ctx.state === 'suspended') ctx.resume();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(800, ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.05);
-                gain.gain.setValueAtTime(0.15, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
-                osc.start(ctx.currentTime);
-                osc.stop(ctx.currentTime + 0.08);
+                const o = ctx.createOscillator();
+                const g = ctx.createGain();
+                o.connect(g); g.connect(ctx.destination);
+                o.type = 'sine';
+                o.frequency.setValueAtTime(900, ctx.currentTime);
+                o.frequency.exponentialRampToValueAtTime(500, ctx.currentTime + 0.04);
+                g.gain.setValueAtTime(0.12, ctx.currentTime);
+                g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06);
+                o.start(ctx.currentTime); o.stop(ctx.currentTime + 0.06);
             } catch {}
         }
-
-        function playSummonSound() {
+        function summonSfx() {
             try {
-                const ctx = getAudioCtx();
+                const ctx = getAudio();
                 if (ctx.state === 'suspended') ctx.resume();
-                const notes = [523, 659, 784, 1047];
-                notes.forEach((freq, i) => {
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.type = 'sine';
-                    osc.frequency.value = freq;
-                    gain.gain.setValueAtTime(0.12, ctx.currentTime + i * 0.1);
-                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.1 + 0.3);
-                    osc.start(ctx.currentTime + i * 0.1);
-                    osc.stop(ctx.currentTime + i * 0.1 + 0.3);
+                [523, 659, 784, 1047].forEach((f, i) => {
+                    const o = ctx.createOscillator();
+                    const g = ctx.createGain();
+                    o.connect(g); g.connect(ctx.destination);
+                    o.type = 'sine'; o.frequency.value = f;
+                    g.gain.setValueAtTime(0.1, ctx.currentTime + i * 0.09);
+                    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.09 + 0.25);
+                    o.start(ctx.currentTime + i * 0.09);
+                    o.stop(ctx.currentTime + i * 0.09 + 0.25);
                 });
             } catch {}
         }
 
-        // Create icons on disc
-        function criarIcones() {
+        // Build icons
+        function build() {
             disc.innerHTML = '';
+            icons = [];
             allRobots.forEach((id, i) => {
                 const r = PRIMAL_FORCE[id];
-                const angle = (ANGLE_PER_ITEM * i) * Math.PI / 180;
-                const x = DISC_SIZE / 2 + Math.cos(angle) * ORBIT_RADIUS - 26;
-                const y = DISC_SIZE / 2 + Math.sin(angle) * ORBIT_RADIUS - 26;
-
-                const icon = document.createElement('div');
-                icon.className = 'wheel-icon';
-                icon.style.left = x + 'px';
-                icon.style.top = y + 'px';
-                icon.style.borderColor = r.cor;
-                icon.dataset.index = i;
-
+                const a = (STEP * i) * Math.PI / 180;
+                const el = document.createElement('div');
+                el.className = 'icon';
+                el.dataset.idx = i;
+                el.style.borderColor = r.cor;
                 if (r.imagem) {
                     const img = document.createElement('img');
-                    img.src = r.imagem;
-                    img.alt = r.nome;
-                    img.onerror = () => { icon.textContent = r.nome[0]; };
-                    icon.appendChild(img);
+                    img.src = r.imagem; img.alt = r.nome;
+                    img.onerror = () => { el.textContent = r.nome[0]; };
+                    el.appendChild(img);
                 } else {
-                    icon.textContent = r.nome[0];
+                    el.textContent = r.nome[0];
                 }
-
-                icon.addEventListener('click', () => {
-                    if (!isSpinning) {
-                        selecionarEInvocar(i);
-                    }
+                el.addEventListener('click', () => {
+                    if (spinning) return;
+                    selectAndSummon(i);
                 });
-
-                disc.appendChild(icon);
+                disc.appendChild(el);
+                icons.push(el);
             });
+            revealAll();
         }
 
-        function getSelectedIndex() {
-            let normalized = ((-currentAngle % 360) + 360) % 360;
-            let index = Math.round(normalized / ANGLE_PER_ITEM) % total;
-            return index;
-        }
-
-        function updateVisuals() {
-            disc.style.transform = `rotate(${currentAngle}deg)`;
-
-            // Counter-rotate icons so they stay upright
-            const icons = disc.querySelectorAll('.wheel-icon');
-            icons.forEach(icon => {
-                icon.style.transform = `rotate(${-currentAngle}deg)`;
-            });
-
-            const idx = getSelectedIndex();
-            icons.forEach((icon, i) => {
-                icon.classList.toggle('active', i === idx);
-            });
-
-            const r = PRIMAL_FORCE[allRobots[idx]];
-            infoName.textContent = r.nome;
-            infoName.style.color = r.cor;
-            infoSub.textContent = `Ranger: ${r.ranger} • ${r.dino}`;
-        }
-
-        // Spin physics
-        function spin() {
-            if (isSpinning) return;
-            isSpinning = true;
-            spinBtn.disabled = true;
-            infoHint.classList.add('spinning');
-
-            // Random velocity between 15-25 deg/frame
-            currentVelocity = 15 + Math.random() * 10;
-            lastTickIndex = -1;
-
-            let frame = 0;
-            function animate() {
-                currentAngle += currentVelocity;
-
-                // Tick sound
-                const idx = getSelectedIndex();
-                if (idx !== lastTickIndex) {
-                    playTick();
-                    lastTickIndex = idx;
-                }
-
-                // Friction
-                currentVelocity *= 0.985;
-                frame++;
-
-                updateVisuals();
-
-                if (currentVelocity > 0.15) {
-                    animFrame = requestAnimationFrame(animate);
-                } else {
-                    currentVelocity = 0;
-                    isSpinning = false;
-                    spinBtn.disabled = false;
-                    infoHint.classList.remove('spinning');
-                    onSpinStop();
-                }
+        // Reveal icons one by one
+        function revealAll() {
+            revealed.clear();
+            icons.forEach(ic => ic.classList.remove('visible'));
+            let idx = 0;
+            function showNext() {
+                if (idx >= total) return;
+                const ic = icons[idx];
+                ic.classList.add('visible');
+                revealed.add(idx);
+                idx++;
+                setTimeout(showNext, 50);
             }
-            animFrame = requestAnimationFrame(animate);
+            showNext();
         }
 
-        function onSpinStop() {
-            const idx = getSelectedIndex();
-            const r = PRIMAL_FORCE[allRobots[idx]];
-            playSummonSound();
+        function revealOne(i) {
+            if (!revealed.has(i)) {
+                icons[i].classList.add('visible');
+                revealed.add(i);
+            }
+        }
+
+        function getIdx() {
+            let n = (((-angle % 360) + 360) % 360);
+            return Math.round(n / STEP) % total;
+        }
+
+        function update() {
+            disc.style.transform = `rotate(${angle}deg)`;
+            icons.forEach(ic => { ic.style.transform = `rotate(${-angle}deg)`; });
+
+            const idx = getIdx();
+            if (idx !== selectedIndex) {
+                selectedIndex = idx;
+                const r = PRIMAL_FORCE[allRobots[idx]];
+                infoName.textContent = r.nome;
+                infoName.style.color = r.cor;
+                infoSub.textContent = `Ranger: ${r.ranger} • ${r.dino}`;
+            }
+            icons.forEach((ic, i) => ic.classList.toggle('selected', i === idx));
+        }
+
+        // Spin with momentum
+        function startSpin(vel) {
+            if (spinning) return;
+            spinning = true; stopped = false;
+            velocity = vel;
+            lastTickIdx = -1;
+            btnSpin.disabled = true;
+            btnSummon.classList.remove('visible');
+            infoHint.classList.add('hidden');
+
+            // Re-reveal all
+            revealAll();
+
+            (function loop() {
+                angle += velocity;
+                velocity *= 0.988;
+
+                const idx = getIdx();
+                if (idx !== lastTickIdx) { tick(); lastTickIdx = idx; }
+
+                // Reveal icons as they pass
+                revealOne(idx);
+
+                update();
+
+                if (velocity > 0.12) {
+                    requestAnimationFrame(loop);
+                } else {
+                    velocity = 0;
+                    spinning = false;
+                    stopped = true;
+                    btnSpin.disabled = false;
+                    update();
+                    onStop();
+                }
+            })();
+        }
+
+        function onStop() {
+            summonSfx();
+            const r = PRIMAL_FORCE[allRobots[selectedIndex]];
 
             // Flash
-            flash.style.background = r.cor;
-            flash.classList.add('ativo');
-            setTimeout(() => flash.classList.remove('ativo'), 500);
+            flashEl.style.background = r.cor;
+            flashEl.classList.add('on');
+            setTimeout(() => flashEl.classList.remove('on'), 500);
 
-            // Reveal
-            setTimeout(() => showReveal(idx), 400);
+            // Show summon button
+            setTimeout(() => {
+                btnSummon.classList.add('visible');
+                btnSummon.textContent = `⚡ INVOCAR ${r.nome.toUpperCase()}`;
+                btnSummon.style.background = r.cor;
+                btnSummon.style.boxShadow = `0 4px 18px ${r.cor}50`;
+            }, 300);
         }
 
-        function showReveal(index) {
-            const r = PRIMAL_FORCE[allRobots[index]];
-            const avatar = document.getElementById('reveal-avatar');
-            avatar.style.setProperty('--reveal-color', r.cor);
+        // Select + rotate to top + auto summon
+        function selectAndSummon(idx) {
+            const target = -idx * STEP;
+            let diff = target - angle;
+            diff = ((diff % 360) + 540) % 360 - 180;
+
+            spinning = true; stopped = false;
+            btnSpin.disabled = true;
+            btnSummon.classList.remove('visible');
+            infoHint.classList.add('hidden');
+
+            const start = angle;
+            const end = angle + diff;
+            const dur = 500;
+            const t0 = performance.now();
+            lastTickIdx = -1;
+
+            (function anim(t) {
+                const p = Math.min((t - t0) / dur, 1);
+                const ease = 1 - Math.pow(1 - p, 3);
+                angle = start + diff * ease;
+
+                const idx = getIdx();
+                if (idx !== lastTickIdx) { tick(); lastTickIdx = idx; }
+                revealOne(idx);
+                update();
+
+                if (p < 1) {
+                    requestAnimationFrame(anim);
+                } else {
+                    angle = end;
+                    spinning = false; stopped = true;
+                    btnSpin.disabled = false;
+                    update();
+                    onStop();
+                }
+            })(performance.now());
+        }
+
+        // Drag to spin
+        let dragging = false;
+        let dragX0 = 0;
+        let dragA0 = 0;
+        let lastX = 0;
+        let lastT = 0;
+        let dragVel = 0;
+
+        disc.addEventListener('mousedown', e => {
+            if (spinning) return;
+            dragging = true; dragX0 = e.clientX; dragA0 = angle;
+            lastX = e.clientX; lastT = performance.now();
+        });
+        document.addEventListener('mousemove', e => {
+            if (!dragging) return;
+            const dx = e.clientX - dragX0;
+            angle = dragA0 + dx * 0.7;
+            const now = performance.now();
+            const dt = now - lastT;
+            if (dt > 0) dragVel = (e.clientX - lastX) / dt * 16;
+            lastX = e.clientX; lastT = now;
+            update();
+        });
+        document.addEventListener('mouseup', () => {
+            if (!dragging) return;
+            dragging = false;
+            if (Math.abs(dragVel) > 1.5) {
+                startSpin(dragVel * 1.2);
+            }
+            dragVel = 0;
+        });
+
+        // Touch
+        disc.addEventListener('touchstart', e => {
+            if (spinning) return;
+            dragging = true; dragX0 = e.touches[0].clientX; dragA0 = angle;
+            lastX = dragX0; lastT = performance.now();
+        }, { passive: true });
+        document.addEventListener('touchmove', e => {
+            if (!dragging) return;
+            const x = e.touches[0].clientX;
+            angle = dragA0 + (x - dragX0) * 0.7;
+            const now = performance.now();
+            const dt = now - lastT;
+            if (dt > 0) dragVel = (x - lastX) / dt * 16;
+            lastX = x; lastT = now;
+            update();
+        }, { passive: true });
+        document.addEventListener('touchend', () => {
+            if (!dragging) return;
+            dragging = false;
+            if (Math.abs(dragVel) > 1.5) startSpin(dragVel * 1.2);
+            dragVel = 0;
+        });
+
+        // Spin button
+        btnSpin.addEventListener('click', () => startSpin(14 + Math.random() * 8));
+
+        // Summon button
+        btnSummon.addEventListener('click', () => {
+            const r = PRIMAL_FORCE[allRobots[selectedIndex]];
+            const avatar = document.getElementById('rev-avatar');
             avatar.style.background = r.cor;
+            avatar.style.boxShadow = `0 0 40px ${r.cor}, 0 0 80px ${r.cor}60`;
             avatar.innerHTML = '';
             if (r.imagem) {
                 const img = document.createElement('img');
                 img.src = r.imagem;
                 img.onerror = () => { avatar.textContent = r.nome[0]; };
                 avatar.appendChild(img);
-            } else {
-                avatar.textContent = r.nome[0];
-            }
+            } else { avatar.textContent = r.nome[0]; }
 
-            document.getElementById('reveal-name').textContent = r.nome;
-            document.getElementById('reveal-name').style.color = r.cor;
-            document.getElementById('reveal-name').style.setProperty('--reveal-color', r.cor);
-            document.getElementById('reveal-ranger').textContent = `Ranger: ${r.ranger}`;
-            document.getElementById('reveal-dino').textContent = `${r.supportType.toUpperCase()} • ${r.dino}`;
-            document.querySelector('.reveal-enter').style.background = r.cor;
-            document.querySelector('.reveal-enter').style.boxShadow = `0 4px 20px ${r.cor}`;
+            document.getElementById('rev-name').textContent = r.nome;
+            document.getElementById('rev-name').style.color = r.cor;
+            document.getElementById('rev-ranger').textContent = `Ranger: ${r.ranger}`;
+            document.getElementById('rev-dino').textContent = `${r.supportType.toUpperCase()} • ${r.dino}`;
+            const enterBtn = document.getElementById('rev-enter');
+            enterBtn.style.background = r.cor;
+            enterBtn.style.boxShadow = `0 4px 20px ${r.cor}`;
 
-            revealOverlay.classList.add('ativo');
-
-            document.getElementById('reveal-enter').onclick = () => {
-                localStorage.setItem('summonedRobot', allRobots[index]);
-                window.location.href = `index.html?robot=${allRobots[index]}`;
+            revealEl.classList.add('on');
+            enterBtn.onclick = () => {
+                localStorage.setItem('summonedRobot', allRobots[selectedIndex]);
+                window.location.href = `index.html?robot=${allRobots[selectedIndex]}`;
             };
-        }
-
-        function selecionarEInvocar(index) {
-            const r = PRIMAL_FORCE[allRobots[index]];
-            const targetAngle = -index * ANGLE_PER_ITEM;
-
-            let diff = targetAngle - currentAngle;
-            diff = ((diff % 360) + 540) % 360 - 180;
-
-            isSpinning = true;
-            spinBtn.disabled = true;
-            infoHint.classList.add('spinning');
-
-            const startAngle = currentAngle;
-            const endAngle = currentAngle + diff;
-            const duration = 600;
-            const startTime = performance.now();
-
-            function animateTo(time) {
-                const elapsed = time - startTime;
-                const progress = Math.min(elapsed / duration, 1);
-                const ease = 1 - Math.pow(1 - progress, 3);
-                currentAngle = startAngle + diff * ease;
-
-                const idx = getSelectedIndex();
-                if (idx !== lastTickIndex) {
-                    playTick();
-                    lastTickIndex = idx;
-                }
-
-                updateVisuals();
-
-                if (progress < 1) {
-                    animFrame = requestAnimationFrame(animateTo);
-                } else {
-                    currentAngle = endAngle;
-                    isSpinning = false;
-                    spinBtn.disabled = false;
-                    infoHint.classList.remove('spinning');
-                    updateVisuals();
-                    onSpinStop();
-                }
-            }
-            animFrame = requestAnimationFrame(animateTo);
-        }
-
-        // Drag to spin
-        let dragStartAngle = 0;
-        let dragStartX = 0;
-        let isDragging = false;
-        let dragVelocity = 0;
-        let lastDragX = 0;
-        let lastDragTime = 0;
-
-        function getAngleFromX(clientX) {
-            const rect = disc.getBoundingClientRect();
-            const cx = rect.left + rect.width / 2;
-            return Math.atan2(0, clientX - cx) * 180 / Math.PI;
-        }
-
-        disc.addEventListener('mousedown', (e) => {
-            if (isSpinning) return;
-            isDragging = true;
-            dragStartX = e.clientX;
-            dragStartAngle = currentAngle;
-            lastDragX = e.clientX;
-            lastDragTime = performance.now();
-            disc.style.cursor = 'grabbing';
         });
 
-        document.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            const dx = e.clientX - dragStartX;
-            currentAngle = dragStartAngle + dx * 0.8;
-            updateVisuals();
-
-            const now = performance.now();
-            const dt = now - lastDragTime;
-            if (dt > 0) {
-                dragVelocity = (e.clientX - lastDragX) / dt * 16;
-            }
-            lastDragX = e.clientX;
-            lastDragTime = now;
-        });
-
-        document.addEventListener('mouseup', () => {
-            if (!isDragging) return;
-            isDragging = false;
-            disc.style.cursor = '';
-
-            if (Math.abs(dragVelocity) > 2) {
-                currentVelocity = dragVelocity * 1.5;
-                isSpinning = true;
-                spinBtn.disabled = true;
-                infoHint.classList.add('spinning');
-                lastTickIndex = -1;
-
-                function animateDrag() {
-                    currentAngle += currentVelocity;
-                    const idx = getSelectedIndex();
-                    if (idx !== lastTickIndex) {
-                        playTick();
-                        lastTickIndex = idx;
-                    }
-                    currentVelocity *= 0.985;
-                    updateVisuals();
-                    if (currentVelocity > 0.15) {
-                        animFrame = requestAnimationFrame(animateDrag);
-                    } else {
-                        currentVelocity = 0;
-                        isSpinning = false;
-                        spinBtn.disabled = false;
-                        infoHint.classList.remove('spinning');
-                        onSpinStop();
-                    }
-                }
-                animFrame = requestAnimationFrame(animateDrag);
-            }
-        });
-
-        // Touch
-        disc.addEventListener('touchstart', (e) => {
-            if (isSpinning) return;
-            isDragging = true;
-            dragStartX = e.touches[0].clientX;
-            dragStartAngle = currentAngle;
-            lastDragX = dragStartX;
-            lastDragTime = performance.now();
-        }, { passive: true });
-
-        document.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
-            const x = e.touches[0].clientX;
-            const dx = x - dragStartX;
-            currentAngle = dragStartAngle + dx * 0.8;
-            updateVisuals();
-
-            const now = performance.now();
-            const dt = now - lastDragTime;
-            if (dt > 0) dragVelocity = (x - lastDragX) / dt * 16;
-            lastDragX = x;
-            lastDragTime = now;
-        }, { passive: true });
-
-        document.addEventListener('touchend', () => {
-            if (!isDragging) return;
-            isDragging = false;
-            if (Math.abs(dragVelocity) > 2) {
-                currentVelocity = dragVelocity * 1.5;
-                isSpinning = true;
-                spinBtn.disabled = true;
-                infoHint.classList.add('spinning');
-                lastTickIndex = -1;
-
-                function animateTouch() {
-                    currentAngle += currentVelocity;
-                    const idx = getSelectedIndex();
-                    if (idx !== lastTickIndex) { playTick(); lastTickIndex = idx; }
-                    currentVelocity *= 0.985;
-                    updateVisuals();
-                    if (currentVelocity > 0.15) {
-                        animFrame = requestAnimationFrame(animateTouch);
-                    } else {
-                        currentVelocity = 0;
-                        isSpinning = false;
-                        spinBtn.disabled = false;
-                        infoHint.classList.remove('spinning');
-                        onSpinStop();
-                    }
-                }
-                animFrame = requestAnimationFrame(animateTouch);
-            }
-        });
-
-        spinBtn.addEventListener('click', spin);
-
-        // Init
-        criarIcones();
-        updateVisuals();
+        build();
+        update();
     </script>
 </body>
 </html>
