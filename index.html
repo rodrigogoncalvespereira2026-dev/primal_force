@@ -537,6 +537,45 @@
             padding: 16px;
         }
         .guardian-overlay.aberto { display: flex; }
+
+        .guardian-lock {
+            position: fixed; inset: 0; z-index: 2100;
+            background: rgba(0,0,0,0.9); display: none;
+            align-items: center; justify-content: center; padding: 16px;
+        }
+        .guardian-lock.aberto { display: flex; }
+        .lock-box {
+            width: 100%; max-width: 360px; text-align: center;
+            background: linear-gradient(160deg, #0d0d2b, #1a0a2e);
+            border: 2px solid var(--power-gold); border-radius: 10px;
+            padding: 32px 24px;
+            box-shadow: 0 0 60px rgba(255,215,0,0.15);
+        }
+        .lock-box .lock-icon { font-size: 48px; margin-bottom: 12px; }
+        .lock-box h2 {
+            font-family:'Orbitron',sans-serif; font-size:14px; color:var(--power-gold);
+            letter-spacing:0.08em; text-transform:uppercase; margin-bottom:6px;
+        }
+        .lock-box p { font-size:12px; color:rgba(255,255,255,0.5); margin-bottom:16px; }
+        .lock-box input {
+            width:100%; background:rgba(255,255,255,0.06); border:1px solid rgba(255,215,0,0.2);
+            border-radius:6px; padding:12px 14px; color:#e8e8f0; font-size:16px;
+            font-family:'Rajdhani',sans-serif; outline:none; text-align:center;
+            letter-spacing:0.1em;
+        }
+        .lock-box input:focus { border-color:var(--power-gold); }
+        .lock-box .lock-erro { color:#ff5252; font-size:12px; margin-top:8px; display:none; }
+        .lock-box button {
+            width:100%; margin-top:12px; padding:12px; background:var(--power-gold);
+            color:#0a0a1a; border:none; border-radius:6px; cursor:pointer;
+            font-family:'Orbitron',sans-serif; font-size:11px; font-weight:700;
+            letter-spacing:0.1em; text-transform:uppercase;
+        }
+        .lock-box button:hover { opacity:0.9; }
+        .lock-box .lock-cancel {
+            background:transparent; color:rgba(255,255,255,0.4); margin-top:8px;
+            border:1px solid rgba(255,255,255,0.1);
+        }
         .guardian-modal {
             width: 100%; max-width: 480px; max-height: 85vh;
             background: linear-gradient(160deg, #0d0d2b, #1a0a2e);
@@ -1024,6 +1063,18 @@
         <button id="btn-guardian" title="Modo Guardião — distribuir robôs">⚡<span class="badge-missao" id="badge-missao"></span></button>
         <div id="robot-list"></div>
     </header>
+
+    <div class="guardian-lock" id="guardian-lock">
+        <div class="lock-box">
+            <div class="lock-icon">🔒</div>
+            <h2 id="lock-titulo">Guardião</h2>
+            <p id="lock-subtitulo">Insere a palavra-passe para aceder ao Modo Guardião</p>
+            <input id="lock-password" type="password" placeholder="Palavra-passe" maxlength="30">
+            <div class="lock-erro" id="lock-erro">Palavra-passe incorreta</div>
+            <button id="lock-confirmar">DESBLOQUEAR</button>
+            <button id="lock-cancel" class="lock-cancel">Cancelar</button>
+        </div>
+    </div>
 
     <div class="guardian-overlay" id="guardian-overlay">
         <div class="guardian-modal">
@@ -1810,13 +1861,95 @@
         let roboSelecionado = null;
         let missionsCache = {};
 
+        // === SISTEMA DE PALAVRA-PASSE DO GUARDIÃO ===
+        function hashPassword(pwd) {
+            let hash = 0;
+            for (let i = 0; i < pwd.length; i++) {
+                const char = pwd.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return 'h_' + Math.abs(hash).toString(36);
+        }
+
+        function temPasswordGuardian() {
+            return localStorage.getItem('guardianPwd') !== null;
+        }
+
+        function verificarPassword(pwd) {
+            return localStorage.getItem('guardianPwd') === hashPassword(pwd);
+        }
+
+        function guardarPassword(pwd) {
+            localStorage.setItem('guardianPwd', hashPassword(pwd));
+        }
+
+        const guardianLock = document.getElementById('guardian-lock');
+        const lockPassword = document.getElementById('lock-password');
+        const lockErro = document.getElementById('lock-erro');
+        const lockTitulo = document.getElementById('lock-titulo');
+        const lockSubtitulo = document.getElementById('lock-subtitulo');
+
+        function abrirLock() {
+            lockPassword.value = '';
+            lockErro.style.display = 'none';
+            if (!temPasswordGuardian()) {
+                lockTitulo.textContent = 'Criar Palavra-Passe';
+                lockSubtitulo.textContent = 'Define uma palavra-passe para proteger o Modo Guardião';
+                document.getElementById('lock-confirmar').textContent = 'CRIAR';
+            } else {
+                lockTitulo.textContent = 'Guardião';
+                lockSubtitulo.textContent = 'Insere a palavra-passe para aceder ao Modo Guardião';
+                document.getElementById('lock-confirmar').textContent = 'DESBLOQUEAR';
+            }
+            guardianLock.classList.add('aberto');
+            lockPassword.focus();
+        }
+
+        document.getElementById('lock-confirmar').addEventListener('click', () => {
+            const pwd = lockPassword.value.trim();
+            if (!pwd) { lockErro.textContent = 'Insere uma palavra-passe'; lockErro.style.display = 'block'; return; }
+            if (!temPasswordGuardian()) {
+                guardarPassword(pwd);
+                guardianLock.classList.remove('aberto');
+                abrirGuardian();
+            } else {
+                if (verificarPassword(pwd)) {
+                    guardianLock.classList.remove('aberto');
+                    abrirGuardian();
+                } else {
+                    lockErro.textContent = 'Palavra-passe incorreta';
+                    lockErro.style.display = 'block';
+                    lockPassword.value = '';
+                    lockPassword.focus();
+                }
+            }
+        });
+
+        lockPassword.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') document.getElementById('lock-confirmar').click();
+        });
+
+        document.getElementById('lock-cancel').addEventListener('click', () => {
+            guardianLock.classList.remove('aberto');
+        });
+
         function abrirGuardian() {
             guardianNome.value = localStorage.getItem('guardianNome') || '';
             construirChipsGuardian();
             atualizarListaMissoes();
             guardianOverlay.classList.add('aberto');
         }
-        btnGuardian.addEventListener('click', abrirGuardian);
+
+        btnGuardian.addEventListener('click', () => {
+            if (!temPasswordGuardian() || guardianOverlay.classList.contains('aberto')) {
+                if (guardianOverlay.classList.contains('aberto')) return;
+                abrirLock();
+            } else {
+                abrirLock();
+            }
+        });
+
         guardianFechar.addEventListener('click', () => guardianOverlay.classList.remove('aberto'));
         guardianOverlay.addEventListener('click', (e) => { if (e.target === guardianOverlay) guardianOverlay.classList.remove('aberto'); });
 
