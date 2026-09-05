@@ -115,7 +115,7 @@ const PRIMAL_FORCE = {
         tracoPrincipal: "Otimista, comunicativo",
         suporte: "utility",
         frase: "Boas vibrações, más notícias - vamos a isto!",
-        resumo: "O mini robô Parassauro companheiro do Verde. Otimista e comunicativo, espalha正能量 e mantém o moral alto em qualquer situação.",
+        resumo: "O mini robô Parassauro companheiro do Verde. Otimista e comunicativo, espalha energias positivas e mantém o moral alto em qualquer situação.",
         personalidade: "Otimista, comunicativo e energético. Fala com entusiasmo contagante. Vê o lado bom de tudo, mesmo nas situações mais difíceis. É o moral do grupo.",
         voz: { nome: "pt-PT-RaquelNeural", rate: "+5%", pitch: 1.05 }
     },

@@ -412,6 +412,29 @@
         .drawer-overlay, .drawer { display: none; }
         .erro { color: var(--power-red); }
 
+        /* ============ CONVERSA PANEL ============ */
+        .conversa-painel {
+            display: none; position: fixed; left: 12px; right: 12px; bottom: 80px;
+            background: linear-gradient(135deg, #0d0d2b, #1a0a2e);
+            border: 1px solid rgba(255,215,0,0.2); border-radius: 14px;
+            padding: 16px; z-index: 100; gap: 8px; flex-direction: column;
+        }
+        .conversa-painel.visivel { display: flex; }
+        .conversa-header { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-family: 'Orbitron', sans-serif; font-size: 12px; color: var(--power-gold); }
+        #conversa-fechar { background: transparent !important; color: #9aa2c0; font-size: 16px; padding: 0; width: 30px; }
+        .conversa-painel label { font-size: 11px; color: #9aa2c0; font-family: 'Orbitron', sans-serif; letter-spacing: 0.05em; }
+        .conversa-painel select, .conversa-painel input { background: #1c2138; border: 1px solid rgba(255,215,0,0.12); color: #e8e8f0; padding: 10px; border-radius: 10px; font-size: 14px; }
+        .conversa-painel button { background: var(--power-gold); color: #0a0a1a; border: none; padding: 10px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 700; font-family: 'Orbitron', sans-serif; }
+        #conversa-robots { display: flex; flex-wrap: wrap; gap: 6px; max-height: 150px; overflow-y: auto; }
+        #conversa-robots label { display: flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 16px; background: #1c2138; border: 1px solid rgba(255,215,0,0.1); color: #e8e8f0; font-size: 11px; font-weight: 600; cursor: pointer; transition: all .2s; }
+        #conversa-robots label.ativo { border-color: var(--cor-chip); box-shadow: 0 0 0 1px var(--cor-chip); }
+        #conversa-robots input { display: none; }
+        .conversa-opcoes { display: flex; gap: 10px; }
+        .conversa-opcoes > div { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+        #btn-conversa { background: #1c2138; border: 1px solid rgba(255,215,0,0.12); color: #e8e8f0; width: 42px; height: 42px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all .2s; flex-shrink: 0; }
+        #btn-conversa:hover { border-color: var(--power-gold); }
+        #btn-conversa.ativo { background: var(--power-gold); border-color: var(--power-gold); color: #0a0a1a; }
+
         /* ============ INSTALL BANNER ============ */
         #install-banner {
             display: none;
@@ -496,6 +519,7 @@
             footer { gap: 8px; padding: 10px 10px; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
             #voz-toggle { display: none !important; }
             #microfone { display: flex !important; width: 42px; height: 42px; }
+            #btn-conversa { display: flex !important; width: 42px; height: 42px; }
             #input { font-size: 16px; flex: 1; min-width: 0; padding: 10px 14px; }
             #enviar { padding: 10px 14px; font-size: 10px; }
             .drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 998; }
@@ -787,8 +811,29 @@
         <div id="chat"></div>
     </div>
 
+    <div class="conversa-painel" id="conversa-painel">
+        <div class="conversa-header">Conversa entre robôs <button id="conversa-fechar">✕</button></div>
+        <label>Robôs na conversa</label>
+        <div id="conversa-robots"></div>
+        <label>Tema da conversa</label>
+        <input id="conversa-tema" type="text" placeholder="Ex: qual é o melhor ataque?">
+        <div class="conversa-opcoes">
+            <div><label>Turnos</label><input id="conversa-turnos" type="number" min="2" max="30" value="6"></div>
+            <div><label>Velocidade</label>
+                <select id="conversa-velocidade">
+                    <option value="2500">Lenta</option>
+                    <option value="1200" selected>Normal</option>
+                    <option value="500">Rápida</option>
+                </select>
+            </div>
+        </div>
+        <button id="conversa-iniciar">Iniciar conversa</button>
+        <button id="conversa-parar" style="display:none">Parar conversa</button>
+    </div>
+
     <footer>
         <button id="voz-toggle" title="Ligar/Desligar voz">🔊</button>
+        <button id="btn-conversa" title="Modo conversa entre robôs">💬</button>
         <input id="input" type="text" inputmode="text" enterkeyhint="send" placeholder="Fala com um robô..." autocomplete="off">
         <button id="microfone" title="Falar com microfone">🎤</button>
         <button id="enviar">MORPHIN</button>
@@ -1075,6 +1120,110 @@
             document.getElementById("drawer").classList.remove("aberto");
             drawerOverlay.classList.remove("aberto");
         }
+
+        // === CONVERSA DE GRUPO ===
+        const btnConversa = document.getElementById("btn-conversa");
+        const painelConversa = document.getElementById("conversa-painel");
+        const conversaRobots = document.getElementById("conversa-robots");
+        const conversaTema = document.getElementById("conversa-tema");
+        const conversaTurnos = document.getElementById("conversa-turnos");
+        const conversaVelocidade = document.getElementById("conversa-velocidade");
+        const btnIniciar = document.getElementById("conversa-iniciar");
+        const btnParar = document.getElementById("conversa-parar");
+        const btnFecharConversa = document.getElementById("conversa-fechar");
+        let conversaIntervalo = null;
+
+        function construirChipsConversa() {
+            conversaRobots.innerHTML = "";
+            const todos = [...RANGERS_PRINCIPAIS, ...OUTROS_RANGERS];
+            todos.forEach(id => {
+                const r = PRIMAL_FORCE[id];
+                const label = document.createElement("label");
+                label.style.setProperty("--cor-chip", r.cor);
+                const check = document.createElement("input");
+                check.type = "checkbox";
+                check.value = id;
+                if (id === "rex" || id === "spike" || id === "tri") check.checked = true;
+                check.addEventListener("change", () => label.classList.toggle("ativo", check.checked));
+                if (check.checked) label.classList.add("ativo");
+                label.appendChild(check);
+                label.appendChild(document.createTextNode(" " + r.nome));
+                conversaRobots.appendChild(label);
+            });
+        }
+
+        btnConversa.addEventListener("click", () => {
+            painelConversa.classList.toggle("visivel");
+            btnConversa.classList.toggle("ativo");
+            if (painelConversa.classList.contains("visivel")) construirChipsConversa();
+        });
+        btnFecharConversa.addEventListener("click", () => {
+            painelConversa.classList.remove("visivel");
+            btnConversa.classList.remove("ativo");
+        });
+
+        btnIniciar.addEventListener("click", async () => {
+            const ids = [...conversaRobots.querySelectorAll("input:checked")].map(c => c.value);
+            if (ids.length < 2) { adicionarSistema("Precisas de pelo menos 2 robôs para uma conversa."); return; }
+            const robotInstances = ids.map(id => robots[id]);
+            const tema = conversaTema.value.trim();
+            const turnos = parseInt(conversaTurnos.value) || 6;
+            const vel = parseInt(conversaVelocidade.value) || 1200;
+
+            btnIniciar.style.display = "none";
+            btnParar.style.display = "";
+            painelConversa.classList.remove("visivel");
+
+            if (tema) adicionarSistema(`💬 Tema: ${tema}`);
+            const historicoConversa = [];
+
+            let turno = 0;
+            conversaIntervalo = setInterval(async () => {
+                if (turno >= turnos || !conversaIntervalo) {
+                    clearInterval(conversaIntervalo);
+                    conversaIntervalo = null;
+                    btnIniciar.style.display = "";
+                    btnParar.style.display = "none";
+                    adicionarSistema("💬 Conversa terminada.");
+                    return;
+                }
+                const robot = robotInstances[turno % robotInstances.length];
+                const digitando = mostrarDigitando();
+                try {
+                    const texto = await robot.conversarCom(robotInstances, historicoConversa);
+                    historicoConversa.push({ role: "assistant", content: texto, robot: robot.nome });
+                    digitando.remove();
+                    const div = document.createElement("div");
+                    div.className = "msg robot";
+                    const linha = document.createElement("div");
+                    linha.className = "linha-robot";
+                    const avatarMini = document.createElement("div");
+                    avatarMini.className = "avatar-mini";
+                    avatarMini.style.background = robot.cor;
+                    avatarMini.textContent = robot.nome[0];
+                    const nomeEl = document.createElement("div");
+                    nomeEl.className = "nome-robot";
+                    nomeEl.textContent = robot.nome;
+                    nomeEl.style.color = robot.cor;
+                    linha.appendChild(avatarMini);
+                    linha.appendChild(nomeEl);
+                    div.appendChild(linha);
+                    div.appendChild(document.createTextNode(texto));
+                    chat.appendChild(div);
+                    chat.scrollTop = chat.scrollHeight;
+                } catch (e) {
+                    digitando.remove();
+                }
+                turno++;
+            }, vel);
+        });
+
+        btnParar.addEventListener("click", () => {
+            if (conversaIntervalo) { clearInterval(conversaIntervalo); conversaIntervalo = null; }
+            btnIniciar.style.display = "";
+            btnParar.style.display = "none";
+            adicionarSistema("💬 Conversa interrompida.");
+        });
 
         if ("serviceWorker" in navigator) {
             navigator.serviceWorker.register("sw.js", { updateViaCache: 'none' }).catch(e => {

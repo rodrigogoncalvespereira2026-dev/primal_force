@@ -157,23 +157,61 @@ class RobotAI {
                 }
 
                 const dados = await resposta.json();
-                return dados.choices[0].message.content;
+                if (dados.choices && dados.choices[0] && dados.choices[0].message) {
+                    return dados.choices[0].message.content;
+                }
+                throw new Error("Resposta da API sem conteúdo válido.");
             }
         }
         throw new Error(`Groq API: todos os modelos falharam (${ultimoErro.join(" | ") || "sem resposta"}).`);
     }
 
     async responde(mensagem) {
+        this.extrairFactos(mensagem);
         this.adicionarHistorico("user", mensagem);
 
         const historico = this.carregarHistorico();
+        const msgLower = mensagem.toLowerCase();
+        let infoExtra = "";
+
+        if (["tempo", "meteorologia", "temperatura", "chuva", "sol", "vento", "frio", "calor", "clima"].some(p => msgLower.includes(p))) {
+            const palavras = msgLower.split(" ");
+            const preposicoes = ["em", "no", "na", "para"];
+            let cidade = "Lisboa";
+            for (let i = 0; i < palavras.length; i++) {
+                if (preposicoes.includes(palavras[i]) && i + 1 < palavras.length) {
+                    cidade = palavras[i + 1].charAt(0).toUpperCase() + palavras[i + 1].slice(1);
+                    break;
+                }
+            }
+            const tempo = await this.obterTempo(cidade);
+            if (tempo) infoExtra += `\nTempo: ${tempo}`;
+        }
+
+        if (["notícia", "noticias", "novidades", "aconteceu", "últimas", "ultimas", "news"].some(p => msgLower.includes(p))) {
+            let tema = null;
+            const palavrasChave = ["sobre", "de", "acerca"];
+            const palavras = msgLower.split(" ");
+            for (let i = 0; i < palavras.length; i++) {
+                if (palavrasChave.includes(palavras[i]) && i + 1 < palavras.length) {
+                    tema = palavras[i + 1];
+                    break;
+                }
+            }
+            const noticias = await this.obterNoticias(tema);
+            if (noticias) infoExtra += `\n${noticias}`;
+        }
+
+        const factos = this.obterFactos();
         const systemPrompt = [
             this.obterDefinicao(),
             this.primalForce ? this.obterContextoEquipa() : "",
             "Responde SEMPRE em português, de forma muito curta e conversável: no máximo 1 a 3 frases.",
             "NUNCA te apresentes nem descrevas quem és por iniciativa própria — só se o utilizador pedir explicitamente.",
             "Usa a tua frase icónica de vez em quando, de forma natural.",
-            `Tu és o ${this.nome}, o robô companheiro do Ranger ${this.ranger}. O teu dinossauro é ${this.dino}. A tua função é ${this.suporte}.`
+            `Tu és o ${this.nome}, o robô companheiro do Ranger ${this.ranger}. O teu dinossauro é ${this.dino}. A tua função é ${this.suporte}.`,
+            factos ? `Factos do utilizador: ${factos}` : "",
+            infoExtra ? `Info: ${infoExtra}` : ""
         ].filter(Boolean).join("\n");
 
         const texto = await this._chamarGroq([
@@ -342,5 +380,69 @@ class RobotAI {
         let soma = 0;
         for (const c of this.nome) soma += c.charCodeAt(0);
         return soma;
+    }
+
+    // === FACTS / LEARNING ===
+    obterChaveFactos() { return `factos_robot_${this.nome.toLowerCase()}`; }
+
+    carregarFactos() {
+        try {
+            const dados = localStorage.getItem(this.obterChaveFactos());
+            return dados ? JSON.parse(dados) : [];
+        } catch (e) { return []; }
+    }
+
+    guardarFactos(factos) {
+        try { localStorage.setItem(this.obterChaveFactos(), JSON.stringify(factos)); } catch (e) {}
+    }
+
+    extrairFactos(texto) {
+        const keywords = ["chamo", "nome é", "tenho", "anos", "trabalho", "gosto", "moro", "vivo", "sou", "estudo", "adoro", "odeio", "prefiro"];
+        const textoLower = texto.toLowerCase();
+        for (const keyword of keywords) {
+            if (textoLower.includes(keyword)) {
+                const factos = this.carregarFactos();
+                const novo = { texto, data: new Date().toISOString().split("T")[0] };
+                if (!factos.some(f => f.texto === texto)) {
+                    factos.push(novo);
+                    this.guardarFactos(factos);
+                }
+                break;
+            }
+        }
+    }
+
+    obterFactos() {
+        const factos = this.carregarFactos();
+        return factos.length ? factos.map(f => f.texto).join("; ") : null;
+    }
+
+    // === WEATHER ===
+    async obterTempo(cidade = "Lisboa") {
+        try {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 8000);
+            const resp = await fetch(`/weather?city=${encodeURIComponent(cidade)}`, { signal: controller.signal });
+            clearTimeout(timeout);
+            if (!resp.ok) return null;
+            const d = await resp.json();
+            if (d.error) return null;
+            return `Em ${d.city} está ${d.description}. ${d.temperature}°C, ${d.humidity}% de humidade, vento ${d.wind} km/h.`;
+        } catch { return null; }
+    }
+
+    // === NEWS ===
+    async obterNoticias(tema = null) {
+        try {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 8000);
+            const url = tema ? `/news?topic=${encodeURIComponent(tema)}` : "/news";
+            const resp = await fetch(url, { signal: controller.signal });
+            clearTimeout(timeout);
+            if (!resp.ok) return null;
+            const d = await resp.json();
+            if (!d.headlines || !d.headlines.length) return null;
+            return "Últimas notícias:\n" + d.headlines.map((t, i) => `${i + 1}. ${t}`).join("\n");
+        } catch { return null; }
     }
 }
