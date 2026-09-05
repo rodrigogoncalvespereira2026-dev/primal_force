@@ -1059,6 +1059,7 @@
         </div>
         <a href="viewer3d.html" style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--power-gold);text-decoration:none;padding:6px 12px;border:1px solid rgba(255,215,0,0.2);border-radius:3px;background:rgba(255,215,0,0.04);transition:all 0.3s;flex-shrink:0;" onmouseover="this.style.borderColor='var(--power-gold)';this.style.boxShadow='0 0 12px rgba(255,215,0,0.2)'" onmouseout="this.style.borderColor='rgba(255,215,0,0.2)';this.style.boxShadow='none'">🏛️ MODELOS 3D</a>
         <a href="world3d.html" style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:#00E676;text-decoration:none;padding:6px 12px;border:1px solid rgba(0,230,118,0.2);border-radius:3px;background:rgba(0,230,118,0.04);transition:all 0.3s;flex-shrink:0;">🌍 MUNDO 3D</a>
+        <a href="summon-wheel.html" style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:#CE93D8;text-decoration:none;padding:6px 12px;border:1px solid rgba(206,147,216,0.2);border-radius:3px;background:rgba(206,147,216,0.04);transition:all 0.3s;flex-shrink:0;">⚡ INVOCAR</a>
         <span class="header-tag">MORPHIN GRID</span>
         <button id="btn-guardian" title="Modo Guardião — distribuir robôs">⚡<span class="badge-missao" id="badge-missao"></span></button>
         <div id="robot-list"></div>
@@ -2142,7 +2143,15 @@
 
         construirHeader();
         construirDrawer();
-        selecionarRobot("rex");
+
+        // Verificar se veio da Roda de Invocação
+        const urlParams = new URLSearchParams(window.location.search);
+        const summonedRobot = urlParams.get('robot');
+        if (summonedRobot && PRIMAL_FORCE[summonedRobot]) {
+            selecionarRobot(summonedRobot);
+        } else {
+            selecionarRobot("rex");
+        }
 
         // ============ PWA INSTALL PROMPT ============
         let deferredPrompt = null;
