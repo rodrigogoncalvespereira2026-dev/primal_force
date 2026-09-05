@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0a0a1a">
+    <title>Primal Force — O teu Robô</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Rajdhani', sans-serif; }
+        :root { color-scheme: dark; --cor-robot: #FFD700; }
+        body {
+            background: #0a0a1a;
+            color: #e8e8f0;
+            min-height: 100vh; min-height: 100dvh;
+            display: flex; flex-direction: column;
+            background-image:
+                linear-gradient(rgba(255,215,0,0.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,215,0,0.06) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        header {
+            padding: 14px 20px;
+            padding-top: max(14px, env(safe-area-inset-top));
+            display: flex; align-items: center; gap: 10px;
+            border-bottom: 2px solid;
+            border-image: linear-gradient(90deg, transparent, var(--cor-robot), transparent) 1;
+        }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; background: var(--cor-robot); display: flex; align-items: center; justify-content: center; font-family: 'Orbitron',sans-serif; font-weight: 800; font-size: 18px; color: #fff; box-shadow: 0 0 12px var(--cor-robot); }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .head-info { flex: 1; }
+        .head-info h1 { font-family: 'Orbitron', sans-serif; font-size: 16px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cor-robot); }
+        .head-info p { font-size: 12px; color: #8090b0; }
+        .timer-badge {
+            font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700;
+            color: var(--cor-robot); padding: 6px 12px;
+            border: 1px solid var(--cor-robot); border-radius: 3px;
+            background: rgba(255, 215, 0, 0.05);
+        }
+        .timer-badge.warn { color: #FF5252; border-color: #FF5252; animation: piscar 1s infinite; }
+        @keyframes piscar { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        #chat { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+        .msg { max-width: 80%; padding: 12px 16px; border-radius: 4px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+        .msg.user { align-self: flex-end; background: linear-gradient(135deg, var(--cor-robot), #000); color: #fff; clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%); }
+        .msg.robot { align-self: flex-start; background: rgba(15,15,40,0.9); border: 1px solid rgba(255,215,0,0.1); clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%, 0 10px); }
+        .msg.sistema { align-self: center; background: rgba(255,215,0,0.06); color: var(--power-gold, #FFD700); font-family: 'Orbitron', sans-serif; font-size: 10px; letter-spacing: 0.08em; padding: 8px 16px; text-align: center; text-transform: uppercase; border: 1px solid rgba(255,215,0,0.1); }
+
+        footer { display: flex; gap: 10px; padding: 14px 16px; padding-bottom: max(14px, env(safe-area-inset-bottom)); background: linear-gradient(0deg, #0a0a2a, #0d0d2b); border-top: 2px solid; border-image: linear-gradient(90deg, transparent, var(--cor-robot), transparent) 1; }
+        #input { flex: 1; background: rgba(15,15,40,0.8); border: 1px solid rgba(255,215,0,0.12); color: #e8e8f0; padding: 12px 16px; border-radius: 4px; outline: none; font-size: 16px; }
+        #input:focus { border-color: var(--cor-robot); }
+        #enviar { background: var(--cor-robot); color: #0a0a1a; border: none; padding: 12px 20px; border-radius: 4px; cursor: pointer; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+        #enviar:disabled { opacity: 0.4; cursor: not-allowed; }
+        .digitando { align-self: flex-start; background: rgba(15,15,40,0.9); border: 1px solid rgba(255,215,0,0.1); padding: 12px 16px; border-radius: 4px; font-family: 'Orbitron', sans-serif; font-size: 11px; }
+        .digitando span { animation: piscar 1s infinite; }
+
+        #despedido { display: none; position: fixed; inset: 0; background: #0a0a1a; z-index: 100; flex-direction: column; align-items: center; justify-content: center; gap: 16px; text-align: center; padding: 24px; }
+        #despedido.visivel { display: flex; }
+        #despedido .bolt { font-size: 64px; }
+        #despedido h2 { font-family: 'Orbitron', sans-serif; font-size: 20px; color: var(--cor-robot); letter-spacing: 0.1em; }
+        #despedido p { color: #8090b0; max-width: 400px; }
+        @media (max-width: 480px) { .msg { max-width: 90%; } header { padding: 10px 12px; } .head-info h1 { font-size: 14px; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="avatar" id="avatar">?</div>
+        <div class="head-info">
+            <h1 id="nome-robot">A ligar à Morphin Grid...</h1>
+            <p id="sub-robot"></p>
+        </div>
+        <div class="timer-badge" id="timer-badge" style="display:none">--:--</div>
+    </header>
+
+    <div id="chat"></div>
+
+    <footer>
+        <input id="input" type="text" placeholder="Fala com o teu robô..." autocomplete="off" enterkeyhint="send">
+        <button id="enviar">ENVIAR</button>
+    </footer>
+
+    <div id="despedido">
+        <div class="bolt">⚡</div>
+        <h2 id="despedido-titulo">Poder devolvido</h2>
+        <p id="despedido-texto">Este robô regressou à Morphin Grid. Fala com o Guardião se quiseres receber o poder de novo.</p>
+        <p style="font-size:11px;opacity:0.5">Primal Force IA</p>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(location.search);
+        const code = params.get("code");
+
+        let info = null;
+        let expiraEm = 0;
+        let timerInterval = null;
+        let pingInterval = null;
+
+        const chat = document.getElementById("chat");
+        const input = document.getElementById("input");
+        const enviar = document.getElementById("enviar");
+        const timerBadge = document.getElementById("timer-badge");
+
+        function adicionarMsg(quem, texto) {
+            const div = document.createElement("div");
+            div.className = "msg " + quem;
+            div.textContent = texto;
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+        }
+        function sistema(texto) {
+            const div = document.createElement("div");
+            div.className = "msg sistema";
+            div.textContent = texto;
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        function formatarTempo(segundos) {
+            if (segundos < 0) segundos = 0;
+            const m = Math.floor(segundos / 60);
+            const s = Math.floor(segundos % 60);
+            return m + ":" + String(s).padStart(2, "0");
+        }
+
+        function iniciarTimer() {
+            timerBadge.style.display = '';
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                const restante = Math.floor((expiraEm - Date.now() / 1000));
+                if (restante <= 0) { devolvido(); return; }
+                timerBadge.textContent = "⏳ " + formatarTempo(restante);
+                timerBadge.classList.toggle("warn", restante < 120);
+            }, 1000);
+        }
+
+        function devolvido() {
+            clearInterval(timerInterval);
+            clearInterval(pingInterval);
+            input.disabled = true;
+            enviar.disabled = true;
+            document.getElementById("despedido").classList.add("visivel");
+        }
+
+        async function ping() {
+            try {
+                const r = await fetch("/ranger/ping", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code }) });
+                const d = await r.json();
+                if (!d.active) { devolvido(); return; }
+                expiraEm = d.expiresAt;
+                if (!timerInterval) iniciarTimer();
+            } catch (e) { /* silencioso */ }
+        }
+
+        async function carregar() {
+            if (!code) { sistema("⚠️ Link inválido — falta o código."); return; }
+            try {
+                const r = await fetch("/ranger/info?code=" + encodeURIComponent(code));
+                if (!r.ok) { devolvido(); return; }
+                info = await r.json();
+                document.documentElement.style.setProperty("--cor-robot", info.cor);
+                document.getElementById("avatar").innerHTML = info.imagem ? `<img src="${info.imagem}" alt="${info.nome}">` : info.nome[0];
+                document.getElementById("nome-robot").textContent = info.nome;
+                document.getElementById("nome-robot").style.color = info.cor;
+                document.getElementById("sub-robot").textContent = `${info.person} • ${info.dino} • Guardião: ${info.guardianName}`;
+                document.title = info.nome + " — Primal Force";
+                expiraEm = (info.lastMessage + info.timeoutMinutes * 60);
+                adicionarMsg("robot", info.frase || `Olá ${info.person}! Sou o ${info.nome}, o teu robô companheiro.`);
+                sistema("⚡ Poder transferido. A tua missão começa agora.");
+                iniciarTimer();
+                pingInterval = setInterval(ping, 20000);
+                enviar.disabled = false;
+                input.disabled = false;
+            } catch (e) {
+                sistema("⚠️ Erro ao ligar à Morphin Grid.");
+            }
+        }
+
+        async function mandarMensagem() {
+            const texto = input.value.trim();
+            if (!texto || !info) return;
+            input.value = "";
+            adicionarMsg("user", texto);
+
+            const digitando = document.createElement("div");
+            digitando.className = "digitando";
+            digitando.innerHTML = `<span>${info.nome}</span> está a pensar...`;
+            chat.appendChild(digitando);
+            chat.scrollTop = chat.scrollHeight;
+            enviar.disabled = true;
+
+            try {
+                const r = await fetch("/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        model: "openai/gpt-oss-120b",
+                        temperature: 0.9,
+                        messages: [
+                            { role: "system", content: `És o ${info.nome}, um mini robô dinossauro companheiro do Ranger ${info.ranger}. Estás numa missão especial: o Guardião ${info.guardianName} atribuiu-te a ${info.person} para lhe fazer companhia. Fala em português de Portugal, de forma muito curta (1 a 3 frases), com a tua personalidade. O nome da pessoa com quem falas é ${info.person}.` },
+                            { role: "user", content: texto }
+                        ]
+                    })
+                });
+                const d = await r.json();
+                digitando.remove();
+                if (d.error) { adicionarMsg("robot", "⚠️ " + d.error); }
+                else { adicionarMsg("robot", d.choices[0].message.content); }
+                // Cada mensagem renova o tempo de missão
+                fetch("/ranger/activity", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code }) });
+            } catch (e) {
+                digitando.remove();
+                adicionarMsg("robot", "⚠️ Não consegui falar agora. Tentar outra vez?");
+            }
+            enviar.disabled = false;
+        }
+
+        enviar.addEventListener("click", mandarMensagem);
+        input.addEventListener("keydown", (e) => { if (e.key === "Enter") mandarMensagem(); });
+
+        fetch("/assignments").catch(() => {});
+        carregar();
+    </script>
+</body>
+</html>

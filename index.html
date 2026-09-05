@@ -275,6 +275,7 @@
         #chat {
             flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
             padding: 24px; display: flex; flex-direction: column; gap: 14px;
+            scroll-behavior: smooth;
         }
 
         .msg {
@@ -431,6 +432,227 @@
         #btn-hamburger { display: none; background: none; border: none; color: var(--power-gold); font-size: 22px; cursor: pointer; padding: 4px 8px; flex-shrink: 0; }
         .drawer-overlay, .drawer { display: none; }
         .erro { color: var(--power-red); }
+
+        /* ============ TYPING ANIMATION ============ */
+        .msg.robot .typing-text { overflow: hidden; }
+        .msg.robot .typing-cursor {
+            display: inline-block;
+            width: 2px; height: 1em;
+            background: var(--power-gold);
+            margin-left: 2px;
+            vertical-align: text-bottom;
+            animation: cursorBlink 0.6s steps(1) infinite;
+        }
+        @keyframes cursorBlink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+        /* ============ XP BAR ============ */
+        .xp-bar-container {
+            width: 100%; height: 6px;
+            background: rgba(255,215,0,0.08);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+        .xp-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--power-gold), var(--power-red));
+            border-radius: 3px;
+            transition: width 0.6s ease;
+        }
+        .xp-popup {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #0d0d2b, #1a0a2e);
+            border: 2px solid var(--power-gold);
+            border-radius: 12px;
+            padding: 24px 32px;
+            text-align: center;
+            z-index: 10000;
+            animation: xpPopIn 0.4s ease-out;
+            box-shadow: 0 0 40px rgba(255,215,0,0.3);
+        }
+        .xp-popup .level-num {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 48px; font-weight: 900;
+            background: linear-gradient(135deg, var(--power-gold), #fff, var(--power-gold));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .xp-popup .level-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px; letter-spacing: 0.1em;
+            color: var(--power-gold); margin-top: 4px;
+        }
+        @keyframes xpPopIn {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            70% { transform: translate(-50%, -50%) scale(1.05); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        /* ============ BATTLE EFFECTS ============ */
+        .battle-flash {
+            position: fixed; inset: 0;
+            z-index: 9998; pointer-events: none;
+            animation: battleFlash 0.5s ease-out forwards;
+        }
+        @keyframes battleFlash {
+            0% { background: rgba(255,23,68,0.4); }
+            50% { background: rgba(255,215,0,0.3); }
+            100% { background: transparent; }
+        }
+        .xp-gain {
+            display: inline-block;
+            animation: xpFloat 1.2s ease-out forwards;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px; font-weight: 700;
+            color: var(--power-green);
+            opacity: 0;
+        }
+        @keyframes xpFloat {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-30px); }
+        }
+
+        /* ============ GUARDIAN PANEL ============ */
+        #btn-guardian {
+            background: none; border: none; cursor: pointer;
+            color: var(--power-gold); font-size: 20px;
+            padding: 4px 8px; flex-shrink: 0;
+            position: relative;
+        }
+        #btn-guardian:hover { filter: drop-shadow(0 0 6px var(--power-gold)); }
+        #btn-guardian .badge-missao {
+            position: absolute; top: 0; right: 2px;
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--power-green);
+            box-shadow: 0 0 6px var(--power-green);
+            display: none;
+        }
+        #btn-guardian .badge-missao.visivel { display: block; }
+
+        .guardian-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.8); z-index: 2000;
+            align-items: center; justify-content: center;
+            padding: 16px;
+        }
+        .guardian-overlay.aberto { display: flex; }
+        .guardian-modal {
+            width: 100%; max-width: 480px; max-height: 85vh;
+            background: linear-gradient(160deg, #0d0d2b, #1a0a2e);
+            border: 2px solid var(--power-gold);
+            border-radius: 10px;
+            display: flex; flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 0 60px rgba(255,215,0,0.15);
+        }
+        .guardian-header {
+            display: flex; align-items: center; gap: 10px;
+            padding: 14px 18px;
+            border-bottom: 1px solid rgba(255,215,0,0.2);
+            background: rgba(255,215,0,0.03);
+        }
+        .guardian-header h2 {
+            flex: 1;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px; font-weight: 700; letter-spacing: 0.1em;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, var(--power-gold), #fff);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        #guardian-fechar { background: none; border: none; color: #9aa2c0; font-size: 18px; cursor: pointer; padding: 4px 8px; }
+
+        .guardian-body { padding: 16px 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .guardian-body label { font-size: 11px; color: #9aa2c0; font-family: 'Orbitron', sans-serif; letter-spacing: 0.05em; text-transform: uppercase; }
+        .guardian-body input, .guardian-body select {
+            background: #1c2138; border: 1px solid rgba(255,215,0,0.15);
+            color: #e8e8f0; padding: 10px 12px; border-radius: 6px; font-size: 14px;
+            font-family: 'Rajdhani', sans-serif; outline: none; width: 100%;
+        }
+        .guardian-body input:focus, .guardian-body select:focus { border-color: var(--power-gold); }
+        .guardian-row { display: flex; gap: 10px; }
+        .guardian-row > div { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+
+        #guardian-robots { display: flex; flex-wrap: wrap; gap: 6px; }
+        #guardian-robots button {
+            display: flex; align-items: center; gap: 5px;
+            padding: 6px 10px; border-radius: 16px;
+            background: #1c2138; border: 1px solid rgba(255,215,0,0.1);
+            color: #e8e8f0; font-size: 11px; font-weight: 600;
+            font-family: 'Orbitron', sans-serif; cursor: pointer; transition: all 0.2s;
+        }
+        #guardian-robots button img { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; }
+        #guardian-robots button .dot-missao { width: 6px; height: 6px; border-radius: 50%; background: var(--power-green); box-shadow: 0 0 4px var(--power-green); }
+        #guardian-robots button.selecionado { border-color: var(--cor-sel); box-shadow: 0 0 0 1px var(--cor-sel), 0 0 10px color-mix(in srgb, var(--cor-sel) 40%, transparent); }
+        #guardian-robots button.em-missao { opacity: 0.45; cursor: not-allowed; }
+
+        #btn-distribuir {
+            background: linear-gradient(135deg, var(--power-gold), #b8860b);
+            color: #0a0a1a; border: none; padding: 12px; border-radius: 6px;
+            cursor: pointer; font-family: 'Orbitron', sans-serif;
+            font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+        }
+        #btn-distribuir:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .guardian-separador {
+            display: flex; align-items: center; gap: 8px;
+            font-family: 'Orbitron', sans-serif; font-size: 9px;
+            letter-spacing: 0.12em; color: var(--power-gold); opacity: 0.5;
+            text-transform: uppercase;
+        }
+        .guardian-separador::before, .guardian-separador::after {
+            content: ''; flex: 1; height: 1px; background: rgba(255,215,0,0.15);
+        }
+
+        #guardian-lista { display: flex; flex-direction: column; gap: 8px; }
+        .missao-card {
+            display: flex; align-items: center; gap: 10px;
+            background: #1c2138; border: 1px solid rgba(255,215,0,0.1);
+            border-radius: 8px; padding: 10px 12px;
+        }
+        .missao-card img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--cor-card); }
+        .missao-info { flex: 1; min-width: 0; }
+        .missao-info .linha1 { font-weight: 700; font-size: 13px; }
+        .missao-info .linha1 .robot-nome-card { color: var(--cor-card); font-family: 'Orbitron', sans-serif; }
+        .missao-info .linha2 { font-size: 11px; color: #8090b0; display: flex; align-items: center; gap: 6px; }
+        .missao-info .dot-online { width: 6px; height: 6px; border-radius: 50%; background: #444; }
+        .missao-info .dot-online.on { background: var(--power-green); box-shadow: 0 0 4px var(--power-green); }
+        .missao-acoes { display: flex; gap: 6px; flex-shrink: 0; }
+        .missao-acoes button {
+            background: rgba(255,215,0,0.08); border: 1px solid rgba(255,215,0,0.25);
+            color: var(--power-gold); font-size: 10px; font-weight: 600;
+            padding: 6px 10px; border-radius: 4px; cursor: pointer;
+            font-family: 'Orbitron', sans-serif; letter-spacing: 0.05em; text-transform: uppercase;
+        }
+        .missao-acoes button:hover { background: rgba(255,215,0,0.2); }
+        .guardian-vazio { text-align: center; color: #5a6080; font-size: 12px; padding: 12px; font-style: italic; }
+
+        .link-caixa {
+            display: none;
+            background: rgba(0,230,118,0.06);
+            border: 1px solid rgba(0,230,118,0.3);
+            border-radius: 8px; padding: 12px;
+        }
+        .link-caixa.visivel { display: block; animation: xpPopIn 0.3s ease-out; }
+        .link-caixa .link-texto {
+            font-size: 12px; color: #00E676; word-break: break-all;
+            font-family: monospace; margin: 6px 0 10px;
+            background: rgba(0,0,0,0.3); padding: 8px; border-radius: 4px;
+        }
+        .link-caixa .link-botoes { display: flex; gap: 8px; }
+        .link-caixa .link-botoes button {
+            flex: 1; padding: 8px; border-radius: 6px; cursor: pointer;
+            font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 700;
+            letter-spacing: 0.05em; text-transform: uppercase; border: none;
+        }
+        #link-copiar { background: #00E676; color: #0a0a1a; }
+        #link-fechar-caixa { background: rgba(0,230,118,0.1); color: #00E676; border: 1px solid rgba(0,230,118,0.3) !important; }
+
+        @media (max-width: 600px) {
+            .guardian-modal { max-height: 90vh; border-radius: 12px; }
+            .guardian-body { padding: 14px 12px; }
+            #guardian-robots button { font-size: 10px; padding: 5px 8px; }
+        }
 
         /* ============ CONVERSA PANEL ============ */
         .conversa-painel {
@@ -799,8 +1021,59 @@
         <a href="viewer3d.html" style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--power-gold);text-decoration:none;padding:6px 12px;border:1px solid rgba(255,215,0,0.2);border-radius:3px;background:rgba(255,215,0,0.04);transition:all 0.3s;flex-shrink:0;" onmouseover="this.style.borderColor='var(--power-gold)';this.style.boxShadow='0 0 12px rgba(255,215,0,0.2)'" onmouseout="this.style.borderColor='rgba(255,215,0,0.2)';this.style.boxShadow='none'">🏛️ MODELOS 3D</a>
         <a href="world3d.html" style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:#00E676;text-decoration:none;padding:6px 12px;border:1px solid rgba(0,230,118,0.2);border-radius:3px;background:rgba(0,230,118,0.04);transition:all 0.3s;flex-shrink:0;">🌍 MUNDO 3D</a>
         <span class="header-tag">MORPHIN GRID</span>
+        <button id="btn-guardian" title="Modo Guardião — distribuir robôs">⚡<span class="badge-missao" id="badge-missao"></span></button>
         <div id="robot-list"></div>
     </header>
+
+    <div class="guardian-overlay" id="guardian-overlay">
+        <div class="guardian-modal">
+            <div class="guardian-header">
+                <span style="font-size:18px">⚡</span>
+                <h2>Modo Guardião</h2>
+                <button id="guardian-fechar">✕</button>
+            </div>
+            <div class="guardian-body">
+                <div>
+                    <label>Guardião</label>
+                    <input id="guardian-nome" type="text" placeholder="O teu nome de Guardião" maxlength="40">
+                </div>
+                <div>
+                    <label>Robô para distribuir</label>
+                    <div id="guardian-robots"></div>
+                </div>
+                <div class="guardian-row">
+                    <div>
+                        <label>Para quem?</label>
+                        <input id="guardian-pessoa" type="text" placeholder="Nome da pessoa" maxlength="40">
+                    </div>
+                    <div>
+                        <label>Tempo limite</label>
+                        <select id="guardian-tempo">
+                            <option value="15">15 min sem falar</option>
+                            <option value="30" selected>30 min sem falar</option>
+                            <option value="60">1 hora sem falar</option>
+                            <option value="240">4 horas sem falar</option>
+                            <option value="480">8 horas sem falar</option>
+                        </select>
+                    </div>
+                </div>
+                <button id="btn-distribuir" disabled>⚡ DISTRIBUIR PODER</button>
+
+                <div class="link-caixa" id="link-caixa">
+                    <div style="font-family:'Orbitron',sans-serif;font-size:10px;color:#00E676;letter-spacing:0.08em;text-transform:uppercase">✅ Poder distribuído!</div>
+                    <div style="font-size:11px;color:#9aa2c0;margin-top:4px">Envia este link para a pessoa. Ela só vai falar com este robô.</div>
+                    <div class="link-texto" id="link-texto"></div>
+                    <div class="link-botoes">
+                        <button id="link-copiar">📋 Copiar link</button>
+                        <button id="link-fechar-caixa">OK</button>
+                    </div>
+                </div>
+
+                <div class="guardian-separador">Robôs em missão</div>
+                <div id="guardian-lista"></div>
+            </div>
+        </div>
+    </div>
 
     <div class="drawer-overlay" id="drawer-overlay"></div>
     <div class="drawer" id="drawer">
@@ -1077,6 +1350,61 @@
             return div;
         }
 
+        function mostrarDigitandoRobot(robot) {
+            const div = document.createElement("div");
+            div.className = "digitando";
+            const span = document.createElement("span");
+            span.textContent = robot.nome;
+            div.appendChild(span);
+            div.appendChild(document.createTextNode(" está a pensar..."));
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+            return div;
+        }
+
+        async function typingAnimation(element, text, speed) {
+            speed = speed || 18;
+            const textSpan = document.createElement("span");
+            textSpan.className = "typing-text";
+            const cursor = document.createElement("span");
+            cursor.className = "typing-cursor";
+            element.appendChild(textSpan);
+            element.appendChild(cursor);
+            for (let i = 0; i < text.length; i++) {
+                textSpan.textContent += text[i];
+                chat.scrollTop = chat.scrollHeight;
+                if (i % 3 === 0) await new Promise(r => setTimeout(r, speed));
+            }
+            cursor.remove();
+            return textSpan;
+        }
+
+        function mostrarXPPopup(level) {
+            const popup = document.createElement("div");
+            popup.className = "xp-popup";
+            popup.innerHTML = `<div class="level-num">${level}</div><div class="level-text">🎉 LEVEL UP!</div>`;
+            document.body.appendChild(popup);
+            setTimeout(() => { popup.style.opacity = '0'; popup.style.transition = 'opacity 0.4s'; }, 2000);
+            setTimeout(() => popup.remove(), 2500);
+        }
+
+        function mostrarXPGain(amount) {
+            const el = document.createElement("span");
+            el.className = "xp-gain";
+            el.textContent = `+${amount} XP`;
+            const lastMsg = chat.querySelector(".msg:last-child") || chat;
+            lastMsg.parentNode.insertBefore(el, lastMsg.nextSibling);
+            setTimeout(() => el.remove(), 1500);
+        }
+
+        function mostrarBattleFlash() {
+            const flash = document.createElement("div");
+            flash.className = "battle-flash";
+            document.body.appendChild(flash);
+            setTimeout(() => flash.remove(), 600);
+        }
+
+
         function adicionarMensagemRobot(texto, cor, nome) {
             const div = document.createElement("div");
             div.className = "msg robot";
@@ -1102,6 +1430,12 @@
             const texto = input.value.trim();
             if (!texto || estado === "pensar") return;
 
+            // Bloqueia chat com robô que está em missão com outra pessoa
+            if (missionsCache[atual] && missionsCache[atual].onMission) {
+                adicionarSistema(`⚡ ${PRIMAL_FORCE[atual].nome} está em missão com ${missionsCache[atual].person}. Escolhe outro robô ou devolve-o ao painel ⚡.`);
+                return;
+            }
+
             input.value = "";
             adicionarMensagem("user", texto);
             definirEstado("pensar");
@@ -1112,7 +1446,29 @@
                 const resposta = await robot.responde(texto);
                 digitando.remove();
                 definirEstado("falar");
-                adicionarMensagem("robot", resposta, PRIMAL_FORCE[atual].cor);
+                // Typing animation for robot response
+                const div = document.createElement("div");
+                div.className = "msg robot";
+                const linha = document.createElement("div");
+                linha.className = "linha-robot";
+                const avatarMini = document.createElement("div");
+                avatarMini.className = "avatar-mini";
+                avatarMini.style.background = PRIMAL_FORCE[atual].cor;
+                if (PRIMAL_FORCE[atual].imagem) {
+                    avatarMini.innerHTML = `<img src="${PRIMAL_FORCE[atual].imagem}" alt="${PRIMAL_FORCE[atual].nome}">`;
+                } else {
+                    avatarMini.textContent = PRIMAL_FORCE[atual].nome[0];
+                }
+                const nomeEl = document.createElement("div");
+                nomeEl.className = "nome-robot";
+                nomeEl.textContent = PRIMAL_FORCE[atual].nome;
+                nomeEl.style.color = PRIMAL_FORCE[atual].cor;
+                linha.appendChild(avatarMini);
+                linha.appendChild(nomeEl);
+                div.appendChild(linha);
+                chat.appendChild(div);
+                await typingAnimation(div, resposta, 15);
+                chat.scrollTop = chat.scrollHeight;
                 await robot.falar(resposta);
                 definirEstado("espera");
             } catch (e) {
@@ -1252,7 +1608,11 @@
                     const avatarMini = document.createElement("div");
                     avatarMini.className = "avatar-mini";
                     avatarMini.style.background = robot.cor;
-                    avatarMini.textContent = robot.nome[0];
+                    if (PRIMAL_FORCE[ids[turno % ids.length]] && PRIMAL_FORCE[ids[turno % ids.length]].imagem) {
+                        avatarMini.innerHTML = `<img src="${PRIMAL_FORCE[ids[turno % ids.length]].imagem}" alt="${robot.nome}">`;
+                    } else {
+                        avatarMini.textContent = robot.nome[0];
+                    }
                     const nomeEl = document.createElement("div");
                     nomeEl.className = "nome-robot";
                     nomeEl.textContent = robot.nome;
@@ -1260,8 +1620,8 @@
                     linha.appendChild(avatarMini);
                     linha.appendChild(nomeEl);
                     div.appendChild(linha);
-                    div.appendChild(document.createTextNode(texto));
                     chat.appendChild(div);
+                    await typingAnimation(div, texto, 20);
                     chat.scrollTop = chat.scrollHeight;
                 } catch (e) {
                     digitando.remove();
@@ -1282,31 +1642,51 @@
             const robot = robots[atual];
             const saudacao = robot.saudacaoDiaria();
             adicionarMensagemRobot(saudacao, robot.cor, robot.nome);
-            robot.ganharXP(5);
+            const xpMsg = robot.ganharXP(5);
+            mostrarXPGain(5);
+            if (xpMsg) mostrarXPPopup(robot.carregarPoder().level);
         });
 
         document.getElementById("btn-facto-dino").addEventListener("click", () => {
             const robot = robots[atual];
             const facto = robot.factoDino();
             adicionarMensagemRobot("🦕 " + facto, robot.cor, robot.nome);
-            robot.ganharXP(5);
+            const xpMsg = robot.ganharXP(5);
+            mostrarXPGain(5);
+            if (xpMsg) mostrarXPPopup(robot.carregarPoder().level);
         });
 
         document.getElementById("btn-motivacao").addEventListener("click", () => {
             const robot = robots[atual];
             const frase = robot.fraseMotivacional();
             adicionarMensagemRobot("💪 " + frase, robot.cor, robot.nome);
-            robot.ganharXP(5);
+            const xpMsg = robot.ganharXP(5);
+            mostrarXPGain(5);
+            if (xpMsg) mostrarXPPopup(robot.carregarPoder().level);
         });
 
         document.getElementById("btn-nivel").addEventListener("click", () => {
             const robot = robots[atual];
             const p = robot.carregarPoder();
             const xpNecessario = p.level * 50;
-            adicionarMensagemRobot(
-                `📊 Nível: ${p.level} | XP: ${p.xp}/${xpNecessario} | Interações: ${p.interacoes}`,
-                robot.cor, robot.nome
-            );
+            const percent = Math.min(100, Math.round((p.xp / xpNecessario) * 100));
+            const div = document.createElement("div");
+            div.className = "msg robot";
+            div.innerHTML = `
+                <div class="linha-robot">
+                    <div class="avatar-mini" style="background:${robot.cor}">${PRIMAL_FORCE[atual].imagem ? `<img src="${PRIMAL_FORCE[atual].imagem}" alt="${robot.nome}">` : robot.nome[0]}</div>
+                    <div class="nome-robot" style="color:${robot.color || robot.cor}">${robot.nome}</div>
+                </div>
+                <div style="margin-top:6px">
+                    <span style="font-family:'Orbitron',sans-serif;font-size:20px;font-weight:900;color:${robot.cor}">Nv. ${p.level}</span>
+                    <span style="font-size:12px;opacity:0.6;margin-left:8px">${p.xp}/${xpNecessario} XP • ${p.interacoes} interações</span>
+                    <div class="xp-bar-container">
+                        <div class="xp-bar-fill" style="width:${percent}%"></div>
+                    </div>
+                </div>
+            `;
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
         });
 
         document.getElementById("btn-batalha").addEventListener("click", async () => {
@@ -1319,13 +1699,16 @@
             try {
                 const resultado = await robot.batalharCom(outroRobot);
                 digitando.remove();
+                mostrarBattleFlash();
                 const div = document.createElement("div");
                 div.className = "msg robot";
                 div.style.borderLeft = `3px solid ${resultado.vencedor.cor}`;
                 div.innerHTML = `<strong>🏆 ${resultado.vencedor.nome} venceu!</strong> (Força: ${resultado.forca1} vs ${resultado.forca2})<br><br>${resultado.narrativa}`;
                 chat.appendChild(div);
                 chat.scrollTop = chat.scrollHeight;
-                resultado.vencedor.ganharXP(20);
+                const xpMsg = resultado.vencedor.ganharXP(20);
+                mostrarXPGain(20);
+                if (xpMsg) mostrarXPPopup(resultado.vencedor.carregarPoder().level);
             } catch (e) {
                 digitando.remove();
                 adicionarSistema("⚠️ Erro na batalha: " + e.message);
@@ -1376,7 +1759,28 @@
                     try {
                         const resultado = await robot.continuarAventura(aventuraHistorico, escolha);
                         digitando.remove();
-                        adicionarMensagemRobot("🗺️ " + resultado.cena, robot.cor, robot.nome);
+                        const advDiv = document.createElement("div");
+                        advDiv.className = "msg robot";
+                        const advLinha = document.createElement("div");
+                        advLinha.className = "linha-robot";
+                        const advAvatar = document.createElement("div");
+                        advAvatar.className = "avatar-mini";
+                        advAvatar.style.background = robot.cor;
+                        if (PRIMAL_FORCE[atual].imagem) {
+                            advAvatar.innerHTML = `<img src="${PRIMAL_FORCE[atual].imagem}" alt="${robot.nome}">`;
+                        } else {
+                            advAvatar.textContent = robot.nome[0];
+                        }
+                        const advNome = document.createElement("div");
+                        advNome.className = "nome-robot";
+                        advNome.textContent = robot.nome;
+                        advNome.style.color = robot.cor;
+                        advLinha.appendChild(advAvatar);
+                        advLinha.appendChild(advNome);
+                        advDiv.appendChild(advLinha);
+                        chat.appendChild(advDiv);
+                        await typingAnimation(advDiv, "🗺️ " + resultado.cena, 18);
+                        chat.scrollTop = chat.scrollHeight;
                         aventuraHistorico.push({ role: "assistant", content: resultado.cena });
                         aventuraOpcoes = resultado.opcoes || [];
                         if (aventuraOpcoes.length > 0) {
@@ -1390,6 +1794,197 @@
                 });
             });
         }
+
+        // ============ MODO GUARDIÃO ============
+        const guardianOverlay = document.getElementById('guardian-overlay');
+        const btnGuardian = document.getElementById('btn-guardian');
+        const guardianFechar = document.getElementById('guardian-fechar');
+        const guardianRobots = document.getElementById('guardian-robots');
+        const guardianPessoa = document.getElementById('guardian-pessoa');
+        const guardianTempo = document.getElementById('guardian-tempo');
+        const guardianNome = document.getElementById('guardian-nome');
+        const btnDistribuir = document.getElementById('btn-distribuir');
+        const linkCaixa = document.getElementById('link-caixa');
+        const linkTexto = document.getElementById('link-texto');
+        const badgeMissao = document.getElementById('badge-missao');
+        let roboSelecionado = null;
+        let missionsCache = {};
+
+        function abrirGuardian() {
+            guardianNome.value = localStorage.getItem('guardianNome') || '';
+            construirChipsGuardian();
+            atualizarListaMissoes();
+            guardianOverlay.classList.add('aberto');
+        }
+        btnGuardian.addEventListener('click', abrirGuardian);
+        guardianFechar.addEventListener('click', () => guardianOverlay.classList.remove('aberto'));
+        guardianOverlay.addEventListener('click', (e) => { if (e.target === guardianOverlay) guardianOverlay.classList.remove('aberto'); });
+
+        function construirChipsGuardian() {
+            guardianRobots.innerHTML = '';
+            const todos = [...RANGERS_PRINCIPAIS, ...OUTROS_RANGERS];
+            todos.forEach(id => {
+                const r = PRIMAL_FORCE[id];
+                const emMissao = missionsCache[id];
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.style.setProperty('--cor-sel', r.cor);
+                btn.innerHTML = `${r.imagem ? `<img src="${r.imagem}" alt="">` : ''}<span>${r.nome}</span>${emMissao ? '<span class="dot-missao" title="Em missão"></span>' : ''}`;
+                if (emMissao) btn.classList.add('em-missao');
+                if (id === roboSelecionado) btn.classList.add('selecionado');
+                btn.addEventListener('click', () => {
+                    if (missionsCache[id]) { adicionarSistema(`⚡ ${r.nome} já está em missão.`); return; }
+                    roboSelecionado = id;
+                    construirChipsGuardian();
+                    validarDistribuicao();
+                });
+                guardianRobots.appendChild(btn);
+            });
+            validarDistribuicao();
+        }
+
+        function validarDistribuicao() {
+            btnDistribuir.disabled = !(roboSelecionado && guardianPessoa.value.trim());
+        }
+        guardianPessoa.addEventListener('input', validarDistribuicao);
+
+        guardianNome.addEventListener('input', () => {
+            localStorage.setItem('guardianNome', guardianNome.value.trim());
+        });
+
+        btnDistribuir.addEventListener('click', async () => {
+            if (!roboSelecionado || !guardianPessoa.value.trim()) return;
+            btnDistribuir.disabled = true;
+            btnDistribuir.textContent = '⚡ A transferir poder...';
+            try {
+                const r = await fetch('/distribute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        robot: roboSelecionado,
+                        person: guardianPessoa.value.trim(),
+                        timeoutMinutes: parseInt(guardianTempo.value),
+                        guardianName: guardianNome.value.trim() || 'Guardião'
+                    })
+                });
+                const d = await r.json();
+                if (d.error) {
+                    adicionarSistema('⚠️ ' + d.error);
+                } else {
+                    linkTexto.textContent = d.url;
+                    linkCaixa.classList.add('visivel');
+                    guardianPessoa.value = '';
+                    roboSelecionado = null;
+                    await atualizarListaMissoes();
+                }
+            } catch (e) {
+                adicionarSistema('⚠️ Erro ao distribuir: ' + e.message);
+            }
+            btnDistribuir.textContent = '⚡ DISTRIBUIR PODER';
+            validarDistribuicao();
+        });
+
+        document.getElementById('link-copiar').addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(linkTexto.textContent);
+                const btn = document.getElementById('link-copiar');
+                btn.textContent = '✅ Copiado!';
+                setTimeout(() => btn.textContent = '📋 Copiar link', 2000);
+            } catch (e) {
+                // Fallback para navegadores antigos
+                const range = document.createRange();
+                range.selectNodeContents(linkTexto);
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(range);
+                document.execCommand('copy');
+                sel.removeAllRanges();
+                const btn = document.getElementById('link-copiar');
+                btn.textContent = '✅ Copiado!';
+                setTimeout(() => btn.textContent = '📋 Copiar link', 2000);
+            }
+        });
+        document.getElementById('link-fechar-caixa').addEventListener('click', () => linkCaixa.classList.remove('visivel'));
+
+        async function atualizarListaMissoes() {
+            try {
+                const r = await fetch('/assignments');
+                const d = await r.json();
+                missionsCache = {};
+                (d.assignments || []).forEach(a => { missionsCache[a.robot] = a; });
+                const lista = document.getElementById('guardian-lista');
+                lista.innerHTML = '';
+                const missoes = d.assignments || [];
+                badgeMissao.classList.toggle('visivel', missoes.length > 0);
+                if (!missoes.length) {
+                    lista.innerHTML = '<div class="guardian-vazio">Nenhum robô em missão — todos estão na Morphin Grid.</div>';
+                    return;
+                }
+                missoes.forEach(a => {
+                    const r = PRIMAL_FORCE[a.robot];
+                    if (!r) return;
+                    const card = document.createElement('div');
+                    card.className = 'missao-card';
+                    card.style.setProperty('--cor-card', r.cor);
+                    const restante = Math.max(0, Math.round((a.expiresAt - Date.now() / 1000)));
+                    const mins = Math.floor(restante / 60);
+                    card.innerHTML = `
+                        ${r.imagem ? `<img src="${r.imagem}" alt="">` : `<div style="width:32px;height:32px;border-radius:50%;background:${r.cor};display:flex;align-items:center;justify-content:center;font-weight:800">${r.nome[0]}</div>`}
+                        <div class="missao-info">
+                            <div class="linha1"><span class="robot-nome-card">${r.nome}</span> → ${a.person}</div>
+                            <div class="linha2">
+                                <span class="dot-online ${a.online ? 'on' : ''}"></span>
+                                <span>${a.online ? 'online' : 'offline'} • volta em ${mins} min</span>
+                            </div>
+                        </div>
+                        <div class="missao-acoes">
+                            <button data-acao="copiar" data-code="${a.code || ''}">🔗</button>
+                            <button data-acao="revogar" data-robot="${a.robot}">↩︎</button>
+                        </div>
+                    `;
+                    card.querySelector('[data-acao="copiar"]').addEventListener('click', async () => {
+                        const url = location.origin + '/ranger.html?code=' + (a.code || '');
+                        try {
+                            await navigator.clipboard.writeText(url);
+                            adicionarSistema('🔗 Link copiado para ' + a.person + '.');
+                        } catch (e) {
+                            prompt('Copia o link:', url);
+                        }
+                    });
+                    card.querySelector('[data-acao="revogar"]').addEventListener('click', async () => {
+                        if (!confirm(`Devolver ${r.nome} à Morphin Grid? ${a.person} perde o acesso.`)) return;
+                        await fetch('/revoke', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ robot: a.robot }) });
+                        adicionarSistema(`⚡ ${r.nome} regressou à Morphin Grid.`);
+                        atualizarListaMissoes();
+                        construirChipsGuardian();
+                    });
+                    lista.appendChild(card);
+                });
+            } catch (e) {
+                console.warn('Erro ao carregar missões:', e);
+            }
+        }
+
+        // Atualiza o badge periodicamente e bloqueia robôs em missão
+        async function verificarMissoes() {
+            try {
+                const r = await fetch('/robot-status');
+                const d = await r.json();
+                missionsCache = d.status || {};
+                badgeMissao.classList.toggle('visivel', Object.keys(missionsCache).length > 0);
+                // Se o robô atual foi distribuído, avisa
+                if (missionsCache[atual]) {
+                    if (window._avisoRoboFora !== missionsCache[atual].person) {
+                        window._avisoRoboFora = missionsCache[atual].person;
+                        adicionarSistema(`⚡ ${PRIMAL_FORCE[atual].nome} está em missão com ${missionsCache[atual].person}. Escolhe outro robô.`);
+                    }
+                } else {
+                    window._avisoRoboFora = null;
+                }
+            } catch (e) { /* silencioso */ }
+        }
+        setInterval(verificarMissoes, 15000);
+        verificarMissoes();
 
         if ("serviceWorker" in navigator) {
             navigator.serviceWorker.register("sw.js", { updateViaCache: 'none' }).catch(e => {

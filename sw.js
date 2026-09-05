@@ -1,9 +1,10 @@
-const CACHE_NAME = "primalforce-v2";
+const CACHE_NAME = "primalforce-v3";
 const CORE_ASSETS = [
     "/",
     "/index.html",
     "/viewer3d.html",
     "/world3d.html",
+    "/ranger.html",
     "/config.js",
     "/primalforce-robots.js",
     "/robot-base.js",

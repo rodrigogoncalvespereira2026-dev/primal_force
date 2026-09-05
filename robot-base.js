@@ -461,7 +461,7 @@ class RobotAI {
             utility: [`Bom ${periodo}! O que precisas hoje?`, `Bom ${periodo}! Vamos organizar o teu dia!`],
             alert: [`Bom ${periodo}! Fica atento ao que vou dizer!`, `Bom ${periodo}!atenção, tenho um aviso!`]
         };
-        const lista = saudacoes[this.supportType] || saudacoes.utility;
+        const lista = saudacoes[this.suporte] || saudacoes.utility;
         return lista[Math.floor(Math.random() * lista.length)];
     }
 
@@ -496,12 +496,12 @@ class RobotAI {
     fraseMotivacional() {
         const frases = {
             attack: ["Não pares até ganhar!", "A vitória é para os corajosos!", "Força total — nada nos para!"],
-            shield: ["A proteção vem da coragem.", "Defender é mais forte que atacar.", "Estou aqui — não te vizinhos sozinho!"],
+            shield: ["A proteção vem da coragem.", "Defender é mais forte que atacar.", "Estou aqui — não ficas sozinho!"],
             scan: ["A informação é poder.", "Conhece o teu inimigo antes da batalha.", "Dados precisos, ações certas."],
             utility: ["Organização é a chave do sucesso.", "Um passo de cada vez.", "Vamos resolver isso juntos!"],
             alert: ["Atenção é o primeiro passo.", "Quem avisa, amigo é!", "Fica atento — o perigo está perto!"]
         };
-        const lista = frases[this.supportType] || frases.utility;
+        const lista = frases[this.suporte] || frases.utility;
         return lista[Math.floor(Math.random() * lista.length)];
     }
 
@@ -549,15 +549,15 @@ class RobotAI {
         const prompt = venceu
             ? `${this.nome} venceu a batalha contra ${outroRobot.nome}! Narra a batalha de forma épica e dramática em português.`
             : `${outroRobot.nome} venceu a batalha contra ${this.nome}! Narra a batalha de forma épica e dramática em português.`;
-        const dados = await this.enviarChat([
-            { role: "system", content: this.prompt },
+        const narrativa = await this._chamarGroq([
+            { role: "system", content: this.obterDefinicao() },
             { role: "user", content: contexto + "\n\n" + prompt }
         ]);
         return {
             vencedor: venceu ? this : outroRobot,
             perdedor: venceu ? outroRobot : this,
             forca1, forca2,
-            narrativa: dados.texto,
+            narrativa,
             historico
         };
     }
@@ -567,12 +567,12 @@ class RobotAI {
         const prompt = `Cria uma aventura interativa de escolha para o utilizador. Tema: ${tema || "aventura nos Power Rangers Primal Force"}. 
         Dá 2 opções de escolha no final (label e descrição). Responde em JSON: { "cena": "texto narrativo", "opcoes": [{ "label": "Opção A", "descricao": "..." }, { "label": "Opção B", "descricao": "..." }] }.
         Se for o fim da história, responde: { "cena": "texto final", "opcoes": [] }.`;
-        const dados = await this.enviarChat([
-            { role: "system", content: this.prompt + "\n" + prompt },
+        const textoRaw = await this._chamarGroq([
+            { role: "system", content: this.obterDefinicao() + "\n" + prompt },
             { role: "user", content: "Começa a aventura!" }
         ]);
         try {
-            const texto = dados.texto.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+            const texto = textoRaw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
             return JSON.parse(texto);
         } catch {
             return { cena: dados.texto, opcoes: [] };
@@ -584,13 +584,13 @@ class RobotAI {
         Dá 2 opções de escolha no final. Responde em JSON: { "cena": "texto narrativo", "opcoes": [{ "label": "Opção A", "descricao": "..." }, { "label": "Opção B", "descricao": "..." }] }.
         Se for o fim, responde: { "cena": "texto final", "opcoes": [] }.`;
         const messages = [
-            { role: "system", content: this.prompt + "\n" + prompt },
+            { role: "system", content: this.obterDefinicao() + "\n" + prompt },
             ...historico,
             { role: "user", content: `Escolhi: ${escolha}` }
         ];
-        const dados = await this.enviarChat(messages);
+        const textoRaw = await this._chamarGroq(messages);
         try {
-            const texto = dados.texto.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+            const texto = textoRaw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
             return JSON.parse(texto);
         } catch {
             return { cena: dados.texto, opcoes: [] };

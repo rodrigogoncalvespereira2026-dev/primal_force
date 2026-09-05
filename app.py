@@ -3,6 +3,8 @@ import io
 import json
 import re
 import time
+import secrets
+import threading
 import urllib.request
 import urllib.parse
 from collections import defaultdict
@@ -171,6 +173,218 @@ def tts():
     except Exception:
         return jsonify({"erro": "TTS service unavailable"}), 500
     return Response(buffer.getvalue(), mimetype="audio/mpeg", status=200)
+
+# ============ MODO GUARDIÃO — DISTRIBUIÇÃO DE PODERES ============
+
+GUARDIAN_FILE = os.path.join(BASE_DIR, "guardian_data.json")
+_guardian_lock = threading.Lock()
+
+VALID_ROBOTS = [
+    "rex", "spike", "tri", "pluma", "nuck", "bolha",
+    "anka", "crista", "blitz", "testa", "mare", "garra",
+    "brisa", "vela", "fin", "ninho", "sol", "frill", "abismo", "alado"
+]
+
+def _carregar_guardian():
+    try:
+        with open(GUARDIAN_FILE, "r", encoding="utf-8") as f:
+            dados = json.load(f)
+        if "assignments" not in dados:
+            dados["assignments"] = {}
+        return dados
+    except Exception:
+        return {"guardianName": "Guardião", "assignments": {}}
+
+def _guardar_guardian(dados):
+    with open(GUARDIAN_FILE, "w", encoding="utf-8") as f:
+        json.dump(dados, f, ensure_ascii=False, indent=2)
+
+def _limpar_expiradas(dados):
+    """Devolve à Morphin Grid os robôs cuja pessoa parou de falar."""
+    agora = time.time()
+    mudou = False
+    for rid in list(dados["assignments"].keys()):
+        a = dados["assignments"][rid]
+        timeout_s = a.get("timeoutMinutes", 30) * 60
+        ultima = a.get("lastMessage") or a.get("assignedAt", agora)
+        if agora - ultima > timeout_s:
+            del dados["assignments"][rid]
+            mudou = True
+    if mudou:
+        _guardar_guardian(dados)
+    return dados
+
+def _serializar_assignments(dados):
+    agora = time.time()
+    out = []
+    for rid, a in dados["assignments"].items():
+        timeout_s = a.get("timeoutMinutes", 30) * 60
+        ultima = a.get("lastMessage") or a.get("assignedAt", agora)
+        out.append({
+            "robot": rid,
+            "person": a.get("person", ""),
+            "code": a.get("code", ""),
+            "assignedAt": a.get("assignedAt"),
+            "lastMessage": a.get("lastMessage"),
+            "lastSeen": a.get("lastSeen"),
+            "timeoutMinutes": a.get("timeoutMinutes", 30),
+            "online": (agora - (a.get("lastSeen") or 0)) < 60,
+            "expiresAt": ultima + timeout_s
+        })
+    return out
+
+@app.route('/distribute', methods=['POST'])
+def distribute():
+    if not check_rate_limit(request.remote_addr):
+        return jsonify({"error": "Rate limit exceeded"}), 429
+    d = request.get_json(silent=True) or {}
+    rid = (d.get("robot") or "").lower().strip()
+    person = (d.get("person") or "").strip()[:40]
+    try:
+        timeout = min(480, max(5, int(d.get("timeoutMinutes", 30))))
+    except (TypeError, ValueError):
+        timeout = 30
+    if rid not in VALID_ROBOTS:
+        return jsonify({"error": "Robô desconhecido"}), 400
+    if not person:
+        return jsonify({"error": "Nome da pessoa obrigatório"}), 400
+    with _guardian_lock:
+        dados = _limpar_expiradas(_carregar_guardian())
+        if rid in dados["assignments"]:
+            return jsonify({"error": "Esse robô já está em missão"}), 409
+        code = secrets.token_urlsafe(6)
+        agora = time.time()
+        dados["assignments"][rid] = {
+            "code": code,
+            "person": person,
+            "assignedAt": agora,
+            "lastMessage": agora,
+            "lastSeen": agora,
+            "timeoutMinutes": timeout
+        }
+        if d.get("guardianName"):
+            dados["guardianName"] = str(d["guardianName"])[:40]
+        _guardar_guardian(dados)
+    url = request.host_url.rstrip("/") + "/ranger.html?code=" + code
+    return jsonify({"ok": True, "code": code, "url": url, "robot": rid, "person": person})
+
+@app.route('/assignments', methods=['GET'])
+def assignments():
+    if not check_rate_limit(request.remote_addr):
+        return jsonify({"error": "Rate limit exceeded"}), 429
+    with _guardian_lock:
+        dados = _limpar_expiradas(_carregar_guardian())
+    return jsonify({"guardianName": dados.get("guardianName", "Guardião"), "assignments": _serializar_assignments(dados)})
+
+@app.route('/revoke', methods=['POST'])
+def revoke():
+    if not check_rate_limit(request.remote_addr):
+        return jsonify({"error": "Rate limit exceeded"}), 429
+    d = request.get_json(silent=True) or {}
+    rid = (d.get("robot") or "").lower().strip()
+    with _guardian_lock:
+        dados = _carregar_guardian()
+        if rid not in dados["assignments"]:
+            return jsonify({"error": "Esse robô não está em missão"}), 404
+        del dados["assignments"][rid]
+        _guardar_guardian(dados)
+    return jsonify({"ok": True, "robot": rid})
+
+@app.route('/robot-status', methods=['GET'])
+def robot_status():
+    if not check_rate_limit(request.remote_addr):
+        return jsonify({"error": "Rate limit exceeded"}), 429
+    with _guardian_lock:
+        dados = _limpar_expiradas(_carregar_guardian())
+    status = {}
+    for a in _serializar_assignments(dados):
+        status[a["robot"]] = {"onMission": True, "person": a["person"], "online": a["online"]}
+    return jsonify({"status": status})
+
+@app.route('/ranger/info', methods=['GET'])
+def ranger_info():
+    code = request.args.get("code", "")
+    if not code:
+        return jsonify({"error": "Código em falta"}), 400
+    with _guardian_lock:
+        dados = _limpar_expiradas(_carregar_guardian())
+    for rid, a in dados["assignments"].items():
+        if a.get("code") == code:
+            info = PRIMAL_ROBOT_INFO.get(rid, {})
+            return jsonify({
+                "ok": True,
+                "robot": rid,
+                "person": a.get("person", ""),
+                "guardianName": dados.get("guardianName", "Guardião"),
+                "nome": info.get("nome", rid),
+                "cor": info.get("cor", "#FFD700"),
+                "ranger": info.get("ranger", ""),
+                "dino": info.get("dino", ""),
+                "imagem": info.get("imagem", ""),
+                "frase": info.get("frase", ""),
+                "lastMessage": a.get("lastMessage"),
+                "timeoutMinutes": a.get("timeoutMinutes", 30)
+            })
+    return jsonify({"error": "Link inválido ou robô já devolvido à Morphin Grid"}), 404
+
+@app.route('/ranger/ping', methods=['POST'])
+def ranger_ping():
+    d = request.get_json(silent=True) or {}
+    code = d.get("code", "")
+    if not code:
+        return jsonify({"error": "Código em falta"}), 400
+    agora = time.time()
+    with _guardian_lock:
+        dados = _limpar_expiradas(_carregar_guardian())
+        for rid, a in dados["assignments"].items():
+            if a.get("code") == code:
+                a["lastSeen"] = agora
+                _guardar_guardian(dados)
+                timeout_s = a.get("timeoutMinutes", 30) * 60
+                ultima = a.get("lastMessage") or a.get("assignedAt", agora)
+                return jsonify({"ok": True, "active": True, "expiresAt": ultima + timeout_s})
+    return jsonify({"ok": True, "active": False})
+
+@app.route('/ranger/activity', methods=['POST'])
+def ranger_activity():
+    d = request.get_json(silent=True) or {}
+    code = d.get("code", "")
+    if not code:
+        return jsonify({"error": "Código em falta"}), 400
+    agora = time.time()
+    with _guardian_lock:
+        dados = _carregar_guardian()
+        for rid, a in dados["assignments"].items():
+            if a.get("code") == code:
+                a["lastMessage"] = agora
+                a["lastSeen"] = agora
+                _guardar_guardian(dados)
+                return jsonify({"ok": True, "active": True, "expiresAt": agora + a.get("timeoutMinutes", 30) * 60})
+    return jsonify({"ok": True, "active": False})
+
+# Informação estática dos robôs para /ranger/info (evita importar JS no servidor)
+PRIMAL_ROBOT_INFO = {
+    "rex": {"nome": "Rex", "cor": "#C62828", "ranger": "Roro", "dino": "T-Rex", "imagem": "assets/img/rex.png", "frase": "Vamos rugir mais alto que eles!"},
+    "spike": {"nome": "Spike", "cor": "#212121", "ranger": "Mar", "dino": "Estegossauro", "imagem": "assets/img/spike.png", "frase": "Isto vai doer... para eles."},
+    "tri": {"nome": "Tri", "cor": "#1565C0", "ranger": "Marc", "dino": "Triceratops", "imagem": "assets/img/tri.png", "frase": "Análise completa."},
+    "pluma": {"nome": "Pluma", "cor": "#F9A825", "ranger": "Vido", "dino": "Pterodáctilo", "imagem": "assets/img/pluma.png", "frase": "Ainda aqui. Sempre aqui."},
+    "nuck": {"nome": "Nuck", "cor": "#546E7A", "ranger": "Zenowing", "dino": "Titanossauro", "imagem": "assets/img/nuck.png", "frase": "(som grave de confirmação)"},
+    "bolha": {"nome": "Bolha", "cor": "#CE93D8", "ranger": "Mira", "dino": "Plesiossauro", "imagem": "assets/img/bolha.png", "frase": "Coordenadas enviadas! Boa sorte lá fora!"},
+    "anka": {"nome": "Anka", "cor": "#E91E63", "ranger": "Rosa", "dino": "Anquilossauro", "imagem": "assets/img/anka.png", "frase": "Ninguém passa por mim!"},
+    "crista": {"nome": "Crista", "cor": "#2E7D32", "ranger": "Verde", "dino": "Parassauro", "imagem": "assets/img/crista.png", "frase": "Boas vibrações, vamos a isto!"},
+    "blitz": {"nome": "Blitz", "cor": "#E65100", "ranger": "Laranja", "dino": "Velociraptor", "imagem": "assets/img/blitz.png", "frase": "Já chegámos? Ah, espera, já ganhei."},
+    "testa": {"nome": "Testa", "cor": "#424242", "ranger": "Grafite", "dino": "Paquicefalossauro", "imagem": "assets/img/testa.png", "frase": "Já experimentei. Funciona."},
+    "mare": {"nome": "Maré", "cor": "#00838F", "ranger": "Ciano", "dino": "Mosassauro", "imagem": "assets/img/mare.png", "frase": "A maré vira sempre a nosso favor."},
+    "garra": {"nome": "Garra", "cor": "#B71C1C", "ranger": "Vermelho Escuro", "dino": "Alossauro", "imagem": "assets/img/garra.png", "frase": "Deixem a fera trabalhar."},
+    "brisa": {"nome": "Brisa", "cor": "#00897B", "ranger": "Aqua", "dino": "Tapejara", "imagem": "assets/img/brisa.png", "frase": "Vi tudo lá de cima. Querem saber?"},
+    "vela": {"nome": "Vela", "cor": "#AD1457", "ranger": "Magenta", "dino": "Amargasaurus", "imagem": "assets/img/vela.png", "frase": "E agora... o momento que esperavam!"},
+    "fin": {"nome": "Fin", "cor": "#4A148C", "ranger": "Roxo", "dino": "Espinossauro", "imagem": "assets/img/fin.png", "frase": "Chega de conversa."},
+    "ninho": {"nome": "Ninho", "cor": "#7CB342", "ranger": "Verde Lima", "dino": "Oviraptor", "imagem": "assets/img/ninho.png", "frase": "Opa... isso não fui eu. Ou fui?"},
+    "sol": {"nome": "Sol", "cor": "#795548", "ranger": "Castanho", "dino": "Dimetrodon", "imagem": "assets/img/sol.png", "frase": "Calma. Tudo tem o seu tempo."},
+    "frill": {"nome": "Frill", "cor": "#FDD835", "ranger": "Amarelo", "dino": "Dilofossauro", "imagem": "assets/img/frill.png", "frase": "CUIDADO! ...ok, era só um inseto."},
+    "abismo": {"nome": "Abismo", "cor": "#0D47A1", "ranger": "Azul Marinho", "dino": "Liopleurodon", "imagem": "assets/img/abismo.png", "frase": "As profundezas guardam segredos. Eu também."},
+    "alado": {"nome": "Alado", "cor": "#ECEFF1", "ranger": "Branco", "dino": "Quetzalcoatlus", "imagem": "assets/img/alado.png", "frase": "Ao seu dispor, sempre."}
+}
 
 @app.route('/<path:filename>')
 def serve_file(filename):

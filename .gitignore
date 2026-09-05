@@ -3,3 +3,4 @@ __pycache__/
 *.pyc
 .env
 .freebuff/
+guardian_data.json
