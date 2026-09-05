@@ -251,6 +251,26 @@
             text-transform: uppercase;
         }
 
+        /* ============ FEATURE BAR ============ */
+        .feature-bar {
+            display: flex; gap: 6px; padding: 8px 16px;
+            background: rgba(20,20,20,0.95); border-top: 1px solid rgba(255,215,0,0.15);
+            overflow-x: auto; flex-shrink: 0;
+        }
+        .feature-btn {
+            flex-shrink: 0; background: rgba(255,215,0,0.08); border: 1px solid rgba(255,215,0,0.2);
+            color: var(--power-gold); font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 600;
+            padding: 6px 10px; border-radius: 4px; cursor: pointer;
+            transition: all 0.2s; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .feature-btn:hover, .feature-btn:active {
+            background: rgba(255,215,0,0.2); border-color: var(--power-gold);
+            box-shadow: 0 0 8px rgba(255,215,0,0.15);
+        }
+        .feature-btn.ativo {
+            background: var(--power-gold); color: var(--power-dark); border-color: var(--power-gold);
+        }
+
         /* ============ CHAT ============ */
         #chat {
             flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
@@ -517,6 +537,8 @@
             .msg { max-width: 85%; }
             #chat { padding: 16px 12px; gap: 10px; }
             footer { gap: 8px; padding: 10px 10px; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
+            .feature-bar { padding: 6px 10px; gap: 4px; }
+            .feature-btn { font-size: 10px; padding: 5px 8px; }
             #voz-toggle { display: none !important; }
             #microfone { display: flex !important; width: 42px; height: 42px; }
             #btn-conversa { display: flex !important; width: 42px; height: 42px; }
@@ -831,6 +853,15 @@
         <button id="conversa-parar" style="display:none">Parar conversa</button>
     </div>
 
+    <div class="feature-bar">
+        <button id="btn-saudacao" class="feature-btn" title="Saudação diária">👋 Saudação</button>
+        <button id="btn-facto-dino" class="feature-btn" title="Facto do dinossauro">🦕 Facto Dino</button>
+        <button id="btn-motivacao" class="feature-btn" title="Frase motivacional">💪 Motivação</button>
+        <button id="btn-batalha" class="feature-btn" title="Batalhar com outro robô">⚔️ Batalhar</button>
+        <button id="btn-aventura" class="feature-btn" title="Aventura interativa">🗺️ Aventura</button>
+        <button id="btn-nivel" class="feature-btn" title="Ver nível e XP">📊 Nível</button>
+    </div>
+
     <footer>
         <button id="voz-toggle" title="Ligar/Desligar voz">🔊</button>
         <button id="btn-conversa" title="Modo conversa entre robôs">💬</button>
@@ -1046,6 +1077,27 @@
             return div;
         }
 
+        function adicionarMensagemRobot(texto, cor, nome) {
+            const div = document.createElement("div");
+            div.className = "msg robot";
+            const linha = document.createElement("div");
+            linha.className = "linha-robot";
+            const avatarMini = document.createElement("div");
+            avatarMini.className = "avatar-mini";
+            avatarMini.style.background = cor;
+            avatarMini.textContent = nome[0];
+            const nomeEl = document.createElement("div");
+            nomeEl.className = "nome-robot";
+            nomeEl.textContent = nome;
+            nomeEl.style.color = cor;
+            linha.appendChild(avatarMini);
+            linha.appendChild(nomeEl);
+            div.appendChild(linha);
+            div.appendChild(document.createTextNode(texto));
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
         async function enviarMensagem() {
             const texto = input.value.trim();
             if (!texto || estado === "pensar") return;
@@ -1224,6 +1276,120 @@
             btnParar.style.display = "none";
             adicionarSistema("💬 Conversa interrompida.");
         });
+
+        // === FUNCIONALIDADES AVANÇADAS ===
+        document.getElementById("btn-saudacao").addEventListener("click", () => {
+            const robot = robots[atual];
+            const saudacao = robot.saudacaoDiaria();
+            adicionarMensagemRobot(saudacao, robot.cor, robot.nome);
+            robot.ganharXP(5);
+        });
+
+        document.getElementById("btn-facto-dino").addEventListener("click", () => {
+            const robot = robots[atual];
+            const facto = robot.factoDino();
+            adicionarMensagemRobot("🦕 " + facto, robot.cor, robot.nome);
+            robot.ganharXP(5);
+        });
+
+        document.getElementById("btn-motivacao").addEventListener("click", () => {
+            const robot = robots[atual];
+            const frase = robot.fraseMotivacional();
+            adicionarMensagemRobot("💪 " + frase, robot.cor, robot.nome);
+            robot.ganharXP(5);
+        });
+
+        document.getElementById("btn-nivel").addEventListener("click", () => {
+            const robot = robots[atual];
+            const p = robot.carregarPoder();
+            const xpNecessario = p.level * 50;
+            adicionarMensagemRobot(
+                `📊 Nível: ${p.level} | XP: ${p.xp}/${xpNecessario} | Interações: ${p.interacoes}`,
+                robot.cor, robot.nome
+            );
+        });
+
+        document.getElementById("btn-batalha").addEventListener("click", async () => {
+            const robot = robots[atual];
+            const ids = Object.keys(robots).filter(id => id !== atual);
+            const outroId = ids[Math.floor(Math.random() * ids.length)];
+            const outroRobot = robots[outroId];
+            adicionarSistema(`⚔️ ${robot.nome} vs ${outroRobot.nome}!`);
+            const digitando = mostrarDigitando();
+            try {
+                const resultado = await robot.batalharCom(outroRobot);
+                digitando.remove();
+                const div = document.createElement("div");
+                div.className = "msg robot";
+                div.style.borderLeft = `3px solid ${resultado.vencedor.cor}`;
+                div.innerHTML = `<strong>🏆 ${resultado.vencedor.nome} venceu!</strong> (Força: ${resultado.forca1} vs ${resultado.forca2})<br><br>${resultado.narrativa}`;
+                chat.appendChild(div);
+                chat.scrollTop = chat.scrollHeight;
+                resultado.vencedor.ganharXP(20);
+            } catch (e) {
+                digitando.remove();
+                adicionarSistema("⚠️ Erro na batalha: " + e.message);
+            }
+        });
+
+        let aventuraHistorico = [];
+        let aventuraOpcoes = [];
+        document.getElementById("btn-aventura").addEventListener("click", async () => {
+            const robot = robots[atual];
+            adicionarSistema("🗺️ Aventura interativa a começar...");
+            const digitando = mostrarDigitando();
+            try {
+                const resultado = await robot.aventura();
+                digitando.remove();
+                adicionarMensagemRobot("🗺️ " + resultado.cena, robot.cor, robot.nome);
+                aventuraHistorico = [{ role: "assistant", content: resultado.cena }];
+                aventuraOpcoes = resultado.opcoes || [];
+                if (aventuraOpcoes.length > 0) {
+                    mostrarOpcoesAventura(aventuraOpcoes);
+                }
+                robot.ganharXP(10);
+            } catch (e) {
+                digitando.remove();
+                adicionarSistema("⚠️ Erro na aventura: " + e.message);
+            }
+        });
+
+        function mostrarOpcoesAventura(opcoes) {
+            const div = document.createElement("div");
+            div.className = "msg sistema";
+            div.id = "aventura-opcoes";
+            div.innerHTML = "Escolhe uma opção:<br>" + opcoes.map((o, i) =>
+                `<button class="aventura-opcao" data-index="${i}" style="display:block;width:100%;margin:6px 0;padding:10px;background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.3);color:var(--power-gold);border-radius:6px;cursor:pointer;text-align:left;font-family:'Rajdhani',sans-serif;font-size:13px;"><strong>${o.label}</strong><br><span style="opacity:0.7">${o.descricao}</span></button>`
+            ).join("");
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+            div.querySelectorAll(".aventura-opcao").forEach(btn => {
+                btn.addEventListener("click", async () => {
+                    const idx = parseInt(btn.dataset.index);
+                    const escolha = aventuraOpcoes[idx].label;
+                    const antigo = document.getElementById("aventura-opcoes");
+                    if (antigo) antigo.remove();
+                    adicionarSistema(`➤ Escolheste: ${escolha}`);
+                    aventuraHistorico.push({ role: "user", content: escolha });
+                    const robot = robots[atual];
+                    const digitando = mostrarDigitando();
+                    try {
+                        const resultado = await robot.continuarAventura(aventuraHistorico, escolha);
+                        digitando.remove();
+                        adicionarMensagemRobot("🗺️ " + resultado.cena, robot.cor, robot.nome);
+                        aventuraHistorico.push({ role: "assistant", content: resultado.cena });
+                        aventuraOpcoes = resultado.opcoes || [];
+                        if (aventuraOpcoes.length > 0) {
+                            mostrarOpcoesAventura(aventuraOpcoes);
+                        }
+                        robot.ganharXP(10);
+                    } catch (e) {
+                        digitando.remove();
+                        adicionarSistema("⚠️ Erro na aventura: " + e.message);
+                    }
+                });
+            });
+        }
 
         if ("serviceWorker" in navigator) {
             navigator.serviceWorker.register("sw.js", { updateViaCache: 'none' }).catch(e => {

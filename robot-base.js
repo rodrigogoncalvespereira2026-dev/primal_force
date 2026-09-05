@@ -445,4 +445,155 @@ class RobotAI {
             return "Últimas notícias:\n" + d.headlines.map((t, i) => `${i + 1}. ${t}`).join("\n");
         } catch { return null; }
     }
+
+    // === SAUDAÇÃO DIÁRIA ===
+    saudacaoDiaria() {
+        const h = new Date().getHours();
+        let periodo;
+        if (h < 6) periodo = "noite madrugada";
+        else if (h < 12) periodo = "manhã";
+        else if (h < 18) periodo = "tarde";
+        else periodo = "noite";
+        const saudacoes = {
+            attack: [`Bom ${periodo}! A batalha começa agora!`, `Pronto para a luta nesta ${periodo}?`],
+            shield: [`Bom ${periodo}! Estou aqui para te proteger.`, `Descansa, eu cuido de tudo nesta ${periodo}.`],
+            scan: [`Bom ${periodo}! Analisei os dados — tudo está otimizado.`, `Bom ${periodo}! Tenho informações importantes para ti.`],
+            utility: [`Bom ${periodo}! O que precisas hoje?`, `Bom ${periodo}! Vamos organizar o teu dia!`],
+            alert: [`Bom ${periodo}! Fica atento ao que vou dizer!`, `Bom ${periodo}!atenção, tenho um aviso!`]
+        };
+        const lista = saudacoes[this.supportType] || saudacoes.utility;
+        return lista[Math.floor(Math.random() * lista.length)];
+    }
+
+    // === FACTOS DOS DINOSSAUROS ===
+    factoDino() {
+        const factos = {
+            t_rex: "O T-Rex tinha uma mordida de 8.000 kg de pressão — mais forte que qualquer animal atual!",
+            triceratops: "O Triceratops tinha 3 chifres e usava-os para defender-se de predadores.",
+            estegossauro: "O Estegossauro tinha placas nas costas que regulavam a temperatura corporal.",
+            pterodactilo: "O Pterodactilo não era um dinossauro — era um réptil voador!",
+            velociraptor: "O Velociraptor era do tamanho de um peru, mas muito mais inteligente.",
+            braquiossauro: "O Braquiossauro media 25 metros e pesava 80 toneladas!",
+            anquilossauro: "O Anquilossaurus tinha uma cauda blindada como um_porco-espinho gigante.",
+            espinossauro: "O Espinossauro era o maior predador — maior que o T-Rex!",
+            parassaurolofo: "O Parassaurolofo tinha um tubo na cabeça que usava para fazer som.",
+            carnotassauro: "O Carnotauro tinha pequenos chifres e corria a 60 km/h!",
+            talaruro: "O Talarauro era um dinossauro blindado do deserto.",
+            dilofossauro: "O Dilofossauro cuszia veneno — sim, como no Jurassic Park!",
+            dimetrodonte: "O Dimetrodonte vivia antes dos dinossauros — há 290 milhões de anos!",
+            smilodonte: "O Smilodonte (tigre-de-presas) caçava mastodontes!",
+            megalodonte: "O Megalodonte tinha 18 metros — 3x maior que um tubarão-branco!",
+            espino_deluxe: "O Espino Deluxe combina aquática e terrestre — o mais versátil!",
+            ptero_ice: "O Pterodactilo de gelo podia voar a 100 km/h em tempestades!",
+            raptor_sonico: "O Raptor Sónico corria a velocidades impossíveis!",
+            rex_primal: "O Rex Primal é a evolução máxima do T-Rex — puro poder!",
+            tri_supreme: "O Triceratops Supremo é o defensor mais resistente de todos os tempos!"
+        };
+        return factos[this.dino] || "Os dinossauros reinaram a Terra por 165 milhões de anos!";
+    }
+
+    // === CITAS MOTIVACIONAIS ===
+    fraseMotivacional() {
+        const frases = {
+            attack: ["Não pares até ganhar!", "A vitória é para os corajosos!", "Força total — nada nos para!"],
+            shield: ["A proteção vem da coragem.", "Defender é mais forte que atacar.", "Estou aqui — não te vizinhos sozinho!"],
+            scan: ["A informação é poder.", "Conhece o teu inimigo antes da batalha.", "Dados precisos, ações certas."],
+            utility: ["Organização é a chave do sucesso.", "Um passo de cada vez.", "Vamos resolver isso juntos!"],
+            alert: ["Atenção é o primeiro passo.", "Quem avisa, amigo é!", "Fica atento — o perigo está perto!"]
+        };
+        const lista = frases[this.supportType] || frases.utility;
+        return lista[Math.floor(Math.random() * lista.length)];
+    }
+
+    // === SISTEMA DE PODER/LEVEL ===
+    obterChavePoder() { return `primal_poder_${this.robotId}`; }
+
+    carregarPoder() {
+        try {
+            const dados = localStorage.getItem(this.obterChavePoder());
+            return dados ? JSON.parse(dados) : { xp: 0, level: 1, interacoes: 0 };
+        } catch { return { xp: 0, level: 1, interacoes: 0 }; }
+    }
+
+    guardarPoder(dados) {
+        try { localStorage.setItem(this.obterChavePoder(), JSON.stringify(dados)); } catch {}
+    }
+
+    ganharXP(amount = 10) {
+        const p = this.carregarPoder();
+        p.xp += amount;
+        p.interacoes += 1;
+        const xpNecessario = p.level * 50;
+        let msg = null;
+        if (p.xp >= xpNecessario) {
+            p.level += 1;
+            p.xp = 0;
+            msg = `🎉 Level Up! Agora sou nível ${p.level}!`;
+        }
+        this.guardarPoder(p);
+        return msg;
+    }
+
+    // === BATALHA ENTRE ROBÔS ===
+    async batalharCom(outroRobot) {
+        const p1 = this.carregarPoder();
+        const p2 = outroRobot.carregarPoder();
+        const forca1 = p1.level * 10 + Math.floor(Math.random() * 20);
+        const forca2 = p2.level * 10 + Math.floor(Math.random() * 20);
+        const venceu = forca1 >= forca2;
+        const historico = [
+            { participante: this.nome, level: p1.level, forca: forca1 },
+            { participante: outroRobot.nome, level: p2.level, forca: forca2 }
+        ];
+        const contexto = `Batalha entre ${this.nome} (Nv.${p1.level}, Força: ${forca1}) e ${outroRobot.nome} (Nv.${p2.level}, Força: ${forca2}).`;
+        const prompt = venceu
+            ? `${this.nome} venceu a batalha contra ${outroRobot.nome}! Narra a batalha de forma épica e dramática em português.`
+            : `${outroRobot.nome} venceu a batalha contra ${this.nome}! Narra a batalha de forma épica e dramática em português.`;
+        const dados = await this.enviarChat([
+            { role: "system", content: this.prompt },
+            { role: "user", content: contexto + "\n\n" + prompt }
+        ]);
+        return {
+            vencedor: venceu ? this : outroRobot,
+            perdedor: venceu ? outroRobot : this,
+            forca1, forca2,
+            narrativa: dados.texto,
+            historico
+        };
+    }
+
+    // === AVENTURA INTERATIVA ===
+    async aventura(tema) {
+        const prompt = `Cria uma aventura interativa de escolha para o utilizador. Tema: ${tema || "aventura nos Power Rangers Primal Force"}. 
+        Dá 2 opções de escolha no final (label e descrição). Responde em JSON: { "cena": "texto narrativo", "opcoes": [{ "label": "Opção A", "descricao": "..." }, { "label": "Opção B", "descricao": "..." }] }.
+        Se for o fim da história, responde: { "cena": "texto final", "opcoes": [] }.`;
+        const dados = await this.enviarChat([
+            { role: "system", content: this.prompt + "\n" + prompt },
+            { role: "user", content: "Começa a aventura!" }
+        ]);
+        try {
+            const texto = dados.texto.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+            return JSON.parse(texto);
+        } catch {
+            return { cena: dados.texto, opcoes: [] };
+        }
+    }
+
+    async continuarAventura(historico, escolha) {
+        const prompt = `Continua esta aventura interativa. O utilizador escolheu: "${escolha}". 
+        Dá 2 opções de escolha no final. Responde em JSON: { "cena": "texto narrativo", "opcoes": [{ "label": "Opção A", "descricao": "..." }, { "label": "Opção B", "descricao": "..." }] }.
+        Se for o fim, responde: { "cena": "texto final", "opcoes": [] }.`;
+        const messages = [
+            { role: "system", content: this.prompt + "\n" + prompt },
+            ...historico,
+            { role: "user", content: `Escolhi: ${escolha}` }
+        ];
+        const dados = await this.enviarChat(messages);
+        try {
+            const texto = dados.texto.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+            return JSON.parse(texto);
+        } catch {
+            return { cena: dados.texto, opcoes: [] };
+        }
+    }
 }
