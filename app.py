@@ -10,8 +10,11 @@ import urllib.parse
 from collections import defaultdict
 from flask import Flask, Response, jsonify, request, send_from_directory
 
-from dotenv import load_dotenv
-load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env'))
+try:
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env'))
+except ImportError:
+    pass
 
 app = Flask(__name__, static_folder=None)
 
