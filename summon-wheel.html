@@ -21,241 +21,175 @@
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
             background-image:
-                radial-gradient(ellipse at center, rgba(255,215,0,0.03) 0%, transparent 70%),
+                radial-gradient(ellipse at center, rgba(255,215,0,0.04) 0%, transparent 60%),
                 linear-gradient(rgba(255,215,0,0.02) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255,215,0,0.02) 1px, transparent 1px);
             background-size: 100% 100%, 50px 50px, 50px 50px;
+            perspective: 800px;
         }
 
         .wheel-container {
             position: relative;
-            width: 500px; height: 500px;
+            width: 100%; max-width: 600px;
+            height: 420px;
             display: flex; align-items: center; justify-content: center;
         }
 
         /* Primal Core - núcleo central */
         .primal-core {
             position: absolute;
-            width: 120px; height: 120px;
+            width: 100px; height: 100px;
             border-radius: 50%;
-            background: radial-gradient(circle, #ffffff 0%, #b0b0b0 40%, #606060 70%, #303030 100%);
+            background: radial-gradient(circle, #ffffff 0%, #c0c0c0 30%, #808080 60%, #404040 100%);
             box-shadow:
-                0 0 30px rgba(255,255,255,0.3),
-                0 0 60px rgba(255,215,0,0.2),
-                inset 0 0 20px rgba(255,255,255,0.2);
+                0 0 25px rgba(255,255,255,0.3),
+                0 0 50px rgba(255,215,0,0.15),
+                inset 0 0 15px rgba(255,255,255,0.3);
             display: flex; align-items: center; justify-content: center;
-            z-index: 10;
+            z-index: 5;
             animation: corePulse 3s ease-in-out infinite;
         }
         .primal-core::before {
             content: '';
-            position: absolute; inset: -8px;
+            position: absolute; inset: -6px;
             border-radius: 50%;
-            border: 2px solid rgba(255,215,0,0.3);
-            animation: coreRing 4s linear infinite;
-        }
-        .primal-core::after {
-            content: '';
-            position: absolute; inset: -16px;
-            border-radius: 50%;
-            border: 1px solid rgba(255,215,0,0.1);
-            animation: coreRing 6s linear infinite reverse;
+            border: 2px solid rgba(255,215,0,0.25);
+            animation: coreRing 5s linear infinite;
         }
         .core-symbol {
-            font-size: 40px;
-            filter: drop-shadow(0 0 10px rgba(255,215,0,0.5));
+            font-size: 32px;
+            filter: drop-shadow(0 0 8px rgba(255,215,0,0.4));
         }
 
         @keyframes corePulse {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(255,255,255,0.3), 0 0 60px rgba(255,215,0,0.2); }
-            50% { transform: scale(1.05); box-shadow: 0 0 40px rgba(255,255,255,0.4), 0 0 80px rgba(255,215,0,0.3); }
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.04); }
         }
         @keyframes coreRing {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
 
-        /* Anel de robôs */
-        .robot-ring {
-            position: absolute;
-            width: 400px; height: 400px;
-            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        /* Carousel track */
+        .carousel {
+            position: relative;
+            width: 100%; height: 260px;
+            display: flex; align-items: center; justify-content: center;
+            transform-style: preserve-3d;
         }
 
-        .robot-icon {
+        .robot-card {
             position: absolute;
-            width: 56px; height: 56px;
+            width: 70px; height: 70px;
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             border: 3px solid transparent;
-            background: rgba(20,20,40,0.9);
-            font-size: 12px; font-weight: 800;
+            background: rgba(15,15,35,0.95);
+            font-size: 11px; font-weight: 800;
             font-family: 'Orbitron', sans-serif;
             color: #fff;
             text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            user-select: none;
+            -webkit-user-select: none;
+            will-change: transform, opacity;
         }
-        .robot-icon img {
+        .robot-card img {
             width: 100%; height: 100%;
             border-radius: 50%; object-fit: cover;
         }
-        .robot-icon.selecionado {
-            width: 72px; height: 72px;
-            border-color: var(--power-gold) !important;
-            box-shadow: 0 0 20px var(--cor-robot), 0 0 40px rgba(255,215,0,0.3);
-            z-index: 5;
-            transform: scale(1.3);
-        }
-        .robot-icon:hover:not(.selecionado) {
-            border-color: rgba(255,215,0,0.5);
-            transform: scale(1.1);
+        .robot-card:hover {
+            z-index: 20 !important;
         }
 
         /* Info do robô selecionado */
         .selected-info {
             position: absolute;
-            bottom: -60px;
+            bottom: -10px;
             text-align: center;
             z-index: 10;
+            transition: all 0.3s ease;
         }
         .selected-name {
             font-family: 'Orbitron', sans-serif;
-            font-size: 24px; font-weight: 900;
+            font-size: 22px; font-weight: 900;
             letter-spacing: 0.1em;
             text-transform: uppercase;
+            transition: color 0.3s;
         }
         .selected-ranger {
-            font-size: 14px;
+            font-size: 13px;
             color: rgba(255,255,255,0.5);
-            margin-top: 4px;
+            margin-top: 2px;
         }
         .selected-dino {
-            font-size: 11px;
-            color: rgba(255,215,0,0.6);
+            font-size: 10px;
+            color: rgba(255,215,0,0.5);
             margin-top: 2px;
             font-family: 'Orbitron', sans-serif;
             letter-spacing: 0.08em;
             text-transform: uppercase;
         }
+        .selected-hint {
+            font-size: 11px;
+            color: rgba(255,255,255,0.3);
+            margin-top: 10px;
+            animation: hintPulse 2s ease-in-out infinite;
+        }
+        @keyframes hintPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.7; }
+        }
 
         /* Botões de seta */
         .arrow-btn {
             position: absolute;
-            top: 50%; transform: translateY(-50%);
-            width: 48px; height: 48px;
+            top: 40%;
+            width: 44px; height: 44px;
             border-radius: 50%;
-            background: rgba(255,215,0,0.1);
-            border: 1px solid rgba(255,215,0,0.3);
+            background: rgba(255,215,0,0.08);
+            border: 1px solid rgba(255,215,0,0.25);
             color: var(--power-gold);
-            font-size: 20px;
+            font-size: 18px;
             cursor: pointer;
             display: flex; align-items: center; justify-content: center;
             transition: all 0.2s;
             z-index: 20;
         }
         .arrow-btn:hover {
-            background: rgba(255,215,0,0.2);
-            box-shadow: 0 0 15px rgba(255,215,0,0.2);
+            background: rgba(255,215,0,0.18);
+            box-shadow: 0 0 12px rgba(255,215,0,0.2);
         }
-        .arrow-left { left: -30px; }
-        .arrow-right { right: -30px; }
-
-        /* Botão invocar */
-        .summon-btn {
-            position: absolute;
-            bottom: -120px;
-            padding: 14px 48px;
-            background: linear-gradient(135deg, var(--power-gold), #FFA000);
-            color: #0a0a1a;
-            border: none; border-radius: 6px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 14px; font-weight: 800;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 20px rgba(255,215,0,0.3);
-        }
-        .summon-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 30px rgba(255,215,0,0.5);
-        }
-        .summon-btn:active { transform: translateY(0); }
-        .summon-btn:disabled {
-            opacity: 0.4; cursor: not-allowed;
-            transform: none; box-shadow: none;
-        }
+        .arrow-left { left: 10px; }
+        .arrow-right { right: 10px; }
 
         /* Flash de invocação */
         .summon-flash {
             position: fixed; inset: 0;
-            background: white;
             opacity: 0; pointer-events: none;
             z-index: 100;
-            transition: opacity 0.1s;
         }
         .summon-flash.ativo {
-            animation: flashAnim 0.8s ease-out forwards;
+            animation: flashAnim 0.7s ease-out forwards;
         }
         @keyframes flashAnim {
-            0% { opacity: 0.9; }
+            0% { opacity: 0.85; }
             100% { opacity: 0; }
-        }
-
-        /* Animação de invocação */
-        .summon-anim {
-            position: fixed;
-            width: 80px; height: 80px;
-            border-radius: 50%;
-            z-index: 99;
-            pointer-events: none;
-            display: none;
-        }
-        .summon-anim.ativo {
-            display: flex; align-items: center; justify-content: center;
-            font-size: 36px; font-weight: 900;
-            font-family: 'Orbitron', sans-serif;
-            color: #fff;
-            animation: summonFly 0.8s ease-in forwards;
-        }
-        @keyframes summonFly {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(2); opacity: 1; }
-            100% { transform: scale(0.1); opacity: 0; top: 50%; left: 50%; }
-        }
-
-        /* Partículas no core */
-        .particles {
-            position: absolute;
-            width: 140px; height: 140px;
-            border-radius: 50%;
-            pointer-events: none;
-        }
-        .particle {
-            position: absolute;
-            width: 3px; height: 3px;
-            background: var(--power-gold);
-            border-radius: 50%;
-            animation: particleFloat 3s ease-in-out infinite;
-        }
-        @keyframes particleFloat {
-            0%, 100% { opacity: 0; transform: translateY(0) scale(0); }
-            50% { opacity: 1; transform: translateY(-30px) scale(1); }
         }
 
         /* Header */
         .header {
             position: fixed; top: 0; left: 0; right: 0;
-            padding: 16px 24px;
+            padding: 14px 20px;
             display: flex; align-items: center; gap: 12px;
-            background: rgba(10,10,26,0.9);
+            background: rgba(10,10,26,0.92);
             border-bottom: 1px solid rgba(255,215,0,0.1);
             z-index: 50;
         }
         .header h1 {
             font-family: 'Orbitron', sans-serif;
-            font-size: 14px; font-weight: 700;
+            font-size: 13px; font-weight: 700;
             letter-spacing: 0.1em;
             color: var(--power-gold);
         }
@@ -265,34 +199,48 @@
             font-size: 10px; font-weight: 700;
             color: var(--power-gold);
             text-decoration: none;
-            padding: 8px 16px;
-            border: 1px solid rgba(255,215,0,0.3);
+            padding: 7px 14px;
+            border: 1px solid rgba(255,215,0,0.25);
             border-radius: 4px;
             transition: all 0.2s;
         }
-        .header a:hover {
-            background: rgba(255,215,0,0.1);
-        }
+        .header a:hover { background: rgba(255,215,0,0.1); }
 
-        /* Contador */
+        /* Counter */
         .counter {
-            position: fixed; top: 70px; right: 24px;
+            position: fixed; top: 60px; right: 20px;
             font-family: 'Orbitron', sans-serif;
-            font-size: 11px;
-            color: rgba(255,255,255,0.4);
+            font-size: 10px;
+            color: rgba(255,255,255,0.35);
             z-index: 50;
         }
 
+        /* Partículas no core */
+        .particles {
+            position: absolute;
+            width: 120px; height: 120px;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .particle {
+            position: absolute;
+            width: 2px; height: 2px;
+            background: var(--power-gold);
+            border-radius: 50%;
+            animation: particleFloat 3s ease-in-out infinite;
+        }
+        @keyframes particleFloat {
+            0%, 100% { opacity: 0; transform: translateY(0) scale(0); }
+            50% { opacity: 0.8; transform: translateY(-25px) scale(1); }
+        }
+
         @media (max-width: 540px) {
-            .wheel-container { width: 340px; height: 340px; }
-            .robot-ring { width: 280px; height: 280px; }
-            .robot-icon { width: 44px; height: 44px; font-size: 10px; }
-            .robot-icon.selecionado { width: 60px; height: 60px; }
-            .primal-core { width: 90px; height: 90px; }
-            .core-symbol { font-size: 30px; }
-            .arrow-left { left: -10px; }
-            .arrow-right { right: -10px; }
+            .wheel-container { height: 340px; }
+            .robot-card { width: 54px; height: 54px; font-size: 9px; }
+            .primal-core { width: 80px; height: 80px; }
+            .core-symbol { font-size: 26px; }
             .selected-name { font-size: 18px; }
+            .arrow-btn { width: 38px; height: 38px; font-size: 16px; }
         }
     </style>
 </head>
@@ -305,7 +253,7 @@
     <div class="counter" id="counter">1 / 20</div>
 
     <div class="wheel-container" id="wheel-container">
-        <div class="robot-ring" id="robot-ring"></div>
+        <div class="carousel" id="carousel"></div>
         <div class="primal-core" id="primal-core">
             <div class="particles" id="particles"></div>
             <span class="core-symbol">⚡</span>
@@ -314,93 +262,107 @@
             <div class="selected-name" id="selected-name">A carregar...</div>
             <div class="selected-ranger" id="selected-ranger"></div>
             <div class="selected-dino" id="selected-dino"></div>
+            <div class="selected-hint">Toca num robô para invocar</div>
         </div>
         <button class="arrow-btn arrow-left" id="arrow-left">◀</button>
         <button class="arrow-btn arrow-right" id="arrow-right">▶</button>
-        <button class="summon-btn" id="summon-btn" disabled>⚡ INVOCAR</button>
     </div>
 
     <div class="summon-flash" id="summon-flash"></div>
-    <div class="summon-anim" id="summon-anim"></div>
 
     <script src="primalforce-robots.js"></script>
     <script>
-        const ring = document.getElementById('robot-ring');
+        const carousel = document.getElementById('carousel');
         const selectedName = document.getElementById('selected-name');
         const selectedRanger = document.getElementById('selected-ranger');
         const selectedDino = document.getElementById('selected-dino');
-        const summonBtn = document.getElementById('summon-btn');
         const counter = document.getElementById('counter');
         const flash = document.getElementById('summon-flash');
-        const summonAnim = document.getElementById('summon-anim');
         const core = document.getElementById('primal-core');
+        const container = document.getElementById('wheel-container');
 
         const allRobots = [...RANGERS_PRINCIPAIS, ...OUTROS_RANGERS];
         const total = allRobots.length;
         let currentIndex = 0;
-        let ringRotation = 0;
-        let isDragging = false;
-        let startX = 0;
-        let startRotation = 0;
+        let isAnimating = false;
 
-        const WHEEL_SIZE = ring.offsetWidth || 400;
-        const RADIUS = WHEEL_SIZE / 2 - 30;
+        const ICON_SIZE = 70;
+        const VISIBLE_COUNT = 9;
+        const ANGLE_STEP = 360 / total;
 
-        // Criar partículas no core
         function criarParticulas() {
-            const container = document.getElementById('particles');
-            for (let i = 0; i < 12; i++) {
+            const c = document.getElementById('particles');
+            for (let i = 0; i < 10; i++) {
                 const p = document.createElement('div');
                 p.className = 'particle';
-                const angle = (Math.PI * 2 / 12) * i;
-                p.style.left = (70 + Math.cos(angle) * 40) + 'px';
-                p.style.top = (70 + Math.sin(angle) * 40) + 'px';
-                p.style.animationDelay = (i * 0.25) + 's';
-                container.appendChild(p);
+                const angle = (Math.PI * 2 / 10) * i;
+                p.style.left = (60 + Math.cos(angle) * 35) + 'px';
+                p.style.top = (60 + Math.sin(angle) * 35) + 'px';
+                p.style.animationDelay = (i * 0.3) + 's';
+                c.appendChild(p);
             }
         }
 
-        // Criar ícones dos robôs
-        function criarAnel() {
-            ring.innerHTML = '';
+        function criarCards() {
+            carousel.innerHTML = '';
             allRobots.forEach((id, i) => {
                 const r = PRIMAL_FORCE[id];
-                const angle = (Math.PI * 2 / total) * i;
-                const x = RADIUS + Math.cos(angle) * RADIUS;
-                const y = RADIUS + Math.sin(angle) * RADIUS;
-
-                const icon = document.createElement('div');
-                icon.className = 'robot-icon';
-                icon.style.setProperty('--cor-robot', r.cor);
-                icon.style.borderColor = r.cor;
-                icon.style.left = (x - 28) + 'px';
-                icon.style.top = (y - 28) + 'px';
-                icon.dataset.index = i;
-                icon.dataset.id = id;
+                const card = document.createElement('div');
+                card.className = 'robot-card';
+                card.style.setProperty('--cor-robot', r.cor);
+                card.dataset.index = i;
+                card.dataset.id = id;
 
                 if (r.imagem) {
                     const img = document.createElement('img');
                     img.src = r.imagem;
                     img.alt = r.nome;
-                    img.onerror = () => { icon.textContent = r.nome[0]; };
-                    icon.appendChild(img);
+                    img.onerror = () => { card.textContent = r.nome[0]; };
+                    card.appendChild(img);
                 } else {
-                    icon.textContent = r.nome[0];
+                    card.textContent = r.nome[0];
                 }
 
-                icon.addEventListener('click', () => {
-                    const diff = i - currentIndex;
-                    rotarPara(diff > 0 ? diff : total + diff);
-                });
-
-                ring.appendChild(icon);
+                card.addEventListener('click', () => invocarRobot(i));
+                carousel.appendChild(card);
             });
         }
 
-        function atualizarSelecao() {
-            const icons = ring.querySelectorAll('.robot-icon');
-            icons.forEach((icon, i) => {
-                icon.classList.toggle('selecionado', i === currentIndex);
+        function getAngleDistance(a, b) {
+            let diff = Math.abs(a - b);
+            if (diff > total / 2) diff = total - diff;
+            return diff;
+        }
+
+        function atualizarCarousel() {
+            const cards = carousel.querySelectorAll('.robot-card');
+            const containerW = container.offsetWidth;
+            const centerX = containerW / 2;
+
+            cards.forEach((card, i) => {
+                const dist = getAngleDistance(i, currentIndex);
+                const normalizedDist = dist / (total / 2);
+
+                const scale = 1.0 - normalizedDist * 0.55;
+                const alpha = 1.0 - normalizedDist * 0.6;
+                const zIndex = Math.round((1 - normalizedDist) * 10);
+
+                const spread = 80;
+                const x = centerX + (dist <= currentIndex ? -dist : dist) * spread * (i < currentIndex ? -1 : 1);
+                const arcX = (i - currentIndex);
+                const xOffset = arcX * 65;
+
+                card.style.left = (centerX + xOffset - ICON_SIZE / 2) + 'px';
+                card.style.top = (90 - (1 - normalizedDist) * 15) + 'px';
+                card.style.width = (ICON_SIZE * scale) + 'px';
+                card.style.height = (ICON_SIZE * scale) + 'px';
+                card.style.opacity = alpha;
+                card.style.zIndex = zIndex;
+                card.style.borderColor = i === currentIndex ? PRIMAL_FORCE[allRobots[i]].cor : 'transparent';
+                card.style.boxShadow = i === currentIndex
+                    ? `0 0 20px ${PRIMAL_FORCE[allRobots[i]].cor}, 0 0 40px ${PRIMAL_FORCE[allRobots[i]].cor}40`
+                    : 'none';
+                card.style.transform = `scale(1)`;
             });
 
             const robot = PRIMAL_FORCE[allRobots[currentIndex]];
@@ -409,106 +371,83 @@
             selectedRanger.textContent = `Ranger: ${robot.ranger}`;
             selectedDino.textContent = `${robot.supportType.toUpperCase()} • ${robot.dino}`;
             counter.textContent = `${currentIndex + 1} / ${total}`;
-            core.style.boxShadow = `0 0 30px rgba(255,255,255,0.3), 0 0 60px ${robot.cor}40`;
-            summonBtn.disabled = false;
         }
 
         function rotarPara(offset) {
-            currentIndex = (currentIndex + offset) % total;
-            ringRotation -= (360 / total) * offset;
-            ring.style.transform = `rotate(${ringRotation}deg)`;
-            ring.querySelectorAll('.robot-icon').forEach(icon => {
-                icon.style.transform = `rotate(${-ringRotation}deg)`;
-            });
-            atualizarSelecao();
+            if (isAnimating) return;
+            currentIndex = ((currentIndex + offset) % total + total) % total;
+            atualizarCarousel();
         }
 
-        // Botões de seta
-        document.getElementById('arrow-left').addEventListener('click', () => rotarPara(total - 1));
+        // Setas
+        document.getElementById('arrow-left').addEventListener('click', () => rotarPara(-1));
         document.getElementById('arrow-right').addEventListener('click', () => rotarPara(1));
 
         // Teclado
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft') rotarPara(total - 1);
+            if (isAnimating) return;
+            if (e.key === 'ArrowLeft') rotarPara(-1);
             else if (e.key === 'ArrowRight') rotarPara(1);
-            else if (e.key === 'Enter') invocar();
         });
 
-        // Arrastar com rato
-        ring.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            startX = e.clientX;
-            startRotation = ringRotation;
-            ring.style.transition = 'none';
-        });
-        document.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            const diff = e.clientX - startX;
-            if (Math.abs(diff) > 30) {
-                rotarPara(diff > 0 ? 1 : total - 1);
-                startX = e.clientX;
+        // Touch/swipe
+        let touchStartX = 0;
+        container.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+        }, { passive: true });
+        container.addEventListener('touchmove', (e) => {
+            const diff = e.touches[0].clientX - touchStartX;
+            if (Math.abs(diff) > 40) {
+                rotarPara(diff > 0 ? -1 : 1);
+                touchStartX = e.touches[0].clientX;
             }
-        });
-        document.addEventListener('mouseup', () => {
-            isDragging = false;
-            ring.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-        });
+        }, { passive: true });
 
-        // Touch
-        ring.addEventListener('touchstart', (e) => {
-            isDragging = true;
-            startX = e.touches[0].clientX;
-            ring.style.transition = 'none';
-        });
-        ring.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
-            const diff = e.touches[0].clientX - startX;
-            if (Math.abs(diff) > 30) {
-                rotarPara(diff > 0 ? 1 : total - 1);
-                startX = e.touches[0].clientX;
+        // Invocação direta por clique
+        function invocarRobot(index) {
+            if (isAnimating) return;
+            if (index !== currentIndex) {
+                currentIndex = index;
+                atualizarCarousel();
+                return;
             }
-        });
-        ring.addEventListener('touchend', () => {
-            isDragging = false;
-            ring.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-        });
 
-        // Invocação
-        function invocar() {
-            const robot = PRIMAL_FORCE[allRobots[currentIndex]];
+            isAnimating = true;
+            const robot = PRIMAL_FORCE[allRobots[index]];
+            const card = carousel.querySelectorAll('.robot-card')[index];
+            const coreRect = core.getBoundingClientRect();
+            const cardRect = card.getBoundingClientRect();
+
+            // Animação: card voa para o core
+            const dx = coreRect.left + coreRect.width / 2 - (cardRect.left + cardRect.width / 2);
+            const dy = coreRect.top + coreRect.height / 2 - (cardRect.top + cardRect.height / 2);
+
+            card.style.transition = 'all 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            card.style.transform = `translate(${dx}px, ${dy}px) scale(1.6)`;
+            card.style.opacity = '1';
+            card.style.zIndex = '50';
+            card.style.border = `3px solid ${robot.cor}`;
+            card.style.boxShadow = `0 0 30px ${robot.cor}, 0 0 60px ${robot.cor}80`;
 
             // Flash
             flash.style.background = robot.cor;
-            flash.classList.add('ativo');
-            setTimeout(() => flash.classList.remove('ativo'), 800);
 
-            // Animação do ícone
-            summonAnim.textContent = robot.nome[0];
-            summonAnim.style.background = robot.cor;
-            summonAnim.style.left = '50%';
-            summonAnim.style.top = '50%';
-            summonAnim.classList.add('ativo');
-            setTimeout(() => summonAnim.classList.remove('ativo'), 800);
-
-            // Core glow
-            core.style.boxShadow = `0 0 60px ${robot.cor}, 0 0 120px ${robot.cor}80`;
             setTimeout(() => {
-                core.style.boxShadow = '0 0 30px rgba(255,255,255,0.3), 0 0 60px rgba(255,215,0,0.2)';
-            }, 1000);
+                flash.classList.add('ativo');
+                core.style.boxShadow = `0 0 60px ${robot.cor}, 0 0 120px ${robot.cor}80`;
+            }, 200);
 
-            // Guardar seleção e redirecionar
-            localStorage.setItem('summonedRobot', allRobots[currentIndex]);
             setTimeout(() => {
-                window.location.href = `index.html?robot=${allRobots[currentIndex]}`;
-            }, 900);
+                flash.classList.remove('ativo');
+                localStorage.setItem('summonedRobot', allRobots[index]);
+                window.location.href = `index.html?robot=${allRobots[index]}`;
+            }, 650);
         }
-
-        summonBtn.addEventListener('click', invocar);
 
         // Init
         criarParticulas();
-        criarAnel();
-        atualizarSelecao();
+        criarCards();
+        atualizarCarousel();
     </script>
 </body>
 </html>
