@@ -37,27 +37,21 @@
         }
         .header a:hover { background: rgba(255,215,0,0.1); }
 
-        /* 3D Scene */
         .scene {
             width: 100%; height: 100%;
             display: flex; align-items: center; justify-content: center;
-            perspective: 900px;
         }
 
-        /* The ring */
         .wheel {
             position: relative;
-            width: 160px; height: 160px;
-            transform-style: preserve-3d;
-            transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            width: 120px; height: 120px;
         }
 
-        /* Each robot on the ring */
         .wheel-item {
             position: absolute;
-            width: 100px; height: 100px;
-            left: 30px; top: 30px;
-            transform-style: preserve-3d;
+            width: 90px; height: 90px;
+            left: 15px; top: 15px;
+            will-change: transform, opacity;
         }
 
         .wheel-item-inner {
@@ -66,10 +60,10 @@
             display: flex; align-items: center; justify-content: center;
             background: rgba(10,10,25,0.95);
             border: 3px solid transparent;
-            font-size: 12px; font-weight: 800;
+            font-size: 14px; font-weight: 800;
             font-family: 'Orbitron', sans-serif; color: #fff;
             cursor: pointer;
-            transition: border-color 0.4s, box-shadow 0.4s;
+            transition: border-color 0.3s, box-shadow 0.3s;
             overflow: hidden;
         }
         .wheel-item-inner img {
@@ -77,18 +71,25 @@
             border-radius: 50%; object-fit: cover;
         }
 
-        /* Selected (front) */
-        .wheel-item.front .wheel-item-inner {
+        .wheel-item.selected .wheel-item-inner {
             border-color: var(--item-color);
-            box-shadow: 0 0 25px var(--item-color),
-                        0 0 50px color-mix(in srgb, var(--item-color) 35%, transparent),
-                        0 0 80px color-mix(in srgb, var(--item-color) 15%, transparent);
+            box-shadow: 0 0 20px var(--item-color),
+                        0 0 40px color-mix(in srgb, var(--item-color) 30%, transparent);
         }
 
-        /* Info */
+        .pulse-ring {
+            position: absolute; inset: -4px; border-radius: 50%;
+            border: 2px solid var(--item-color);
+            animation: pulseRing 1.5s ease-out infinite;
+            pointer-events: none;
+        }
+        @keyframes pulseRing {
+            0% { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(1.4); opacity: 0; }
+        }
+
         .info-panel {
-            position: fixed;
-            bottom: 120px;
+            position: fixed; bottom: 100px;
             text-align: center; width: 100%;
         }
         .info-name {
@@ -110,7 +111,6 @@
             margin-top: 14px;
         }
 
-        /* Arrows */
         .arrow {
             position: fixed; top: 50%; transform: translateY(-50%);
             width: 50px; height: 50px;
@@ -125,14 +125,19 @@
         .arrow.left { left: 20px; }
         .arrow.right { right: 20px; }
 
-        /* Counter */
         .counter {
             position: fixed; top: 60px; right: 20px;
             font-family: 'Orbitron', sans-serif;
             font-size: 10px; color: rgba(255,255,255,0.2); z-index: 50;
         }
 
-        /* Reveal overlay */
+        .flash {
+            position: fixed; inset: 0;
+            pointer-events: none; z-index: 99; opacity: 0;
+        }
+        .flash.on { animation: flashFx 0.5s ease-out forwards; }
+        @keyframes flashFx { 0% { opacity: 0.9; } 100% { opacity: 0; } }
+
         .reveal {
             position: fixed; inset: 0;
             background: rgba(0,0,0,0);
@@ -176,18 +181,6 @@
             cursor: pointer;
             box-shadow: 0 4px 20px var(--rev-color);
         }
-        @keyframes popIn {
-            0% { transform: scale(0.3); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        .flash {
-            position: fixed; inset: 0;
-            pointer-events: none; z-index: 99; opacity: 0;
-        }
-        .flash.on { animation: flashFx 0.5s ease-out forwards; }
-        @keyframes flashFx { 0% { opacity: 0.9; } 100% { opacity: 0; } }
-
         .reveal-close {
             position: absolute; top: 20px; right: 20px;
             width: 36px; height: 36px; border-radius: 50%;
@@ -198,15 +191,9 @@
         }
         .reveal-close:hover { background: rgba(255,255,255,0.12); }
 
-        .pulse-ring {
-            position: absolute; inset: -8px; border-radius: 50%;
-            border: 2px solid var(--item-color);
-            animation: pulseRing 1.5s ease-out infinite;
-            pointer-events: none;
-        }
-        @keyframes pulseRing {
-            0% { transform: scale(1); opacity: 0.6; }
-            100% { transform: scale(1.3); opacity: 0; }
+        @keyframes popIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
         }
     </style>
 </head>
@@ -258,19 +245,16 @@
         const allRobots = [...RANGERS_PRINCIPAIS, ...OUTROS_RANGERS];
         const total = allRobots.length;
         const ANGLE_STEP = 360 / total;
-        const RING_RADIUS = 300;
+        const RING_RADIUS = 320;
 
-        let currentAngle = 0;
-        let targetAngle = 0;
         let selectedIndex = 0;
         let animating = false;
+        let animFrame = null;
 
-        // Build 3D ring
         function build() {
             wheelEl.innerHTML = '';
             allRobots.forEach((id, i) => {
                 const r = PRIMAL_FORCE[id];
-                const angle = ANGLE_STEP * i;
 
                 const item = document.createElement('div');
                 item.className = 'wheel-item';
@@ -282,195 +266,180 @@
 
                 if (r.imagem) {
                     const img = document.createElement('img');
-                    img.src = r.imagem; img.alt = r.nome;
-                    img.onerror = () => { inner.textContent = r.nome[0]; };
+                    img.src = r.imagem;
+                    img.alt = r.nome;
+                    img.onerror = () => { img.remove(); inner.textContent = r.nome[0]; };
                     inner.appendChild(img);
                 } else {
                     inner.textContent = r.nome[0];
                 }
 
+                const pulse = document.createElement('div');
+                pulse.className = 'pulse-ring';
+                pulse.style.display = 'none';
+                item.appendChild(pulse);
+
                 inner.addEventListener('click', () => {
                     if (i === selectedIndex && !animating) {
                         invocar(i);
                     } else {
-                        rotateTo(i);
+                        goTo(i);
                     }
                 });
 
                 item.appendChild(inner);
                 wheelEl.appendChild(item);
             });
-            updatePositions();
+            render();
         }
 
-        function updatePositions() {
+        function render() {
             const items = wheelEl.querySelectorAll('.wheel-item');
 
             items.forEach((item, i) => {
-                const angle = (ANGLE_STEP * i + currentAngle) * Math.PI / 180;
-                const x = Math.sin(angle) * RING_RADIUS;
-                const z = Math.cos(angle) * RING_RADIUS;
-                const scale = (z + RING_RADIUS) / (2 * RING_RADIUS);
-                const opacity = 0.15 + scale * 0.85;
-                const yPos = -z * 0.12;
+                const angleDeg = ANGLE_STEP * (i - selectedIndex);
+                const angleRad = angleDeg * Math.PI / 180;
 
-                item.style.transform = `translateX(${x}px) translateY(${yPos}px) scale(${0.3 + scale * 0.7})`;
+                const x = Math.sin(angleRad) * RING_RADIUS;
+                const z = Math.cos(angleRad);
+
+                const absAngle = Math.abs(angleDeg % 360);
+                const normalAngle = absAngle > 180 ? 360 - absAngle : absAngle;
+                const depthFactor = normalAngle / 180;
+
+                const scale = 1 - depthFactor * 0.6;
+                const opacity = 1 - depthFactor * 0.75;
+                const yOffset = z * 20;
+
+                item.style.transform = `translateX(${x}px) translateY(${yOffset}px) scale(${scale})`;
                 item.style.opacity = opacity;
-                item.style.zIndex = Math.round(scale * 100);
+                item.style.zIndex = Math.round((1 - depthFactor) * 100);
 
-                const normalizedZ = (z + RING_RADIUS) / (2 * RING_RADIUS);
-                const isFront = normalizedZ > 0.92;
-                const wasFront = item.classList.contains('front');
-                item.classList.toggle('front', isFront);
+                const isSelected = i === selectedIndex;
+                item.classList.toggle('selected', isSelected);
 
-                // Add/remove pulse ring
-                let pulse = item.querySelector('.pulse-ring');
-                if (isFront && !pulse) {
-                    pulse = document.createElement('div');
-                    pulse.className = 'pulse-ring';
-                    item.appendChild(pulse);
-                } else if (!isFront && pulse) {
-                    pulse.remove();
-                }
-
-                if (isFront && selectedIndex !== i) {
-                    selectedIndex = i;
-                    const r = PRIMAL_FORCE[allRobots[i]];
-                    infoName.textContent = r.nome;
-                    infoName.style.color = r.cor;
-                    infoSub.textContent = `Ranger: ${r.ranger} • ${r.dino}`;
-                    infoType.textContent = `${r.supportType.toUpperCase()} • ${r.dino}`;
-                    counterEl.textContent = `${i + 1} / ${total}`;
-                }
+                const pulseEl = item.querySelector('.pulse-ring');
+                pulseEl.style.display = isSelected ? 'block' : 'none';
             });
+
+            const r = PRIMAL_FORCE[allRobots[selectedIndex]];
+            infoName.textContent = r.nome;
+            infoName.style.color = r.cor;
+            infoSub.textContent = `Ranger: ${r.ranger} • ${r.dino}`;
+            infoType.textContent = r.supportType.toUpperCase();
+            counterEl.textContent = `${selectedIndex + 1} / ${total}`;
         }
 
-        function rotateTo(index) {
+        function goTo(index, duration) {
             if (animating) return;
-            animating = true;
-            const target = -index * ANGLE_STEP;
-            let diff = target - currentAngle;
-            diff = ((diff % 360) + 540) % 360 - 180;
+            if (index === selectedIndex) { render(); return; }
 
-            const start = currentAngle;
-            const end = currentAngle + diff;
-            const duration = 600;
+            animating = true;
+            duration = duration || 500;
+
+            const from = selectedIndex;
+            const to = index;
             const t0 = performance.now();
 
             function anim(t) {
                 const p = Math.min((t - t0) / duration, 1);
                 const ease = 1 - Math.pow(1 - p, 3);
-                currentAngle = start + diff * ease;
-                updatePositions();
+
+                selectedIndex = p < 1 ? from + (to - from) * ease : to;
                 if (p < 1) {
-                    requestAnimationFrame(anim);
+                    selectedIndex = Math.round(selectedIndex * 100) / 100;
+                    render();
+                    animFrame = requestAnimationFrame(anim);
                 } else {
-                    currentAngle = end;
+                    selectedIndex = to;
                     animating = false;
-                    updatePositions();
+                    render();
                 }
             }
-            requestAnimationFrame(anim);
+
+            if (animFrame) cancelAnimationFrame(animFrame);
+            animFrame = requestAnimationFrame(anim);
         }
 
-        // Arrows
+        function snapToIndex() {
+            const idx = Math.round(selectedIndex);
+            goTo(((idx % total) + total) % total);
+        }
+
         document.getElementById('arrow-left').addEventListener('click', () => {
-            rotateTo((selectedIndex - 1 + total) % total);
+            goTo((selectedIndex - 1 + total) % total);
         });
         document.getElementById('arrow-right').addEventListener('click', () => {
-            rotateTo((selectedIndex + 1) % total);
+            goTo((selectedIndex + 1) % total);
         });
 
-        // Keyboard
         document.addEventListener('keydown', e => {
             if (revealEl.classList.contains('on')) {
                 if (e.key === 'Escape') closeReveal();
                 return;
             }
-            if (e.key === 'ArrowLeft') rotateTo((selectedIndex - 1 + total) % total);
-            else if (e.key === 'ArrowRight') rotateTo((selectedIndex + 1) % total);
-            else if (e.key === 'Enter') invocar(selectedIndex);
+            if (e.key === 'ArrowLeft') goTo((selectedIndex - 1 + total) % total);
+            else if (e.key === 'ArrowRight') goTo((selectedIndex + 1) % total);
+            else if (e.key === 'Enter' && !animating) invocar(selectedIndex);
         });
 
-        // Resize handler
-        window.addEventListener('resize', () => updatePositions());
-
-        // Drag
         let dragging = false;
         let dragStartX = 0;
-        let dragStartAngle = 0;
+        let dragStartIdx = 0;
         let lastX = 0;
         let lastT = 0;
         let dragVel = 0;
 
-        wheelEl.addEventListener('mousedown', e => {
+        function onDragStart(x) {
+            if (animating) return;
             dragging = true;
-            dragStartX = e.clientX;
-            dragStartAngle = currentAngle;
-            lastX = e.clientX;
+            dragStartX = x;
+            dragStartIdx = selectedIndex;
+            lastX = x;
             lastT = performance.now();
             dragVel = 0;
-        });
-        document.addEventListener('mousemove', e => {
+            if (animFrame) cancelAnimationFrame(animFrame);
+        }
+
+        function onDragMove(x) {
             if (!dragging) return;
-            const dx = e.clientX - dragStartX;
-            currentAngle = dragStartAngle + dx * 0.5;
+            const dx = x - dragStartX;
+            const idxDelta = dx / 80;
+            selectedIndex = dragStartIdx - idxDelta;
             const now = performance.now();
             const dt = now - lastT;
-            if (dt > 0) dragVel = (e.clientX - lastX) / dt * 16;
-            lastX = e.clientX;
+            if (dt > 0) dragVel = (x - lastX) / dt;
+            lastX = x;
             lastT = now;
-            updatePositions();
-        });
-        document.addEventListener('mouseup', () => {
+            render();
+        }
+
+        function onDragEnd() {
             if (!dragging) return;
             dragging = false;
-            snapToNearest();
-        });
-
-        function snapToNearest() {
             let idx;
-            if (Math.abs(dragVel) > 2) {
-                const angleDelta = dragVel * 8;
-                const newTarget = currentAngle + angleDelta;
-                idx = Math.round(-newTarget / ANGLE_STEP);
+            if (Math.abs(dragVel) > 0.3) {
+                idx = Math.round(selectedIndex - dragVel * 3);
             } else {
-                idx = Math.round(-currentAngle / ANGLE_STEP);
+                idx = Math.round(selectedIndex);
             }
             idx = ((idx % total) + total) % total;
-            rotateTo(idx);
+            goTo(idx);
             dragVel = 0;
         }
 
-        // Touch
-        wheelEl.addEventListener('touchstart', e => {
-            dragging = true;
-            dragStartX = e.touches[0].clientX;
-            dragStartAngle = currentAngle;
-            lastX = dragStartX;
-            lastT = performance.now();
-            dragVel = 0;
-        }, { passive: true });
+        wheelEl.addEventListener('mousedown', e => { e.preventDefault(); onDragStart(e.clientX); });
+        document.addEventListener('mousemove', e => onDragMove(e.clientX));
+        document.addEventListener('mouseup', onDragEnd);
+
+        wheelEl.addEventListener('touchstart', e => { onDragStart(e.touches[0].clientX); }, { passive: true });
         document.addEventListener('touchmove', e => {
             if (!dragging) return;
             e.preventDefault();
-            const x = e.touches[0].clientX;
-            const dx = x - dragStartX;
-            currentAngle = dragStartAngle + dx * 0.5;
-            const now = performance.now();
-            const dt = now - lastT;
-            if (dt > 0) dragVel = (x - lastX) / dt * 16;
-            lastX = x;
-            lastT = now;
-            updatePositions();
+            onDragMove(e.touches[0].clientX);
         }, { passive: false });
-        document.addEventListener('touchend', () => {
-            if (!dragging) return;
-            dragging = false;
-            snapToNearest();
-        });
+        document.addEventListener('touchend', onDragEnd);
 
-        // Invocar
         let invocando = false;
         function invocar(idx) {
             if (invocando) return;
@@ -485,7 +454,7 @@
                 const av = document.getElementById('rev-avatar');
                 av.style.background = r.cor;
                 av.innerHTML = r.imagem
-                    ? `<img src="${r.imagem}" alt="" onerror="this.textContent='${r.nome[0]}'">`
+                    ? `<img src="${r.imagem}" alt="" onerror="this.parentElement.innerHTML='${r.nome[0]}'">`
                     : r.nome[0];
                 document.getElementById('rev-name').textContent = r.nome;
                 document.getElementById('rev-name').style.color = r.cor;
