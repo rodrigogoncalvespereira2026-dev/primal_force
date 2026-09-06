@@ -234,6 +234,7 @@
 
     <script src="primalforce-robots.js"></script>
     <script>
+    (function() {
         const wheelEl = document.getElementById('wheel');
         const flashEl = document.getElementById('flash');
         const revealEl = document.getElementById('reveal');
@@ -244,48 +245,56 @@
 
         const allRobots = [...RANGERS_PRINCIPAIS, ...OUTROS_RANGERS];
         const total = allRobots.length;
-        const ANGLE_STEP = 360 / total;
+        const ANGLE_PER_ITEM = 360 / total;
         const RING_RADIUS = 320;
 
+        let rotationAngle = 0;
+        let targetAngle = 0;
         let selectedIndex = 0;
         let animating = false;
         let animFrame = null;
 
+        function getSelectedIndex(angle) {
+            return (((-angle / ANGLE_PER_ITEM) % total) + total) % total;
+        }
+
         function build() {
             wheelEl.innerHTML = '';
-            allRobots.forEach((id, i) => {
+            allRobots.forEach(function(id, i) {
                 const r = PRIMAL_FORCE[id];
-
-                const item = document.createElement('div');
+                var item = document.createElement('div');
                 item.className = 'wheel-item';
                 item.dataset.index = i;
 
-                const inner = document.createElement('div');
+                var inner = document.createElement('div');
                 inner.className = 'wheel-item-inner';
                 inner.style.setProperty('--item-color', r.cor);
 
                 if (r.imagem) {
-                    const img = document.createElement('img');
+                    var img = document.createElement('img');
                     img.src = r.imagem;
                     img.alt = r.nome;
-                    img.onerror = () => { img.remove(); inner.textContent = r.nome[0]; };
+                    img.onerror = function() { img.remove(); inner.textContent = r.nome[0]; };
                     inner.appendChild(img);
                 } else {
                     inner.textContent = r.nome[0];
                 }
 
-                const pulse = document.createElement('div');
+                var pulse = document.createElement('div');
                 pulse.className = 'pulse-ring';
                 pulse.style.display = 'none';
                 item.appendChild(pulse);
 
-                inner.addEventListener('click', () => {
-                    if (i === selectedIndex && !animating) {
-                        invocar(i);
-                    } else {
-                        goTo(i);
-                    }
-                });
+                (function(idx) {
+                    inner.addEventListener('click', function() {
+                        var si = getSelectedIndex(rotationAngle);
+                        if (idx === Math.round(si) && !animating) {
+                            invocar(idx);
+                        } else {
+                            goTo(idx);
+                        }
+                    });
+                })(i);
 
                 item.appendChild(inner);
                 wheelEl.appendChild(item);
@@ -294,64 +303,67 @@
         }
 
         function render() {
-            const items = wheelEl.querySelectorAll('.wheel-item');
+            var items = wheelEl.querySelectorAll('.wheel-item');
+            var si = getSelectedIndex(rotationAngle);
+            selectedIndex = Math.round(si);
 
-            items.forEach((item, i) => {
-                const angleDeg = ANGLE_STEP * (i - selectedIndex);
-                const angleRad = angleDeg * Math.PI / 180;
+            items.forEach(function(item, i) {
+                var angleDeg = ANGLE_PER_ITEM * i + rotationAngle;
+                var angleRad = angleDeg * Math.PI / 180;
 
-                const x = Math.sin(angleRad) * RING_RADIUS;
-                const z = Math.cos(angleRad);
+                var x = Math.sin(angleRad) * RING_RADIUS;
+                var z = Math.cos(angleRad);
 
-                const absAngle = Math.abs(angleDeg % 360);
-                const normalAngle = absAngle > 180 ? 360 - absAngle : absAngle;
-                const depthFactor = normalAngle / 180;
+                var angleFromFront = Math.abs(((angleDeg % 360) + 540) % 360 - 180);
+                var depthFactor = angleFromFront / 180;
 
-                const scale = 1 - depthFactor * 0.6;
-                const opacity = 1 - depthFactor * 0.75;
-                const yOffset = z * 20;
+                var scale = 1 - depthFactor * 0.55;
+                var opacity = 1 - depthFactor * 0.7;
+                var yOffset = -z * 0.15;
 
-                item.style.transform = `translateX(${x}px) translateY(${yOffset}px) scale(${scale})`;
+                item.style.transform = 'translateX(' + x + 'px) translateY(' + yOffset + 'px) scale(' + scale + ')';
                 item.style.opacity = opacity;
                 item.style.zIndex = Math.round((1 - depthFactor) * 100);
 
-                const isSelected = i === selectedIndex;
+                var isSelected = i === selectedIndex;
                 item.classList.toggle('selected', isSelected);
 
-                const pulseEl = item.querySelector('.pulse-ring');
+                var pulseEl = item.querySelector('.pulse-ring');
                 pulseEl.style.display = isSelected ? 'block' : 'none';
             });
 
-            const r = PRIMAL_FORCE[allRobots[selectedIndex]];
+            var r = PRIMAL_FORCE[allRobots[selectedIndex]];
             infoName.textContent = r.nome;
             infoName.style.color = r.cor;
-            infoSub.textContent = `Ranger: ${r.ranger} • ${r.dino}`;
+            infoSub.textContent = 'Ranger: ' + r.ranger + ' \u2022 ' + r.dino;
             infoType.textContent = r.supportType.toUpperCase();
-            counterEl.textContent = `${selectedIndex + 1} / ${total}`;
+            counterEl.textContent = (selectedIndex + 1) + ' / ' + total;
         }
 
         function goTo(index, duration) {
             if (animating) return;
-            if (index === selectedIndex) { render(); return; }
-
-            animating = true;
             duration = duration || 500;
 
-            const from = selectedIndex;
-            const to = index;
-            const t0 = performance.now();
+            targetAngle = -index * ANGLE_PER_ITEM;
+
+            var diff = targetAngle - rotationAngle;
+            diff = ((diff % 360) + 540) % 360 - 180;
+
+            var startAngle = rotationAngle;
+            var endAngle = rotationAngle + diff;
+            var t0 = performance.now();
+
+            animating = true;
 
             function anim(t) {
-                const p = Math.min((t - t0) / duration, 1);
-                const ease = 1 - Math.pow(1 - p, 3);
-
-                selectedIndex = p < 1 ? from + (to - from) * ease : to;
+                var p = Math.min((t - t0) / duration, 1);
+                var ease = 1 - Math.pow(1 - p, 3);
+                rotationAngle = startAngle + diff * ease;
+                render();
                 if (p < 1) {
-                    selectedIndex = Math.round(selectedIndex * 100) / 100;
-                    render();
                     animFrame = requestAnimationFrame(anim);
                 } else {
-                    selectedIndex = to;
+                    rotationAngle = endAngle;
                     animating = false;
                     render();
                 }
@@ -361,19 +373,14 @@
             animFrame = requestAnimationFrame(anim);
         }
 
-        function snapToIndex() {
-            const idx = Math.round(selectedIndex);
-            goTo(((idx % total) + total) % total);
-        }
-
-        document.getElementById('arrow-left').addEventListener('click', () => {
+        document.getElementById('arrow-left').addEventListener('click', function() {
             goTo((selectedIndex - 1 + total) % total);
         });
-        document.getElementById('arrow-right').addEventListener('click', () => {
+        document.getElementById('arrow-right').addEventListener('click', function() {
             goTo((selectedIndex + 1) % total);
         });
 
-        document.addEventListener('keydown', e => {
+        document.addEventListener('keydown', function(e) {
             if (revealEl.classList.contains('on')) {
                 if (e.key === 'Escape') closeReveal();
                 return;
@@ -383,31 +390,32 @@
             else if (e.key === 'Enter' && !animating) invocar(selectedIndex);
         });
 
-        let dragging = false;
-        let dragStartX = 0;
-        let dragStartIdx = 0;
-        let lastX = 0;
-        let lastT = 0;
-        let dragVel = 0;
+        var dragging = false;
+        var dragStartX = 0;
+        var dragStartAngle = 0;
+        var lastX = 0;
+        var lastT = 0;
+        var dragVel = 0;
 
         function onDragStart(x) {
-            if (animating) return;
+            if (animating && animFrame) {
+                cancelAnimationFrame(animFrame);
+                animating = false;
+            }
             dragging = true;
             dragStartX = x;
-            dragStartIdx = selectedIndex;
+            dragStartAngle = rotationAngle;
             lastX = x;
             lastT = performance.now();
             dragVel = 0;
-            if (animFrame) cancelAnimationFrame(animFrame);
         }
 
         function onDragMove(x) {
             if (!dragging) return;
-            const dx = x - dragStartX;
-            const idxDelta = dx / 80;
-            selectedIndex = dragStartIdx - idxDelta;
-            const now = performance.now();
-            const dt = now - lastT;
+            var dx = x - dragStartX;
+            rotationAngle = dragStartAngle + dx * 0.5;
+            var now = performance.now();
+            var dt = now - lastT;
             if (dt > 0) dragVel = (x - lastX) / dt;
             lastX = x;
             lastT = now;
@@ -417,56 +425,62 @@
         function onDragEnd() {
             if (!dragging) return;
             dragging = false;
-            let idx;
+            var idx;
             if (Math.abs(dragVel) > 0.3) {
-                idx = Math.round(selectedIndex - dragVel * 3);
+                var projected = rotationAngle - dragVel * 300;
+                idx = Math.round(-projected / ANGLE_PER_ITEM);
             } else {
-                idx = Math.round(selectedIndex);
+                idx = Math.round(-rotationAngle / ANGLE_PER_ITEM);
             }
             idx = ((idx % total) + total) % total;
             goTo(idx);
             dragVel = 0;
         }
 
-        wheelEl.addEventListener('mousedown', e => { e.preventDefault(); onDragStart(e.clientX); });
-        document.addEventListener('mousemove', e => onDragMove(e.clientX));
+        wheelEl.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            onDragStart(e.clientX);
+        });
+        document.addEventListener('mousemove', function(e) { onDragMove(e.clientX); });
         document.addEventListener('mouseup', onDragEnd);
 
-        wheelEl.addEventListener('touchstart', e => { onDragStart(e.touches[0].clientX); }, { passive: true });
-        document.addEventListener('touchmove', e => {
+        wheelEl.addEventListener('touchstart', function(e) {
+            onDragStart(e.touches[0].clientX);
+        }, { passive: true });
+        document.addEventListener('touchmove', function(e) {
             if (!dragging) return;
             e.preventDefault();
             onDragMove(e.touches[0].clientX);
         }, { passive: false });
         document.addEventListener('touchend', onDragEnd);
 
-        let invocando = false;
+        var invocando = false;
         function invocar(idx) {
             if (invocando) return;
             invocando = true;
-            const r = PRIMAL_FORCE[allRobots[idx]];
+            var r = PRIMAL_FORCE[allRobots[idx]];
 
             flashEl.style.background = r.cor;
             flashEl.classList.add('on');
-            setTimeout(() => flashEl.classList.remove('on'), 500);
+            setTimeout(function() { flashEl.classList.remove('on'); }, 500);
 
-            setTimeout(() => {
-                const av = document.getElementById('rev-avatar');
+            setTimeout(function() {
+                var av = document.getElementById('rev-avatar');
                 av.style.background = r.cor;
                 av.innerHTML = r.imagem
-                    ? `<img src="${r.imagem}" alt="" onerror="this.parentElement.innerHTML='${r.nome[0]}'">`
+                    ? '<img src="' + r.imagem + '" alt="" onerror="this.parentElement.innerHTML=\'' + r.nome[0] + '\'">'
                     : r.nome[0];
                 document.getElementById('rev-name').textContent = r.nome;
                 document.getElementById('rev-name').style.color = r.cor;
-                document.getElementById('rev-ranger').textContent = `Ranger: ${r.ranger}`;
-                document.getElementById('rev-dino').textContent = `${r.supportType.toUpperCase()} • ${r.dino}`;
+                document.getElementById('rev-ranger').textContent = 'Ranger: ' + r.ranger;
+                document.getElementById('rev-dino').textContent = r.supportType.toUpperCase() + ' \u2022 ' + r.dino;
                 document.getElementById('rev-btn').style.background = r.cor;
-                document.getElementById('rev-btn').style.boxShadow = `0 4px 20px ${r.cor}`;
+                document.getElementById('rev-btn').style.boxShadow = '0 4px 20px ' + r.cor;
                 document.querySelector('.reveal-ring').style.setProperty('--rev-color', r.cor);
                 revealEl.classList.add('on');
-                document.getElementById('rev-btn').onclick = () => {
+                document.getElementById('rev-btn').onclick = function() {
                     localStorage.setItem('summonedRobot', allRobots[idx]);
-                    window.location.href = `index.html?robot=${allRobots[idx]}`;
+                    window.location.href = 'index.html?robot=' + allRobots[idx];
                 };
             }, 350);
         }
@@ -476,11 +490,12 @@
             invocando = false;
         }
         document.getElementById('rev-close').addEventListener('click', closeReveal);
-        revealEl.addEventListener('click', e => {
+        revealEl.addEventListener('click', function(e) {
             if (e.target === revealEl) closeReveal();
         });
 
         build();
+    })();
     </script>
 </body>
 </html>
