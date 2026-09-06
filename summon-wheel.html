@@ -12,22 +12,17 @@
         html, body { height: 100%; overflow: hidden; }
         body {
             font-family: 'Rajdhani', sans-serif;
-            background: var(--power-dark); color: #e8e8f0;
+            background: #000; color: #e8e8f0;
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
-            background-image:
-                radial-gradient(ellipse at center, rgba(255,215,0,0.04) 0%, transparent 55%),
-                linear-gradient(rgba(255,215,0,0.015) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,215,0,0.015) 1px, transparent 1px);
-            background-size: 100% 100%, 45px 45px, 45px 45px;
             user-select: none; -webkit-user-select: none;
         }
 
         .header {
             position: fixed; top: 0; left: 0; right: 0;
             padding: 14px 20px; display: flex; align-items: center; gap: 12px;
-            background: rgba(10,10,26,0.92);
-            border-bottom: 1px solid rgba(255,215,0,0.1); z-index: 50;
+            background: rgba(0,0,0,0.9);
+            border-bottom: 1px solid rgba(255,215,0,0.08); z-index: 50;
         }
         .header h1 {
             font-family: 'Orbitron', sans-serif; font-size: 13px;
@@ -37,150 +32,142 @@
             margin-left: auto; font-family: 'Orbitron', sans-serif;
             font-size: 10px; font-weight: 700; color: var(--power-gold);
             text-decoration: none; padding: 7px 14px;
-            border: 1px solid rgba(255,215,0,0.25); border-radius: 4px;
+            border: 1px solid rgba(255,215,0,0.2); border-radius: 4px;
             transition: all 0.2s;
         }
         .header a:hover { background: rgba(255,215,0,0.1); }
 
-        /* Wheel */
-        .wheel-area {
+        /* Main carousel area */
+        .carousel-wrapper {
             position: relative;
-            width: 380px; height: 380px;
-            display: flex; align-items: center; justify-content: center;
+            width: 100%; max-width: 600px;
+            height: 320px;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
         }
 
-        /* Outer decorative ring */
-        .outer-ring {
+        /* Background glow */
+        .bg-glow {
             position: absolute;
-            width: 360px; height: 360px;
+            width: 300px; height: 300px;
             border-radius: 50%;
-            border: 1.5px solid rgba(255,215,0,0.1);
+            background: radial-gradient(circle, var(--glow-color, rgba(255,100,100,0.15)) 0%, transparent 70%);
+            transition: background 0.5s;
             pointer-events: none;
         }
-        .outer-ring::before {
+
+        /* The horizontal track */
+        .carousel-track {
+            position: relative;
+            width: 100%; height: 200px;
+            display: flex; align-items: center; justify-content: center;
+            overflow: visible;
+            cursor: grab;
+        }
+        .carousel-track:active { cursor: grabbing; }
+
+        /* Individual item */
+        .carousel-item {
+            position: absolute;
+            width: 120px; height: 120px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            cursor: pointer;
+        }
+
+        .item-ring {
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            border: 3px solid transparent;
+            transition: all 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+        }
+
+        /* Outer glow ring for selected */
+        .item-ring::before {
             content: '';
             position: absolute; inset: -8px;
             border-radius: 50%;
-            border: 1px solid rgba(255,215,0,0.05);
+            border: 2px solid transparent;
+            transition: border-color 0.4s;
+            opacity: 0;
         }
 
-        /* Spinning disc */
-        .disc {
-            position: absolute;
-            width: 320px; height: 320px;
-            border-radius: 50%;
-            cursor: grab;
-        }
-        .disc:active { cursor: grabbing; }
-
-        /* Icons */
-        .icon {
-            position: absolute;
-            width: 50px; height: 50px;
+        .item-icon {
+            width: 80px; height: 80px;
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            background: rgba(12,12,30,0.95);
-            border: 2px solid rgba(255,255,255,0.1);
-            cursor: pointer;
-            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-                        opacity 0.4s ease,
-                        border-color 0.3s,
-                        box-shadow 0.3s;
-            font-size: 10px; font-weight: 800;
+            background: rgba(15,15,30,0.9);
+            font-size: 14px; font-weight: 800;
             font-family: 'Orbitron', sans-serif; color: #fff;
-            opacity: 0;
-            transform: scale(0.3);
+            transition: all 0.4s;
+            overflow: hidden;
         }
-        .icon.visible {
-            opacity: 1;
-            transform: scale(1);
-        }
-        .icon.selected {
-            border-color: var(--power-gold) !important;
-            box-shadow: 0 0 18px var(--power-gold), 0 0 35px rgba(255,215,0,0.25);
-            transform: scale(1.25) !important;
-            z-index: 10;
-        }
-        .icon img {
+        .item-icon img {
             width: 100%; height: 100%;
             border-radius: 50%; object-fit: cover;
         }
 
-        /* Center hub */
-        .hub {
-            position: absolute;
-            width: 72px; height: 72px;
-            border-radius: 50%;
-            background: radial-gradient(circle, #fff 0%, #bbb 35%, #666 70%, #333 100%);
-            box-shadow: 0 0 20px rgba(255,255,255,0.2), 0 0 40px rgba(255,215,0,0.12);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 5; pointer-events: none;
+        /* Selected state */
+        .carousel-item.selected {
+            z-index: 10;
         }
-        .hub::before {
-            content: ''; position: absolute; inset: -5px;
-            border-radius: 50%;
-            border: 1.5px solid rgba(255,215,0,0.2);
-            animation: hubRing 6s linear infinite;
+        .carousel-item.selected .item-ring {
+            border-color: var(--item-color, var(--power-gold));
+            box-shadow: 0 0 25px var(--item-color, var(--power-gold)),
+                        0 0 50px color-mix(in srgb, var(--item-color, var(--power-gold)) 40%, transparent);
         }
-        @keyframes hubRing { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .hub-symbol { font-size: 26px; filter: drop-shadow(0 0 6px rgba(255,215,0,0.4)); }
-
-        /* Selector arrow */
-        .arrow {
-            position: absolute; top: -6px;
-            width: 0; height: 0;
-            border-left: 12px solid transparent;
-            border-right: 12px solid transparent;
-            border-top: 20px solid var(--power-gold);
-            filter: drop-shadow(0 0 6px rgba(255,215,0,0.5));
-            z-index: 20; pointer-events: none;
+        .carousel-item.selected .item-ring::before {
+            border-color: var(--item-color, var(--power-gold));
+            opacity: 0.3;
         }
 
-        /* Info */
-        .info {
-            position: absolute; bottom: -65px;
-            text-align: center; width: 100%;
+        /* Info panel */
+        .info-panel {
+            text-align: center; margin-top: 30px;
         }
         .info-name {
             font-family: 'Orbitron', sans-serif;
-            font-size: 20px; font-weight: 900;
+            font-size: 24px; font-weight: 900;
+            letter-spacing: 0.12em; text-transform: uppercase;
+            transition: color 0.3s;
+        }
+        .info-sub {
+            font-size: 13px; color: rgba(255,255,255,0.4); margin-top: 4px;
+        }
+        .info-type {
+            font-size: 10px; font-family: 'Orbitron', sans-serif;
             letter-spacing: 0.1em; text-transform: uppercase;
-            transition: color 0.2s;
+            margin-top: 6px; opacity: 0.5;
         }
-        .info-sub { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 2px; }
-        .info-hint {
-            font-size: 11px; color: rgba(255,255,255,0.25);
-            margin-top: 8px; transition: opacity 0.3s;
-        }
-        .info-hint.hidden { opacity: 0; }
 
-        /* Action buttons */
-        .actions {
-            position: absolute; bottom: -115px;
-            display: flex; gap: 10px;
+        /* Hint */
+        .hint {
+            position: fixed; bottom: 40px;
+            font-size: 11px; color: rgba(255,255,255,0.2);
+            animation: hintPulse 2.5s ease-in-out infinite;
         }
-        .btn-spin, .btn-summon {
-            padding: 12px 28px; border: none; border-radius: 5px;
+        @keyframes hintPulse {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Swipe indicators */
+        .swipe-arrow {
+            position: fixed; top: 50%; transform: translateY(-50%);
+            font-size: 28px; color: rgba(255,255,255,0.15);
+            pointer-events: none; transition: opacity 0.3s;
+        }
+        .swipe-arrow.left { left: 16px; }
+        .swipe-arrow.right { right: 16px; }
+
+        /* Counter */
+        .counter {
+            position: fixed; top: 60px; right: 20px;
             font-family: 'Orbitron', sans-serif;
-            font-size: 11px; font-weight: 800;
-            letter-spacing: 0.1em; text-transform: uppercase;
-            cursor: pointer; transition: all 0.25s;
+            font-size: 10px; color: rgba(255,255,255,0.25); z-index: 50;
         }
-        .btn-spin {
-            background: rgba(255,215,0,0.12);
-            border: 1px solid rgba(255,215,0,0.3);
-            color: var(--power-gold);
-        }
-        .btn-spin:hover { background: rgba(255,215,0,0.2); }
-        .btn-summon {
-            background: linear-gradient(135deg, var(--power-gold), #FFA000);
-            color: #0a0a1a;
-            box-shadow: 0 4px 18px rgba(255,215,0,0.3);
-            display: none;
-        }
-        .btn-summon.visible { display: block; }
-        .btn-summon:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(255,215,0,0.45); }
-        .btn-summon:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
 
         /* Reveal overlay */
         .reveal {
@@ -189,31 +176,42 @@
             display: none; align-items: center; justify-content: center;
             z-index: 100; transition: background 0.4s;
         }
-        .reveal.on { display: flex; background: rgba(0,0,0,0.88); }
+        .reveal.on { display: flex; background: rgba(0,0,0,0.9); }
         .reveal-card { text-align: center; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .reveal-ring {
+            width: 130px; height: 130px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 16px;
+            border: 4px solid var(--rev-color);
+            box-shadow: 0 0 40px var(--rev-color), 0 0 80px color-mix(in srgb, var(--rev-color) 50%, transparent);
+        }
         .reveal-avatar {
             width: 110px; height: 110px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 14px; font-size: 44px; font-weight: 900;
+            font-size: 44px; font-weight: 900;
             font-family: 'Orbitron', sans-serif; color: #fff;
+            background: rgba(15,15,30,0.9);
         }
         .reveal-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
         .reveal-name {
-            font-family: 'Orbitron', sans-serif; font-size: 26px;
+            font-family: 'Orbitron', sans-serif; font-size: 28px;
             font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase;
+            color: var(--rev-color);
         }
-        .reveal-ranger { font-size: 13px; color: rgba(255,255,255,0.45); margin-top: 3px; }
+        .reveal-ranger { font-size: 14px; color: rgba(255,255,255,0.4); margin-top: 4px; }
         .reveal-dino {
             font-size: 10px; font-family: 'Orbitron', sans-serif;
-            letter-spacing: 0.08em; text-transform: uppercase; margin-top: 5px;
+            letter-spacing: 0.1em; text-transform: uppercase; margin-top: 6px;
+            color: var(--rev-color); opacity: 0.6;
         }
-        .reveal-enter {
-            margin-top: 22px; padding: 12px 34px;
-            border: none; border-radius: 5px;
-            font-family: 'Orbitron', sans-serif;
+        .reveal-btn {
+            margin-top: 28px; padding: 14px 40px;
+            background: var(--rev-color); color: #fff; border: none;
+            border-radius: 6px; font-family: 'Orbitron', sans-serif;
             font-size: 12px; font-weight: 800;
             letter-spacing: 0.1em; text-transform: uppercase;
-            cursor: pointer; color: #fff;
+            cursor: pointer;
+            box-shadow: 0 4px 20px var(--rev-color);
         }
         @keyframes popIn {
             0% { transform: scale(0.3); opacity: 0; }
@@ -226,16 +224,7 @@
             pointer-events: none; z-index: 99; opacity: 0;
         }
         .flash.on { animation: flashFx 0.5s ease-out forwards; }
-        @keyframes flashFx { 0% { opacity: 0.85; } 100% { opacity: 0; } }
-
-        @media (max-width: 420px) {
-            .wheel-area { width: 310px; height: 310px; }
-            .disc { width: 260px; height: 260px; }
-            .icon { width: 42px; height: 42px; font-size: 8px; }
-            .hub { width: 60px; height: 60px; }
-            .hub-symbol { font-size: 20px; }
-            .info-name { font-size: 17px; }
-        }
+        @keyframes flashFx { 0% { opacity: 0.9; } 100% { opacity: 0; } }
     </style>
 </head>
 <body>
@@ -244,353 +233,301 @@
         <a href="index.html">VOLTAR</a>
     </div>
 
-    <div class="wheel-area" id="wheel-area">
-        <div class="outer-ring"></div>
-        <div class="arrow"></div>
-        <div class="disc" id="disc"></div>
-        <div class="hub"><span class="hub-symbol">⚡</span></div>
-        <div class="info">
+    <div class="counter" id="counter">1 / 20</div>
+
+    <div class="carousel-wrapper">
+        <div class="bg-glow" id="bg-glow"></div>
+        <div class="carousel-track" id="track"></div>
+        <div class="info-panel">
             <div class="info-name" id="info-name">Primal Force</div>
-            <div class="info-sub" id="info-sub">Arrasta para rodar</div>
-            <div class="info-hint" id="info-hint">ou toca num robô</div>
-        </div>
-        <div class="actions">
-            <button class="btn-spin" id="btn-spin">⚡ RODAR</button>
-            <button class="btn-summon" id="btn-summon">⚡ INVOCAR</button>
+            <div class="info-sub" id="info-sub">Arrasta para escolher</div>
+            <div class="info-type" id="info-type"></div>
         </div>
     </div>
+
+    <div class="swipe-arrow left">‹</div>
+    <div class="swipe-arrow right">›</div>
+    <div class="hint">Arrasta ou toca para selecionar • Toca duas vezes para invocar</div>
 
     <div class="flash" id="flash"></div>
     <div class="reveal" id="reveal">
         <div class="reveal-card">
-            <div class="reveal-avatar" id="rev-avatar"></div>
+            <div class="reveal-ring">
+                <div class="reveal-avatar" id="rev-avatar"></div>
+            </div>
             <div class="reveal-name" id="rev-name"></div>
             <div class="reveal-ranger" id="rev-ranger"></div>
             <div class="reveal-dino" id="rev-dino"></div>
-            <button class="reveal-enter" id="rev-enter">ENTRAR NO CHAT</button>
+            <button class="reveal-btn" id="rev-btn">ENTRAR NO CHAT</button>
         </div>
     </div>
 
     <script src="primalforce-robots.js"></script>
     <script>
-        const disc = document.getElementById('disc');
-        const btnSpin = document.getElementById('btn-spin');
-        const btnSummon = document.getElementById('btn-summon');
+        const track = document.getElementById('track');
+        const bgGlow = document.getElementById('bg-glow');
         const infoName = document.getElementById('info-name');
         const infoSub = document.getElementById('info-sub');
-        const infoHint = document.getElementById('info-hint');
+        const infoType = document.getElementById('info-type');
         const flashEl = document.getElementById('flash');
         const revealEl = document.getElementById('reveal');
+        const counterEl = document.getElementById('counter');
 
         const allRobots = [...RANGERS_PRINCIPAIS, ...OUTROS_RANGERS];
         const total = allRobots.length;
-        const STEP = 360 / total;
-        const DISC_R = 140;
-        const ICON_R = 25;
+        const ITEM_SPACING = 130;
+        const CENTER_X = window.innerWidth / 2;
 
-        let angle = 0;
-        let velocity = 0;
-        let spinning = false;
-        let stopped = true;
         let selectedIndex = 0;
-        let icons = [];
-        let revealed = new Set();
-        let audioCtx = null;
-        let lastTickIdx = -1;
+        let scrollX = 0;
+        let targetScrollX = 0;
+        let isDragging = false;
+        let dragStartX = 0;
+        let dragStartScroll = 0;
+        let lastX = 0;
+        let lastT = 0;
+        let dragVel = 0;
+        let items = [];
 
-        // Audio
-        function getAudio() {
-            if (!audioCtx) audioCtx = new (window.webkitAudioContext || window.AudioContext)();
-            return audioCtx;
-        }
-        function tick() {
-            try {
-                const ctx = getAudio();
-                if (ctx.state === 'suspended') ctx.resume();
-                const o = ctx.createOscillator();
-                const g = ctx.createGain();
-                o.connect(g); g.connect(ctx.destination);
-                o.type = 'sine';
-                o.frequency.setValueAtTime(900, ctx.currentTime);
-                o.frequency.exponentialRampToValueAtTime(500, ctx.currentTime + 0.04);
-                g.gain.setValueAtTime(0.12, ctx.currentTime);
-                g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06);
-                o.start(ctx.currentTime); o.stop(ctx.currentTime + 0.06);
-            } catch {}
-        }
-        function summonSfx() {
-            try {
-                const ctx = getAudio();
-                if (ctx.state === 'suspended') ctx.resume();
-                [523, 659, 784, 1047].forEach((f, i) => {
-                    const o = ctx.createOscillator();
-                    const g = ctx.createGain();
-                    o.connect(g); g.connect(ctx.destination);
-                    o.type = 'sine'; o.frequency.value = f;
-                    g.gain.setValueAtTime(0.1, ctx.currentTime + i * 0.09);
-                    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.09 + 0.25);
-                    o.start(ctx.currentTime + i * 0.09);
-                    o.stop(ctx.currentTime + i * 0.09 + 0.25);
-                });
-            } catch {}
-        }
-
-        // Build icons
+        // Build items
         function build() {
-            disc.innerHTML = '';
-            icons = [];
+            track.innerHTML = '';
+            items = [];
             allRobots.forEach((id, i) => {
                 const r = PRIMAL_FORCE[id];
-                const a = (STEP * i) * Math.PI / 180;
                 const el = document.createElement('div');
-                el.className = 'icon';
-                el.dataset.idx = i;
-                el.style.borderColor = r.cor;
-                if (r.imagem) {
-                    const img = document.createElement('img');
-                    img.src = r.imagem; img.alt = r.nome;
-                    img.onerror = () => { el.textContent = r.nome[0]; };
-                    el.appendChild(img);
-                } else {
-                    el.textContent = r.nome[0];
-                }
+                el.className = 'carousel-item';
+                el.dataset.index = i;
+                el.style.setProperty('--item-color', r.cor);
+
+                el.innerHTML = `
+                    <div class="item-ring">
+                        <div class="item-icon">
+                            ${r.imagem ? `<img src="${r.imagem}" alt="${r.nome}" onerror="this.parentElement.textContent='${r.nome[0]}'">` : r.nome[0]}
+                        </div>
+                    </div>
+                `;
+
                 el.addEventListener('click', () => {
-                    if (spinning) return;
-                    selectAndSummon(i);
+                    if (Math.abs(targetScrollX - scrollX) < 2) {
+                        handleTap(i);
+                    }
                 });
-                disc.appendChild(el);
-                icons.push(el);
+
+                track.appendChild(el);
+                items.push(el);
             });
-            revealAll();
-        }
-
-        // Reveal icons one by one
-        function revealAll() {
-            revealed.clear();
-            icons.forEach(ic => ic.classList.remove('visible'));
-            let idx = 0;
-            function showNext() {
-                if (idx >= total) return;
-                const ic = icons[idx];
-                ic.classList.add('visible');
-                revealed.add(idx);
-                idx++;
-                setTimeout(showNext, 50);
-            }
-            showNext();
-        }
-
-        function revealOne(i) {
-            if (!revealed.has(i)) {
-                icons[i].classList.add('visible');
-                revealed.add(i);
-            }
-        }
-
-        function getIdx() {
-            let n = (((-angle % 360) + 360) % 360);
-            return Math.round(n / STEP) % total;
         }
 
         function update() {
-            disc.style.transform = `rotate(${angle}deg)`;
-            icons.forEach(ic => { ic.style.transform = `rotate(${-angle}deg)`; });
+            const vw = window.innerWidth;
+            const cx = vw / 2;
 
-            const idx = getIdx();
-            if (idx !== selectedIndex) {
-                selectedIndex = idx;
-                const r = PRIMAL_FORCE[allRobots[idx]];
+            items.forEach((el, i) => {
+                const itemX = i * ITEM_SPACING - scrollX;
+                const distFromCenter = Math.abs(itemX - cx);
+                const maxDist = vw * 0.6;
+
+                const normDist = Math.min(distFromCenter / maxDist, 1);
+
+                const scale = 1.0 - normDist * 0.55;
+                const opacity = 1.0 - normDist * 0.7;
+                const zIndex = Math.round((1 - normDist) * 10);
+
+                const x = cx + (itemX - cx) * 0.85;
+
+                el.style.left = (x - 60) + 'px';
+                el.style.top = (100 - (1 - normDist) * 20) + 'px';
+                el.style.transform = `scale(${scale})`;
+                el.style.opacity = opacity;
+                el.style.zIndex = zIndex;
+
+                el.classList.toggle('selected', normDist < 0.08);
+            });
+
+            // Find closest to center
+            let closestIdx = 0;
+            let closestDist = Infinity;
+            items.forEach((el, i) => {
+                const itemX = i * ITEM_SPACING - scrollX;
+                const dist = Math.abs(itemX - cx);
+                if (dist < closestDist) {
+                    closestDist = dist;
+                    closestIdx = i;
+                }
+            });
+
+            if (closestIdx !== selectedIndex) {
+                selectedIndex = closestIdx;
+                const r = PRIMAL_FORCE[allRobots[selectedIndex]];
                 infoName.textContent = r.nome;
                 infoName.style.color = r.cor;
                 infoSub.textContent = `Ranger: ${r.ranger} • ${r.dino}`;
+                infoType.textContent = `${r.supportType.toUpperCase()} • ${r.dino}`;
+                bgGlow.style.setProperty('--glow-color', r.cor + '20');
+                counterEl.textContent = `${selectedIndex + 1} / ${total}`;
             }
-            icons.forEach((ic, i) => ic.classList.toggle('selected', i === idx));
         }
 
-        // Spin with momentum
-        function startSpin(vel) {
-            if (spinning) return;
-            spinning = true; stopped = false;
-            velocity = vel;
-            lastTickIdx = -1;
-            btnSpin.disabled = true;
-            btnSummon.classList.remove('visible');
-            infoHint.classList.add('hidden');
-
-            // Re-reveal all
-            revealAll();
-
-            (function loop() {
-                angle += velocity;
-                velocity *= 0.988;
-
-                const idx = getIdx();
-                if (idx !== lastTickIdx) { tick(); lastTickIdx = idx; }
-
-                // Reveal icons as they pass
-                revealOne(idx);
-
-                update();
-
-                if (velocity > 0.12) {
-                    requestAnimationFrame(loop);
-                } else {
-                    velocity = 0;
-                    spinning = false;
-                    stopped = true;
-                    btnSpin.disabled = false;
-                    update();
-                    onStop();
+        // Snap to nearest
+        function snapToNearest() {
+            const cx = window.innerWidth / 2;
+            let closestIdx = 0;
+            let closestDist = Infinity;
+            items.forEach((el, i) => {
+                const itemX = i * ITEM_SPACING - scrollX;
+                const dist = Math.abs(itemX - cx);
+                if (dist < closestDist) {
+                    closestDist = dist;
+                    closestIdx = i;
                 }
-            })();
+            });
+            scrollToIndex(closestIdx);
         }
 
-        function onStop() {
-            summonSfx();
-            const r = PRIMAL_FORCE[allRobots[selectedIndex]];
+        function scrollToIndex(idx) {
+            const cx = window.innerWidth / 2;
+            targetScrollX = idx * ITEM_SPACING - cx + ITEM_SPACING / 2;
+            animateScroll();
+        }
+
+        function animateScroll() {
+            const diff = targetScrollX - scrollX;
+            if (Math.abs(diff) < 0.5) {
+                scrollX = targetScrollX;
+                update();
+                return;
+            }
+            scrollX += diff * 0.15;
+            update();
+            requestAnimationFrame(animateScroll);
+        }
+
+        // Tap to select
+        let lastTapIdx = -1;
+        let lastTapTime = 0;
+        function handleTap(idx) {
+            const now = Date.now();
+            if (idx === lastTapIdx && now - lastTapTime < 400) {
+                invocar(idx);
+            } else {
+                scrollToIndex(idx);
+            }
+            lastTapIdx = idx;
+            lastTapTime = now;
+        }
+
+        // Drag
+        track.addEventListener('mousedown', e => {
+            isDragging = true;
+            dragStartX = e.clientX;
+            dragStartScroll = scrollX;
+            lastX = e.clientX;
+            lastT = performance.now();
+            dragVel = 0;
+        });
+        document.addEventListener('mousemove', e => {
+            if (!isDragging) return;
+            const dx = e.clientX - dragStartX;
+            scrollX = dragStartScroll - dx;
+            const now = performance.now();
+            const dt = now - lastT;
+            if (dt > 0) dragVel = -(e.clientX - lastX) / dt * 16;
+            lastX = e.clientX;
+            lastT = now;
+            update();
+        });
+        document.addEventListener('mouseup', () => {
+            if (!isDragging) return;
+            isDragging = false;
+            if (Math.abs(dragVel) > 2) {
+                targetScrollX = scrollX + dragVel * 15;
+                targetScrollX = Math.max(0, Math.min(targetScrollX, (total - 1) * ITEM_SPACING));
+                animateScroll();
+            } else {
+                snapToNearest();
+            }
+        });
+
+        // Touch
+        track.addEventListener('touchstart', e => {
+            isDragging = true;
+            dragStartX = e.touches[0].clientX;
+            dragStartScroll = scrollX;
+            lastX = dragStartX;
+            lastT = performance.now();
+            dragVel = 0;
+        }, { passive: true });
+        document.addEventListener('touchmove', e => {
+            if (!isDragging) return;
+            const x = e.touches[0].clientX;
+            const dx = x - dragStartX;
+            scrollX = dragStartScroll - dx;
+            const now = performance.now();
+            const dt = now - lastT;
+            if (dt > 0) dragVel = -(x - lastX) / dt * 16;
+            lastX = x;
+            lastT = now;
+            update();
+        }, { passive: true });
+        document.addEventListener('touchend', () => {
+            if (!isDragging) return;
+            isDragging = false;
+            if (Math.abs(dragVel) > 2) {
+                targetScrollX = scrollX + dragVel * 15;
+                targetScrollX = Math.max(0, Math.min(targetScrollX, (total - 1) * ITEM_SPACING));
+                animateScroll();
+            } else {
+                snapToNearest();
+            }
+        });
+
+        // Keyboard
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowLeft') scrollToIndex(Math.max(0, selectedIndex - 1));
+            else if (e.key === 'ArrowRight') scrollToIndex(Math.min(total - 1, selectedIndex + 1));
+            else if (e.key === 'Enter') invocar(selectedIndex);
+        });
+
+        // Invocar
+        let invocando = false;
+        function invocar(idx) {
+            if (invocando) return;
+            invocando = true;
+            const r = PRIMAL_FORCE[allRobots[idx]];
 
             // Flash
             flashEl.style.background = r.cor;
             flashEl.classList.add('on');
             setTimeout(() => flashEl.classList.remove('on'), 500);
 
-            // Show summon button
+            // Reveal
             setTimeout(() => {
-                btnSummon.classList.add('visible');
-                btnSummon.textContent = `⚡ INVOCAR ${r.nome.toUpperCase()}`;
-                btnSummon.style.background = r.cor;
-                btnSummon.style.boxShadow = `0 4px 18px ${r.cor}50`;
-            }, 300);
+                const av = document.getElementById('rev-avatar');
+                av.style.background = r.cor;
+                av.innerHTML = r.imagem
+                    ? `<img src="${r.imagem}" alt="" onerror="this.textContent='${r.nome[0]}'">`
+                    : r.nome[0];
+
+                document.getElementById('rev-name').textContent = r.nome;
+                document.getElementById('rev-name').style.color = r.cor;
+                document.getElementById('rev-ranger').textContent = `Ranger: ${r.ranger}`;
+                document.getElementById('rev-dino').textContent = `${r.supportType.toUpperCase()} • ${r.dino}`;
+                document.getElementById('rev-btn').style.background = r.cor;
+                document.getElementById('rev-btn').style.boxShadow = `0 4px 20px ${r.cor}`;
+                document.querySelector('.reveal-ring').style.setProperty('--rev-color', r.cor);
+
+                revealEl.classList.add('on');
+                document.getElementById('rev-btn').onclick = () => {
+                    localStorage.setItem('summonedRobot', allRobots[idx]);
+                    window.location.href = `index.html?robot=${allRobots[idx]}`;
+                };
+            }, 350);
         }
 
-        // Select + rotate to top + auto summon
-        function selectAndSummon(idx) {
-            const target = -idx * STEP;
-            let diff = target - angle;
-            diff = ((diff % 360) + 540) % 360 - 180;
-
-            spinning = true; stopped = false;
-            btnSpin.disabled = true;
-            btnSummon.classList.remove('visible');
-            infoHint.classList.add('hidden');
-
-            const start = angle;
-            const end = angle + diff;
-            const dur = 500;
-            const t0 = performance.now();
-            lastTickIdx = -1;
-
-            (function anim(t) {
-                const p = Math.min((t - t0) / dur, 1);
-                const ease = 1 - Math.pow(1 - p, 3);
-                angle = start + diff * ease;
-
-                const idx = getIdx();
-                if (idx !== lastTickIdx) { tick(); lastTickIdx = idx; }
-                revealOne(idx);
-                update();
-
-                if (p < 1) {
-                    requestAnimationFrame(anim);
-                } else {
-                    angle = end;
-                    spinning = false; stopped = true;
-                    btnSpin.disabled = false;
-                    update();
-                    onStop();
-                }
-            })(performance.now());
-        }
-
-        // Drag to spin
-        let dragging = false;
-        let dragX0 = 0;
-        let dragA0 = 0;
-        let lastX = 0;
-        let lastT = 0;
-        let dragVel = 0;
-
-        disc.addEventListener('mousedown', e => {
-            if (spinning) return;
-            dragging = true; dragX0 = e.clientX; dragA0 = angle;
-            lastX = e.clientX; lastT = performance.now();
-        });
-        document.addEventListener('mousemove', e => {
-            if (!dragging) return;
-            const dx = e.clientX - dragX0;
-            angle = dragA0 + dx * 0.7;
-            const now = performance.now();
-            const dt = now - lastT;
-            if (dt > 0) dragVel = (e.clientX - lastX) / dt * 16;
-            lastX = e.clientX; lastT = now;
-            update();
-        });
-        document.addEventListener('mouseup', () => {
-            if (!dragging) return;
-            dragging = false;
-            if (Math.abs(dragVel) > 1.5) {
-                startSpin(dragVel * 1.2);
-            }
-            dragVel = 0;
-        });
-
-        // Touch
-        disc.addEventListener('touchstart', e => {
-            if (spinning) return;
-            dragging = true; dragX0 = e.touches[0].clientX; dragA0 = angle;
-            lastX = dragX0; lastT = performance.now();
-        }, { passive: true });
-        document.addEventListener('touchmove', e => {
-            if (!dragging) return;
-            const x = e.touches[0].clientX;
-            angle = dragA0 + (x - dragX0) * 0.7;
-            const now = performance.now();
-            const dt = now - lastT;
-            if (dt > 0) dragVel = (x - lastX) / dt * 16;
-            lastX = x; lastT = now;
-            update();
-        }, { passive: true });
-        document.addEventListener('touchend', () => {
-            if (!dragging) return;
-            dragging = false;
-            if (Math.abs(dragVel) > 1.5) startSpin(dragVel * 1.2);
-            dragVel = 0;
-        });
-
-        // Spin button
-        btnSpin.addEventListener('click', () => startSpin(14 + Math.random() * 8));
-
-        // Summon button
-        btnSummon.addEventListener('click', () => {
-            const r = PRIMAL_FORCE[allRobots[selectedIndex]];
-            const avatar = document.getElementById('rev-avatar');
-            avatar.style.background = r.cor;
-            avatar.style.boxShadow = `0 0 40px ${r.cor}, 0 0 80px ${r.cor}60`;
-            avatar.innerHTML = '';
-            if (r.imagem) {
-                const img = document.createElement('img');
-                img.src = r.imagem;
-                img.onerror = () => { avatar.textContent = r.nome[0]; };
-                avatar.appendChild(img);
-            } else { avatar.textContent = r.nome[0]; }
-
-            document.getElementById('rev-name').textContent = r.nome;
-            document.getElementById('rev-name').style.color = r.cor;
-            document.getElementById('rev-ranger').textContent = `Ranger: ${r.ranger}`;
-            document.getElementById('rev-dino').textContent = `${r.supportType.toUpperCase()} • ${r.dino}`;
-            const enterBtn = document.getElementById('rev-enter');
-            enterBtn.style.background = r.cor;
-            enterBtn.style.boxShadow = `0 4px 20px ${r.cor}`;
-
-            revealEl.classList.add('on');
-            enterBtn.onclick = () => {
-                localStorage.setItem('summonedRobot', allRobots[selectedIndex]);
-                window.location.href = `index.html?robot=${allRobots[selectedIndex]}`;
-            };
-        });
-
+        // Init
         build();
-        update();
+        scrollToIndex(0);
     </script>
 </body>
 </html>
