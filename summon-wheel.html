@@ -312,12 +312,13 @@
             var si = getSelectedIndex(rotationAngle);
             selectedIndex = Math.round(si);
 
+            var itemData = [];
             items.forEach(function(item, i) {
                 var angleDeg = ANGLE_PER_ITEM * i + rotationAngle;
                 var angleRad = angleDeg * Math.PI / 180;
 
                 var x = Math.sin(angleRad) * RING_RADIUS;
-                var z = Math.cos(angleRad);
+                var z = Math.cos(angleRad) * RING_RADIUS;
 
                 var angleFromFront = Math.abs(((angleDeg % 360) + 540) % 360 - 180);
                 var depthFactor = angleFromFront / 180;
@@ -327,15 +328,25 @@
                 var yOffset = -(1 - depthFactor) * 80;
                 var rotateY = depthFactor * 85;
 
-                item.style.transform = 'translateX(' + x + 'px) translateY(' + yOffset + 'px) scale(' + scale + ') rotateY(' + rotateY + 'deg)';
-                item.style.opacity = 1;
-                item.style.filter = 'brightness(' + brightness + ')';
-                item.style.zIndex = Math.round((1 - depthFactor) * 100);
+                itemData.push({
+                    item: item, i: i, x: x, z: z, scale: scale,
+                    brightness: brightness, yOffset: yOffset,
+                    rotateY: rotateY, depthFactor: depthFactor
+                });
+            });
 
-                var isSelected = i === selectedIndex;
-                item.classList.toggle('selected', isSelected);
+            itemData.sort(function(a, b) { return a.z - b.z; });
 
-                var pulseEl = item.querySelector('.pulse-ring');
+            itemData.forEach(function(d, rank) {
+                d.item.style.transform = 'translateX(' + d.x + 'px) translateY(' + d.yOffset + 'px) scale(' + d.scale + ') rotateY(' + d.rotateY + 'deg)';
+                d.item.style.opacity = 1;
+                d.item.style.filter = 'brightness(' + d.brightness + ')';
+                d.item.style.zIndex = rank;
+
+                var isSelected = d.i === selectedIndex;
+                d.item.classList.toggle('selected', isSelected);
+
+                var pulseEl = d.item.querySelector('.pulse-ring');
                 pulseEl.style.display = isSelected ? 'block' : 'none';
             });
 
