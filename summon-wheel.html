@@ -40,7 +40,8 @@
         .scene {
             width: 100%; height: 100%;
             display: flex; align-items: center; justify-content: center;
-            perspective: 800px;
+            perspective: 1200px;
+            perspective-origin: center center;
         }
 
         .wheel {
@@ -51,10 +52,11 @@
 
         .wheel-item {
             position: absolute;
-            width: 65px; height: 65px;
-            left: 27px; top: 27px;
-            will-change: transform, opacity;
+            width: 60px; height: 60px;
+            left: 30px; top: 30px;
             transform-style: preserve-3d;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
         }
 
         .wheel-item-inner {
@@ -312,7 +314,6 @@
             var si = getSelectedIndex(rotationAngle);
             selectedIndex = Math.round(si);
 
-            var itemData = [];
             items.forEach(function(item, i) {
                 var angleDeg = ANGLE_PER_ITEM * i + rotationAngle;
                 var angleRad = angleDeg * Math.PI / 180;
@@ -328,25 +329,14 @@
                 var yOffset = -(1 - depthFactor) * 80;
                 var rotateY = depthFactor * 85;
 
-                itemData.push({
-                    item: item, i: i, x: x, z: z, scale: scale,
-                    brightness: brightness, yOffset: yOffset,
-                    rotateY: rotateY, depthFactor: depthFactor
-                });
-            });
+                item.style.transform = 'translate3d(' + x + 'px, ' + yOffset + 'px, ' + z + 'px) scale(' + scale + ') rotateY(' + rotateY + 'deg)';
+                item.style.opacity = 1;
+                item.style.filter = 'brightness(' + brightness + ')';
 
-            itemData.sort(function(a, b) { return a.z - b.z; });
+                var isSelected = i === selectedIndex;
+                item.classList.toggle('selected', isSelected);
 
-            itemData.forEach(function(d, rank) {
-                d.item.style.transform = 'translateX(' + d.x + 'px) translateY(' + d.yOffset + 'px) scale(' + d.scale + ') rotateY(' + d.rotateY + 'deg)';
-                d.item.style.opacity = 1;
-                d.item.style.filter = 'brightness(' + d.brightness + ')';
-                d.item.style.zIndex = rank;
-
-                var isSelected = d.i === selectedIndex;
-                d.item.classList.toggle('selected', isSelected);
-
-                var pulseEl = d.item.querySelector('.pulse-ring');
+                var pulseEl = item.querySelector('.pulse-ring');
                 pulseEl.style.display = isSelected ? 'block' : 'none';
             });
 
