@@ -21,7 +21,7 @@
         .header {
             position: fixed; top: 0; left: 0; right: 0;
             padding: 14px 20px; display: flex; align-items: center; gap: 12px;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.95);
             border-bottom: 1px solid rgba(255,215,0,0.08); z-index: 50;
         }
         .header h1 {
@@ -37,99 +37,63 @@
         }
         .header a:hover { background: rgba(255,215,0,0.1); }
 
-        /* Main carousel area */
-        .carousel-wrapper {
-            position: relative;
-            width: 100%; max-width: 600px;
-            height: 320px;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-        }
-
-        /* Background glow */
-        .bg-glow {
-            position: absolute;
-            width: 300px; height: 300px;
-            border-radius: 50%;
-            background: radial-gradient(circle, var(--glow-color, rgba(255,100,100,0.15)) 0%, transparent 70%);
-            transition: background 0.5s;
-            pointer-events: none;
-        }
-
-        /* The horizontal track */
-        .carousel-track {
-            position: relative;
-            width: 100%; height: 200px;
+        /* 3D Scene */
+        .scene {
+            width: 100%; height: 100%;
             display: flex; align-items: center; justify-content: center;
-            overflow: visible;
-            cursor: grab;
+            perspective: 900px;
         }
-        .carousel-track:active { cursor: grabbing; }
 
-        /* Individual item */
-        .carousel-item {
+        /* The ring */
+        .wheel {
+            position: relative;
+            width: 160px; height: 160px;
+            transform-style: preserve-3d;
+            transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        /* Each robot on the ring */
+        .wheel-item {
             position: absolute;
-            width: 120px; height: 120px;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            cursor: pointer;
+            width: 100px; height: 100px;
+            left: 30px; top: 30px;
+            transform-style: preserve-3d;
         }
 
-        .item-ring {
+        .wheel-item-inner {
             width: 100%; height: 100%;
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
+            background: rgba(10,10,25,0.95);
             border: 3px solid transparent;
-            transition: all 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            position: relative;
-        }
-
-        /* Outer glow ring for selected */
-        .item-ring::before {
-            content: '';
-            position: absolute; inset: -8px;
-            border-radius: 50%;
-            border: 2px solid transparent;
-            transition: border-color 0.4s;
-            opacity: 0;
-        }
-
-        .item-icon {
-            width: 80px; height: 80px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            background: rgba(15,15,30,0.9);
-            font-size: 14px; font-weight: 800;
+            font-size: 12px; font-weight: 800;
             font-family: 'Orbitron', sans-serif; color: #fff;
-            transition: all 0.4s;
+            cursor: pointer;
+            transition: border-color 0.4s, box-shadow 0.4s;
             overflow: hidden;
         }
-        .item-icon img {
+        .wheel-item-inner img {
             width: 100%; height: 100%;
             border-radius: 50%; object-fit: cover;
         }
 
-        /* Selected state */
-        .carousel-item.selected {
-            z-index: 10;
-        }
-        .carousel-item.selected .item-ring {
-            border-color: var(--item-color, var(--power-gold));
-            box-shadow: 0 0 25px var(--item-color, var(--power-gold)),
-                        0 0 50px color-mix(in srgb, var(--item-color, var(--power-gold)) 40%, transparent);
-        }
-        .carousel-item.selected .item-ring::before {
-            border-color: var(--item-color, var(--power-gold));
-            opacity: 0.3;
+        /* Selected (front) */
+        .wheel-item.front .wheel-item-inner {
+            border-color: var(--item-color);
+            box-shadow: 0 0 25px var(--item-color),
+                        0 0 50px color-mix(in srgb, var(--item-color) 35%, transparent),
+                        0 0 80px color-mix(in srgb, var(--item-color) 15%, transparent);
         }
 
-        /* Info panel */
+        /* Info */
         .info-panel {
-            text-align: center; margin-top: 30px;
+            position: fixed;
+            bottom: 120px;
+            text-align: center; width: 100%;
         }
         .info-name {
             font-family: 'Orbitron', sans-serif;
-            font-size: 24px; font-weight: 900;
+            font-size: 26px; font-weight: 900;
             letter-spacing: 0.12em; text-transform: uppercase;
             transition: color 0.3s;
         }
@@ -141,32 +105,31 @@
             letter-spacing: 0.1em; text-transform: uppercase;
             margin-top: 6px; opacity: 0.5;
         }
-
-        /* Hint */
         .hint {
-            position: fixed; bottom: 40px;
-            font-size: 11px; color: rgba(255,255,255,0.2);
-            animation: hintPulse 2.5s ease-in-out infinite;
-        }
-        @keyframes hintPulse {
-            0%, 100% { opacity: 0.2; }
-            50% { opacity: 0.5; }
+            font-size: 11px; color: rgba(255,255,255,0.15);
+            margin-top: 14px;
         }
 
-        /* Swipe indicators */
-        .swipe-arrow {
+        /* Arrows */
+        .arrow {
             position: fixed; top: 50%; transform: translateY(-50%);
-            font-size: 28px; color: rgba(255,255,255,0.15);
-            pointer-events: none; transition: opacity 0.3s;
+            width: 50px; height: 50px;
+            border-radius: 50%;
+            background: rgba(255,215,0,0.06);
+            border: 1px solid rgba(255,215,0,0.15);
+            color: var(--power-gold); font-size: 22px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 20; transition: all 0.2s;
         }
-        .swipe-arrow.left { left: 16px; }
-        .swipe-arrow.right { right: 16px; }
+        .arrow:hover { background: rgba(255,215,0,0.12); }
+        .arrow.left { left: 20px; }
+        .arrow.right { right: 20px; }
 
         /* Counter */
         .counter {
             position: fixed; top: 60px; right: 20px;
             font-family: 'Orbitron', sans-serif;
-            font-size: 10px; color: rgba(255,255,255,0.25); z-index: 50;
+            font-size: 10px; color: rgba(255,255,255,0.2); z-index: 50;
         }
 
         /* Reveal overlay */
@@ -176,7 +139,7 @@
             display: none; align-items: center; justify-content: center;
             z-index: 100; transition: background 0.4s;
         }
-        .reveal.on { display: flex; background: rgba(0,0,0,0.9); }
+        .reveal.on { display: flex; background: rgba(0,0,0,0.92); }
         .reveal-card { text-align: center; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .reveal-ring {
             width: 130px; height: 130px; border-radius: 50%;
@@ -190,7 +153,7 @@
             display: flex; align-items: center; justify-content: center;
             font-size: 44px; font-weight: 900;
             font-family: 'Orbitron', sans-serif; color: #fff;
-            background: rgba(15,15,30,0.9);
+            background: rgba(10,10,25,0.95);
         }
         .reveal-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
         .reveal-name {
@@ -218,7 +181,6 @@
             100% { transform: scale(1); opacity: 1; }
         }
 
-        /* Flash */
         .flash {
             position: fixed; inset: 0;
             pointer-events: none; z-index: 99; opacity: 0;
@@ -232,22 +194,21 @@
         <h1>⚡ RODA DE INVOCAÇÃO</h1>
         <a href="index.html">VOLTAR</a>
     </div>
-
     <div class="counter" id="counter">1 / 20</div>
 
-    <div class="carousel-wrapper">
-        <div class="bg-glow" id="bg-glow"></div>
-        <div class="carousel-track" id="track"></div>
-        <div class="info-panel">
-            <div class="info-name" id="info-name">Primal Force</div>
-            <div class="info-sub" id="info-sub">Arrasta para escolher</div>
-            <div class="info-type" id="info-type"></div>
-        </div>
+    <div class="scene" id="scene">
+        <div class="wheel" id="wheel"></div>
     </div>
 
-    <div class="swipe-arrow left">‹</div>
-    <div class="swipe-arrow right">›</div>
-    <div class="hint">Arrasta ou toca para selecionar • Toca duas vezes para invocar</div>
+    <div class="arrow left" id="arrow-left">‹</div>
+    <div class="arrow right" id="arrow-right">›</div>
+
+    <div class="info-panel">
+        <div class="info-name" id="info-name">Primal Force</div>
+        <div class="info-sub" id="info-sub">Arrasta ou usa as setas</div>
+        <div class="info-type" id="info-type"></div>
+        <div class="hint">Toca no robô da frente para invocar</div>
+    </div>
 
     <div class="flash" id="flash"></div>
     <div class="reveal" id="reveal">
@@ -264,229 +225,211 @@
 
     <script src="primalforce-robots.js"></script>
     <script>
-        const track = document.getElementById('track');
-        const bgGlow = document.getElementById('bg-glow');
+        const wheelEl = document.getElementById('wheel');
+        const flashEl = document.getElementById('flash');
+        const revealEl = document.getElementById('reveal');
         const infoName = document.getElementById('info-name');
         const infoSub = document.getElementById('info-sub');
         const infoType = document.getElementById('info-type');
-        const flashEl = document.getElementById('flash');
-        const revealEl = document.getElementById('reveal');
         const counterEl = document.getElementById('counter');
 
         const allRobots = [...RANGERS_PRINCIPAIS, ...OUTROS_RANGERS];
         const total = allRobots.length;
-        const ITEM_SPACING = 130;
-        const CENTER_X = window.innerWidth / 2;
+        const ANGLE_STEP = 360 / total;
+        const RING_RADIUS = 300;
 
+        let currentAngle = 0;
+        let targetAngle = 0;
         let selectedIndex = 0;
-        let scrollX = 0;
-        let targetScrollX = 0;
-        let isDragging = false;
-        let dragStartX = 0;
-        let dragStartScroll = 0;
-        let lastX = 0;
-        let lastT = 0;
-        let dragVel = 0;
-        let items = [];
+        let animating = false;
 
-        // Build items
+        // Build 3D ring
         function build() {
-            track.innerHTML = '';
-            items = [];
+            wheelEl.innerHTML = '';
             allRobots.forEach((id, i) => {
                 const r = PRIMAL_FORCE[id];
-                const el = document.createElement('div');
-                el.className = 'carousel-item';
-                el.dataset.index = i;
-                el.style.setProperty('--item-color', r.cor);
+                const angle = ANGLE_STEP * i;
 
-                el.innerHTML = `
-                    <div class="item-ring">
-                        <div class="item-icon">
-                            ${r.imagem ? `<img src="${r.imagem}" alt="${r.nome}" onerror="this.parentElement.textContent='${r.nome[0]}'">` : r.nome[0]}
-                        </div>
-                    </div>
-                `;
+                const item = document.createElement('div');
+                item.className = 'wheel-item';
+                item.dataset.index = i;
 
-                el.addEventListener('click', () => {
-                    if (Math.abs(targetScrollX - scrollX) < 2) {
-                        handleTap(i);
+                const inner = document.createElement('div');
+                inner.className = 'wheel-item-inner';
+                inner.style.setProperty('--item-color', r.cor);
+
+                if (r.imagem) {
+                    const img = document.createElement('img');
+                    img.src = r.imagem; img.alt = r.nome;
+                    img.onerror = () => { inner.textContent = r.nome[0]; };
+                    inner.appendChild(img);
+                } else {
+                    inner.textContent = r.nome[0];
+                }
+
+                inner.addEventListener('click', () => {
+                    if (i === selectedIndex && !animating) {
+                        invocar(i);
+                    } else {
+                        rotateTo(i);
                     }
                 });
 
-                track.appendChild(el);
-                items.push(el);
+                item.appendChild(inner);
+                wheelEl.appendChild(item);
             });
+            updatePositions();
         }
 
-        function update() {
+        function updatePositions() {
+            const items = wheelEl.querySelectorAll('.wheel-item');
             const vw = window.innerWidth;
-            const cx = vw / 2;
 
-            items.forEach((el, i) => {
-                const itemX = i * ITEM_SPACING - scrollX;
-                const distFromCenter = Math.abs(itemX - cx);
-                const maxDist = vw * 0.6;
+            items.forEach((item, i) => {
+                const angle = (ANGLE_STEP * i + currentAngle) * Math.PI / 180;
+                const x = Math.sin(angle) * RING_RADIUS;
+                const z = Math.cos(angle) * RING_RADIUS;
+                const scale = (z + RING_RADIUS) / (2 * RING_RADIUS);
+                const opacity = 0.2 + scale * 0.8;
+                const yPos = -z * 0.15;
 
-                const normDist = Math.min(distFromCenter / maxDist, 1);
+                item.style.transform = `translateX(${x}px) translateY(${yPos}px) scale(${0.35 + scale * 0.65})`;
+                item.style.opacity = opacity;
+                item.style.zIndex = Math.round(scale * 100);
 
-                const scale = 1.0 - normDist * 0.55;
-                const opacity = 1.0 - normDist * 0.7;
-                const zIndex = Math.round((1 - normDist) * 10);
+                const normalizedZ = (z + RING_RADIUS) / (2 * RING_RADIUS);
+                const isFront = normalizedZ > 0.92;
+                item.classList.toggle('front', isFront);
 
-                const x = cx + (itemX - cx) * 0.85;
-
-                el.style.left = (x - 60) + 'px';
-                el.style.top = (100 - (1 - normDist) * 20) + 'px';
-                el.style.transform = `scale(${scale})`;
-                el.style.opacity = opacity;
-                el.style.zIndex = zIndex;
-
-                el.classList.toggle('selected', normDist < 0.08);
-            });
-
-            // Find closest to center
-            let closestIdx = 0;
-            let closestDist = Infinity;
-            items.forEach((el, i) => {
-                const itemX = i * ITEM_SPACING - scrollX;
-                const dist = Math.abs(itemX - cx);
-                if (dist < closestDist) {
-                    closestDist = dist;
-                    closestIdx = i;
+                if (isFront && selectedIndex !== i) {
+                    selectedIndex = i;
+                    const r = PRIMAL_FORCE[allRobots[i]];
+                    infoName.textContent = r.nome;
+                    infoName.style.color = r.cor;
+                    infoSub.textContent = `Ranger: ${r.ranger} • ${r.dino}`;
+                    infoType.textContent = `${r.supportType.toUpperCase()} • ${r.dino}`;
+                    counterEl.textContent = `${i + 1} / ${total}`;
                 }
             });
-
-            if (closestIdx !== selectedIndex) {
-                selectedIndex = closestIdx;
-                const r = PRIMAL_FORCE[allRobots[selectedIndex]];
-                infoName.textContent = r.nome;
-                infoName.style.color = r.cor;
-                infoSub.textContent = `Ranger: ${r.ranger} • ${r.dino}`;
-                infoType.textContent = `${r.supportType.toUpperCase()} • ${r.dino}`;
-                bgGlow.style.setProperty('--glow-color', r.cor + '20');
-                counterEl.textContent = `${selectedIndex + 1} / ${total}`;
-            }
         }
 
-        // Snap to nearest
-        function snapToNearest() {
-            const cx = window.innerWidth / 2;
-            let closestIdx = 0;
-            let closestDist = Infinity;
-            items.forEach((el, i) => {
-                const itemX = i * ITEM_SPACING - scrollX;
-                const dist = Math.abs(itemX - cx);
-                if (dist < closestDist) {
-                    closestDist = dist;
-                    closestIdx = i;
+        function rotateTo(index) {
+            if (animating) return;
+            animating = true;
+            const target = -index * ANGLE_STEP;
+            let diff = target - currentAngle;
+            diff = ((diff % 360) + 540) % 360 - 180;
+
+            const start = currentAngle;
+            const end = currentAngle + diff;
+            const duration = 600;
+            const t0 = performance.now();
+
+            function anim(t) {
+                const p = Math.min((t - t0) / duration, 1);
+                const ease = 1 - Math.pow(1 - p, 3);
+                currentAngle = start + diff * ease;
+                updatePositions();
+                if (p < 1) {
+                    requestAnimationFrame(anim);
+                } else {
+                    currentAngle = end;
+                    animating = false;
+                    updatePositions();
                 }
-            });
-            scrollToIndex(closestIdx);
-        }
-
-        function scrollToIndex(idx) {
-            const cx = window.innerWidth / 2;
-            targetScrollX = idx * ITEM_SPACING - cx + ITEM_SPACING / 2;
-            animateScroll();
-        }
-
-        function animateScroll() {
-            const diff = targetScrollX - scrollX;
-            if (Math.abs(diff) < 0.5) {
-                scrollX = targetScrollX;
-                update();
-                return;
             }
-            scrollX += diff * 0.15;
-            update();
-            requestAnimationFrame(animateScroll);
+            requestAnimationFrame(anim);
         }
 
-        // Tap to select
-        let lastTapIdx = -1;
-        let lastTapTime = 0;
-        function handleTap(idx) {
-            const now = Date.now();
-            if (idx === lastTapIdx && now - lastTapTime < 400) {
-                invocar(idx);
-            } else {
-                scrollToIndex(idx);
-            }
-            lastTapIdx = idx;
-            lastTapTime = now;
-        }
+        // Arrows
+        document.getElementById('arrow-left').addEventListener('click', () => {
+            rotateTo((selectedIndex - 1 + total) % total);
+        });
+        document.getElementById('arrow-right').addEventListener('click', () => {
+            rotateTo((selectedIndex + 1) % total);
+        });
+
+        // Keyboard
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowLeft') rotateTo((selectedIndex - 1 + total) % total);
+            else if (e.key === 'ArrowRight') rotateTo((selectedIndex + 1) % total);
+            else if (e.key === 'Enter') invocar(selectedIndex);
+        });
 
         // Drag
-        track.addEventListener('mousedown', e => {
-            isDragging = true;
+        let dragging = false;
+        let dragStartX = 0;
+        let dragStartAngle = 0;
+        let lastX = 0;
+        let lastT = 0;
+        let dragVel = 0;
+
+        wheelEl.addEventListener('mousedown', e => {
+            dragging = true;
             dragStartX = e.clientX;
-            dragStartScroll = scrollX;
+            dragStartAngle = currentAngle;
             lastX = e.clientX;
             lastT = performance.now();
             dragVel = 0;
         });
         document.addEventListener('mousemove', e => {
-            if (!isDragging) return;
+            if (!dragging) return;
             const dx = e.clientX - dragStartX;
-            scrollX = dragStartScroll - dx;
+            currentAngle = dragStartAngle + dx * 0.5;
             const now = performance.now();
             const dt = now - lastT;
-            if (dt > 0) dragVel = -(e.clientX - lastX) / dt * 16;
+            if (dt > 0) dragVel = (e.clientX - lastX) / dt * 16;
             lastX = e.clientX;
             lastT = now;
-            update();
+            updatePositions();
         });
         document.addEventListener('mouseup', () => {
-            if (!isDragging) return;
-            isDragging = false;
+            if (!dragging) return;
+            dragging = false;
             if (Math.abs(dragVel) > 2) {
-                targetScrollX = scrollX + dragVel * 15;
-                targetScrollX = Math.max(0, Math.min(targetScrollX, (total - 1) * ITEM_SPACING));
-                animateScroll();
+                const angleDelta = dragVel * 8;
+                const newTarget = currentAngle + angleDelta;
+                const nearestIdx = Math.round(-newTarget / ANGLE_STEP);
+                rotateTo(((nearestIdx % total) + total) % total);
             } else {
-                snapToNearest();
+                const nearestIdx = Math.round(-currentAngle / ANGLE_STEP);
+                rotateTo(((nearestIdx % total) + total) % total);
             }
         });
 
         // Touch
-        track.addEventListener('touchstart', e => {
-            isDragging = true;
+        wheelEl.addEventListener('touchstart', e => {
+            dragging = true;
             dragStartX = e.touches[0].clientX;
-            dragStartScroll = scrollX;
+            dragStartAngle = currentAngle;
             lastX = dragStartX;
             lastT = performance.now();
             dragVel = 0;
         }, { passive: true });
         document.addEventListener('touchmove', e => {
-            if (!isDragging) return;
+            if (!dragging) return;
             const x = e.touches[0].clientX;
             const dx = x - dragStartX;
-            scrollX = dragStartScroll - dx;
+            currentAngle = dragStartAngle + dx * 0.5;
             const now = performance.now();
             const dt = now - lastT;
-            if (dt > 0) dragVel = -(x - lastX) / dt * 16;
+            if (dt > 0) dragVel = (x - lastX) / dt * 16;
             lastX = x;
             lastT = now;
-            update();
+            updatePositions();
         }, { passive: true });
         document.addEventListener('touchend', () => {
-            if (!isDragging) return;
-            isDragging = false;
+            if (!dragging) return;
+            dragging = false;
             if (Math.abs(dragVel) > 2) {
-                targetScrollX = scrollX + dragVel * 15;
-                targetScrollX = Math.max(0, Math.min(targetScrollX, (total - 1) * ITEM_SPACING));
-                animateScroll();
+                const angleDelta = dragVel * 8;
+                const newTarget = currentAngle + angleDelta;
+                const nearestIdx = Math.round(-newTarget / ANGLE_STEP);
+                rotateTo(((nearestIdx % total) + total) % total);
             } else {
-                snapToNearest();
+                const nearestIdx = Math.round(-currentAngle / ANGLE_STEP);
+                rotateTo(((nearestIdx % total) + total) % total);
             }
-        });
-
-        // Keyboard
-        document.addEventListener('keydown', e => {
-            if (e.key === 'ArrowLeft') scrollToIndex(Math.max(0, selectedIndex - 1));
-            else if (e.key === 'ArrowRight') scrollToIndex(Math.min(total - 1, selectedIndex + 1));
-            else if (e.key === 'Enter') invocar(selectedIndex);
         });
 
         // Invocar
@@ -496,19 +439,16 @@
             invocando = true;
             const r = PRIMAL_FORCE[allRobots[idx]];
 
-            // Flash
             flashEl.style.background = r.cor;
             flashEl.classList.add('on');
             setTimeout(() => flashEl.classList.remove('on'), 500);
 
-            // Reveal
             setTimeout(() => {
                 const av = document.getElementById('rev-avatar');
                 av.style.background = r.cor;
                 av.innerHTML = r.imagem
                     ? `<img src="${r.imagem}" alt="" onerror="this.textContent='${r.nome[0]}'">`
                     : r.nome[0];
-
                 document.getElementById('rev-name').textContent = r.nome;
                 document.getElementById('rev-name').style.color = r.cor;
                 document.getElementById('rev-ranger').textContent = `Ranger: ${r.ranger}`;
@@ -516,7 +456,6 @@
                 document.getElementById('rev-btn').style.background = r.cor;
                 document.getElementById('rev-btn').style.boxShadow = `0 4px 20px ${r.cor}`;
                 document.querySelector('.reveal-ring').style.setProperty('--rev-color', r.cor);
-
                 revealEl.classList.add('on');
                 document.getElementById('rev-btn').onclick = () => {
                     localStorage.setItem('summonedRobot', allRobots[idx]);
@@ -525,9 +464,7 @@
             }, 350);
         }
 
-        // Init
         build();
-        scrollToIndex(0);
     </script>
 </body>
 </html>
