@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0a0a1a">
+    <title>Primal Force — Phone</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --power-dark: #0a0a1a; --power-gold: #FFD700; --cor: #FFD700; }
+        html, body { height: 100%; overflow: hidden; }
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--power-dark); color: #e8e8f0;
+            display: flex; flex-direction: column;
+            background-image:
+                radial-gradient(ellipse at center, rgba(255,215,0,0.03) 0%, transparent 60%),
+                linear-gradient(rgba(255,215,0,0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,215,0,0.015) 1px, transparent 1px);
+            background-size: 100% 100%, 45px 45px, 45px 45px;
+            user-select: none; -webkit-user-select: none;
+        }
+
+        /* Header */
+        .phone-header {
+            padding: 16px 20px;
+            padding-top: max(16px, env(safe-area-inset-top));
+            display: flex; align-items: center; gap: 12px;
+            background: rgba(10,10,26,0.95);
+            border-bottom: 2px solid;
+            border-image: linear-gradient(90deg, transparent, var(--cor), transparent) 1;
+        }
+        .phone-avatar {
+            width: 44px; height: 44px; border-radius: 50%;
+            background: var(--cor);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 900;
+            color: #0a0a1a; flex-shrink: 0;
+        }
+        .phone-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        .phone-info h1 {
+            font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700;
+            letter-spacing: 0.08em; text-transform: uppercase; color: var(--cor);
+        }
+        .phone-info p { font-size: 12px; color: rgba(255,255,255,0.4); }
+        .back-btn {
+            margin-left: auto; background: none; border: none;
+            color: var(--cor); font-size: 20px; cursor: pointer;
+            padding: 8px; opacity: 0.7; transition: opacity 0.2s;
+        }
+        .back-btn:hover { opacity: 1; }
+
+        /* Tabs */
+        .tabs {
+            display: flex; background: rgba(15,15,30,0.9);
+            border-bottom: 1px solid rgba(255,215,0,0.1);
+        }
+        .tab {
+            flex: 1; padding: 12px; text-align: center;
+            font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 700;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            color: rgba(255,255,255,0.4); cursor: pointer;
+            border-bottom: 2px solid transparent; transition: all 0.2s;
+        }
+        .tab.active { color: var(--cor); border-bottom-color: var(--cor); }
+        .tab:hover:not(.active) { color: rgba(255,255,255,0.6); }
+
+        /* Content */
+        .content { flex: 1; overflow-y: auto; }
+        .page { display: none; height: 100%; }
+        .page.active { display: flex; flex-direction: column; }
+
+        /* Contact list */
+        .contact-list { padding: 8px 0; }
+        .contact-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 20px; cursor: pointer;
+            transition: background 0.2s;
+        }
+        .contact-item:hover { background: rgba(255,215,0,0.05); }
+        .contact-avatar {
+            width: 48px; height: 48px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 900;
+            color: #0a0a1a; flex-shrink: 0; position: relative;
+        }
+        .contact-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        .online-dot {
+            position: absolute; bottom: 0; right: 0;
+            width: 12px; height: 12px; border-radius: 50%;
+            background: #00E676; border: 2px solid var(--power-dark);
+        }
+        .contact-name {
+            flex: 1; font-size: 15px; font-weight: 600;
+        }
+        .contact-role {
+            font-size: 11px; color: rgba(255,255,255,0.35);
+        }
+        .call-btn {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: rgba(0,230,118,0.15); border: 1px solid rgba(0,230,118,0.3);
+            color: #00E676; font-size: 18px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .call-btn:hover { background: rgba(0,230,118,0.25); }
+
+        /* Recents */
+        .recent-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 20px; cursor: pointer;
+            transition: background 0.2s;
+        }
+        .recent-item:hover { background: rgba(255,215,0,0.05); }
+        .recent-icon {
+            width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+        }
+        .recent-icon.incoming { color: #00E676; }
+        .recent-icon.outgoing { color: var(--cor); }
+        .recent-icon.missed { color: #FF5252; }
+        .recent-info { flex: 1; }
+        .recent-name { font-size: 14px; font-weight: 600; }
+        .recent-time { font-size: 11px; color: rgba(255,255,255,0.35); }
+
+        /* ===== CALL SCREENS ===== */
+
+        /* Outgoing call */
+        .call-overlay {
+            position: fixed; inset: 0; z-index: 100;
+            display: none; flex-direction: column;
+            align-items: center; justify-content: center;
+            background: var(--power-dark);
+            background-image:
+                radial-gradient(ellipse at center, var(--call-color, rgba(255,215,0,0.08)) 0%, transparent 60%);
+        }
+        .call-overlay.ativo { display: flex; }
+
+        .call-avatar {
+            width: 100px; height: 100px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 40px; font-weight: 900;
+            font-family: 'Orbitron', sans-serif; color: #fff;
+            animation: callPulse 1.5s ease-in-out infinite;
+        }
+        .call-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        @keyframes callPulse {
+            0%, 100% { box-shadow: 0 0 0 0 var(--call-color, rgba(255,215,0,0.4)); }
+            50% { box-shadow: 0 0 0 20px transparent; }
+        }
+
+        .call-name {
+            font-family: 'Orbitron', sans-serif; font-size: 22px; font-weight: 900;
+            letter-spacing: 0.1em; text-transform: uppercase; margin-top: 20px;
+            color: var(--call-color, var(--power-gold));
+        }
+        .call-status {
+            font-size: 14px; color: rgba(255,255,255,0.5); margin-top: 6px;
+            animation: statusBlink 1.5s ease-in-out infinite;
+        }
+        .call-status.connected { animation: none; color: rgba(255,255,255,0.7); }
+        @keyframes statusBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .call-timer {
+            font-family: 'Orbitron', sans-serif; font-size: 32px; font-weight: 700;
+            color: rgba(255,255,255,0.8); margin-top: 12px;
+            display: none;
+        }
+        .call-timer.visible { display: block; }
+
+        .call-actions {
+            display: flex; gap: 20px; margin-top: 50px;
+        }
+        .call-action {
+            width: 60px; height: 60px; border-radius: 50%;
+            border: none; cursor: pointer; font-size: 24px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .call-action.reject {
+            background: #FF5252; color: #fff;
+        }
+        .call-action.accept {
+            background: #00E676; color: #fff;
+        }
+        .call-action.end {
+            background: #FF5252; color: #fff;
+        }
+        .call-action.mute {
+            background: rgba(255,255,255,0.1); color: #fff;
+        }
+        .call-action:hover { transform: scale(1.1); }
+
+        /* Incoming call */
+        .incoming-overlay {
+            position: fixed; inset: 0; z-index: 200;
+            display: none; flex-direction: column;
+            align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.95);
+        }
+        .incoming-overlay.ativo { display: flex; }
+
+        .incoming-label {
+            font-family: 'Orbitron', sans-serif; font-size: 11px;
+            letter-spacing: 0.15em; text-transform: uppercase;
+            color: rgba(255,255,255,0.5); margin-bottom: 16px;
+        }
+        .incoming-avatar {
+            width: 90px; height: 90px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 36px; font-weight: 900;
+            font-family: 'Orbitron', sans-serif; color: #fff;
+            animation: incomingPulse 1s ease-in-out infinite;
+        }
+        .incoming-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        @keyframes incomingPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0,230,118,0.4); }
+            50% { box-shadow: 0 0 0 15px transparent; }
+        }
+        .incoming-name {
+            font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 900;
+            letter-spacing: 0.1em; text-transform: uppercase; margin-top: 16px;
+            color: #00E676;
+        }
+        .incoming-sub {
+            font-size: 13px; color: rgba(255,255,255,0.4); margin-top: 4px;
+        }
+        .incoming-actions {
+            display: flex; gap: 40px; margin-top: 50px;
+        }
+
+        /* Sound wave animation */
+        .sound-waves {
+            display: flex; gap: 4px; align-items: center; height: 30px;
+            margin-top: 16px;
+        }
+        .wave-bar {
+            width: 4px; background: var(--call-color, var(--power-gold));
+            border-radius: 2px; animation: waveAnim 0.8s ease-in-out infinite;
+        }
+        .wave-bar:nth-child(1) { height: 10px; animation-delay: 0s; }
+        .wave-bar:nth-child(2) { height: 18px; animation-delay: 0.1s; }
+        .wave-bar:nth-child(3) { height: 25px; animation-delay: 0.2s; }
+        .wave-bar:nth-child(4) { height: 15px; animation-delay: 0.3s; }
+        .wave-bar:nth-child(5) { height: 20px; animation-delay: 0.15s; }
+        @keyframes waveAnim {
+            0%, 100% { transform: scaleY(0.5); }
+            50% { transform: scaleY(1.2); }
+        }
+
+        .empty-state {
+            flex: 1; display: flex; align-items: center; justify-content: center;
+            flex-direction: column; gap: 8px; color: rgba(255,255,255,0.3);
+        }
+        .empty-state .icon { font-size: 48px; opacity: 0.3; }
+    </style>
+</head>
+<body>
+    <div class="phone-header" id="phone-header">
+        <div class="phone-avatar" id="phone-avatar">?</div>
+        <div class="phone-info">
+            <h1 id="phone-name">A carregar...</h1>
+            <p id="phone-sub"></p>
+        </div>
+        <a href="index.html" class="back-btn" title="Voltar">✕</a>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" data-tab="contacts">CONTACTOS</div>
+        <div class="tab" data-tab="recents">CHAMADAS</div>
+    </div>
+
+    <div class="content">
+        <div class="page active" id="page-contacts">
+            <div class="contact-list" id="contact-list"></div>
+        </div>
+        <div class="page" id="page-recents">
+            <div id="recent-list"></div>
+            <div class="empty-state" id="empty-recents">
+                <div class="icon">📞</div>
+                <div>Sem chamadas recentes</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Outgoing call screen -->
+    <div class="call-overlay" id="outgoing-screen">
+        <div class="call-avatar" id="out-avatar"></div>
+        <div class="call-name" id="out-name"></div>
+        <div class="call-status" id="out-status">A chamar...</div>
+        <div class="call-timer" id="out-timer">00:00</div>
+        <div class="sound-waves" id="out-waves">
+            <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+        </div>
+        <div class="call-actions" id="out-actions">
+            <button class="call-action end" id="btn-end-call" title="Terminar">📞</button>
+        </div>
+    </div>
+
+    <!-- Incoming call screen -->
+    <div class="incoming-overlay" id="incoming-screen">
+        <div class="incoming-label">CHAMADA A RECEBER</div>
+        <div class="incoming-avatar" id="inc-avatar"></div>
+        <div class="incoming-name" id="inc-name"></div>
+        <div class="incoming-sub" id="inc-sub"></div>
+        <div class="incoming-actions">
+            <button class="call-action reject" id="btn-reject-call" title="Recusar">✕</button>
+            <button class="call-action accept" id="btn-accept-call" title="Atender">📞</button>
+        </div>
+    </div>
+
+    <script src="primalforce-robots.js"></script>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const robotId = params.get('robot') || 'rex';
+        const robot = PRIMAL_FORCE[robotId];
+        const allRobots = [...RANGERS_PRINCIPAIS, ...OUTROS_RANGERS].filter(id => id !== robotId);
+
+        let audioCtx = null;
+        let callTimer = null;
+        let callSeconds = 0;
+        let recentCalls = JSON.parse(localStorage.getItem('primal_recents') || '[]');
+
+        // Audio
+        function getAudio() {
+            if (!audioCtx) audioCtx = new (window.webkitAudioContext || window.AudioContext)();
+            return audioCtx;
+        }
+
+        function playRingtone() {
+            try {
+                const ctx = getAudio();
+                if (ctx.state === 'suspended') ctx.resume();
+                const notes = [440, 523, 440, 523];
+                let i = 0;
+                const interval = setInterval(() => {
+                    if (i >= 8 || !document.getElementById('outgoing-screen').classList.contains('ativo')) {
+                        clearInterval(interval); return;
+                    }
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.type = 'sine';
+                    osc.frequency.value = notes[i % 2];
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+                    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.3);
+                    i++;
+                }, 500);
+                return interval;
+            } catch { return null; }
+        }
+
+        function playConnectSound() {
+            try {
+                const ctx = getAudio();
+                if (ctx.state === 'suspended') ctx.resume();
+                [659, 784, 988].forEach((f, i) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.type = 'sine'; osc.frequency.value = f;
+                    gain.gain.setValueAtTime(0.12, ctx.currentTime + i * 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.08 + 0.2);
+                    osc.start(ctx.currentTime + i * 0.08);
+                    osc.stop(ctx.currentTime + i * 0.08 + 0.2);
+                });
+            } catch {}
+        }
+
+        function playEndSound() {
+            try {
+                const ctx = getAudio();
+                if (ctx.state === 'suspended') ctx.resume();
+                [400, 300].forEach((f, i) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.type = 'sine'; osc.frequency.value = f;
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime + i * 0.15);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.15 + 0.2);
+                    osc.start(ctx.currentTime + i * 0.15);
+                    osc.stop(ctx.currentTime + i * 0.15 + 0.2);
+                });
+            } catch {}
+        }
+
+        function playIncomingTone() {
+            try {
+                const ctx = getAudio();
+                if (ctx.state === 'suspended') ctx.resume();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.type = 'sine'; osc.frequency.value = 440;
+                gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+                osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.8);
+            } catch {}
+        }
+
+        // Header
+        document.getElementById('phone-avatar').textContent = robot.nome[0];
+        document.getElementById('phone-avatar').style.background = robot.cor;
+        document.getElementById('phone-name').textContent = robot.nome;
+        document.getElementById('phone-name').style.color = robot.cor;
+        document.getElementById('phone-sub').textContent = `${robot.ranger} • ${robot.dino}`;
+        document.documentElement.style.setProperty('--cor', robot.cor);
+
+        // Tabs
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById('page-' + tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Contacts
+        function buildContacts() {
+            const list = document.getElementById('contact-list');
+            list.innerHTML = '';
+            allRobots.forEach(id => {
+                const r = PRIMAL_FORCE[id];
+                const item = document.createElement('div');
+                item.className = 'contact-item';
+                item.innerHTML = `
+                    <div class="contact-avatar" style="background:${r.cor}">
+                        ${r.imagem ? `<img src="${r.imagem}" alt="" onerror="this.textContent='${r.nome[0]}'">` : r.nome[0]}
+                        <div class="online-dot"></div>
+                    </div>
+                    <div>
+                        <div class="contact-name">${r.nome}</div>
+                        <div class="contact-role">Ranger ${r.ranger} • ${r.dino}</div>
+                    </div>
+                    <button class="call-btn" data-id="${id}" title="Ligar">📞</button>
+                `;
+                item.querySelector('.call-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    iniciarChamada(id);
+                });
+                item.addEventListener('click', () => iniciarChamada(id));
+                list.appendChild(item);
+            });
+        }
+
+        // Recents
+        function buildRecents() {
+            const list = document.getElementById('recent-list');
+            const empty = document.getElementById('empty-recents');
+            list.innerHTML = '';
+            if (recentCalls.length === 0) { empty.style.display = 'flex'; return; }
+            empty.style.display = 'none';
+            recentCalls.slice(0, 20).forEach(c => {
+                const r = PRIMAL_FORCE[c.robotId];
+                if (!r) return;
+                const item = document.createElement('div');
+                item.className = 'recent-item';
+                const icon = c.type === 'incoming' ? '📥' : c.type === 'missed' ? '📞' : '📤';
+                const cls = c.type === 'incoming' ? 'incoming' : c.type === 'missed' ? 'missed' : 'outgoing';
+                item.innerHTML = `
+                    <div class="recent-icon ${cls}">${icon}</div>
+                    <div class="recent-info">
+                        <div class="recent-name">${r.nome}</div>
+                        <div class="recent-time">${c.time || ''} • ${c.duration || ''}</div>
+                    </div>
+                `;
+                item.addEventListener('click', () => iniciarChamada(c.robotId));
+                list.appendChild(item);
+            });
+        }
+
+        // Outgoing call
+        let ringInterval = null;
+        function iniciarChamada(targetId) {
+            const target = PRIMAL_FORCE[targetId];
+            document.getElementById('out-avatar').style.background = target.cor;
+            document.getElementById('out-avatar').innerHTML = target.imagem
+                ? `<img src="${target.imagem}" alt="" onerror="this.textContent='${target.nome[0]}'">`
+                : target.nome[0];
+            document.getElementById('out-name').textContent = target.nome;
+            document.getElementById('out-name').style.color = target.cor;
+            document.getElementById('out-status').textContent = 'A chamar...';
+            document.getElementById('out-status').className = 'call-status';
+            document.getElementById('out-timer').classList.remove('visible');
+            document.getElementById('out-waves').style.display = 'flex';
+            document.getElementById('outgoing-screen').style.setProperty('--call-color', target.cor + '40');
+            document.getElementById('outgoing-screen').classList.add('ativo');
+
+            ringInterval = playRingtone();
+
+            // Simular atender após 3-5 segundos
+            setTimeout(() => {
+                if (!document.getElementById('outgoing-screen').classList.contains('ativo')) return;
+                if (ringInterval) clearInterval(ringInterval);
+                playConnectSound();
+                document.getElementById('out-status').textContent = 'Chamada conectada';
+                document.getElementById('out-status').className = 'call-status connected';
+                document.getElementById('out-timer').classList.add('visible');
+                callSeconds = 0;
+                callTimer = setInterval(() => {
+                    callSeconds++;
+                    const m = String(Math.floor(callSeconds / 60)).padStart(2, '0');
+                    const s = String(callSeconds % 60).padStart(2, '0');
+                    document.getElementById('out-timer').textContent = `${m}:${s}`;
+                }, 1000);
+
+                // Adicionar aos recentes
+                recentCalls.unshift({
+                    robotId: targetId,
+                    type: 'outgoing',
+                    time: new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }),
+                    duration: ''
+                });
+                localStorage.setItem('primal_recents', JSON.stringify(recentCalls));
+            }, 3000 + Math.random() * 2000);
+        }
+
+        document.getElementById('btn-end-call').addEventListener('click', terminarChamada);
+
+        function terminarChamada() {
+            if (ringInterval) clearInterval(ringInterval);
+            if (callTimer) clearInterval(callTimer);
+            playEndSound();
+
+            if (callSeconds > 0 && recentCalls.length > 0) {
+                const m = String(Math.floor(callSeconds / 60)).padStart(2, '0');
+                const s = String(callSeconds % 60).padStart(2, '0');
+                recentCalls[0].duration = `${m}:${s}`;
+                localStorage.setItem('primal_recents', JSON.stringify(recentCalls));
+            }
+
+            document.getElementById('outgoing-screen').classList.remove('ativo');
+            callTimer = null; callSeconds = 0;
+            buildRecents();
+        }
+
+        // Incoming call (simulated)
+        function simularChamadaRecebida() {
+            if (allRobots.length === 0) return;
+            const callerId = allRobots[Math.floor(Math.random() * allRobots.length)];
+            const caller = PRIMAL_FORCE[callerId];
+
+            document.getElementById('inc-avatar').style.background = caller.cor;
+            document.getElementById('inc-avatar').innerHTML = caller.imagem
+                ? `<img src="${caller.imagem}" alt="" onerror="this.textContent='${caller.nome[0]}'">`
+                : caller.nome[0];
+            document.getElementById('inc-name').textContent = caller.nome;
+            document.getElementById('inc-name').style.color = caller.cor;
+            document.getElementById('inc-sub').textContent = `Ranger ${caller.ranger} • ${caller.dino}`;
+            document.getElementById('incoming-screen').classList.add('ativo');
+            playIncomingTone();
+
+            document.getElementById('btn-accept-call').onclick = () => {
+                document.getElementById('incoming-screen').classList.remove('ativo');
+                recentCalls.unshift({
+                    robotId: callerId,
+                    type: 'incoming',
+                    time: new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }),
+                    duration: ''
+                });
+                localStorage.setItem('primal_recents', JSON.stringify(recentCalls));
+                iniciarChamada(callerId);
+            };
+
+            document.getElementById('btn-reject-call').onclick = () => {
+                document.getElementById('incoming-screen').classList.remove('ativo');
+                recentCalls.unshift({
+                    robotId: callerId,
+                    type: 'missed',
+                    time: new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }),
+                    duration: ''
+                });
+                localStorage.setItem('primal_recents', JSON.stringify(recentCalls));
+                buildRecents();
+            };
+        }
+
+        // Simular chamada recebida após 30 segundos
+        setTimeout(simularChamadaRecebida, 30000);
+
+        // Init
+        buildContacts();
+        buildRecents();
+    </script>
+</body>
+</html>
