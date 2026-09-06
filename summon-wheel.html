@@ -187,6 +187,27 @@
         }
         .flash.on { animation: flashFx 0.5s ease-out forwards; }
         @keyframes flashFx { 0% { opacity: 0.9; } 100% { opacity: 0; } }
+
+        .reveal-close {
+            position: absolute; top: 20px; right: 20px;
+            width: 36px; height: 36px; border-radius: 50%;
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15);
+            color: #fff; font-size: 18px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s;
+        }
+        .reveal-close:hover { background: rgba(255,255,255,0.12); }
+
+        .pulse-ring {
+            position: absolute; inset: -8px; border-radius: 50%;
+            border: 2px solid var(--item-color);
+            animation: pulseRing 1.5s ease-out infinite;
+            pointer-events: none;
+        }
+        @keyframes pulseRing {
+            0% { transform: scale(1); opacity: 0.6; }
+            100% { transform: scale(1.3); opacity: 0; }
+        }
     </style>
 </head>
 <body>
@@ -212,6 +233,7 @@
 
     <div class="flash" id="flash"></div>
     <div class="reveal" id="reveal">
+        <button class="reveal-close" id="rev-close">✕</button>
         <div class="reveal-card">
             <div class="reveal-ring">
                 <div class="reveal-avatar" id="rev-avatar"></div>
@@ -283,23 +305,33 @@
 
         function updatePositions() {
             const items = wheelEl.querySelectorAll('.wheel-item');
-            const vw = window.innerWidth;
 
             items.forEach((item, i) => {
                 const angle = (ANGLE_STEP * i + currentAngle) * Math.PI / 180;
                 const x = Math.sin(angle) * RING_RADIUS;
                 const z = Math.cos(angle) * RING_RADIUS;
                 const scale = (z + RING_RADIUS) / (2 * RING_RADIUS);
-                const opacity = 0.2 + scale * 0.8;
-                const yPos = -z * 0.15;
+                const opacity = 0.15 + scale * 0.85;
+                const yPos = -z * 0.12;
 
-                item.style.transform = `translateX(${x}px) translateY(${yPos}px) scale(${0.35 + scale * 0.65})`;
+                item.style.transform = `translateX(${x}px) translateY(${yPos}px) scale(${0.3 + scale * 0.7})`;
                 item.style.opacity = opacity;
                 item.style.zIndex = Math.round(scale * 100);
 
                 const normalizedZ = (z + RING_RADIUS) / (2 * RING_RADIUS);
                 const isFront = normalizedZ > 0.92;
+                const wasFront = item.classList.contains('front');
                 item.classList.toggle('front', isFront);
+
+                // Add/remove pulse ring
+                let pulse = item.querySelector('.pulse-ring');
+                if (isFront && !pulse) {
+                    pulse = document.createElement('div');
+                    pulse.className = 'pulse-ring';
+                    item.appendChild(pulse);
+                } else if (!isFront && pulse) {
+                    pulse.remove();
+                }
 
                 if (isFront && selectedIndex !== i) {
                     selectedIndex = i;
@@ -351,10 +383,17 @@
 
         // Keyboard
         document.addEventListener('keydown', e => {
+            if (revealEl.classList.contains('on')) {
+                if (e.key === 'Escape') closeReveal();
+                return;
+            }
             if (e.key === 'ArrowLeft') rotateTo((selectedIndex - 1 + total) % total);
             else if (e.key === 'ArrowRight') rotateTo((selectedIndex + 1) % total);
             else if (e.key === 'Enter') invocar(selectedIndex);
         });
+
+        // Resize handler
+        window.addEventListener('resize', () => updatePositions());
 
         // Drag
         let dragging = false;
@@ -386,16 +425,22 @@
         document.addEventListener('mouseup', () => {
             if (!dragging) return;
             dragging = false;
+            snapToNearest();
+        });
+
+        function snapToNearest() {
+            let idx;
             if (Math.abs(dragVel) > 2) {
                 const angleDelta = dragVel * 8;
                 const newTarget = currentAngle + angleDelta;
-                const nearestIdx = Math.round(-newTarget / ANGLE_STEP);
-                rotateTo(((nearestIdx % total) + total) % total);
+                idx = Math.round(-newTarget / ANGLE_STEP);
             } else {
-                const nearestIdx = Math.round(-currentAngle / ANGLE_STEP);
-                rotateTo(((nearestIdx % total) + total) % total);
+                idx = Math.round(-currentAngle / ANGLE_STEP);
             }
-        });
+            idx = ((idx % total) + total) % total;
+            rotateTo(idx);
+            dragVel = 0;
+        }
 
         // Touch
         wheelEl.addEventListener('touchstart', e => {
@@ -408,6 +453,7 @@
         }, { passive: true });
         document.addEventListener('touchmove', e => {
             if (!dragging) return;
+            e.preventDefault();
             const x = e.touches[0].clientX;
             const dx = x - dragStartX;
             currentAngle = dragStartAngle + dx * 0.5;
@@ -417,19 +463,11 @@
             lastX = x;
             lastT = now;
             updatePositions();
-        }, { passive: true });
+        }, { passive: false });
         document.addEventListener('touchend', () => {
             if (!dragging) return;
             dragging = false;
-            if (Math.abs(dragVel) > 2) {
-                const angleDelta = dragVel * 8;
-                const newTarget = currentAngle + angleDelta;
-                const nearestIdx = Math.round(-newTarget / ANGLE_STEP);
-                rotateTo(((nearestIdx % total) + total) % total);
-            } else {
-                const nearestIdx = Math.round(-currentAngle / ANGLE_STEP);
-                rotateTo(((nearestIdx % total) + total) % total);
-            }
+            snapToNearest();
         });
 
         // Invocar
@@ -463,6 +501,15 @@
                 };
             }, 350);
         }
+
+        function closeReveal() {
+            revealEl.classList.remove('on');
+            invocando = false;
+        }
+        document.getElementById('rev-close').addEventListener('click', closeReveal);
+        revealEl.addEventListener('click', e => {
+            if (e.target === revealEl) closeReveal();
+        });
 
         build();
     </script>
