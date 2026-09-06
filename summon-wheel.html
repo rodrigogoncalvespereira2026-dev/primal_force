@@ -49,8 +49,8 @@
 
         .wheel-item {
             position: absolute;
-            width: 90px; height: 90px;
-            left: 15px; top: 15px;
+            width: 100px; height: 100px;
+            left: 10px; top: 10px;
             will-change: transform, opacity;
         }
 
@@ -317,9 +317,9 @@
                 var angleFromFront = Math.abs(((angleDeg % 360) + 540) % 360 - 180);
                 var depthFactor = angleFromFront / 180;
 
-                var scale = 1 - depthFactor * 0.55;
+                var scale = 1.3 - depthFactor * 0.85;
                 var opacity = 1 - depthFactor * 0.7;
-                var yOffset = -z * 0.15;
+                var yOffset = -(1 - depthFactor) * 80;
 
                 item.style.transform = 'translateX(' + x + 'px) translateY(' + yOffset + 'px) scale(' + scale + ')';
                 item.style.opacity = opacity;
