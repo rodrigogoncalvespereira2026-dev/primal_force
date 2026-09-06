@@ -51,8 +51,8 @@
 
         .wheel-item {
             position: absolute;
-            width: 80px; height: 80px;
-            left: 20px; top: 20px;
+            width: 65px; height: 65px;
+            left: 27px; top: 27px;
             will-change: transform, opacity;
             transform-style: preserve-3d;
         }
@@ -68,6 +68,8 @@
             cursor: pointer;
             transition: border-color 0.3s, box-shadow 0.3s;
             overflow: hidden;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
         }
         .wheel-item-inner img {
             width: 100%; height: 100%;
@@ -249,7 +251,7 @@
         const allRobots = [...RANGERS_PRINCIPAIS, ...OUTROS_RANGERS];
         const total = allRobots.length;
         const ANGLE_PER_ITEM = 360 / total;
-        const RING_RADIUS = 450;
+        const RING_RADIUS = 600;
 
         let rotationAngle = 0;
         let targetAngle = 0;
@@ -321,7 +323,7 @@
                 var depthFactor = angleFromFront / 180;
 
                 var scale = 1.5 - depthFactor * 0.5;
-                var brightness = 1 - depthFactor * 0.7;
+                var brightness = 1 - depthFactor * 0.8;
                 var yOffset = -(1 - depthFactor) * 80;
                 var rotateY = depthFactor * 85;
 
