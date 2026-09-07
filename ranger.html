@@ -27,8 +27,13 @@
             border-bottom: 2px solid;
             border-image: linear-gradient(90deg, transparent, var(--cor-robot), transparent) 1;
         }
-        .avatar { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; background: var(--cor-robot); display: flex; align-items: center; justify-content: center; font-family: 'Orbitron',sans-serif; font-weight: 800; font-size: 18px; color: #fff; box-shadow: 0 0 12px var(--cor-robot); }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; background: var(--cor-robot); display: flex; align-items: center; justify-content: center; font-family: 'Orbitron',sans-serif; font-weight: 800; font-size: 18px; color: #fff; box-shadow: 0 0 12px var(--cor-robot); animation: avatarDespertar 0.7s ease-out 0.15s backwards; }
         .avatar img { width: 100%; height: 100%; object-fit: cover; }
+        @keyframes avatarDespertar {
+            0% { transform: scale(0.4); opacity: 0; filter: brightness(2.5); }
+            60% { transform: scale(1.15); opacity: 1; filter: brightness(1.4); }
+            100% { transform: scale(1); opacity: 1; filter: brightness(1); }
+        }
         .head-info { flex: 1; }
         .head-info h1 { font-family: 'Orbitron', sans-serif; font-size: 16px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cor-robot); }
         .head-info p { font-size: 12px; color: #8090b0; }
@@ -60,6 +65,54 @@
         #despedido .bolt { font-size: 64px; }
         #despedido h2 { font-family: 'Orbitron', sans-serif; font-size: 20px; color: var(--cor-robot); letter-spacing: 0.1em; }
         #despedido p { color: #8090b0; max-width: 400px; }
+
+        /* ===== CHAMADA RECEBIDA (anéis dourados, como no vídeo) ===== */
+        #incoming {
+            display: none; position: fixed; inset: 0; z-index: 120;
+            background: radial-gradient(ellipse 90% 70% at 50% 42%, #1a1306 0%, #0a0a1a 78%);
+            flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 24px; gap: 10px;
+        }
+        #incoming.visivel { display: flex; animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        #incoming .hud {
+            position: relative; width: 190px; height: 190px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        #incoming .hud .glyph {
+            width: 120px; height: 120px; object-fit: contain;
+            filter: drop-shadow(0 0 18px rgba(255, 215, 0, 0.9));
+            animation: glyphPulse 1.6s ease-in-out infinite;
+            position: relative; z-index: 2;
+        }
+        #incoming .hud .anillo {
+            position: absolute; border-radius: 50%; border: 2px solid rgba(255, 215, 0, 0.8);
+            animation: anillo 1.7s ease-out infinite;
+        }
+        #incoming .hud .anillo.a2 { animation-delay: 0.6s; }
+        #incoming .hud .anillo.a3 { animation-delay: 1.2s; }
+        @keyframes anillo {
+            0% { width: 40px; height: 40px; opacity: 0.95; }
+            100% { width: 210px; height: 210px; opacity: 0; }
+        }
+        @keyframes glyphPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        #incoming h2 {
+            font-family: 'Orbitron', sans-serif; font-size: 20px; letter-spacing: 0.12em;
+            text-transform: uppercase; color: var(--cor-robot); margin-top: 6px;
+        }
+        #incoming .de-quem { font-family: 'Orbitron', sans-serif; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #ffd700; opacity: 0.9; text-shadow: 0 0 14px rgba(255, 215, 0, 0.6); }
+        #incoming .status-inc { color: #8090b0; font-size: 14px; }
+        #incoming .btn-row { display: flex; gap: 14px; margin-top: 18px; }
+        #incoming button {
+            font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            padding: 13px 26px; border-radius: 6px; cursor: pointer; border: none;
+        }
+        #incoming #atender { background: linear-gradient(135deg, #ffd700, #b8860b); color: #1a1300; box-shadow: 0 0 24px rgba(255, 215, 0, 0.4); }
+        #incoming #ignorar { background: transparent; color: #b0b8d0; border: 1px solid rgba(255,255,255,0.25) !important; }
         @media (max-width: 480px) { .msg { max-width: 90%; } header { padding: 10px 12px; } .head-info h1 { font-size: 14px; } }
     </style>
 </head>
@@ -85,6 +138,22 @@
         <h2 id="despedido-titulo">Poder devolvido</h2>
         <p id="despedido-texto">Este robô regressou à Morphin Grid. Fala com o Guardião se quiseres receber o poder de novo.</p>
         <p style="font-size:11px;opacity:0.5">Primal Force IA</p>
+    </div>
+
+    <div id="incoming">
+        <div class="de-quem">📡 Chamada do Guardião</div>
+        <div class="hud">
+            <div class="anillo"></div>
+            <div class="anillo a2"></div>
+            <div class="anillo a3"></div>
+            <img class="glyph" id="inc-glyph" alt="símbolo">
+        </div>
+        <h2 id="inc-nome">...</h2>
+        <div class="status-inc" id="inc-status">Coordenadas recebidas • Missão atribuída</div>
+        <div class="btn-row">
+            <button id="atender">⚡ Atender</button>
+            <button id="ignorar">Ignorar</button>
+        </div>
     </div>
 
     <script>
@@ -152,6 +221,64 @@
             } catch (e) { /* silencioso */ }
         }
 
+        // ---- Som de toque (WebAudio) ----
+        function toque(ligado) {
+            try {
+                const Ctx = window.AudioContext || window.webkitAudioContext;
+                if (!Ctx) return;
+                if (!window._ringCtx) window._ringCtx = new Ctx();
+                const ctx = window._ringCtx;
+                if (ctx.state === 'suspended') ctx.resume().catch(function () {});
+                const t0 = ctx.currentTime;
+                for (let i = 0; i < 6; i++) {
+                    const o = ctx.createOscillator();
+                    const g = ctx.createGain();
+                    o.type = 'sine';
+                    o.frequency.value = ligado ? 880 : 780;
+                    const ts = t0 + i * 0.42;
+                    g.gain.setValueAtTime(0.001, ts);
+                    g.gain.exponentialRampToValueAtTime(0.16, ts + 0.03);
+                    g.gain.exponentialRampToValueAtTime(0.001, ts + 0.3);
+                    o.connect(g); g.connect(ctx.destination);
+                    o.start(ts); o.stop(ts + 0.35);
+                }
+            } catch (e) { /* silencioso */ }
+        }
+
+        function iniciarMissao() {
+            document.getElementById("nome-robot").textContent = info.nome;
+            document.getElementById("nome-robot").style.color = info.cor;
+            document.getElementById("sub-robot").textContent = `${info.person} • ${info.dino} • Guardião: ${info.guardianName}`;
+            expiraEm = (info.lastMessage + info.timeoutMinutes * 60);
+            adicionarMsg("robot", "✨ Acordei, " + info.person + "! " + (info.frase || `Sou o ${info.nome}, o teu robô companheiro.`));
+            sistema(`✨ ${info.nome} despertou da Morphin Grid. O poder é teu — a tua missão começa agora.`);
+            iniciarTimer();
+            pingInterval = setInterval(ping, 20000);
+            enviar.disabled = false;
+            input.disabled = false;
+            if (navigator.vibrate) { try { navigator.vibrate([120, 60, 120]); } catch (e) {} }
+        }
+
+        async function atender() {
+            document.getElementById("incoming").classList.remove("visivel");
+            try {
+                await fetch("/ranger/answer", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code }) });
+            } catch (e) { /* silencioso */ }
+            info.calling = false;
+            toque(true);
+            iniciarMissao();
+        }
+
+        async function ignorar() {
+            document.getElementById("incoming").classList.remove("visivel");
+            try {
+                await fetch("/ranger/decline", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code }) });
+            } catch (e) { /* silencioso */ }
+            document.getElementById("despedido-titulo").textContent = "Chamada ignorada";
+            document.getElementById("despedido-texto").textContent = "O " + info.nome + " não atendeu. O robô regressou à Morphin Grid à espera do próximo chamado.";
+            devolvido();
+        }
+
         async function carregar() {
             if (!code) { sistema("⚠️ Link inválido — falta o código."); return; }
             try {
@@ -160,21 +287,39 @@
                 info = await r.json();
                 document.documentElement.style.setProperty("--cor-robot", info.cor);
                 document.getElementById("avatar").innerHTML = info.imagem ? `<img src="${info.imagem}" alt="${info.nome}">` : info.nome[0];
-                document.getElementById("nome-robot").textContent = info.nome;
+                document.getElementById("nome-robot").textContent = info.calling ? "Chamada a entrar..." : info.nome;
                 document.getElementById("nome-robot").style.color = info.cor;
                 document.getElementById("sub-robot").textContent = `${info.person} • ${info.dino} • Guardião: ${info.guardianName}`;
-                document.title = info.nome + " — Primal Force";
-                expiraEm = (info.lastMessage + info.timeoutMinutes * 60);
-                adicionarMsg("robot", info.frase || `Olá ${info.person}! Sou o ${info.nome}, o teu robô companheiro.`);
-                sistema("⚡ Poder transferido. A tua missão começa agora.");
-                iniciarTimer();
-                pingInterval = setInterval(ping, 20000);
-                enviar.disabled = false;
-                input.disabled = false;
+                document.title = (info.calling ? "📞 " : "") + info.nome + " — Primal Force";
+
+                if (info.calling) {
+                    // O dispositivo toca: símbolo em anéis dourados (como o vídeo)
+                    document.getElementById("inc-glyph").src = "assets/symbols/" + info.robot + ".png";
+                    document.getElementById("inc-nome").textContent = info.nome + " • " + info.dino;
+                    document.getElementById("inc-nome").style.color = info.cor;
+                    document.getElementById("inc-status").textContent = "Chamada de " + info.guardianName + " para " + info.person + " • Coordenadas recebidas";
+                    document.getElementById("incoming").classList.add("visivel");
+                    input.disabled = true;
+                    enviar.disabled = true;
+                    toque(false);
+                    if (navigator.vibrate) {
+                        const vibrar = function () { try { navigator.vibrate([300, 200, 300]); } catch (e) {} };
+                        vibrar();
+                        const loop = setInterval(function () {
+                            if (!document.getElementById("incoming").classList.contains("visivel")) { clearInterval(loop); return; }
+                            vibrar();
+                        }, 1500);
+                    }
+                    return;
+                }
+                iniciarMissao();
             } catch (e) {
                 sistema("⚠️ Erro ao ligar à Morphin Grid.");
             }
         }
+
+        document.getElementById("atender").addEventListener("click", atender);
+        document.getElementById("ignorar").addEventListener("click", ignorar);
 
         async function mandarMensagem() {
             const texto = input.value.trim();

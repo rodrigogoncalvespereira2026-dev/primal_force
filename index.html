@@ -220,6 +220,42 @@
         #face-panel[data-estado="ouvir"] .robot-avatar { animation: robotOuvir 1.6s ease-in-out infinite, robotBrilho 2s ease-in-out infinite; }
         #face-panel[data-estado="pensar"] .robot-avatar { animation: robotFlutuar 2s ease-in-out infinite, robotBrilho 2.5s ease-in-out infinite; }
         #face-panel[data-estado="falar"] .robot-avatar { animation: robotFalar 0.5s ease-in-out infinite, robotBrilho 1s ease-in-out infinite; }
+        #face-panel[data-estado="despertar"] .robot-avatar { animation: robotDespertar 0.7s ease-out; }
+        @keyframes robotDespertar {
+            0% { transform: scale(0.5); opacity: 0.2; filter: brightness(2.5); }
+            40% { transform: scale(1.15); opacity: 1; filter: brightness(1.5); }
+            100% { transform: scale(1); opacity: 1; filter: brightness(1); }
+        }
+
+        /* ============ DESPERTAR KWAMI (REVEAL) ============ */
+        .kwami-burst {
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            pointer-events: none; z-index: 2;
+        }
+        .kwami-burst .anel {
+            position: absolute;
+            border: 2px solid var(--cor-robot);
+            border-radius: 50%;
+            animation: kwamiRing 0.9s ease-out forwards;
+        }
+        .kwami-burst .anel:nth-child(2) { animation-delay: 0.08s; }
+        .kwami-burst .anel:nth-child(3) { animation-delay: 0.16s; }
+        @keyframes kwamiRing {
+            0% { width: 30px; height: 30px; opacity: 0.9; }
+            100% { width: 240px; height: 240px; opacity: 0; }
+        }
+        .kwami-burst .particula {
+            position: absolute;
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--cor-robot);
+            box-shadow: 0 0 10px var(--cor-robot);
+            animation: kwamiSpark 0.8s ease-out forwards;
+        }
+        @keyframes kwamiSpark {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
+        }
 
         .robot-info { text-align: center; margin-top: 4px; position: relative; z-index: 1; }
         .robot-nome {
@@ -788,12 +824,34 @@
             .logo-bolt { width: 28px; height: 28px; }
             .logo-bolt svg { width: 24px; height: 24px; }
             header h1 { font-size: 13px; letter-spacing: 0.06em; }
-            header > a[href="viewer3d.html"] { display: none; }
+            header > a[href="viewer3d.html"], header > a[href="world3d.html"], header > a[href="summon-wheel.html"] { display: none; }
             .header-tag { display: none; }
             #btn-hamburger { display: flex !important; font-size: 20px; padding: 2px 6px; }
             #robot-list { display: none !important; }
-            #main #face-panel { display: none !important; }
             #main { flex-direction: column; }
+            /* Barra compacta do robô atual: avatar + nome + estado por cima do chat */
+            #main #face-panel {
+                display: flex !important;
+                flex-direction: row;
+                align-items: center;
+                gap: 10px;
+                width: 100%;
+                padding: 8px 12px;
+                border-right: none;
+                border-bottom: 2px solid;
+                border-image: linear-gradient(90deg, transparent, var(--power-gold), transparent) 1;
+                overflow: hidden;
+            }
+            #main #face-panel::before { display: none; }
+            #main #face-panel .morphin-badge { width: 46px; height: 46px; flex-shrink: 0; }
+            #main #face-panel .morphin-badge .ring { display: none; }
+            #main #face-panel .robot-avatar { width: 42px; height: 42px; font-size: 18px; }
+            #main #face-panel .robot-avatar::after { display: none; }
+            #main #face-panel .robot-info { text-align: left; margin-top: 0; flex: 1; min-width: 0; }
+            #main #face-panel .robot-nome { font-size: 13px; letter-spacing: 0.06em; }
+            #main #face-panel .robot-ranger { font-size: 10px; margin-top: 0; }
+            #main #face-panel .robot-suporte { display: none; }
+            #main #face-panel .estado-label { margin-top: 0; margin-left: auto; font-size: 9px; flex-shrink: 0; }
             #main > #chat { width: 100% !important; }
             .msg { max-width: 85%; }
             #chat { padding: 16px 12px; gap: 10px; }
@@ -1109,11 +1167,11 @@
                         </select>
                     </div>
                 </div>
-                <button id="btn-distribuir" disabled>⚡ DISTRIBUIR PODER</button>
+                <button id="btn-distribuir" disabled>⚡ ENTREGAR PODER</button>
 
                 <div class="link-caixa" id="link-caixa">
-                    <div style="font-family:'Orbitron',sans-serif;font-size:10px;color:#00E676;letter-spacing:0.08em;text-transform:uppercase">✅ Poder distribuído!</div>
-                    <div style="font-size:11px;color:#9aa2c0;margin-top:4px">Envia este link para a pessoa. Ela só vai falar com este robô.</div>
+                    <div style="font-family:'Orbitron',sans-serif;font-size:10px;color:#00E676;letter-spacing:0.08em;text-transform:uppercase">✨ O poder despertou!</div>
+                    <div style="font-size:11px;color:#9aa2c0;margin-top:4px">Envia este link. Quando a pessoa o abrir, o robô desperta e fica ao serviço dela até o tempo acabar.</div>
                     <div class="link-texto" id="link-texto"></div>
                     <div class="link-botoes">
                         <button id="link-copiar">📋 Copiar link</button>
@@ -1139,6 +1197,7 @@
         </div>
         <a href="viewer3d.html" style="display:block;margin:0 16px;padding:10px 16px;font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--power-gold);text-decoration:none;border:1px solid rgba(255,215,0,0.2);border-radius:4px;background:rgba(255,215,0,0.06);text-align:center;">🏛️ Modelos 3D</a>
         <a href="world3d.html" style="display:block;margin:8px 16px 0;padding:10px 16px;font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#00E676;text-decoration:none;border:1px solid rgba(0,230,118,0.2);border-radius:4px;background:rgba(0,230,118,0.06);text-align:center;">🌍 Mundo 3D</a>
+        <a href="summon-wheel.html" style="display:block;margin:8px 16px 0;padding:10px 16px;font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#CE93D8;text-decoration:none;border:1px solid rgba(206,147,216,0.2);border-radius:4px;background:rgba(206,147,216,0.06);text-align:center;">📡 Chamar Heróis</a>
         <div class="drawer-robot-list" id="drawer-robot-list"></div>
     </div>
 
@@ -1311,6 +1370,37 @@
             sec2.appendChild(tit2); sec2.appendChild(grp2); lista.appendChild(sec2);
         }
 
+        function despertarKwami(r) {
+            // Vibração no telemóvel (só depois de o utilizador tocar)
+            if (navigator.vibrate && window._interagiu) { try { navigator.vibrate([20, 40, 30]); } catch (e) {} }
+            // Rajada de anéis + partículas na cor do robô
+            const badge = document.querySelector(".morphin-badge");
+            if (badge) {
+                const burst = document.createElement("div");
+                burst.className = "kwami-burst";
+                burst.innerHTML = '<span class="anel"></span><span class="anel"></span><span class="anel"></span>';
+                for (let i = 0; i < 8; i++) {
+                    const p = document.createElement("span");
+                    p.className = "particula";
+                    const ang = (i / 8) * Math.PI * 2 + Math.random() * 0.4;
+                    const dist = 60 + Math.random() * 70;
+                    p.style.setProperty("--dx", Math.cos(ang) * dist + "px");
+                    p.style.setProperty("--dy", Math.sin(ang) * dist + "px");
+                    burst.appendChild(p);
+                }
+                badge.appendChild(burst);
+                setTimeout(() => burst.remove(), 1100);
+            }
+            // Avatar a despertar
+            const face = document.getElementById("face-panel");
+            face.setAttribute("data-estado", "despertar");
+            setTimeout(() => {
+                if (face.getAttribute("data-estado") === "despertar") {
+                    face.setAttribute("data-estado", "espera");
+                }
+            }, 750);
+        }
+
         function selecionarRobot(id) {
             atual = id;
             const r = PRIMAL_FORCE[id];
@@ -1341,6 +1431,8 @@
             input.placeholder = `Fala com ${r.nome}...`;
 
             chat.innerHTML = "";
+            despertarKwami(r);
+            adicionarSistema(`✨ ${r.nome} despertou da Morphin Grid e escolheu-te como companheiro.`);
             adicionarMensagem("robot", r.frase, r.cor);
         }
 
@@ -1990,7 +2082,7 @@
         btnDistribuir.addEventListener('click', async () => {
             if (!roboSelecionado || !guardianPessoa.value.trim()) return;
             btnDistribuir.disabled = true;
-            btnDistribuir.textContent = '⚡ A transferir poder...';
+            btnDistribuir.textContent = '✨ O poder está a despertar...';
             try {
                 const r = await fetch('/distribute', {
                     method: 'POST',
@@ -2015,7 +2107,7 @@
             } catch (e) {
                 adicionarSistema('⚠️ Erro ao distribuir: ' + e.message);
             }
-            btnDistribuir.textContent = '⚡ DISTRIBUIR PODER';
+            btnDistribuir.textContent = '⚡ ENTREGAR PODER';
             validarDistribuicao();
         });
 
@@ -2140,6 +2232,9 @@
         ["touchstart", "click", "keydown"].forEach((ev) => {
             document.addEventListener(ev, desbloquearAudio, { once: true });
             document.addEventListener(ev, desbloquearAudio);
+        });
+        ["touchstart", "pointerdown", "click"].forEach((ev) => {
+            document.addEventListener(ev, () => { window._interagiu = true; }, { once: true, capture: true });
         });
 
         construirHeader();

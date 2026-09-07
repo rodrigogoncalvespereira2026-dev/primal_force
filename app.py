@@ -223,6 +223,7 @@ def _serializar_assignments(dados):
     for rid, a in dados["assignments"].items():
         timeout_s = a.get("timeoutMinutes", 30) * 60
         ultima = a.get("lastMessage") or a.get("assignedAt", agora)
+        calling = bool(a.get("calling"))
         out.append({
             "robot": rid,
             "person": a.get("person", ""),
@@ -231,7 +232,8 @@ def _serializar_assignments(dados):
             "lastMessage": a.get("lastMessage"),
             "lastSeen": a.get("lastSeen"),
             "timeoutMinutes": a.get("timeoutMinutes", 30),
-            "online": (agora - (a.get("lastSeen") or 0)) < 60,
+            "calling": calling,
+            "online": (not calling) and (agora - (a.get("lastSeen") or 0)) < 60,
             "expiresAt": ultima + timeout_s
         })
     return out
@@ -251,6 +253,8 @@ def distribute():
         return jsonify({"error": "Robô desconhecido"}), 400
     if not person:
         return jsonify({"error": "Nome da pessoa obrigatório"}), 400
+    mode = (d.get("mode") or "").lower().strip()
+    is_call = mode == "call"
     with _guardian_lock:
         dados = _limpar_expiradas(_carregar_guardian())
         if rid in dados["assignments"]:
@@ -262,14 +266,15 @@ def distribute():
             "person": person,
             "assignedAt": agora,
             "lastMessage": agora,
-            "lastSeen": agora,
+            "lastSeen": None if is_call else agora,
+            "calling": is_call,
             "timeoutMinutes": timeout
         }
         if d.get("guardianName"):
             dados["guardianName"] = str(d["guardianName"])[:40]
         _guardar_guardian(dados)
     url = request.host_url.rstrip("/") + "/ranger.html?code=" + code
-    return jsonify({"ok": True, "code": code, "url": url, "robot": rid, "person": person})
+    return jsonify({"ok": True, "code": code, "url": url, "robot": rid, "person": person, "calling": is_call})
 
 @app.route('/assignments', methods=['GET'])
 def assignments():
@@ -319,6 +324,7 @@ def ranger_info():
                 "robot": rid,
                 "person": a.get("person", ""),
                 "guardianName": dados.get("guardianName", "Guardião"),
+                "calling": bool(a.get("calling")),
                 "nome": info.get("nome", rid),
                 "cor": info.get("cor", "#FFD700"),
                 "ranger": info.get("ranger", ""),
@@ -329,6 +335,39 @@ def ranger_info():
                 "timeoutMinutes": a.get("timeoutMinutes", 30)
             })
     return jsonify({"error": "Link inválido ou robô já devolvido à Morphin Grid"}), 404
+
+@app.route('/ranger/answer', methods=['POST'])
+def ranger_answer():
+    d = request.get_json(silent=True) or {}
+    code = d.get("code", "")
+    if not code:
+        return jsonify({"error": "Código em falta"}), 400
+    agora = time.time()
+    with _guardian_lock:
+        dados = _limpar_expiradas(_carregar_guardian())
+        for rid, a in dados["assignments"].items():
+            if a.get("code") == code:
+                a["calling"] = False
+                a["lastSeen"] = agora
+                a["lastMessage"] = agora
+                _guardar_guardian(dados)
+                return jsonify({"ok": True, "robot": rid, "active": True})
+    return jsonify({"ok": True, "active": False})
+
+@app.route('/ranger/decline', methods=['POST'])
+def ranger_decline():
+    d = request.get_json(silent=True) or {}
+    code = d.get("code", "")
+    if not code:
+        return jsonify({"error": "Código em falta"}), 400
+    with _guardian_lock:
+        dados = _carregar_guardian()
+        for rid, a in dados["assignments"].items():
+            if a.get("code") == code:
+                del dados["assignments"][rid]
+                _guardar_guardian(dados)
+                return jsonify({"ok": True, "robot": rid, "declined": True})
+    return jsonify({"ok": True, "declined": False})
 
 @app.route('/ranger/ping', methods=['POST'])
 def ranger_ping():

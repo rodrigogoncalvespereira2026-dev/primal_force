@@ -3,506 +3,811 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#0a0a1a">
-    <title>Primal Force — Roda de Invocação</title>
+    <meta name="theme-color" content="#0a0a12">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Primal Force — Chamar Heróis</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root { --power-dark: #0a0a1a; --power-gold: #FFD700; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root { --pink: #ff5ab5; --gold: #FFD700; --dark: #0a0a12; }
         html, body { height: 100%; overflow: hidden; }
         body {
             font-family: 'Rajdhani', sans-serif;
-            background: #000; color: #e8e8f0;
+            color: #f0eef6;
             display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
             user-select: none; -webkit-user-select: none;
+            /* Cena noturna — como o espaço real onde os ícones flutuam */
+            background:
+                radial-gradient(ellipse 120% 55% at 50% 118%, rgba(255,90,181,0.16) 0%, rgba(120,40,140,0.10) 40%, transparent 70%),
+                radial-gradient(ellipse 90% 45% at 50% 88%, rgba(255,215,0,0.10) 0%, transparent 62%),
+                radial-gradient(ellipse 60% 40% at 50% 40%, rgba(255,90,181,0.10) 0%, transparent 70%),
+                linear-gradient(180deg, #05040c 0%, #0c0820 55%, #180a2e 100%);
+        }
+        /* Luzes desfocadas da cidade (bokeh) por trás do anel */
+        body::before {
+            content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+            background:
+                radial-gradient(circle 3px at 12% 22%, rgba(255,255,255,0.5), transparent 80%),
+                radial-gradient(circle 5px at 26% 64%, rgba(255,170,120,0.45), transparent 80%),
+                radial-gradient(circle 3px at 41% 30%, rgba(255,255,255,0.35), transparent 80%),
+                radial-gradient(circle 6px at 58% 70%, rgba(150,220,255,0.4), transparent 80%),
+                radial-gradient(circle 4px at 73% 26%, rgba(255,255,255,0.4), transparent 80%),
+                radial-gradient(circle 3px at 86% 58%, rgba(255,200,120,0.35), transparent 80%),
+                radial-gradient(circle 7px at 92% 16%, rgba(255,140,180,0.4), transparent 80%),
+                radial-gradient(circle 4px at 8% 84%, rgba(255,255,255,0.3), transparent 80%);
+            filter: blur(1px);
+        }
+        /* Silhueta de horizonte a fingir a rua iluminada */
+        body::after {
+            content: ''; position: fixed; left: 0; right: 0; bottom: 0; height: 150px; z-index: 0; pointer-events: none;
+            background:
+                linear-gradient(170deg, transparent 40%, rgba(10,6,24,0.85) 100%),
+                radial-gradient(ellipse 55% 30% at 50% 100%, rgba(255,90,181,0.12), transparent 70%);
         }
 
-        .header {
-            position: fixed; top: 0; left: 0; right: 0;
-            padding: 14px 20px; display: flex; align-items: center; gap: 12px;
-            background: rgba(0,0,0,0.95);
-            border-bottom: 1px solid rgba(255,215,0,0.08); z-index: 50;
+        header {
+            position: relative; z-index: 30;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 20px;
+            padding-top: max(14px, env(safe-area-inset-top));
+            border-bottom: 2px solid;
+            border-image: linear-gradient(90deg, transparent, var(--pink), transparent) 1;
+            flex-shrink: 0;
+            background: rgba(5,4,12,0.55);
+            backdrop-filter: blur(6px);
         }
-        .header h1 {
-            font-family: 'Orbitron', sans-serif; font-size: 13px;
-            font-weight: 700; letter-spacing: 0.1em; color: var(--power-gold);
+        header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 15px; font-weight: 800; letter-spacing: 0.12em;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, var(--pink), #fff, var(--pink));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
-        .header a {
-            margin-left: auto; font-family: 'Orbitron', sans-serif;
-            font-size: 10px; font-weight: 700; color: var(--power-gold);
-            text-decoration: none; padding: 7px 14px;
-            border: 1px solid rgba(255,215,0,0.2); border-radius: 4px;
+        header a {
+            font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 700;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            color: var(--pink); text-decoration: none;
+            padding: 7px 14px;
+            border: 1px solid rgba(255,90,181,0.3);
+            border-radius: 4px;
             transition: all 0.2s;
         }
-        .header a:hover { background: rgba(255,215,0,0.1); }
+        header a:hover { background: rgba(255,90,181,0.12); box-shadow: 0 0 14px rgba(255,90,181,0.25); }
 
-        .scene {
-            width: 100%; height: 100%;
-            display: flex; align-items: center; justify-content: center;
-            perspective: 1200px;
-            perspective-origin: center center;
-        }
+        .scene { flex: 1; position: relative; overflow: hidden; z-index: 5; }
 
-        .wheel {
-            position: relative;
-            width: 120px; height: 120px;
-            transform-style: preserve-3d;
-        }
-
-        .wheel-item {
+        /* Anel decorativo elíptico */
+        .ring-holo {
             position: absolute;
-            width: 60px; height: 60px;
-            left: 30px; top: 30px;
-            transform-style: preserve-3d;
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
-        }
-
-        .wheel-item-inner {
-            width: 100%; height: 100%;
+            border: 1px dashed rgba(255,90,181,0.20);
             border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            background: rgba(10,10,25,0.95);
-            border: 3px solid transparent;
-            font-size: 14px; font-weight: 800;
-            font-family: 'Orbitron', sans-serif; color: #fff;
+            pointer-events: none;
+            transform: translate(-50%,-50%);
+        }
+        .ring-holo::after {
+            content: '';
+            position: absolute; inset: -14px;
+            border: 1px solid rgba(255,90,181,0.08);
+            border-radius: 50%;
+            animation: holoPulse 4s ease-in-out infinite;
+        }
+        @keyframes holoPulse { 0%,100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 1; transform: scale(1.02); } }
+
+        /* ===== Ícones translúcidos (como os círculos do vídeo) ===== */
+        .icon {
+            position: absolute;
+            width: 76px; height: 76px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,150,205,0.75);
+            background:
+                radial-gradient(circle at 32% 28%, rgba(255,140,200,0.35) 0%, rgba(255,70,160,0.14) 42%, rgba(120,20,90,0.30) 100%);
+            backdrop-filter: blur(1.5px);
+            box-shadow: 0 0 16px rgba(255,90,181,0.30), inset 0 0 18px rgba(255,120,200,0.20);
             cursor: pointer;
-            transition: border-color 0.3s, box-shadow 0.3s;
-            overflow: hidden;
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
+            display: flex; align-items: center; justify-content: center;
+            touch-action: none;
+            animation: iconIn 0.5s ease-out backwards;
         }
-        .wheel-item-inner img {
-            width: 100%; height: 100%;
-            border-radius: 50%; object-fit: cover;
+        @keyframes iconIn {
+            0% { opacity: 0; transform: translate(-50%,-50%) scale(0.2) rotate(-30deg); }
+            100% { opacity: 1; transform: translate(-50%,-50%) scale(1) rotate(0deg); }
         }
-
-        .wheel-item.selected .wheel-item-inner {
-            border-color: var(--item-color);
-            box-shadow: 0 0 20px var(--item-color),
-                        0 0 40px color-mix(in srgb, var(--item-color) 30%, transparent);
+        .icon .sym {
+            width: 60%; height: 60%;
+            object-fit: contain;
+            filter: drop-shadow(0 0 6px rgba(255,255,255,0.95)) drop-shadow(0 0 14px rgba(255,255,255,0.4));
         }
-
-        .pulse-ring {
-            position: absolute; inset: -4px; border-radius: 50%;
-            border: 2px solid var(--item-color);
-            animation: pulseRing 1.5s ease-out infinite;
+        .icon::before, .icon::after {
+            content: '';
+            position: absolute; inset: -7px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,90,181,0.7);
+            opacity: 0;
             pointer-events: none;
         }
-        @keyframes pulseRing {
-            0% { transform: scale(1); opacity: 0.5; }
-            100% { transform: scale(1.4); opacity: 0; }
+        .icon.selecionado {
+            border-color: var(--cor, #fff);
+            box-shadow: 0 0 22px color-mix(in srgb, var(--cor, #fff) 60%, transparent),
+                        0 0 0 3px rgba(255,90,181,0.12), inset 0 0 18px rgba(255,120,200,0.25);
         }
+        .icon.selecionado::before {
+            border-color: color-mix(in srgb, var(--cor, #fff) 70%, #fff);
+            animation: selRing 1.4s ease-out infinite;
+        }
+        .icon.selecionado::after {
+            border-color: color-mix(in srgb, var(--cor, #fff) 70%, #fff);
+            animation: selRing 1.4s ease-out 0.7s infinite;
+        }
+        @keyframes selRing {
+            0% { transform: scale(0.92); opacity: 0.9; }
+            100% { transform: scale(1.6); opacity: 0; }
+        }
+        .icon.chamando .sym { animation: chamPulso 0.5s ease-in-out infinite; }
+        @keyframes chamPulso { 0%,100% { transform: scale(1); } 50% { transform: scale(0.78); } }
+        .icon.ocupado { opacity: 0.35 !important; cursor: not-allowed; filter: saturate(0.2); }
+        .icon.ocupado .sym { animation: none; }
 
-        .info-panel {
-            position: fixed; bottom: 100px;
-            text-align: center; width: 100%;
-        }
-        .info-name {
+        /* Info + botão */
+        .info {
+            position: absolute;
+            top: 2px; left: 50%; transform: translateX(-50%);
             font-family: 'Orbitron', sans-serif;
-            font-size: 26px; font-weight: 900;
-            letter-spacing: 0.12em; text-transform: uppercase;
-            transition: color 0.3s;
+            font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+            color: rgba(255,190,225,0.9); text-align: center;
+            width: 92%;
+            text-shadow: 0 0 8px rgba(0,0,0,0.8);
+            z-index: 6;
         }
-        .info-sub {
-            font-size: 13px; color: rgba(255,255,255,0.4); margin-top: 4px;
-        }
-        .info-type {
-            font-size: 10px; font-family: 'Orbitron', sans-serif;
-            letter-spacing: 0.1em; text-transform: uppercase;
-            margin-top: 6px; opacity: 0.5;
-        }
-        .hint {
-            font-size: 11px; color: rgba(255,255,255,0.15);
-            margin-top: 14px;
-        }
-
-        .arrow {
-            position: fixed; top: 50%; transform: translateY(-50%);
-            width: 50px; height: 50px;
-            border-radius: 50%;
-            background: rgba(255,215,0,0.06);
-            border: 1px solid rgba(255,215,0,0.15);
-            color: var(--power-gold); font-size: 22px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; z-index: 20; transition: all 0.2s;
-        }
-        .arrow:hover { background: rgba(255,215,0,0.12); }
-        .arrow.left { left: 20px; }
-        .arrow.right { right: 20px; }
-
-        .counter {
-            position: fixed; top: 60px; right: 20px;
+        .call-btn {
+            position: absolute;
+            z-index: 20;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #ff5ab5, #c2185b);
+            color: #fff; border: none;
+            padding: 13px 30px; border-radius: 8px;
             font-family: 'Orbitron', sans-serif;
-            font-size: 10px; color: rgba(255,255,255,0.2); z-index: 50;
-        }
-
-        .flash {
-            position: fixed; inset: 0;
-            pointer-events: none; z-index: 99; opacity: 0;
-        }
-        .flash.on { animation: flashFx 0.5s ease-out forwards; }
-        @keyframes flashFx { 0% { opacity: 0.9; } 100% { opacity: 0; } }
-
-        .reveal {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0);
-            display: none; align-items: center; justify-content: center;
-            z-index: 100; transition: background 0.4s;
-        }
-        .reveal.on { display: flex; background: rgba(0,0,0,0.92); }
-        .reveal-card { text-align: center; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .reveal-ring {
-            width: 130px; height: 130px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 16px;
-            border: 4px solid var(--rev-color);
-            box-shadow: 0 0 40px var(--rev-color), 0 0 80px color-mix(in srgb, var(--rev-color) 50%, transparent);
-        }
-        .reveal-avatar {
-            width: 110px; height: 110px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 44px; font-weight: 900;
-            font-family: 'Orbitron', sans-serif; color: #fff;
-            background: rgba(10,10,25,0.95);
-        }
-        .reveal-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-        .reveal-name {
-            font-family: 'Orbitron', sans-serif; font-size: 28px;
-            font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase;
-            color: var(--rev-color);
-        }
-        .reveal-ranger { font-size: 14px; color: rgba(255,255,255,0.4); margin-top: 4px; }
-        .reveal-dino {
-            font-size: 10px; font-family: 'Orbitron', sans-serif;
-            letter-spacing: 0.1em; text-transform: uppercase; margin-top: 6px;
-            color: var(--rev-color); opacity: 0.6;
-        }
-        .reveal-btn {
-            margin-top: 28px; padding: 14px 40px;
-            background: var(--rev-color); color: #fff; border: none;
-            border-radius: 6px; font-family: 'Orbitron', sans-serif;
             font-size: 12px; font-weight: 800;
-            letter-spacing: 0.1em; text-transform: uppercase;
+            letter-spacing: 0.12em; text-transform: uppercase;
             cursor: pointer;
-            box-shadow: 0 4px 20px var(--rev-color);
+            box-shadow: 0 0 26px rgba(255,90,181,0.45);
+            transition: all 0.25s;
         }
-        .reveal-close {
-            position: absolute; top: 20px; right: 20px;
-            width: 36px; height: 36px; border-radius: 50%;
-            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15);
-            color: #fff; font-size: 18px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            transition: background 0.2s;
-        }
-        .reveal-close:hover { background: rgba(255,255,255,0.12); }
+        .call-btn:hover:not(:disabled) { transform: translateX(-50%) translateY(-2px); box-shadow: 0 0 40px rgba(255,90,181,0.7); }
+        .call-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
 
-        @keyframes popIn {
-            0% { transform: scale(0.3); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
+        /* ===== Dispositivo (yo-yo) onde o símbolo escolhido aparece ===== */
+        .device {
+            position: absolute; z-index: 8;
+            left: 50%;
+            width: 108px; height: 108px;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle at 50% 34%, rgba(70,20,90,0.6), rgba(20,6,34,0.9) 80%);
+            border: 2px solid rgba(255,90,181,0.8);
+            box-shadow: 0 10px 34px rgba(0,0,0,0.5), 0 0 26px rgba(255,90,181,0.30), inset 0 0 22px rgba(0,0,0,0.6);
+            display: flex; align-items: center; justify-content: center;
+            animation: deviceFloat 5s ease-in-out infinite;
+        }
+        @keyframes deviceFloat {
+            0%,100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-7px); }
+        }
+        .device .core {
+            position: absolute;
+            width: 40px; height: 40px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(220,120,255,0.8), rgba(220,120,255,0.10) 70%);
+            filter: blur(3px);
+            animation: corePulse 2.2s ease-in-out infinite;
+            pointer-events: none;
+        }
+        .device .glyph {
+            width: 64%; height: 64%;
+            object-fit: contain;
+            filter: drop-shadow(0 0 8px rgba(255,255,255,0.9));
+            position: relative; z-index: 1;
+            display: none;
+        }
+        .device.tem-sel .core { display: none; }
+        .device.tem-sel .glyph { display: block; animation: glyphPop 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+        @keyframes glyphPop { 0% { transform: scale(0.3); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .device.tem-sel::before, .device.tem-sel::after {
+            content: '';
+            position: absolute; inset: -9px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,90,181,0.8);
+            opacity: 0;
+            pointer-events: none;
+            animation: selRing 1.5s ease-out infinite;
+        }
+        .device.tem-sel::after { animation-delay: 0.75s; }
+        @keyframes corePulse { 0%,100% { transform: scale(0.8); opacity: 0.6; } 50% { transform: scale(1.2); opacity: 1; } }
+        .device.ocupado { opacity: 0.5; filter: saturate(0.2); border-color: rgba(255,255,255,0.2); }
+        .device.ocupado::before, .device.ocupado::after { display: none; }
+
+        /* Legenda estilo vídeo */
+        .caption {
+            position: absolute; z-index: 6;
+            left: 50%; transform: translateX(-50%);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+            color: rgba(255,255,255,0.95);
+            text-shadow: 0 1px 0 #000, 0 0 2px #000, 0 0 8px rgba(0,0,0,0.9);
+            width: 94%; text-align: center;
+        }
+
+        /* Feixe de energia ao chamar (spinner 360°) */
+        .beam {
+            position: absolute; left: 50%;
+            width: 300px; height: 300px;
+            transform: translateX(-50%);
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0;
+            background:
+                conic-gradient(from 0deg, transparent 0deg, rgba(255,215,0,0.25) 70deg, rgba(255,90,181,0.55) 120deg, transparent 200deg),
+                radial-gradient(circle, rgba(255,215,0,0.12), transparent 65%);
+            z-index: 4;
+        }
+        .beam.ativo { opacity: 1; animation: beamSpin 0.9s ease-out; }
+        @keyframes beamSpin { from { transform: translateX(-50%) rotate(0deg) scale(0.7); } to { transform: translateX(-50%) rotate(360deg) scale(1.25); } }
+
+        .stage.spinning .ring-holo { border-style: solid; border-color: rgba(255,215,0,0.5); }
+
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed; top: 64px; left: 50%; transform: translateX(-50%);
+            background: linear-gradient(135deg, rgba(255,90,181,0.18), rgba(194,24,91,0.22));
+            border: 1px solid rgba(255,90,181,0.45);
+            color: #ffd9ee; padding: 10px 18px; border-radius: 8px;
+            font-family: 'Orbitron', sans-serif; font-size: 10px; letter-spacing: 0.08em;
+            text-transform: uppercase; text-align: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 90; max-width: 88%;
+            box-shadow: 0 0 30px rgba(255,90,181,0.25);
+        }
+        .toast.mostrar { opacity: 1; transform: translateX(-50%) translateY(6px); }
+
+        /* ===== OVERLAY DE CHAMADA (lado de quem chama) ===== */
+        .call-overlay {
+            position: fixed; inset: 0;
+            background:
+                radial-gradient(ellipse 90% 70% at 50% 40%, rgba(255,90,181,0.10), transparent 70%),
+                rgba(5,3,12,0.95);
+            display: none; align-items: center; justify-content: center;
+            z-index: 80; padding: 20px;
+            backdrop-filter: blur(8px);
+        }
+        .call-overlay.on { display: flex; animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .call-card {
+            position: relative;
+            width: 100%; max-width: 340px;
+            text-align: center;
+            color: #fff;
+        }
+        .call-hud { position: relative; width: 190px; height: 190px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; }
+        .call-hud .ring {
+            position: absolute; border-radius: 50%;
+            border: 2px solid rgba(255,90,181,0.8);
+            animation: anillo 1.5s ease-out infinite;
+        }
+        .call-hud .ring.r2 { animation-delay: 0.5s; }
+        .call-hud .ring.r3 { animation-delay: 1s; }
+        @keyframes anillo {
+            0% { width: 46px; height: 46px; opacity: 0.95; }
+            100% { width: 210px; height: 210px; opacity: 0; }
+        }
+        .call-hud .glyph {
+            position: relative; z-index: 2;
+            width: 120px; height: 120px; object-fit: contain;
+            filter: drop-shadow(0 0 16px rgba(255,255,255,0.85));
+            animation: glyphPulso 1.6s ease-in-out infinite;
+        }
+        @keyframes glyphPulso { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        .call-hud.ligado .ring { border-color: rgba(255,215,0,0.9); }
+        .call-hud.ligado .glyph { filter: drop-shadow(0 0 20px rgba(255,215,0,1)); animation: none; }
+        .call-de { font-family: 'Orbitron', sans-serif; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,190,225,0.8); }
+        .call-nome {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 26px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase;
+            margin: 6px 0 2px;
+        }
+        .call-status {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+            color: rgba(255,255,255,0.75);
+            min-height: 20px;
+        }
+        .call-status.ligado { color: #FFD700; text-shadow: 0 0 14px rgba(255,215,0,0.7); }
+        .call-sub { margin-top: 4px; font-size: 13px; color: rgba(255,255,255,0.5); min-height: 18px; }
+        .call-link-wrap { margin-top: 10px; }
+        .call-link {
+            display: inline-block;
+            font-family: 'Orbitron', sans-serif; font-size: 10px; letter-spacing: 0.1em;
+            color: #ffd9ee; text-decoration: none;
+            border: 1px dashed rgba(255,90,181,0.5); border-radius: 6px;
+            padding: 8px 14px; cursor: pointer; background: rgba(255,90,181,0.06);
+        }
+        .call-link:hover { background: rgba(255,90,181,0.14); }
+        .call-btns { display: flex; gap: 12px; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
+        .call-btns button {
+            font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800;
+            letter-spacing: 0.12em; text-transform: uppercase;
+            padding: 13px 22px; border-radius: 8px; cursor: pointer; border: none;
+        }
+        #call-enter {
+            background: linear-gradient(135deg, #ffd700, #e6a800); color: #1a1300;
+            box-shadow: 0 0 26px rgba(255,215,0,0.45);
+        }
+        #call-enter:disabled { opacity: 0.35; cursor: not-allowed; box-shadow: none; }
+        #call-cancel {
+            background: transparent; color: rgba(255,255,255,0.75);
+            border: 1px solid rgba(255,255,255,0.3) !important;
+        }
+        #call-cancel:hover { background: rgba(255,255,255,0.08); }
+
+        /* ===== MOBILE ===== */
+        @media (max-width: 600px) {
+            .icon { width: 62px; height: 62px; }
+            .device { width: 92px; height: 92px; }
+            .caption { font-size: 8px; }
+            .call-btn { padding: 12px 24px; font-size: 11px; }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>⚡ RODA DE INVOCAÇÃO</h1>
+    <header>
+        <h1>📡 Chamar Heróis</h1>
         <a href="index.html">VOLTAR</a>
-    </div>
-    <div class="counter" id="counter">1 / 20</div>
+    </header>
 
     <div class="scene" id="scene">
-        <div class="wheel" id="wheel"></div>
+        <div class="info" id="info">Toca num herói para o chamar</div>
+        <div class="stage" id="stage">
+            <div class="ring-holo" id="ring-holo"></div>
+            <div class="beam" id="beam"></div>
+        </div>
+
+        <div class="device" id="device">
+            <span class="core"></span>
+            <img class="glyph" id="device-glyph" alt="">
+        </div>
+
+        <div class="caption">Gosto quando diferentes heróis usam a nova funcionalidade ✨</div>
+        <button class="call-btn" id="call-btn" disabled>📡 Chamar</button>
     </div>
 
-    <div class="arrow left" id="arrow-left">‹</div>
-    <div class="arrow right" id="arrow-right">›</div>
+    <div class="toast" id="toast"></div>
 
-    <div class="info-panel">
-        <div class="info-name" id="info-name">Primal Force</div>
-        <div class="info-sub" id="info-sub">Arrasta ou usa as setas</div>
-        <div class="info-type" id="info-type"></div>
-        <div class="hint">Toca no robô da frente para invocar</div>
-    </div>
-
-    <div class="flash" id="flash"></div>
-    <div class="reveal" id="reveal">
-        <button class="reveal-close" id="rev-close">✕</button>
-        <div class="reveal-card">
-            <div class="reveal-ring">
-                <div class="reveal-avatar" id="rev-avatar"></div>
+    <div class="call-overlay" id="call-overlay">
+        <div class="call-card">
+            <div class="call-hud" id="call-hud">
+                <div class="ring"></div><div class="ring r2"></div><div class="ring r3"></div>
+                <img class="glyph" id="call-glyph" alt="">
             </div>
-            <div class="reveal-name" id="rev-name"></div>
-            <div class="reveal-ranger" id="rev-ranger"></div>
-            <div class="reveal-dino" id="rev-dino"></div>
-            <button class="reveal-btn" id="rev-btn">ENTRAR NO CHAT</button>
+            <div class="call-de" id="call-de">📡 A CHAMAR</div>
+            <div class="call-nome" id="call-nome">—</div>
+            <div class="call-status" id="call-status">A chamar...</div>
+            <div class="call-sub" id="call-sub"></div>
+            <div class="call-link-wrap" id="call-link-wrap"></div>
+            <div class="call-btns">
+                <button id="call-cancel">✕ Fechar</button>
+                <button id="call-enter" disabled>Entrar no chat</button>
+            </div>
         </div>
     </div>
 
     <script src="primalforce-robots.js"></script>
     <script>
-    (function() {
-        const wheelEl = document.getElementById('wheel');
-        const flashEl = document.getElementById('flash');
-        const revealEl = document.getElementById('reveal');
-        const infoName = document.getElementById('info-name');
-        const infoSub = document.getElementById('info-sub');
-        const infoType = document.getElementById('info-type');
-        const counterEl = document.getElementById('counter');
-
+    (function () {
         const allRobots = [...RANGERS_PRINCIPAIS, ...OUTROS_RANGERS];
         const total = allRobots.length;
-        const ANGLE_PER_ITEM = 360 / total;
-        const RING_RADIUS = 600;
+        const scene = document.getElementById('scene');
+        const stage = document.getElementById('stage');
+        const ringHolo = document.getElementById('ring-holo');
+        const info = document.getElementById('info');
+        const callBtn = document.getElementById('call-btn');
+        const device = document.getElementById('device');
+        const deviceGlyph = document.getElementById('device-glyph');
+        const toast = document.getElementById('toast');
+        const overlay = document.getElementById('call-overlay');
+        const callHud = document.getElementById('call-hud');
+        const callGlyph = document.getElementById('call-glyph');
+        const callDe = document.getElementById('call-de');
+        const callNome = document.getElementById('call-nome');
+        const callStatus = document.getElementById('call-status');
+        const callSub = document.getElementById('call-sub');
+        const callEnter = document.getElementById('call-enter');
+        const callCancel = document.getElementById('call-cancel');
+        const callLinkWrap = document.getElementById('call-link-wrap');
 
-        let rotationAngle = 0;
-        let targetAngle = 0;
-        let selectedIndex = 0;
-        let animating = false;
-        let animFrame = null;
+        const selecionados = new Set();
+        let cx = 0, cy = 0, R = 210, Ry = 72;
+        let rot = 0, vel = 0.006;
+        let aChamar = null;        // id do robô em chamada
+        let missionUrl = null;     // link do ranger.html
+        let pollTimer = null;
+        let movendo = false;
 
-        function getSelectedIndex(angle) {
-            return (((-angle / ANGLE_PER_ITEM) % total) + total) % total;
-        }
+        function glifoSrc(id) { return 'assets/symbols/' + id + '.png'; }
 
-        function build() {
-            wheelEl.innerHTML = '';
-            allRobots.forEach(function(id, i) {
+        // Pré-carrega glifos
+        allRobots.forEach(function (id) { const im = new Image(); im.src = glifoSrc(id); });
+
+        // ===== Anel de ícones =====
+        function construir() {
+            allRobots.forEach(function (id, i) {
                 const r = PRIMAL_FORCE[id];
-                var item = document.createElement('div');
-                item.className = 'wheel-item';
-                item.dataset.index = i;
-
-                var inner = document.createElement('div');
-                inner.className = 'wheel-item-inner';
-                inner.style.setProperty('--item-color', r.cor);
-
-                if (r.imagem) {
-                    var img = document.createElement('img');
-                    img.src = r.imagem;
-                    img.alt = r.nome;
-                    img.onerror = function() { img.remove(); inner.textContent = r.nome[0]; };
-                    inner.appendChild(img);
-                } else {
-                    inner.textContent = r.nome[0];
-                }
-
-                var pulse = document.createElement('div');
-                pulse.className = 'pulse-ring';
-                pulse.style.display = 'none';
-                item.appendChild(pulse);
-
-                (function(idx) {
-                    inner.addEventListener('click', function() {
-                        var si = getSelectedIndex(rotationAngle);
-                        if (idx === Math.round(si) && !animating) {
-                            invocar(idx);
-                        } else {
-                            goTo(idx);
-                        }
-                    });
-                })(i);
-
-                item.appendChild(inner);
-                wheelEl.appendChild(item);
+                const icon = document.createElement('button');
+                icon.type = 'button';
+                icon.className = 'icon';
+                icon.dataset.id = id;
+                icon.style.setProperty('--cor', r.cor);
+                icon.setAttribute('aria-label', 'Chamar ' + r.nome);
+                icon.title = r.nome;
+                const im = document.createElement('img');
+                im.className = 'sym';
+                im.src = glifoSrc(id);
+                im.alt = '';
+                icon.appendChild(im);
+                icon.style.animationDelay = (i * 0.05) + 's';
+                icon.addEventListener('click', function (e) {
+                    if (overlay.classList.contains('on')) return;
+                    if (icon.classList.contains('ocupado')) return;
+                    if (movendo) { movendo = false; return; } // foi arrasto, não clique
+                    if (selecionados.has(id)) selecionados.delete(id);
+                    else selecionados.add(id);
+                    icon.classList.toggle('selecionado', selecionados.has(id));
+                    atualizarEcrã();
+                    atualizarInfo();
+                });
+                stage.appendChild(icon);
             });
-            render();
+            layout();
         }
 
-        function render() {
-            var items = wheelEl.querySelectorAll('.wheel-item');
-            var si = getSelectedIndex(rotationAngle);
-            selectedIndex = Math.round(si);
+        function layout() {
+            const rect = scene.getBoundingClientRect();
+            cx = rect.width / 2;
+            cy = rect.height * 0.38;
+            R = Math.min(rect.width * 0.34, 235);
+            Ry = R * 0.31;
 
-            items.forEach(function(item, i) {
-                var angleDeg = ANGLE_PER_ITEM * i + rotationAngle;
-                var angleRad = angleDeg * Math.PI / 180;
+            ringHolo.style.width = (R * 2) + 'px';
+            ringHolo.style.height = (Ry * 2) + 'px';
+            ringHolo.style.left = cx + 'px';
+            ringHolo.style.top = cy + 'px';
 
-                var x = Math.sin(angleRad) * RING_RADIUS;
-                var z = Math.cos(angleRad) * RING_RADIUS;
-
-                var angleFromFront = Math.abs(((angleDeg % 360) + 540) % 360 - 180);
-                var depthFactor = angleFromFront / 180;
-
-                var scale = 1.5 - depthFactor * 0.5;
-                var brightness = 1 - depthFactor * 0.8;
-                var yOffset = -(1 - depthFactor) * 80;
-                var rotateY = depthFactor * 85;
-
-                item.style.transform = 'translate3d(' + x + 'px, ' + yOffset + 'px, ' + z + 'px) scale(' + scale + ') rotateY(' + rotateY + 'deg)';
-                item.style.opacity = 1;
-                item.style.filter = 'brightness(' + brightness + ')';
-
-                var isSelected = i === selectedIndex;
-                item.classList.toggle('selected', isSelected);
-
-                var pulseEl = item.querySelector('.pulse-ring');
-                pulseEl.style.display = isSelected ? 'block' : 'none';
+            const icons = stage.querySelectorAll('.icon');
+            icons.forEach(function (icon, i) {
+                const a = rot + (i / total) * Math.PI * 2;
+                const sin = Math.sin(a);
+                const front = (sin + 1) / 2;
+                icon.style.left = (cx + Math.cos(a) * R) + 'px';
+                icon.style.top = (cy + sin * Ry) + 'px';
+                icon.style.zIndex = Math.round(100 + front * 100);
+                icon.style.opacity = String(0.5 + front * 0.5);
+                icon.style.transform = 'translate(-50%,-50%) scale(' + (0.74 + front * 0.46).toFixed(3) + ')';
             });
-
-            var r = PRIMAL_FORCE[allRobots[selectedIndex]];
-            infoName.textContent = r.nome;
-            infoName.style.color = r.cor;
-            infoSub.textContent = 'Ranger: ' + r.ranger + ' \u2022 ' + r.dino;
-            infoType.textContent = r.supportType.toUpperCase();
-            counterEl.textContent = (selectedIndex + 1) + ' / ' + total;
         }
 
-        function goTo(index, duration) {
-            if (animating) return;
-            duration = duration || 500;
+        window.addEventListener('resize', layout);
 
-            targetAngle = -index * ANGLE_PER_ITEM;
+        // Rotação lenta contínua
+        setInterval(function () {
+            if (overlay.classList.contains('on')) return;
+            rot += vel;
+            layout();
+        }, 60);
 
-            var diff = targetAngle - rotationAngle;
-            diff = ((diff % 360) + 540) % 360 - 180;
+        // Arrastar para rodar (como girar o anel)
+        let arrastando = false, ultX = 0, inicioX = 0;
+        stage.addEventListener('pointerdown', function (e) {
+            if (overlay.classList.contains('on')) return;
+            arrastando = true;
+            movendo = false;
+            inicioX = ultX = e.clientX;
+        });
+        window.addEventListener('pointermove', function (e) {
+            if (!arrastando) return;
+            const dx = e.clientX - ultX;
+            if (Math.abs(e.clientX - inicioX) > 6) movendo = true;
+            rot += dx / R;
+            vel = dx * 0.00035;
+            ultX = e.clientX;
+            layout();
+        });
+        window.addEventListener('pointerup', function () { arrastando = false; });
 
-            var startAngle = rotationAngle;
-            var endAngle = rotationAngle + diff;
-            var t0 = performance.now();
-
-            animating = true;
-
-            function anim(t) {
-                var p = Math.min((t - t0) / duration, 1);
-                var ease = 1 - Math.pow(1 - p, 3);
-                rotationAngle = startAngle + diff * ease;
-                render();
-                if (p < 1) {
-                    animFrame = requestAnimationFrame(anim);
-                } else {
-                    rotationAngle = endAngle;
-                    animating = false;
-                    render();
-                }
+        // ===== Ecrã do dispositivo (símbolo selecionado) =====
+        function atualizarEcrã() {
+            const primeiro = allRobots.find(function (id) { return selecionados.has(id); });
+            if (primeiro) {
+                const r = PRIMAL_FORCE[primeiro];
+                device.classList.add('tem-sel');
+                device.style.setProperty('--cor', r.cor);
+                deviceGlyph.src = glifoSrc(primeiro);
+            } else {
+                device.classList.remove('tem-sel');
+                deviceGlyph.removeAttribute('src');
             }
-
-            if (animFrame) cancelAnimationFrame(animFrame);
-            animFrame = requestAnimationFrame(anim);
         }
 
-        document.getElementById('arrow-left').addEventListener('click', function() {
-            goTo((selectedIndex - 1 + total) % total);
-        });
-        document.getElementById('arrow-right').addEventListener('click', function() {
-            goTo((selectedIndex + 1) % total);
+        function atualizarInfo() {
+            const n = selecionados.size;
+            if (n === 0) {
+                info.textContent = 'Toca num herói para o chamar';
+                info.style.color = 'rgba(255,190,225,0.9)';
+            } else if (n === 1) {
+                const r = PRIMAL_FORCE[allRobots.find(function (id) { return selecionados.has(id); })];
+                info.textContent = r.nome + ' • ' + r.ranger;
+                info.style.color = '#ffd9ee';
+            } else {
+                info.textContent = n + ' heróis selecionados';
+                info.style.color = '#ffd9ee';
+            }
+            callBtn.disabled = n === 0 || aChamar !== null;
+        }
+
+        function mostrarToast(texto) {
+            toast.textContent = texto;
+            toast.classList.add('mostrar');
+            clearTimeout(window._toastT);
+            window._toastT = setTimeout(function () { toast.classList.remove('mostrar'); }, 2600);
+        }
+
+        // ===== Som (WebAudio) =====
+        function beep(freq, dur, quando) {
+            try {
+                const Ctx = window.AudioContext || window.webkitAudioContext;
+                if (!Ctx) return;
+                if (!window._callCtx) window._callCtx = new Ctx();
+                const ctx = window._callCtx;
+                if (ctx.state === 'suspended') ctx.resume().catch(function () {});
+                const t0 = ctx.currentTime + (quando || 0);
+                const o = ctx.createOscillator();
+                const g = ctx.createGain();
+                o.type = 'sine';
+                o.frequency.value = freq;
+                g.gain.setValueAtTime(0.001, t0);
+                g.gain.exponentialRampToValueAtTime(0.16, t0 + 0.02);
+                g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+                o.connect(g); g.connect(ctx.destination);
+                o.start(t0); o.stop(t0 + dur + 0.05);
+            } catch (e) { /* silencioso */ }
+        }
+
+        // ===== CHAMAR: gira 360° como a Ladybug e envia coordenadas =====
+        callBtn.addEventListener('click', function () {
+            const id = allRobots.find(function (x) { return selecionados.has(x); });
+            if (!id || aChamar !== null) return;
+            aChamar = id;
+            const r = PRIMAL_FORCE[id];
+
+            callBtn.disabled = true;
+            callBtn.textContent = 'A chamar...';
+            if (navigator.vibrate) { try { navigator.vibrate([40, 30, 40, 30, 140]); } catch (e) {} }
+            beep(880, 0.1, 0);
+            beep(1174, 0.1, 0.12);
+
+            // Spinner de 360° (como o vídeo 2)
+            stage.classList.add('spinning');
+            const beam = document.getElementById('beam');
+            beam.classList.remove('ativo');
+            void beam.offsetWidth;
+            beam.classList.add('ativo');
+            let spin = 0;
+            const spinId = setInterval(function () {
+                spin += 0.12;
+                rot += spin;
+                layout();
+                if (spin > 0.55) {
+                    clearInterval(spinId);
+                    stage.classList.remove('spinning');
+                    enviarChamada(id, r);
+                }
+            }, 33);
         });
 
-        document.addEventListener('keydown', function(e) {
-            if (revealEl.classList.contains('on')) {
-                if (e.key === 'Escape') closeReveal();
+        function enviarChamada(id, r) {
+            mostrarToast('📡 Coordenadas enviadas para ' + r.nome + '!');
+            const data = { robot: id, person: r.ranger, mode: 'call', timeoutMinutes: 30 };
+            fetch('/distribute', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).then(function (resp) {
+                return resp.json().then(function (d) { return { ok: resp.ok, d: d }; });
+            }).then(function (res) {
+                if (!res.ok) {
+                    // Servidor respondeu (ex.: robô já em missão) — não simular ligação
+                    aChamar = null;
+                    mostrarToast('⚠️ ' + (res.d && res.d.error ? res.d.error : 'Erro ao chamar'));
+                    scene.querySelectorAll('.icon').forEach(function (el) { if (el.dataset.id === id) el.classList.add('ocupado'); });
+                    fecharChamadaVisual();
+                    return;
+                }
+                missionUrl = res.d.url;
+                abrirChamada(id, true);
+            }).catch(function () {
+                // Sem servidor (demo local): simula ligação direta
+                missionUrl = null;
+                abrirChamada(id, false);
+            });
+        }
+
+        function abrirChamada(id, real) {
+            const r = PRIMAL_FORCE[id];
+            overlay.classList.add('on');
+            callHud.classList.remove('ligado');
+            callDe.textContent = '📡 A CHAMAR';
+            callDe.style.color = '';
+            callGlyph.src = glifoSrc(id);
+            callNome.textContent = r.nome + ' • ' + r.ranger;
+            callNome.style.color = r.cor;
+            callStatus.textContent = 'A chamar ' + r.nome + '...';
+            callStatus.classList.remove('ligado');
+            callSub.textContent = real ? 'Vibração e coordenadas enviadas para o dispositivo do Ranger' : 'A chamar...';
+            callEnter.disabled = true;
+            callEnter.textContent = 'Entrar no chat';
+            callLinkWrap.innerHTML = '';
+            beep(780, 0.22, 0);
+            beep(780, 0.22, 0.5);
+            beep(780, 0.22, 1.0);
+
+            if (!real) {
+                // Demo offline: liga sozinho pouco depois
+                setTimeout(function () { ligado(id); }, 1600);
                 return;
             }
-            if (e.key === 'ArrowLeft') goTo((selectedIndex - 1 + total) % total);
-            else if (e.key === 'ArrowRight') goTo((selectedIndex + 1) % total);
-            else if (e.key === 'Enter' && !animating) invocar(selectedIndex);
+            if (navigator.vibrate) { try { navigator.vibrate([100, 80, 100]); } catch (e) {} }
+            // Link para abrir o ecrã do Ranger noutro dispositivo/aba
+            const link = document.createElement('a');
+            link.className = 'call-link';
+            link.href = missionUrl;
+            link.target = '_blank';
+            link.rel = 'noopener';
+            link.textContent = '📱 Abrir no telemóvel do Ranger';
+            callLinkWrap.appendChild(link);
+            callSub.textContent = 'Aguardar que ' + r.ranger + ' atenda no dispositivo...';
+
+            clearInterval(pollTimer);
+            pollTimer = setInterval(function () { verificarEstado(id); }, 2000);
+            verificarEstado(id);
+        }
+
+        function verificarEstado(id) {
+            fetch('/robot-status').then(function (resp) { return resp.json(); }).then(function (d) {
+                const st = (d.status || {})[id];
+                if (!st) {
+                    // Robô deixou de existir: chamada recusada ou expirada
+                    recusado(id);
+                    return;
+                }
+                if (st.online) {
+                    ligado(id);
+                }
+            }).catch(function () { /* servidor caiu entretanto */ });
+        }
+
+        function ligado(id) {
+            clearInterval(pollTimer);
+            const r = PRIMAL_FORCE[id];
+            callHud.classList.add('ligado');
+            callDe.textContent = '⚡ CHAMADA LIGADA';
+            callDe.style.color = '#FFD700';
+            callStatus.textContent = 'Ligado • Transformado ⚡';
+            callStatus.classList.add('ligado');
+            callSub.textContent = 'Coordenadas recebidas • Missão atribuída a ' + r.ranger;
+            callEnter.disabled = false;
+            beep(659, 0.12, 0);
+            beep(988, 0.12, 0.12);
+            beep(1318, 0.3, 0.24);
+            if (navigator.vibrate) { try { navigator.vibrate([120, 60, 200]); } catch (e) {} }
+            if (missionUrl) {
+                const link = document.createElement('a');
+                link.className = 'call-link';
+                link.href = missionUrl;
+                link.target = '_blank';
+                link.rel = 'noopener';
+                link.textContent = '📱 Missão ativa — abrir no Ranger';
+                callLinkWrap.innerHTML = '';
+                callLinkWrap.appendChild(link);
+            }
+        }
+
+        function recusado(id) {
+            if (!aChamar) return;
+            clearInterval(pollTimer);
+            const r = PRIMAL_FORCE[id];
+            aChamar = null;
+            callDe.textContent = '📵 SEM RESPOSTA';
+            callDe.style.color = 'rgba(255,120,140,0.9)';
+            callStatus.textContent = r.nome + ' não atendeu';
+            callStatus.classList.remove('ligado');
+            callSub.textContent = 'Devolvido à Morphin Grid. Podes chamar outro herói.';
+            callEnter.disabled = true;
+            callEnter.textContent = 'Entrar no chat';
+            callLinkWrap.innerHTML = '';
+            beep(400, 0.3, 0);
+            beep(300, 0.4, 0.3);
+            if (navigator.vibrate) { try { navigator.vibrate([60, 40, 60]); } catch (e) {} }
+            scene.querySelectorAll('.icon').forEach(function (el) {
+                el.classList.remove('chamando');
+                if (el.dataset.id === id) el.classList.add('ocupado');
+            });
+            fecharChamadaVisual();
+        }
+
+        function fecharChamadaVisual() {
+            // Liga apenas o botão de novo se houver seleção restante
+            callBtn.textContent = '📡 Chamar';
+            const restantes = allRobots.some(function (x) { return selecionados.has(x); });
+            callBtn.disabled = !restantes || aChamar !== null;
+        }
+
+        callEnter.addEventListener('click', function () {
+            const primeiro = allRobots.find(function (id) { return selecionados.has(id); });
+            if (!primeiro) return;
+            try { localStorage.setItem('summonedRobot', primeiro); } catch (e) {}
+            window.location.href = 'index.html?robot=' + primeiro;
         });
 
-        var dragging = false;
-        var dragStartX = 0;
-        var dragStartAngle = 0;
-        var lastX = 0;
-        var lastT = 0;
-        var dragVel = 0;
-
-        function onDragStart(x) {
-            if (animating && animFrame) {
-                cancelAnimationFrame(animFrame);
-                animating = false;
+        callCancel.addEventListener('click', function () {
+            if (!callEnter.disabled) {
+                // Chamada ligada — fechar volta à roda sem desfazer a missão
+                overlay.classList.remove('on');
+                clearInterval(pollTimer);
+                aChamar = null;
+                callBtn.textContent = '📡 Chamar';
+                atualizarInfo();
+                return;
             }
-            dragging = true;
-            dragStartX = x;
-            dragStartAngle = rotationAngle;
-            lastX = x;
-            lastT = performance.now();
-            dragVel = 0;
-        }
+            clearInterval(pollTimer);
+            if (aChamar) {
+                // Ainda a tocar: tenta parar a chamada no servidor
+                const id = aChamar;
+                aChamar = null;
+                try { fetch('/revoke', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ robot: id }) }); } catch (e) {}
+                try { fetch('/ranger/decline', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: missionUrl ? missionUrl.split('code=')[1] : '' }) }); } catch (e) {}
+            }
+            overlay.classList.remove('on');
+            callBtn.textContent = '📡 Chamar';
+            atualizarInfo();
+        });
 
-        function onDragMove(x) {
-            if (!dragging) return;
-            var dx = x - dragStartX;
-            rotationAngle = dragStartAngle + dx * 0.5;
-            var now = performance.now();
-            var dt = now - lastT;
-            if (dt > 0) dragVel = (x - lastX) / dt;
-            lastX = x;
-            lastT = now;
-            render();
-        }
-
-        function onDragEnd() {
-            if (!dragging) return;
-            dragging = false;
-            var idx;
-            if (Math.abs(dragVel) > 0.3) {
-                var projected = rotationAngle - dragVel * 300;
-                idx = Math.round(-projected / ANGLE_PER_ITEM);
+        // Posições estáticas calculadas no resize
+        function posicionarEstaticos() {
+            const rect = scene.getBoundingClientRect();
+            const topInfo = document.querySelector('.info');
+            const caption = document.querySelector('.caption');
+            const btn = document.querySelector('.call-btn');
+            const dev = document.querySelector('.device');
+            const h = rect.height;
+            const w = rect.width;
+            if (h < 520) { // ecrã pequeno: tudo mais junto
+                dev.style.bottom = '14px';
+                dev.style.left = '50%';
+                btn.style.bottom = '140px';
+                caption.style.bottom = '118px';
+                topInfo.style.top = '4px';
             } else {
-                idx = Math.round(-rotationAngle / ANGLE_PER_ITEM);
+                dev.style.bottom = '22px';
+                dev.style.left = '50%';
+                btn.style.bottom = '152px';
+                caption.style.bottom = '122px';
+                topInfo.style.top = '6px';
             }
-            idx = ((idx % total) + total) % total;
-            goTo(idx);
-            dragVel = 0;
         }
+        window.addEventListener('resize', posicionarEstaticos);
 
-        wheelEl.addEventListener('mousedown', function(e) {
-            e.preventDefault();
-            onDragStart(e.clientX);
-        });
-        document.addEventListener('mousemove', function(e) { onDragMove(e.clientX); });
-        document.addEventListener('mouseup', onDragEnd);
-
-        wheelEl.addEventListener('touchstart', function(e) {
-            onDragStart(e.touches[0].clientX);
-        }, { passive: true });
-        document.addEventListener('touchmove', function(e) {
-            if (!dragging) return;
-            e.preventDefault();
-            onDragMove(e.touches[0].clientX);
-        }, { passive: false });
-        document.addEventListener('touchend', onDragEnd);
-
-        var invocando = false;
-        function invocar(idx) {
-            if (invocando) return;
-            invocando = true;
-            var r = PRIMAL_FORCE[allRobots[idx]];
-
-            flashEl.style.background = r.cor;
-            flashEl.classList.add('on');
-            setTimeout(function() { flashEl.classList.remove('on'); }, 500);
-
-            setTimeout(function() {
-                var av = document.getElementById('rev-avatar');
-                av.style.background = r.cor;
-                av.innerHTML = r.imagem
-                    ? '<img src="' + r.imagem + '" alt="" onerror="this.parentElement.innerHTML=\'' + r.nome[0] + '\'">'
-                    : r.nome[0];
-                document.getElementById('rev-name').textContent = r.nome;
-                document.getElementById('rev-name').style.color = r.cor;
-                document.getElementById('rev-ranger').textContent = 'Ranger: ' + r.ranger;
-                document.getElementById('rev-dino').textContent = r.supportType.toUpperCase() + ' \u2022 ' + r.dino;
-                document.getElementById('rev-btn').style.background = r.cor;
-                document.getElementById('rev-btn').style.boxShadow = '0 4px 20px ' + r.cor;
-                document.querySelector('.reveal-ring').style.setProperty('--rev-color', r.cor);
-                revealEl.classList.add('on');
-                document.getElementById('rev-btn').onclick = function() {
-                    localStorage.setItem('summonedRobot', allRobots[idx]);
-                    window.location.href = 'index.html?robot=' + allRobots[idx];
-                };
-            }, 350);
-        }
-
-        function closeReveal() {
-            revealEl.classList.remove('on');
-            invocando = false;
-        }
-        document.getElementById('rev-close').addEventListener('click', closeReveal);
-        revealEl.addEventListener('click', function(e) {
-            if (e.target === revealEl) closeReveal();
-        });
-
-        build();
+        construir();
+        atualizarInfo();
+        atualizarEcrã();
+        posicionarEstaticos();
     })();
     </script>
 </body>
