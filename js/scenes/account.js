@@ -33,12 +33,15 @@ const AccountScene = {
     // Feedback visual simples enquanto o jogador escreve
     emailInput.addEventListener('input', () => { errorEl.textContent = ''; });
     ageInput.addEventListener('input', () => { errorEl.textContent = ''; });
+
+    document.getElementById('btn-back-account').onclick = () => App.goTo('perfil');
   },
 
   show() {
     document.getElementById('account-email').value = '';
     document.getElementById('account-age').value = '';
     document.getElementById('account-error').textContent = '';
+    document.getElementById('btn-back-account').style.display = Account.exists() ? '' : 'none';
     setTimeout(() => document.getElementById('account-email').focus(), 100);
   }
 };

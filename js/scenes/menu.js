@@ -6,7 +6,7 @@ const MenuScene = {
     document.getElementById('btn-trofeus').onclick = () => App.goTo('trophies');
     document.getElementById('btn-passe').onclick   = () => App.goTo('battlepass');
     document.getElementById('btn-missoes').onclick = () => App.goTo('missions');
-    document.getElementById('btn-perfil').onclick  = () => alert('Perfil — em breve!');
+    document.getElementById('btn-perfil').onclick  = () => App.goTo('perfil');
     document.getElementById('btn-loja').onclick    = () => App.goTo('shop');
     document.getElementById('btn-criar').onclick   = () => App.goTo('creator');
     document.getElementById('btn-grimorio').onclick = () => window.open('grimorio.html', '_blank');

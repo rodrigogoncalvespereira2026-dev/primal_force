@@ -12,7 +12,7 @@
   <meta name="theme-color" content="#04080a">
   <link rel="apple-touch-icon" href="icon-192.svg">
   <title>Power Rangers Primal Force</title>
-  <link rel="stylesheet" href="css/style.css?v=21">
+  <link rel="stylesheet" href="css/style.css?v=22">
 <script src="vendor/three.min.js"
         onerror="document.write('<script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js&quot;><\/script>')"></script>
 <script src="vendor/GLTFLoader.js"
@@ -225,6 +225,15 @@
       <h1>MISSÕES</h1>
     </div>
     <div id="missions-content" class="dm-list"></div>
+  </div>
+
+  <!-- ── PERFIL ── -->
+  <div id="screen-perfil" class="screen">
+    <div class="select-header">
+      <button class="back-btn" id="btn-back-perfil">&#8592; Voltar</button>
+      <h1>PERFIL</h1>
+    </div>
+    <div id="perfil-content" class="pf-list"></div>
   </div>
 
   <!-- ── PASSE DE BATALHA ── -->
@@ -602,6 +611,7 @@
   <!-- ── CRIAÇÃO DE CONTA ── -->
   <div id="screen-account" class="screen">
     <div class="menu-bg"></div>
+    <button class="back-btn account-back" id="btn-back-account">&#8592; Voltar</button>
     <div class="account-box">
       <div class="logo-title">
         <div class="logo-sub">POWER RANGERS</div>
@@ -682,11 +692,12 @@
 <script src="js/entities/particle.js?v=14"></script>
 <script src="js/entities/pickup.js?v=14"></script>
 <script src="js/ui/hud.js?v=15"></script>
-<script src="js/scenes/menu.js?v=16"></script>
+<script src="js/scenes/menu.js?v=17"></script>
 <script src="js/scenes/select.js?v=15"></script>
 <script src="js/scenes/dialog.js?v=14"></script>
 <script src="js/scenes/worldmap.js?v=15"></script>
 <script src="js/scenes/missions.js?v=1"></script>
+<script src="js/scenes/perfil.js?v=1"></script>
 <script src="js/scenes/trophies.js?v=14"></script>
 <script src="js/scenes/battlepass.js?v=15"></script>
 <script src="js/scenes/primordial.js?v=14"></script>
@@ -698,7 +709,7 @@
 <script src="js/data/rangerparts.js?v=1"></script>
 <script src="js/scenes/creator.js?v=1"></script>
 <script src="js/scenes/game.js?v=16"></script>
-<script src="js/scenes/account.js?v=1"></script>
-<script src="js/main.js?v=20"></script>
+<script src="js/scenes/account.js?v=2"></script>
+<script src="js/main.js?v=21"></script>
 </body>
 </html>

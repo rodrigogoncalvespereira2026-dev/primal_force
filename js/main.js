@@ -10,6 +10,7 @@ const App = {
     ranger:      'screen-ranger',
     worldmap:    'screen-worldmap',
     missions:    'screen-missoes',
+    perfil:      'screen-perfil',
     trophies:    'screen-trophies',
     battlepass:  'screen-battlepass',
     gota:        'screen-gota',
@@ -39,6 +40,7 @@ const App = {
     }
     if (name === 'worldmap') WorldMap.show();
     if (name === 'missions') MissionsScene.show();
+    if (name === 'perfil') PerfilScene.show();
     if (name === 'trophies') TrophiesScene.show();
     if (name === 'battlepass') BattlePassScene.show();
     if (name === 'gota') GotaScene.show();
@@ -331,6 +333,7 @@ const App = {
     SelectScene.init();
     TrophiesScene.init();
     MissionsScene.init();
+    PerfilScene.init();
     BattlePassScene.init();
     GotaScene.init();
     ShopScene.init();

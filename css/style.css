@@ -1629,6 +1629,47 @@ body {
 .is-mobile .dm-card { grid-template-columns: 1fr; gap: 8px; text-align: left; }
 .is-mobile .dm-title { font-size: 17px; }
 
+/* Perfil */
+#screen-perfil { background: #04060a; padding: 20px; gap: 16px; overflow-y: auto; }
+.pf-list { display: flex; flex-direction: column; gap: 14px; padding-bottom: 24px; }
+.pf-card {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px; padding: 16px;
+}
+.pf-card-title { font-size: 11px; letter-spacing: 2px; color: rgba(255,255,255,0.45); margin-bottom: 12px; }
+.pf-head { display: flex; gap: 14px; align-items: center; }
+.pf-avatar {
+  width: 64px; height: 64px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(180deg,#e24b4a,#2a1e3d);
+  border: 2px solid #fac775; display: flex; align-items: center; justify-content: center;
+  font-size: 30px;
+}
+.pf-id { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.pf-email { font-size: 15px; font-weight: 800; word-break: break-all; }
+.pf-meta { font-size: 12px; color: rgba(255,255,255,0.5); }
+.pf-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.pf-stat {
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 6px;
+}
+.pf-stat-label { font-size: 10px; letter-spacing: 1px; color: rgba(255,255,255,0.45); }
+.pf-stat-value { font-size: 20px; font-weight: 900; color: #fac775; }
+.pf-rows { display: flex; flex-direction: column; gap: 8px; }
+.pf-row { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; }
+.pf-row span:first-child { color: rgba(255,255,255,0.55); }
+.pf-row span:last-child { font-weight: 700; text-align: right; }
+.pf-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.pf-btn {
+  border: none; border-radius: 6px; padding: 10px 14px; cursor: pointer;
+  font-size: 11px; font-weight: 800; letter-spacing: 1px;
+  background: rgba(255,255,255,0.1); color: #fff;
+}
+.pf-btn:hover { background: rgba(255,255,255,0.18); }
+.pf-btn.danger { background: rgba(226,75,74,0.2); color: #ff8a8a; border: 1px solid rgba(226,75,74,0.5); }
+.account-back { position: absolute; top: 20px; left: 20px; z-index: 3; }
+.is-mobile #screen-perfil { padding: 10px; gap: 10px; }
+.is-mobile .pf-stats { grid-template-columns: repeat(2, 1fr); }
+
 /* Trophy header */
 .trophy-header { padding: 16px 0 0; flex-shrink:0; }
 .trophy-count { font-size: 28px; font-weight:900; color:#fac775; margin-bottom:12px; }
