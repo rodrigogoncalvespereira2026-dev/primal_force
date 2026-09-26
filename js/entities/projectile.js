@@ -131,6 +131,7 @@ class Pickup {
       if (this.type === 'power') { player.power = Math.min(player.maxPower, player.power + 35); game.showMsg('+35 PODER', 40); }
       if (this.type === 'score') { game.score += 200; game.updateScoreEl(); game.showMsg('+200 PTS', 40); }
       window.sfx && sfx(this.type === 'score' ? 'coin' : 'pickup');
+      window.DailyMissions && DailyMissions.track('pickups');
       this.dead = true;
     }
   }

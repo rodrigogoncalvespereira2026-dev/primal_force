@@ -49,6 +49,7 @@ const GameScene = {
     else if (r<0.55) this.pickups.push(new Pickup(e.x,e.y,'score'));
     this.spawnParticles(e.x,e.y,e.color,20);
     window.sfx && sfx('kill');
+    window.DailyMissions && DailyMissions.track('kills');
     WaveSystem.enemiesLeft = Math.max(0, WaveSystem.enemiesLeft - 1);
     this._updateWaveHUD();
     Engine3D.shake(1.5);
@@ -100,6 +101,7 @@ const GameScene = {
     if (boss.mesh3d) { this._entityGroup.remove(boss.mesh3d); boss.mesh3d = null; }
     Engine3D.shake(8);
     window.sfx && sfx('explode');
+    window.DailyMissions && DailyMissions.track('boss');
 
     const defeatKey = boss.typeKey + '_defeat';
     const lines = Story.dialogues[defeatKey];
@@ -117,6 +119,7 @@ const GameScene = {
     if (App.currentZone) WorldMap.completeMission(App.currentZone.id);
     this._missionRewards = { coins: coinsEarned, trophies: trophiesEarned };
     this._showGameoverData('🏆 VITÓRIA!', '— BOSS DERROTADO!');
+    window.DailyMissions && DailyMissions.track('missions');
     window.sfx && sfx('victory');
     this._tryPrimordial({ victory: true, isBoss: true });
   },
@@ -138,6 +141,7 @@ const GameScene = {
     this.spawnParticles(this.player.x, this.player.y, '#fac775', 60);
     this._missionRewards = { coins: coinsEarned, trophies: trophiesEarned };
     this._showGameoverData('🏆 VITÓRIA!', '— MISSÃO COMPLETA!');
+    window.DailyMissions && DailyMissions.track('missions');
     window.sfx && sfx('victory');
     this._tryPrimordial({ victory: true, isBoss: false });
   },
@@ -165,6 +169,7 @@ const GameScene = {
     Progression.addBattlePassXP(50 + waveNum * 10);
     this.showMsg('ONDA ' + waveNum + ' COMPLETA! +' + trophiesEarned + ' 🏆 +' + coinsEarned + ' ' + COIN_SVG, 180);
     window.sfx && sfx('wave');
+    window.DailyMissions && DailyMissions.track('waves');
     this.spawnParticles(this.player.x, this.player.y, '#fac775', 40);
     this._updateWaveHUD();
   },

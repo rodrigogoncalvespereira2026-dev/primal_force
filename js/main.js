@@ -9,6 +9,7 @@ const App = {
     select:      'screen-select',
     ranger:      'screen-ranger',
     worldmap:    'screen-worldmap',
+    missions:    'screen-missoes',
     trophies:    'screen-trophies',
     battlepass:  'screen-battlepass',
     gota:        'screen-gota',
@@ -37,6 +38,7 @@ const App = {
       document.getElementById('menu-gems').textContent     = Progression.data.gems;
     }
     if (name === 'worldmap') WorldMap.show();
+    if (name === 'missions') MissionsScene.show();
     if (name === 'trophies') TrophiesScene.show();
     if (name === 'battlepass') BattlePassScene.show();
     if (name === 'gota') GotaScene.show();
@@ -322,11 +324,13 @@ const App = {
     }
     Progression.load();
     WorldMap.load();
+    if (typeof DailyMissions !== 'undefined') DailyMissions.load();
     if (typeof AudioFX !== 'undefined') AudioFX.init();
     Input.init();
     MenuScene.init();
     SelectScene.init();
     TrophiesScene.init();
+    MissionsScene.init();
     BattlePassScene.init();
     GotaScene.init();
     ShopScene.init();

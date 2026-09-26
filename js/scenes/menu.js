@@ -5,7 +5,7 @@ const MenuScene = {
     document.getElementById('btn-mundo').onclick   = () => App.goTo('worldmap');
     document.getElementById('btn-trofeus').onclick = () => App.goTo('trophies');
     document.getElementById('btn-passe').onclick   = () => App.goTo('battlepass');
-    document.getElementById('btn-missoes').onclick = () => alert('Missões — em breve!');
+    document.getElementById('btn-missoes').onclick = () => App.goTo('missions');
     document.getElementById('btn-perfil').onclick  = () => alert('Perfil — em breve!');
     document.getElementById('btn-loja').onclick    = () => App.goTo('shop');
     document.getElementById('btn-criar').onclick   = () => App.goTo('creator');

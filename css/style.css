@@ -1598,6 +1598,36 @@ body {
 /* ── TROPHIES SCREEN ── */
 #screen-trophies { background: #04060a; padding: 20px; gap: 16px; }
 #screen-battlepass { background: #04060a; padding: 20px; gap: 16px; }
+#screen-missoes { background: #04060a; padding: 20px; gap: 16px; overflow-y: auto; }
+
+/* Missões diárias */
+.dm-list { display: flex; flex-direction: column; gap: 12px; padding-bottom: 24px; }
+.dm-header { display: flex; flex-direction: column; gap: 6px; padding-top: 8px; }
+.dm-title { font-size: 22px; font-weight: 900; letter-spacing: 4px; color: #fac775; }
+.dm-sub { font-size: 12px; color: rgba(255,255,255,0.45); letter-spacing: 1px; }
+.dm-card {
+  display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 14px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px; padding: 14px 16px;
+}
+.dm-card.claimed { opacity: 0.55; }
+.dm-card.claimable { border-color: #fac775; animation: bpPulse 1.6s ease-in-out infinite; }
+.dm-main { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.dm-card-title { font-size: 14px; font-weight: 700; }
+.dm-bar { height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; max-width: 340px; }
+.dm-fill { height: 100%; background: linear-gradient(90deg,#fac775,#e24b4a); border-radius: 4px; transition: width 0.3s; }
+.dm-progress { font-size: 11px; color: rgba(255,255,255,0.5); }
+.dm-reward { font-size: 13px; font-weight: 700; color: #fac775; white-space: nowrap; }
+.dm-state { font-size: 11px; color: rgba(255,255,255,0.4); white-space: nowrap; }
+.dm-claim {
+  border: none; border-radius: 6px; cursor: pointer;
+  background: linear-gradient(180deg,#ffd93e,#f5a623); color: #1a1a2e;
+  font-size: 11px; font-weight: 800; letter-spacing: 1px; padding: 8px 12px;
+}
+.dm-claim:hover { filter: brightness(1.1); }
+.is-mobile #screen-missoes { padding: 10px; gap: 10px; }
+.is-mobile .dm-card { grid-template-columns: 1fr; gap: 8px; text-align: left; }
+.is-mobile .dm-title { font-size: 17px; }
 
 /* Trophy header */
 .trophy-header { padding: 16px 0 0; flex-shrink:0; }
