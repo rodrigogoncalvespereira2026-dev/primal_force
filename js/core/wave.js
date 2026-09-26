@@ -38,6 +38,9 @@ const WaveSystem = {
   maxTier() { return Math.min(3, Math.floor((this.wave - 1) / 2)); },
 
   update(dt, game) {
+    // Boss em combate — não spawnar mais ondas nem fechar a missão
+    if (this.bossSpawned) return;
+
     if (this.betweenWaves) {
       this.betweenTimer -= dt;
       if (this.betweenTimer <= 0) {
@@ -62,11 +65,17 @@ const WaveSystem = {
 
     // Verifica se onda acabou
     if (this.enemiesSpawned >= this.enemiesPerWave && game.enemies.filter(e => !e.dead).length === 0) {
-      // Última onda da missão final da zona? Spawna boss!
-      if (this.wave >= this.maxWaves && !this.bossSpawned && this.isFinalMission) {
-        this.bossSpawned = true;
-        this.waveComplete = false; // não completa ainda — espera o boss
-        game._spawnBoss();
+      // Última onda da missão?
+      if (this.wave >= this.maxWaves) {
+        const bossKey = game._bossKeyForMission ? game._bossKeyForMission() : null;
+        if (this.isFinalMission && bossKey) {
+          this.bossSpawned = true;
+          this.waveComplete = false; // não completa ainda — espera pelo boss
+          game._spawnBoss(bossKey);
+          return;
+        }
+        // Missão sem boss (missões intermédias ou zona sem boss) → vitória
+        game._completeMission();
         return;
       }
 

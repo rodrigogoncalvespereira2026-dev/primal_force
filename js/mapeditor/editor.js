@@ -30,6 +30,9 @@ const MapEditor = {
     if (this._initialized) {
       this._resize();
       this._dirty = true;
+      // Reativar o loop de renderização (o destroy() tinha-o parado)
+      if (this._raf) { cancelAnimationFrame(this._raf); this._raf = null; }
+      this._startLoop();
       return;
     }
     this.canvas = document.getElementById('editor-canvas');

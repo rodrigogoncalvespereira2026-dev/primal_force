@@ -21,6 +21,14 @@ const BOSS_MODELS = {
   demon: 'models/boss_demon.glb'
 };
 
+// Chave do BOSS_TYPES → chave do BOSS_MODELS
+const BOSS_MODEL_BY_TYPE = {
+  maltherion: 'robot',
+  valtherion: 'demon',
+  vordax: 'dragon',
+  arcano: 'wizard'
+};
+
 class Ranger {
   constructor(data) {
     this.data     = data;
@@ -67,6 +75,12 @@ class Ranger {
         game.spawnParticles(e.x,e.y,'#ff6060',8);
       }
     }
+    const boss = game.boss;
+    if(boss && !boss.dead && Utils.dist(this,boss)<60+boss.size){
+      boss.takeDamage(this.data.attack+game.combo*2,game);
+      hit=true;
+      game.spawnParticles(boss.x,boss.y,'#ff6060',10);
+    }
     hit ? game.addCombo() : game.resetCombo();
     game.spawnParticles(this.x+Math.cos(this.facing)*36,this.y+Math.sin(this.facing)*36,this.data.color,5);
     Engine3D.shake(hit ? 2 : 0.5);
@@ -84,6 +98,10 @@ class Ranger {
       const d = Utils.dist(this, e);
       if (d < nearDist) { nearDist = d; nearest = e; }
     }
+    if (game.boss && !game.boss.dead) {
+      const d = Utils.dist(this, game.boss);
+      if (d < nearDist) { nearDist = d; nearest = game.boss; }
+    }
     if (nearest) this.facing = Math.atan2(nearest.y - this.y, nearest.x - this.x);
 
     const range = this.data.laserRange || 220;
@@ -94,6 +112,7 @@ class Ranger {
       range/11
     ));
     Engine3D.shake(1.5);
+    window.sfx && sfx('shoot');
   }
 
   doShield(game) {
@@ -122,6 +141,7 @@ class Ranger {
     game.showMsg('ZORD '+this.data.zord.toUpperCase()+' ATIVADO!',100);
     game.spawnParticles(this.x,this.y,this.data.color,40);
     for(const e of game.enemies){if(!e.dead){e.takeDamage(this.data.attack*2.5,game);game.spawnParticles(e.x,e.y,this.data.color,14);}}
+    if(game.boss && !game.boss.dead){game.boss.takeDamage(this.data.attack*2.5,game);game.spawnParticles(game.boss.x,game.boss.y,this.data.color,14);}
     Engine3D.shake(5);
   }
 
@@ -129,6 +149,7 @@ class Ranger {
     if(this.invincible>0) return;
     if(this.shielded){game.spawnParticles(this.x,this.y,'#378add',8);game.showMsg('BLOQUEADO!',30);return;}
     this.hp-=dmg; this.invincible=55;
+    window.sfx && sfx('hurt');
     game.spawnParticles(this.x,this.y,'#ff4444',6);
     Engine3D.shake(4);
     if(this.hp<=0){this.hp=0;game.onPlayerDeath();}

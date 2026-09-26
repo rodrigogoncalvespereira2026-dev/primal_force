@@ -52,6 +52,42 @@ const ShopScene = {
 
     // Secção Gota Primordial
     this._renderPrimordial();
+
+    // Secção de skins
+    this._renderSkins();
+  },
+
+  _renderSkins() {
+    const el = document.getElementById('shop-skins');
+    if (!el) return;
+    const skins = Progression.ownedSkins();
+    const eq = Progression.data.equippedSkin || null;
+
+    if (!skins.length) {
+      el.innerHTML = `
+        <div class="shop-skins-title">🎨 SKINS</div>
+        <div class="shop-skins-empty">Ainda não tens skins. Ganha troféus, sobe o passe de batalha ou abre Gotas Primordiais!</div>
+      `;
+      return;
+    }
+
+    el.innerHTML = `
+      <div class="shop-skins-title">🎨 SKINS</div>
+      <div class="shop-skins-list">
+        <button class="shop-skin-chip ${eq === null ? 'active' : ''}" data-id="">Original</button>
+        ${skins.map(s => `
+          <button class="shop-skin-chip ${eq === s.id ? 'active' : ''}" data-id="${s.id}">
+            <span class="shop-skin-dot" style="background:${s.color}"></span>${s.icon} ${s.name}
+          </button>
+        `).join('')}
+      </div>
+    `;
+    el.querySelectorAll('.shop-skin-chip').forEach(btn => {
+      btn.onclick = () => {
+        Progression.equipSkin(btn.dataset.id || null);
+        this._renderSkins();
+      };
+    });
   },
 
   _renderPrimordial() {

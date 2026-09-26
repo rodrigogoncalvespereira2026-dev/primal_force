@@ -43,6 +43,7 @@ class Enemy {
   takeDamage(dmg, game) {
     this.hp -= dmg;
     this.hit = 14;
+    window.sfx && sfx('hit');
     if (this.hp <= 0) this.die(game);
   }
 

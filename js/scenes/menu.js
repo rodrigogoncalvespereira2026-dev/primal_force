@@ -23,6 +23,10 @@ const MenuScene = {
       }
     });
     // Cada botão — placeholder
+    const somBtn = sidebar.querySelector('[data-opcao="som"]');
+    if (somBtn && typeof AudioFX !== 'undefined') {
+      somBtn.querySelector('span:last-child').textContent = AudioFX.enabled ? 'Som: ligado' : 'Som: desligado';
+    }
     sidebar.querySelectorAll('.op-btn').forEach(btn => {
       btn.onclick = () => {
         const opcao = btn.dataset.opcao;
@@ -30,6 +34,11 @@ const MenuScene = {
         sidebar.classList.remove('open');
         if (opcao === 'mapas') {
           setTimeout(() => App.goTo('mapmaker'), 150);
+        } else if (opcao === 'som') {
+          if (typeof AudioFX !== 'undefined') {
+            AudioFX.toggle();
+            btn.querySelector('span:last-child').textContent = AudioFX.enabled ? 'Som: ligado' : 'Som: desligado';
+          }
         } else {
           setTimeout(() => alert(`${nome} — em breve!`), 150);
         }

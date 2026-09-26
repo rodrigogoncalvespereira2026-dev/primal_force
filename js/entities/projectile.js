@@ -15,6 +15,14 @@ class Projectile {
     this.life -= dt;
     if (this.life <= 0) { this.dead = true; return; }
 
+    const b = game.boss;
+    if (b && !b.dead && Utils.dist(this, b) < b.size + 6) {
+      b.takeDamage(this.dmg, game);
+      game.spawnParticles(this.x, this.y, this.color, 8);
+      this.dead = true;
+      return;
+    }
+
     for (const e of game.enemies) {
       if (e.dead) continue;
       if (Utils.dist(this, e) < e.size + 6) {
@@ -122,6 +130,7 @@ class Pickup {
       if (this.type === 'hp')    { player.hp    = Math.min(player.maxHp,    player.hp    + 30); game.showMsg('+30 HP', 40); }
       if (this.type === 'power') { player.power = Math.min(player.maxPower, player.power + 35); game.showMsg('+35 PODER', 40); }
       if (this.type === 'score') { game.score += 200; game.updateScoreEl(); game.showMsg('+200 PTS', 40); }
+      window.sfx && sfx(this.type === 'score' ? 'coin' : 'pickup');
       this.dead = true;
     }
   }

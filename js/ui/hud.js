@@ -43,14 +43,19 @@ const HUD = {
     if(cur>0){el.style.display='block';el.style.height=(cur/max*100)+'%';el.style.top=0;el.style.background='rgba(0,0,0,0.65)';}
     else el.style.display='none';
   },
-  updateMinimap(player,enemies,cam,vw,vh) {
+  updateMinimap(player,enemies,cam,vw,vh,boss) {
     const mm=document.getElementById('minimap');
-    if(!mm)return;
+    if(!mm||!cam)return;
     const mctx=mm.getContext('2d');
     const W=mm.width,H=mm.height;
     const sx=W/World.W,sy=H/World.H;
     mctx.fillStyle='rgba(0,0,0,0.85)';mctx.fillRect(0,0,W,H);
     for(const e of enemies){if(!e.dead){mctx.fillStyle=e.color;mctx.fillRect(e.x*sx-1,e.y*sy-1,3,3);}}
+    if(boss&&!boss.dead){
+      mctx.fillStyle=boss.color;
+      mctx.beginPath();mctx.arc(boss.x*sx,boss.y*sy,4,0,Math.PI*2);mctx.fill();
+      mctx.strokeStyle='#fff';mctx.lineWidth=1;mctx.stroke();
+    }
     mctx.fillStyle='#e24b4a';mctx.fillRect(player.x*sx-2,player.y*sy-2,5,5);
     mctx.strokeStyle='rgba(255,255,255,0.25)';mctx.lineWidth=0.5;
     mctx.strokeRect(cam.vx*sx,cam.vy*sy,vw*sx,vh*sy);

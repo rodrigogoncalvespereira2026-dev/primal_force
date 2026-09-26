@@ -47,7 +47,19 @@ const App = {
     if (this._current === 'creator' && name !== 'creator') { CreatorScene.hide(); }
     if (name === 'account') { AccountScene.show(); }
     if (name === 'game') {
+      // Mapa personalizado = modo livre, sem missão de zona
+      let customMap = null;
+      try { customMap = MapStorage.loadActiveMap(); } catch (e) {}
+      if (customMap && customMap.grid) {
+        this.currentZone = null;
+        this.currentMission = 0;
+      }
       GameScene.stop();
+      // Sincronizar a missão ativa com o progresso guardado
+      if (this.currentZone) {
+        const done = WorldMap.completed[this.currentZone.id] || 0;
+        this.currentMission = Math.min(done, this.currentZone.missions.length - 1);
+      }
       const ranger = this.selectedRanger || RANGERS_DATA[0];
       setTimeout(() => GameScene.start(ranger), 0);
     }
@@ -310,6 +322,7 @@ const App = {
     }
     Progression.load();
     WorldMap.load();
+    if (typeof AudioFX !== 'undefined') AudioFX.init();
     Input.init();
     MenuScene.init();
     SelectScene.init();
@@ -334,3 +347,9 @@ const App = {
 };
 
 window.addEventListener('DOMContentLoaded', () => App.init());
+
+window.addEventListener('load', () => {
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.protocol === 'http:')) {
+    navigator.serviceWorker.register('service-worker.js').catch(() => {});
+  }
+});

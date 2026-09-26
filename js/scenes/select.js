@@ -12,7 +12,9 @@ const SelectScene = {
   init() {
     document.getElementById('btn-back-select').onclick = () => App.goTo('menu');
     document.getElementById('btn-confirmar-ranger').onclick = () => {
-      App.selectedRanger = this._allRangers[this.selected];
+      const r = this._allRangers[this.selected];
+      if (r && !this._isUnlocked(r)) { this.showDetail(this.selected); return; }
+      App.selectedRanger = r;
       App.goTo('game');
     };
     // ranger detail controls
@@ -21,14 +23,18 @@ const SelectScene = {
     const rdSelect = document.getElementById('rd-select');
     if (rdSelect) rdSelect.onclick = () => {
       if (this._detailIndex != null) {
-        App.selectedRanger = this._allRangers[this._detailIndex];
+        const r = this._allRangers[this._detailIndex];
+        if (!this._isUnlocked(r)) return;
+        App.selectedRanger = r;
         App.goTo('game');
       }
     };
     const rdTest = document.getElementById('rd-test');
     if (rdTest) rdTest.onclick = () => {
       if (this._detailIndex != null) {
-        App.selectedRanger = this._allRangers[this._detailIndex];
+        const r = this._allRangers[this._detailIndex];
+        if (!this._isUnlocked(r)) return;
+        App.selectedRanger = r;
         App.goTo('game');
       }
     };
@@ -238,13 +244,28 @@ const SelectScene = {
     right.onclick = () => { const w = scroll.querySelector('.ranger-card')?.offsetWidth || 170; scroll.scrollBy({ left:  (w + 12), behavior: 'smooth' }); };
   },
 
+  _isUnlocked(r) {
+    if (!r) return true;
+    if (r.isCustom) return true;
+    return Progression.isRangerUnlocked(r.id);
+  },
+
+  // Troféus necessários para desbloquear o ranger (null = sem requisito)
+  _requirement(r) {
+    if (!r || r.isCustom) return null;
+    const m = Progression.TROPHY_PATH.find(m => m.reward && m.reward.type === 'ranger' && m.reward.id === r.id);
+    return m ? m.trophies : null;
+  },
+
   _buildGrid() {
     const grid = document.getElementById('ranger-grid');
     grid.innerHTML = '';
     
     this._allRangers.forEach((r, i) => {
       const card = document.createElement('div');
-      card.className = 'ranger-card' + (i === this.selected ? ' selected' : '');
+      const unlocked = this._isUnlocked(r);
+      const req = this._requirement(r);
+      card.className = 'ranger-card' + (i === this.selected ? ' selected' : '') + (unlocked ? '' : ' locked');
       
       const level = 5 + i;
       const power = (10 + i * 5) + (i * 3);
@@ -263,6 +284,7 @@ const SelectScene = {
         <div class="ranger-card-name" style="color:${r.color}">${r.name}</div>
         <div class="ranger-card-zord">${r.title}</div>
         ${customBadge}
+        ${unlocked ? '' : `<div class="ranger-card-lock"><span>🔒</span><small>${req ? '🏆 ' + req : 'Bloqueado'}</small></div>`}
         <div class="ranger-card-stats">
           ${SelectScene._statIcon('💪', r.attack, '#ff8080')}
           ${SelectScene._statIcon('🛡️', r.defense, '#378add')}
@@ -288,9 +310,24 @@ const SelectScene = {
     setText('rd-class', r.title);
     setText('rd-tag', r.zord.toUpperCase());
     setText('rd-desc', r.specialDesc || r.title);
-    setText('rd-trophies', (index * 12) + '/1000');
-    const tf = document.getElementById('rd-trophy-fill');
-    if (tf) tf.style.width = Math.min(100, (index * 12) / 10) + '%';
+    const unlocked = this._isUnlocked(r);
+    const req = this._requirement(r);
+    if (unlocked) {
+      setText('rd-trophies', '✅ Desbloqueado');
+      const tf0 = document.getElementById('rd-trophy-fill');
+      if (tf0) tf0.style.width = '100%';
+    } else {
+      const have = Progression.data.trophies;
+      setText('rd-trophies', `🔒 ${have}/${req} 🏆`);
+      const tf = document.getElementById('rd-trophy-fill');
+      if (tf) tf.style.width = Math.min(100, (have / (req || 1)) * 100) + '%';
+    }
+    const selBtn = document.getElementById('rd-select');
+    if (selBtn) {
+      selBtn.disabled = !unlocked;
+      selBtn.textContent = unlocked ? 'SELECIONAR' : 'BLOQUEADO';
+      selBtn.classList.toggle('disabled', !unlocked);
+    }
 
     // Centro
     const av = document.getElementById('rd-avatar');

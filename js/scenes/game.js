@@ -48,17 +48,24 @@ const GameScene = {
     else if (r<0.45) this.pickups.push(new Pickup(e.x,e.y,'power'));
     else if (r<0.55) this.pickups.push(new Pickup(e.x,e.y,'score'));
     this.spawnParticles(e.x,e.y,e.color,20);
+    window.sfx && sfx('kill');
     WaveSystem.enemiesLeft = Math.max(0, WaveSystem.enemiesLeft - 1);
     this._updateWaveHUD();
     Engine3D.shake(1.5);
   },
 
-  _spawnBoss() {
-    const bossKey = pickRandomBoss();
+  _bossKeyForMission() {
+    if (typeof bossForZone !== 'function') return pickRandomBoss();
+    return bossForZone(App.currentZone);
+  },
+
+  _spawnBoss(bossKey) {
+    bossKey = bossKey || this._bossKeyForMission() || pickRandomBoss();
     const bossType = BOSS_TYPES[bossKey];
     const dialogKey = bossType.dialogKey;
 
     this.showMsg('⚠️ BOSS APROXIMA-SE!', 120);
+    window.sfx && sfx('boss');
     this.spawnParticles(this.player.x, this.player.y, '#ff4444', 30);
 
     const lines = Story.dialogues[dialogKey];
@@ -92,6 +99,7 @@ const GameScene = {
     this._updateBossHUD(false);
     if (boss.mesh3d) { this._entityGroup.remove(boss.mesh3d); boss.mesh3d = null; }
     Engine3D.shake(8);
+    window.sfx && sfx('explode');
 
     const defeatKey = boss.typeKey + '_defeat';
     const lines = Story.dialogues[defeatKey];
@@ -104,10 +112,34 @@ const GameScene = {
   },
 
   _afterBossDefeat(trophiesEarned, coinsEarned) {
+    if (this._missionEnded) return;
+    this._missionEnded = true;
     if (App.currentZone) WorldMap.completeMission(App.currentZone.id);
     this._missionRewards = { coins: coinsEarned, trophies: trophiesEarned };
     this._showGameoverData('🏆 VITÓRIA!', '— BOSS DERROTADO!');
+    window.sfx && sfx('victory');
     this._tryPrimordial({ victory: true, isBoss: true });
+  },
+
+  // Vitória de missões sem boss (missões intermédias / zona sem boss)
+  _completeMission() {
+    if (this._missionEnded) return;
+    this._missionEnded = true;
+    this.running = false;
+    if (this._raf) { cancelAnimationFrame(this._raf); this._raf = null; }
+
+    const trophiesEarned = Math.round((30 + WaveSystem.wave * 5) * this.activeBoosts.trophyMult);
+    const coinsEarned    = Math.round((80 + WaveSystem.wave * 8) * this.activeBoosts.coinMult);
+    Progression.addTrophies(trophiesEarned);
+    Progression.addCoins(coinsEarned);
+    Progression.addBattlePassXP(200 + WaveSystem.wave * 20);
+    if (App.currentZone) WorldMap.completeMission(App.currentZone.id);
+
+    this.spawnParticles(this.player.x, this.player.y, '#fac775', 60);
+    this._missionRewards = { coins: coinsEarned, trophies: trophiesEarned };
+    this._showGameoverData('🏆 VITÓRIA!', '— MISSÃO COMPLETA!');
+    window.sfx && sfx('victory');
+    this._tryPrimordial({ victory: true, isBoss: false });
   },
 
   _showGameoverData(title, suffix) {
@@ -132,6 +164,7 @@ const GameScene = {
     Progression.addCoins(coinsEarned);
     Progression.addBattlePassXP(50 + waveNum * 10);
     this.showMsg('ONDA ' + waveNum + ' COMPLETA! +' + trophiesEarned + ' 🏆 +' + coinsEarned + ' ' + COIN_SVG, 180);
+    window.sfx && sfx('wave');
     this.spawnParticles(this.player.x, this.player.y, '#fac775', 40);
     this._updateWaveHUD();
   },
@@ -163,6 +196,8 @@ const GameScene = {
   },
 
   onPlayerDeath() {
+    if (this._missionEnded) return;
+    this._missionEnded = true;
     this.running = false;
     cancelAnimationFrame(this._raf);
     const trophiesEarned = Math.round(Math.floor(this.kills / 2) * this.activeBoosts.trophyMult);
@@ -172,6 +207,7 @@ const GameScene = {
     Progression.addBattlePassXP(this.kills * 5);
     this._missionRewards = { coins: coinsEarned, trophies: trophiesEarned };
     this._showGameoverData('DERROTA', '');
+    window.sfx && sfx('defeat');
     this._tryPrimordial({ victory: false, isBoss: false });
   },
 
@@ -221,11 +257,22 @@ const GameScene = {
         document.getElementById('screen-pause').classList.add('active');
       }
     });
+
+    // Registar uma única vez (antes acumulava a cada partida)
+    window.addEventListener('resize', () => {
+      if (this._overlayCanvas) {
+        this._overlayCanvas.width = window.innerWidth;
+        this._overlayCanvas.height = window.innerHeight;
+      }
+    });
   },
 
   start(rangerData) {
     this.running = false;
     if (this._raf) { cancelAnimationFrame(this._raf); this._raf=null; }
+    this._playerMixer = null;
+    this._bossMixer = null;
+    this._enemyMixers.clear();
 
     // Show loading screen
     this._showLoading(true);
@@ -242,12 +289,6 @@ const GameScene = {
       this._overlayCanvas.width = window.innerWidth;
       this._overlayCanvas.height = window.innerHeight;
       this._overlayCtx = this._overlayCanvas.getContext('2d');
-      window.addEventListener('resize', () => {
-        if (this._overlayCanvas) {
-          this._overlayCanvas.width = window.innerWidth;
-          this._overlayCanvas.height = window.innerHeight;
-        }
-      });
     }
 
     // Grupo para entidades
@@ -285,6 +326,7 @@ const GameScene = {
     this.laserFireTimer=0;
     this.boss = null;
     this.bossDefeated = false;
+    this._missionEnded = false;
 
     this.activeBoosts = { coinMult: 1, trophyMult: 1 };
     const boostMsgs = [];
@@ -406,6 +448,7 @@ const GameScene = {
     // Remover entidades mortas e seus meshes 3D
     for (const e of this.enemies) {
       if (e.dead && e.mesh3d) { this._entityGroup.remove(e.mesh3d); e.mesh3d = null; }
+      if (e.dead) this._enemyMixers.delete(e);
     }
     for (const pr of this.projectiles) {
       if (pr.dead && pr.mesh3d) { this._entityGroup.remove(pr.mesh3d); pr.mesh3d = null; }
@@ -435,6 +478,7 @@ const GameScene = {
     this.cam.vy = Utils.clamp(p.y - vh/2, 0, Math.max(0, World.H - vh));
 
     HUD.update(p,this);
+    HUD.updateMinimap(p, this.enemies, this.cam, vw, vh, this.boss);
     this._updateWaveHUD();
   },
 
@@ -670,6 +714,10 @@ const GameScene = {
           ModelLoader.tintModel(mesh, player.data.color);
         }
 
+        // Skin equipada (sobrepõe a cor base do ranger)
+        const skin = (typeof Progression !== 'undefined') ? Progression.getSkin(Progression.data.equippedSkin) : null;
+        if (skin && skin.color) ModelLoader.tintModel(mesh, skin.color);
+
         if (mesh.userData?.hasAnimations && mesh.userData.animations.length > 0) {
           this._playerMixer = new THREE.AnimationMixer(mesh);
           const action = this._playerMixer.clipAction(mesh.userData.animations[0]);
@@ -682,8 +730,10 @@ const GameScene = {
   },
 
   _createEnemyMesh(enemy) {
-    const modelPath = ENEMY_MODELS[enemy.type] || 'models/enemy_normal.glb';
+    const modelKeys = ['normal', 'fast', 'tank', 'ranged'];
+    const modelPath = ENEMY_MODELS[modelKeys[enemy.type]] || ENEMY_MODELS.normal;
     Model3D.createFromGLB(modelPath, { size: 10 }).then((mesh) => {
+      if (enemy.dead) return;
       mesh.position.set(enemy.x, 0, enemy.y);
       this._entityGroup.add(mesh);
       enemy.mesh3d = mesh;
@@ -702,8 +752,10 @@ const GameScene = {
   },
 
   _createBossMesh(boss) {
-    const modelPath = BOSS_MODELS[boss.typeKey] || 'models/boss_dragon.glb';
+    const modelKey = (typeof BOSS_MODEL_BY_TYPE !== 'undefined' && BOSS_MODEL_BY_TYPE[boss.typeKey]) || boss.typeKey;
+    const modelPath = BOSS_MODELS[modelKey] || 'models/sample.glb';
     Model3D.createFromGLB(modelPath, { size: 18 }).then((mesh) => {
+      if (boss.dead) return;
       mesh.position.set(boss.x, 0, boss.y);
       this._entityGroup.add(mesh);
       boss.mesh3d = mesh;

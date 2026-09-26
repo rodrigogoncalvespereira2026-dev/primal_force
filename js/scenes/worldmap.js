@@ -27,7 +27,7 @@ const WorldMap = {
       dialogIntro:'mountains_intro', unlocksAfter:'desert' },
     { id:'base',       name:'Base dos Rangers',    emoji:'⚡', x:0.50,y:0.50, color:'#e24b4a', locked:false,
       waves:0, enemyTier:0, missions:['Treino','Arquivo','Plano final'],
-      dialogIntro:'base_intro', unlocksAfter:null, isBase:true },
+      dialogIntro:'base_intro', unlocksAfter:null, isBase:true, boss:null },
   ],
 
   completed: {},

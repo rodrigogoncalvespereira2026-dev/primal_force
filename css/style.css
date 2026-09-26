@@ -403,6 +403,27 @@ body {
   transform: translateY(-2px);
 }
 
+.ranger-card.locked { opacity: 0.6; filter: grayscale(0.7); }
+.ranger-card.locked:hover { border-color: rgba(255,255,255,0.18); transform: none; }
+
+.ranger-card-lock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: #fac775;
+  font-weight: 700;
+}
+.ranger-card-lock span { font-size: 22px; line-height: 1; }
+.ranger-card-lock small { font-size: 11px; letter-spacing: 1px; }
+
+.rd-btn-select.disabled,
+.rd-btn-select:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
+
 .ranger-avatar {
   width: 64px;
   height: 64px;
@@ -1638,6 +1659,22 @@ body {
 .bp-reward.premium { background:rgba(175,86,245,0.06); }
 .bp-reward.premium.done { background:rgba(175,86,245,0.12); }
 .bp-reward-item { font-size:14px; }
+.bp-reward.claimable { box-shadow:0 0 0 1px #fac775 inset; animation:bpPulse 1.4s ease-in-out infinite; }
+@keyframes bpPulse { 0%,100% { box-shadow:0 0 0 1px rgba(250,199,117,0.6) inset; } 50% { box-shadow:0 0 0 2px #fac775 inset; } }
+.bp-claim {
+  border:none; border-radius:4px; cursor:pointer;
+  background:linear-gradient(180deg,#ffd93e,#f5a623); color:#1a1a2e;
+  font-size:10px; font-weight:800; letter-spacing:1px; padding:5px 6px;
+}
+.bp-claim:hover { filter:brightness(1.1); }
+.bp-claim.premium-claim { background:linear-gradient(180deg,#c98bff,#af56f5); color:#fff; }
+.bp-buy-premium {
+  align-self:flex-start; border:1px solid rgba(175,86,245,0.6); border-radius:6px;
+  background:rgba(175,86,245,0.14); color:#e0c4ff; cursor:pointer;
+  font-size:11px; font-weight:700; letter-spacing:1px; padding:7px 12px;
+}
+.bp-buy-premium:hover { background:rgba(175,86,245,0.28); }
+.bp-premium-active { font-size:11px; font-weight:800; letter-spacing:2px; color:#c98bff; }
 
 /* ── MAPA DO MUNDO ── */
 #screen-worldmap { background: #06090f; display:none; flex-direction:column; }
@@ -1822,6 +1859,32 @@ body {
 .shop-gota-btn.gota-free { background: #2ecc71; color: #fff; }
 .shop-gota-btn.gota-done { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.3); }
 .shop-gota-btn.gota-gems { background: #9b59b6; color: #fff; }
+
+/* ── LOJA — SKINS ── */
+.shop-skins-section {
+  padding: 16px; border-top: 1.5px solid rgba(255,255,255,0.08);
+  text-align: center;
+}
+.shop-skins-title { font-size: 15px; font-weight: 700; color: #fac775; margin-bottom: 10px; }
+.shop-skins-empty { font-size: 12px; color: rgba(255,255,255,0.4); line-height: 1.6; }
+.shop-skins-list { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.shop-skin-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 12px; border-radius: 20px; cursor: pointer;
+  font-family: inherit; font-size: 12px; font-weight: 700;
+  background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.75);
+  border: 1px solid rgba(255,255,255,0.12);
+  transition: all 0.15s;
+}
+.shop-skin-chip:hover { background: rgba(255,255,255,0.1); }
+.shop-skin-chip.active {
+  background: rgba(250,199,117,0.15); color: #fac775;
+  border-color: #fac775;
+}
+.shop-skin-dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  display: inline-block; box-shadow: 0 0 4px rgba(0,0,0,0.6);
+}
 
 /* ── SIDEBAR OPÇÕES ── */
 .opcoes-sidebar {

@@ -8,9 +8,13 @@ const Progression = {
     battlePassXP: 0,
     unlockedRangers: ['roro'],
     unlockedSkins: [],
+    equippedSkin: null,
     unlockedWeapons: [],
     coins: 0,
     gems: 0,
+    bpPremium: false,
+    claimedBPFree: [],
+    claimedBPPremium: [],
     lastFreePrimordial: null,
     items: { potion: 0, shield: 0, speedBoost: 0, doubleCoins: 0, doubleTrophies: 0 },
   },
@@ -202,6 +206,77 @@ const Progression = {
   },
 
   isRangerUnlocked(id) { return this.data.unlockedRangers.includes(id); },
+
+  // ── SKINS EQUIPÁVEIS ──
+  SKIN_DEFS: {
+    primal_aura:      { name:'Aura Primal',      color:'#7ee0ff', icon:'🌟' },
+    golden_ranger:    { name:'Ranger Dourado',   color:'#ffd700', icon:'✨' },
+    shadow_phantom:   { name:'Fantasma Sombrio', color:'#2b2b3d', icon:'🌑' },
+    crystal_guardian: { name:'Guardião Cristal', color:'#a9e7ff', icon:'💎' },
+    inferno_blaze:    { name:'Chama Infernal',   color:'#ff5a1f', icon:'🔥' },
+    roro_fire:        { name:'Fogo (Roro)',      color:'#ff7a1f', icon:'🔥' },
+    mar_dark:         { name:'Sombra (Mar)',     color:'#4a4a55', icon:'🌑' },
+    roro_legend:      { name:'Lendário (Roro)',  color:'#ffe08a', icon:'👑' },
+    all_gold:         { name:'Ouro (todos)',     color:'#ffd700', icon:'🏆' },
+  },
+
+  getSkin(id) {
+    if (!id) return null;
+    const def = this.SKIN_DEFS[id];
+    if (def) return Object.assign({ id: id }, def);
+    // IDs gerados (passe de batalha) — cor derivada do nome
+    let h = 0;
+    for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) % 360;
+    return { id: id, name: id.replace(/_/g, ' '), color: `hsl(${h},70%,55%)`, icon: '🎨' };
+  },
+
+  ownedSkins() {
+    return (this.data.unlockedSkins || []).map(id => this.getSkin(id)).filter(Boolean);
+  },
+
+  equipSkin(id) {
+    if (id && !(this.data.unlockedSkins || []).includes(id)) return false;
+    this.data.equippedSkin = id || null;
+    this.save();
+    return true;
+  },
+
+  buyBPPremium(price = 50) {
+    if (this.data.bpPremium) return true;
+    if (!this.spendGems(price)) return false;
+    this.data.bpPremium = true;
+    this.save();
+    return true;
+  },
+
+  _grantReward(r) {
+    if (!r) return;
+    if (r.type === 'coins')  this.data.coins += (r.amount || 0);
+    else if (r.type === 'gems') this.data.gems = (this.data.gems || 0) + (r.amount || 0);
+    else if (r.type === 'skin'   && r.id && !this.data.unlockedSkins.includes(r.id))    this.data.unlockedSkins.push(r.id);
+    else if (r.type === 'weapon' && r.id && !this.data.unlockedWeapons.includes(r.id))  this.data.unlockedWeapons.push(r.id);
+    else if (r.type === 'ranger' && r.id && !this.data.unlockedRangers.includes(r.id))  this.data.unlockedRangers.push(r.id);
+  },
+
+  canClaimBPReward(tierNum, track) {
+    if (tierNum > this.data.battlePassTier) return false;
+    if (track === 'premium' && !this.data.bpPremium) return false;
+    const list = track === 'premium'
+      ? (this.data.claimedBPPremium || [])
+      : (this.data.claimedBPFree || []);
+    return !list.includes(tierNum);
+  },
+
+  claimBPReward(tierNum, track) {
+    if (!this.canClaimBPReward(tierNum, track)) return false;
+    const tier = this.BATTLE_PASS[tierNum - 1];
+    if (!tier) return false;
+    tier[track].forEach(r => this._grantReward(r));
+    if (track === 'premium') this.data.claimedBPPremium.push(tierNum);
+    else this.data.claimedBPFree.push(tierNum);
+    this.save();
+    return true;
+  },
 
   getCurrentTrophyMilestone() {
     let current = this.TROPHY_PATH[0];

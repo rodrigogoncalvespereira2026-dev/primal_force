@@ -61,6 +61,24 @@ const BOSS_TYPES = {
   },
 };
 
+// Rectângulo arredondado compatível com WebViews antigas (sem ctx.roundRect)
+function roundRectFill(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  if (typeof ctx.roundRect === 'function') {
+    ctx.roundRect(x, y, w, h, r);
+    ctx.fill();
+    return;
+  }
+  const rr = Math.max(0, Math.min(r, w / 2, h / 2));
+  ctx.moveTo(x + rr, y);
+  ctx.arcTo(x + w, y,     x + w, y + h, rr);
+  ctx.arcTo(x + w, y + h, x,     y + h, rr);
+  ctx.arcTo(x,     y + h, x,     y,     rr);
+  ctx.arcTo(x,     y,     x + w, y,     rr);
+  ctx.closePath();
+  ctx.fill();
+}
+
 class Boss {
   constructor(typeKey) {
     const t = BOSS_TYPES[typeKey];
@@ -313,6 +331,7 @@ class Boss {
     this.hp -= dmg;
     this.hit = 12;
     this.shakeT = 8;
+    window.sfx && sfx('hit');
     if (this.hp <= 0) this.die(game);
   }
 
@@ -369,16 +388,12 @@ class Boss {
 
     ctx.save();
     ctx.fillStyle = '#1a1a2e';
-    ctx.beginPath();
-    ctx.roundRect(bx - 2, by - 2, bw + 4, bh + 4, 4);
-    ctx.fill();
+    roundRectFill(ctx, bx - 2, by - 2, bw + 4, bh + 4, 4);
 
     const pct = Math.max(0, this.hp / this.maxHp);
     const barColor = pct > 0.5 ? '#3cb371' : pct > this.type.phase2Threshold ? '#e0a020' : '#e24b4a';
     ctx.fillStyle = barColor;
-    ctx.beginPath();
-    ctx.roundRect(bx, by, bw * pct, bh, 3);
-    ctx.fill();
+    roundRectFill(ctx, bx, by, Math.max(1, bw * pct), bh, 3);
 
     const ph2x = bx + bw * this.type.phase2Threshold;
     ctx.strokeStyle = '#ffffff88';
@@ -461,4 +476,22 @@ const BOSS_POOL = ['maltherion', 'valtherion', 'vordax', 'arcano'];
 
 function pickRandomBoss() {
   return BOSS_POOL[Math.floor(Math.random() * BOSS_POOL.length)];
+}
+
+// Boss fixo por zona (cada zona promete um adversário concreto)
+const ZONE_BOSSES = {
+  forest:     'maltherion',
+  city:       'arcano',
+  enemy_base: 'maltherion',
+  volcano:    'valtherion',
+  ocean:      'vordax',
+  desert:     'arcano',
+  mountains:  'valtherion',
+};
+
+// Devolve a chave do boss para a zona atual (null = missão sem boss)
+function bossForZone(zone) {
+  if (!zone) return pickRandomBoss();
+  if (zone.boss !== undefined) return zone.boss; // null = zona sem boss
+  return ZONE_BOSSES[zone.id] || pickRandomBoss();
 }
