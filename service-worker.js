@@ -57,6 +57,7 @@ const ASSETS = [
   './vendor/three.min.js',
   './vendor/GLTFLoader.js',
   './vendor/OrbitControls.js',
+  './splash_screen.png.jpg',
   './models/sample.glb',
 
   './assets/img/gota/gota-comum.png',

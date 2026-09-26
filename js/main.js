@@ -345,6 +345,15 @@ const App = {
     this._initEditor();
     this.selectedRanger = RANGERS_DATA[0];
     Account.load();
+
+    // Splash screen: hide after animation or on click
+    const splash = document.getElementById('splash-screen');
+    const hideSplash = () => { if (splash) splash.classList.add('hidden'); };
+    if (splash) {
+      splash.addEventListener('click', hideSplash, { once: true });
+      setTimeout(hideSplash, 4000);
+    }
+
     if (!Account.exists()) {
       this.goTo('account');
     } else {

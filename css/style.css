@@ -58,6 +58,46 @@ body {
 }
 .screen.overlay.active { display: flex; }
 
+/* ── SPLASH SCREEN ── */
+.splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #000 url('splash_screen.png.jpg') center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: splashFadeOut 0.8s ease-out 3.2s forwards;
+}
+.splash-screen.hidden { display: none; }
+.splash-content { display: flex; flex-direction: column; align-items: center; gap: 24px; pointer-events: none; }
+.splash-logo {
+  width: 180px; height: 180px;
+  background: url('splash_screen.png.jpg') center/contain no-repeat;
+  filter: drop-shadow(0 8px 32px rgba(226,75,74,0.6));
+  animation: splashPulse 1.5s ease-in-out infinite;
+}
+@keyframes splashPulse {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 8px 32px rgba(226,75,74,0.6)); }
+  50% { transform: scale(1.05); filter: drop-shadow(0 12px 40px rgba(226,75,74,0.9)); }
+}
+.splash-loading { display: flex; gap: 8px; }
+.splash-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: linear-gradient(180deg, #e24b4a, #ff6b3d);
+  animation: splashDot 1s ease-in-out infinite;
+  box-shadow: 0 0 8px #e24b4a;
+}
+.splash-dot:nth-child(2) { animation-delay: 0.15s; }
+.splash-dot:nth-child(3) { animation-delay: 0.3s; }
+@keyframes splashDot {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.5; }
+  50% { transform: translateY(-8px) scale(1.3); opacity: 1; }
+}
+@keyframes splashFadeOut {
+  to { opacity: 0; visibility: hidden; }
+}
+
 /* ── FUNDO AZUL COM RELÂMPAGOS ── */
 @keyframes storm-drift {
   0%   { transform: translate(0, 0); }
