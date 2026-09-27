@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Sintaxe JavaScript
+        run: |
+          fail=0
+          while IFS= read -r f; do
+            if ! node --check "$f"; then
+              echo "::error::Sintaxe invalida em $f"
+              fail=1
+            fi
+          done < <(find js tests service-worker.js -type f -name '*.js')
+          exit $fail
+
+      - name: Testes de logica
+        run: |
+          node tests/check-scripts.js
+          node tests/wavetest.js
+          node tests/progtest.js
+          node tests/dailytest.js
+          node tests/perfiltest.js
+          node tests/smoke.js

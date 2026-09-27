@@ -154,6 +154,15 @@ const GameScene = {
     setText('go-mission-rewards', 'Missão: +' + this._missionRewards.trophies + ' 🏆 +' + this._missionRewards.coins + ' ' + COIN_SVG + ' ' + (suffix || ''));
     setText('go-gota-rewards', '');
     setText('go-trophies', 'Total: +' + this._missionRewards.trophies + ' 🏆 +' + this._missionRewards.coins + ' ' + COIN_SVG);
+    if (typeof Leaderboard !== 'undefined') {
+      Leaderboard.record({
+        score: this.score,
+        kills: this.kills,
+        zone: (App.currentZone && App.currentZone.name) || 'Mapa personalizado',
+        ranger: (App.selectedRanger && App.selectedRanger.name) || '—',
+        result: (title || '').indexOf('VITÓRIA') >= 0 ? 'Vitória' : 'Derrota',
+      });
+    }
   },
 
   _updateBossHUD(show) {
@@ -286,6 +295,7 @@ const GameScene = {
     const container = document.getElementById('game-3d-container');
     if (!container) return;
     Engine3D.init(container);
+    if (typeof Settings !== 'undefined') Settings.apply();
     Engine3D.clear();
 
     // Setup overlay 2D canvas (joystick + reactions)

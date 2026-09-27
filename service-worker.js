@@ -1,4 +1,4 @@
-const CACHE_NAME = 'primal-force-v5';
+const CACHE_NAME = 'primal-force-v6';
 const ASSETS = [
   './',
   './index.html',
@@ -21,6 +21,7 @@ const ASSETS = [
   './js/core/primordial.js',
   './js/core/progression.js',
   './js/core/renderer.js',
+  './js/core/settings.js',
   './js/core/story.js',
   './js/core/toonshader.js',
   './js/core/utils.js',
@@ -41,6 +42,8 @@ const ASSETS = [
   './js/scenes/account.js',
   './js/scenes/battlepass.js',
   './js/scenes/creator.js',
+  './js/scenes/config.js',
+  './js/scenes/leaderboard.js',
   './js/scenes/dialog.js',
   './js/scenes/game.js',
   './js/scenes/mapmaker.js',

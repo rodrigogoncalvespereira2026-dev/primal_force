@@ -13,7 +13,15 @@ const MenuScene = {
     document.getElementById('btn-viewer').onclick  = () => window.open('viewer.html', '_blank');
 
     const sidebar = document.getElementById('opcoes-sidebar');
+    const refreshSom = () => {
+      const b = sidebar.querySelector('[data-opcao="som"]');
+      if (b && typeof AudioFX !== 'undefined') {
+        b.querySelector('span:last-child').textContent = AudioFX.enabled ? 'Som: ligado' : 'Som: desligado';
+      }
+    };
+    refreshSom();
     document.getElementById('btn-opcoes').onclick = () => {
+      refreshSom();
       sidebar.classList.toggle('open');
     };
     // Fechar ao clicar fora
@@ -22,11 +30,7 @@ const MenuScene = {
         sidebar.classList.remove('open');
       }
     });
-    // Cada botão — placeholder
-    const somBtn = sidebar.querySelector('[data-opcao="som"]');
-    if (somBtn && typeof AudioFX !== 'undefined') {
-      somBtn.querySelector('span:last-child').textContent = AudioFX.enabled ? 'Som: ligado' : 'Som: desligado';
-    }
+    // Cada botão
     sidebar.querySelectorAll('.op-btn').forEach(btn => {
       btn.onclick = () => {
         const opcao = btn.dataset.opcao;
@@ -34,6 +38,10 @@ const MenuScene = {
         sidebar.classList.remove('open');
         if (opcao === 'mapas') {
           setTimeout(() => App.goTo('mapmaker'), 150);
+        } else if (opcao === 'config') {
+          setTimeout(() => App.goTo('config'), 150);
+        } else if (opcao === 'lideranca') {
+          setTimeout(() => App.goTo('leaderboard'), 150);
         } else if (opcao === 'som') {
           if (typeof AudioFX !== 'undefined') {
             AudioFX.toggle();

@@ -11,6 +11,8 @@ const App = {
     worldmap:    'screen-worldmap',
     missions:    'screen-missoes',
     perfil:      'screen-perfil',
+    config:      'screen-config',
+    leaderboard: 'screen-lideranca',
     trophies:    'screen-trophies',
     battlepass:  'screen-battlepass',
     gota:        'screen-gota',
@@ -37,10 +39,15 @@ const App = {
       document.getElementById('menu-trophies').textContent = Progression.data.trophies;
       document.getElementById('menu-coins').textContent    = Progression.data.coins;
       document.getElementById('menu-gems').textContent     = Progression.data.gems;
+      if (typeof MissionsScene !== 'undefined' && MissionsScene.updateBadge) MissionsScene.updateBadge();
+      if (typeof AudioFX !== 'undefined') AudioFX.playMusic('menu');
     }
+    if (name === 'game' && typeof AudioFX !== 'undefined') AudioFX.playMusic('battle');
     if (name === 'worldmap') WorldMap.show();
     if (name === 'missions') MissionsScene.show();
     if (name === 'perfil') PerfilScene.show();
+    if (name === 'config' && typeof ConfigScene !== 'undefined') ConfigScene.show();
+    if (name === 'leaderboard' && typeof LeaderboardScene !== 'undefined') LeaderboardScene.show();
     if (name === 'trophies') TrophiesScene.show();
     if (name === 'battlepass') BattlePassScene.show();
     if (name === 'gota') GotaScene.show();
@@ -327,6 +334,7 @@ const App = {
     Progression.load();
     WorldMap.load();
     if (typeof DailyMissions !== 'undefined') DailyMissions.load();
+    if (typeof Settings !== 'undefined') Settings.load();
     if (typeof AudioFX !== 'undefined') AudioFX.init();
     Input.init();
     MenuScene.init();
@@ -334,6 +342,8 @@ const App = {
     TrophiesScene.init();
     MissionsScene.init();
     PerfilScene.init();
+    if (typeof ConfigScene !== 'undefined') ConfigScene.init();
+    if (typeof LeaderboardScene !== 'undefined') LeaderboardScene.init();
     BattlePassScene.init();
     GotaScene.init();
     ShopScene.init();

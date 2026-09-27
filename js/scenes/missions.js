@@ -93,6 +93,15 @@ const DailyMissions = {
     if (r.gems)     parts.push(GEM_SVG + ' ' + r.gems);
     return parts.join(' + ');
   },
+
+  claimableCount() {
+    if (!this.data || this.data.date !== this.today()) this.load();
+    if (!this.data) return 0;
+    return this.data.missions.filter(m => {
+      const t = this.template(m.id);
+      return t && !m.claimed && m.progress >= t.goal;
+    }).length;
+  },
 };
 
 const MissionsScene = {
@@ -103,6 +112,14 @@ const MissionsScene = {
   show() {
     DailyMissions.load();
     this._render();
+  },
+
+  updateBadge() {
+    const el = document.getElementById('badge-missoes');
+    if (!el || typeof DailyMissions === 'undefined') return;
+    const n = DailyMissions.claimableCount();
+    el.textContent = String(n);
+    el.hidden = n <= 0;
   },
 
   _render() {
@@ -146,5 +163,7 @@ const MissionsScene = {
         if (DailyMissions.claim(btn.dataset.id)) this._render();
       };
     });
+
+    this.updateBadge();
   },
 };
