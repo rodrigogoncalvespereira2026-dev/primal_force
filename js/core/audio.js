@@ -390,6 +390,26 @@ const AudioFX = {
         case 'defeat':
           [440, 349, 294, 220].forEach((f, i) => this._tone({ f: f, dur: 0.3, type: 'sawtooth', gain: 0.16, delay: i * 0.16 }));
           break;
+        case 'gotaTap':
+          this._tone({ f: 640, to: 760, dur: 0.05, type: 'triangle', gain: 0.14 });
+          break;
+        case 'gotaMiss':
+          this._tone({ f: 320, to: 190, dur: 0.16, type: 'square', gain: 0.14 });
+          break;
+        case 'gotaUpgrade':
+          this._tone({ f: 660, dur: 0.09, type: 'triangle', gain: 0.18 });
+          this._tone({ f: 880, dur: 0.09, type: 'triangle', gain: 0.18, delay: 0.08 });
+          this._tone({ f: 1180, dur: 0.14, type: 'triangle', gain: 0.2, delay: 0.16 });
+          this._noise(0.18, 0.16);
+          break;
+        case 'gotaBurst':
+          this._tone({ f: 300, to: 900, dur: 0.26, type: 'sawtooth', gain: 0.2 });
+          this._noise(0.3, 0.18);
+          break;
+        case 'gotaClaim':
+          [523, 784, 1046, 1318].forEach((f, i) => this._tone({ f: f, dur: 0.2, type: 'triangle', gain: 0.2, delay: i * 0.11 }));
+          this._noise(0.35, 0.14);
+          break;
       }
     } catch (e) {}
   },

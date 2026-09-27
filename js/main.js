@@ -50,7 +50,7 @@ const App = {
     if (name === 'leaderboard' && typeof LeaderboardScene !== 'undefined') LeaderboardScene.show();
     if (name === 'trophies') TrophiesScene.show();
     if (name === 'battlepass') BattlePassScene.show();
-    if (name === 'gota') GotaScene.show();
+    if (name === 'gota' && typeof GotaScene !== 'undefined') GotaScene.show(null, () => App.goTo('shop'));
     if (name === 'shop') ShopScene.show();
     if (name === 'mapmaker') MapMakerScene.show();
     if (name === 'editor') MapEditor._editorActive = true;

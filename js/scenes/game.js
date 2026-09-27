@@ -186,19 +186,19 @@ const GameScene = {
   _tryPrimordial(missionResult) {
     const drop = Primordial.canDrop(missionResult);
     if (Math.random() < drop.chance) {
-      Primordial.start(drop.maxTier);
+      Primordial.start(drop.mode);
       GotaScene.show(this._missionRewards || { coins:0, trophies:0 }, () => {
         this._updateGameoverWithGota();
         App.goTo('gameover');
       });
     } else {
-      window._gotaRewards = [];
+      GotaScene.rewards = [];
       App.goTo('gameover');
     }
   },
 
   _updateGameoverWithGota() {
-    const r = window._gotaRewards || [];
+    const r = GotaScene.rewards || [];
     const gotaCoins = r.filter(x => x.type === 'coins').reduce((s, x) => s + x.amount, 0);
     const gotaTrophies = r.filter(x => x.type === 'trophies').reduce((s, x) => s + x.amount, 0);
     const mCoins = this._missionRewards?.coins || 0;

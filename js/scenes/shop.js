@@ -168,7 +168,7 @@ const ShopScene = {
       cards.push(this._card({
         icon: '💧',
         name: `Gota Extra ${i + 1}`,
-        desc: 'Abre mais uma Gota Primordial agora.',
+        desc: 'Abre mais uma Gota Primordial. Chance de subir +5%.',
         badge: i === 0 ? '1ª' : (i === 1 ? '2ª' : '3ª+'),
         priceHtml: bought ? '✅ COMPRADA' : `${GEM_SVG} ${price}`,
         act: `gota-extra:${i}`,
@@ -180,7 +180,7 @@ const ShopScene = {
     cards.push(this._card({
       icon: '🎁',
       name: 'Pack de 3 Gotas',
-      desc: 'Abre 3 Gotas Primordiais em sequência.',
+      desc: 'Abre 3 Gotas Primordiais em sequência. Chance de subir +5%.',
       badge: 'PACK',
       bonus: '3 EM SEQUÊNCIA',
       priceHtml: `${GEM_SVG} ${Progression.GOTAPACK_PRICE}`,
@@ -269,18 +269,18 @@ const ShopScene = {
     } else if (key === 'gota-free') {
       if (!Progression.canClaimFreePrimordial()) return;
       Progression.claimFreePrimordial();
-      this._startGota();
+      this._startGota(false);
     } else if (key === 'gota-extra') {
       const idx = Number(arg);
       const maxIdx = Progression.GEM_PRICES.length - 1;
       if (idx !== Math.min(this._extraCount, maxIdx)) return;
       if (!Progression.spendGems(Progression.GEM_PRICES[idx])) return;
       this._extraCount++;
-      this._startGota();
+      this._startGota(true);
     } else if (key === 'gotapack3') {
       if (!Progression.spendGems(Progression.GOTAPACK_PRICE)) return;
       this._packQueue = 3;
-      this._startGota();
+      this._startGota(true);
     } else if (key === 'bp-premium') {
       if (Progression.buyBPPremium(50)) { this._sfx('coin'); this._render(); }
     } else if (key === 'bp-view') {
@@ -290,14 +290,14 @@ const ShopScene = {
     }
   },
 
-  _startGota() {
+  _startGota(paid) {
     this._sfx('pickup');
     this._render();
-    Primordial.start(6);
+    Primordial.start('shop', { upgradeBonus: paid ? Primordial.UPGRADE_BONUS : 0 });
     GotaScene.show({ coins: 0, trophies: 0 }, () => {
       if (this._packQueue > 0) {
         this._packQueue--;
-        this._startGota();
+        this._startGota(true);
       } else {
         this._render();
       }

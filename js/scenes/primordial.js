@@ -1,11 +1,12 @@
 const GotaScene = {
   _canvas: null, _ctx: null, _raf: null, _running: false,
   _sprites: {}, _imagesLoaded: 0, _imagesTotal: 7,
-  _state: 'idle', // idle | playing | popup | rewards | done
-  _popupTimer: 0, _popupText: '',
-  _rewardIndex: 0, _rewardTimer: 0,
-  _rewards: [], _onDone: null, _missionRewards: null,
+  _phase: 'idle',
+  _spinT: 0, _spinIdx: 0, _spinEnd: 1.7,
   _bgColor: '#1a1a2e', _targetBgColor: '#1a1a2e',
+  _flash: 0, _burst: 0, _punch: 0, _last: 0,
+  _rewards: null, _onDone: null, _missionRewards: null,
+  rewards: null,
 
   init() {
     this._canvas = document.getElementById('gota-canvas');
@@ -20,12 +21,12 @@ const GotaScene = {
     }
     this._preloadSprites();
     this._resize();
-    // Pointerdown + touchstart para compatibilidade mobile
     this._canvas.addEventListener('pointerdown', e => this._onTap(e));
-    this._canvas.addEventListener('touchstart', e => {
-      e.preventDefault();
-      this._onTap(e);
-    }, { passive: false });
+    const on = (id, fn) => { const el = document.getElementById(id); if (el) el.onclick = fn; };
+    on('gota-collect', () => this._finish());
+    on('gota-exit', () => this._finish());
+    on('gota-reveal-ok', () => this._close());
+    window.addEventListener('resize', () => this._resize());
   },
 
   _preloadSprites() {
@@ -53,57 +54,74 @@ const GotaScene = {
     this._missionRewards = missionRewards || { coins:0, trophies:0 };
     this._onDone = onDone || (() => {});
     this._rewards = null;
-    this._state = 'playing';
-    this._rewardIndex = 0;
-    this._popupTimer = 0;
+    this.rewards = null;
+    if (!Primordial.state.active) Primordial.start('shop');
+
+    this._phase = 'spin';
+    this._spinT = 0;
+    this._spinIdx = 0;
+    this._flash = 0;
+    this._burst = 0;
+    this._punch = 0;
     this._running = true;
+    this._last = performance.now();
     this._bgColor = '#1a1a2e';
-    this._targetBgColor = '#1a1a2e';
+    this._targetBgColor = Primordial.getTierData().color;
 
     document.getElementById('screen-gota').classList.add('active');
-    document.getElementById('gota-tap-counter').textContent = '0';
+    const rewards = document.getElementById('gota-rewards');
+    if (rewards) { rewards.style.display = 'none'; rewards.innerHTML = ''; }
+    this._setHud(true);
+    this._updateMeter();
+    this._updateTier(Primordial.TIERS[Primordial.state.winner]);
+    this._updateTimer(Primordial.state.remainingMs);
 
     const hint = document.getElementById('gota-hint');
-    if (!localStorage.getItem('prf_gota_onboarding')) {
+    if (hint && !localStorage.getItem('prf_gota_onboarding')) {
       localStorage.setItem('prf_gota_onboarding', '1');
       hint.style.display = 'block';
       setTimeout(() => { hint.style.display = 'none'; }, 3000);
     }
 
-    this._loop();
+    this._loop(this._last);
   },
 
-  _loop() {
+  _setHud(show) {
+    ['gota-top', 'gota-meter', 'gota-actions'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = show ? '' : 'none';
+    });
+  },
+
+  _loop(now) {
     if (!this._running) return;
+    const dt = Math.min(0.05, Math.max(0, (now - this._last) / 1000));
+    this._last = now;
 
-    if (this._state === 'popup') {
-      this._popupTimer -= 0.016;
-      if (this._popupTimer <= 0) {
-        this._state = 'playing';
+    if (this._phase === 'spin') {
+      this._spinT += dt;
+      this._spinIdx = Math.floor(this._spinT / 0.075) % Primordial.TIERS.length;
+      if (this._spinT >= this._spinEnd) {
+        this._phase = 'play';
+        this._spinIdx = Primordial.state.tierIdx;
+        this._punch = 1;
+        this._flash = 0.45;
+        this._targetBgColor = Primordial.getTierData().color;
+        this._sfx('gotaBurst');
       }
+    } else if (this._phase === 'play') {
+      const left = Primordial.tick(Date.now());
+      this._updateTimer(left);
+      if (left <= 0) this._finish();
     }
 
-    if (this._state === 'rewards') {
-      this._rewardTimer += 0.016;
-      if (this._rewardTimer > 0.6 && this._rewardIndex < this._rewards.length) {
-        this._rewardIndex++;
-        this._rewardTimer = 0;
-      }
-      if (this._rewardIndex >= this._rewards.length && this._rewardTimer > 1.5) {
-        this._state = 'done';
-        this._running = false;
-        cancelAnimationFrame(this._raf);
-        document.getElementById('screen-gota').classList.remove('active');
-        this._onDone();
-        return;
-      }
-    }
-
-    // Animação suave da cor de fundo
-    this._bgColor = this._lerpColor(this._bgColor, this._targetBgColor, 0.08);
+    this._flash = Math.max(0, this._flash - dt * 2);
+    this._burst = Math.max(0, this._burst - dt * 1.6);
+    this._punch = Math.max(0, this._punch - dt * 3);
+    this._bgColor = this._lerpColor(this._bgColor, this._targetBgColor, Math.min(1, dt * 5));
 
     this._draw();
-    this._raf = requestAnimationFrame(() => this._loop());
+    this._raf = requestAnimationFrame(t => this._loop(t));
   },
 
   _lerpColor(a, b, t) {
@@ -116,83 +134,157 @@ const GotaScene = {
     return '#' + ((1 << 24) + (rr << 16) + (rg << 8) + rb).toString(16).slice(1);
   },
 
+  _updateTimer(ms) {
+    const fill = document.getElementById('gota-timer-fill');
+    if (fill) {
+      const pct = Math.max(0, Math.min(100, (ms / Primordial.ROUND_MS) * 100));
+      fill.style.width = pct + '%';
+      fill.classList.toggle('low', ms <= 3000);
+    }
+    const label = document.getElementById('gota-timer-label');
+    if (label) label.textContent = (ms / 1000).toFixed(1) + 's';
+  },
+
+  _updateTier(tier) {
+    const el = document.getElementById('gota-tier-name');
+    if (!el || !tier) return;
+    el.textContent = tier.name.toUpperCase();
+    el.style.color = tier.color;
+  },
+
+  _updateMeter() {
+    const el = document.getElementById('gota-meter');
+    if (!el) return;
+    const filled = Primordial.state.charge;
+    let html = '';
+    for (let i = 0; i < Primordial.CHARGE_MAX; i++) {
+      html += `<span class="gota-pip ${i < filled ? 'on' : ''}"></span>`;
+    }
+    el.innerHTML = html;
+  },
+
   _draw() {
     const ctx = this._ctx, w = this._canvas.width, h = this._canvas.height;
 
-    if (this._state === 'rewards' || this._state === 'done') {
-      this._drawRewards(ctx, w, h);
-      return;
-    }
-
-    // Fundo com cor da raridade (suave)
     ctx.fillStyle = this._bgColor;
     ctx.fillRect(0, 0, w, h);
-
-    // Gradiente no centro
-    const tier = Primordial.getTierData();
-    const grad = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w * 0.5);
-    grad.addColorStop(0, 'rgba(255,255,255,0.08)');
-    grad.addColorStop(1, 'rgba(0,0,0,0.3)');
+    const grad = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w * 0.55);
+    grad.addColorStop(0, 'rgba(255,255,255,0.09)');
+    grad.addColorStop(1, 'rgba(0,0,0,0.35)');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, w, h);
 
-    const cx = w / 2, cy = h * 0.38;
-    const baseR = Math.min(w, h) * 0.18;
+    const tierIdx = this._phase === 'spin' ? this._spinIdx : Primordial.state.tierIdx;
+    const tier = Primordial.TIERS[tierIdx] || Primordial.TIERS[0];
 
-    // Gota (sprite)
-    this._drawSprite(ctx, cx, cy, baseR, tier);
-
-    // Nome do tier
-    ctx.fillStyle = tier.color || '#fff';
-    ctx.font = 'bold ' + Math.round(Math.min(w, h) * 0.05) + 'px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(tier.name.toUpperCase(), cx, cy + baseR + 36);
-
-    // Indicador de progresso (toques neste tier)
-    const tapsForTier = Primordial.state.tapsForTier;
-    const needed = Primordial.TAPS_PER_TIER;
-    for (let i = 0; i < needed; i++) {
-      const bx = cx - (needed - 1) * 12 + i * 24;
-      const by = cy + baseR + 66;
-      ctx.beginPath();
-      ctx.arc(bx, by, 7, 0, Math.PI * 2);
-      ctx.fillStyle = i < tapsForTier ? tier.color || '#fff' : 'rgba(255,255,255,0.2)';
-      ctx.fill();
+    if (this._phase === 'reveal') {
+      if (this._flash > 0) {
+        ctx.fillStyle = 'rgba(255,255,255,' + (this._flash * 0.35) + ')';
+        ctx.fillRect(0, 0, w, h);
+      }
+      return;
     }
 
-    // Total de toques
-    ctx.fillStyle = 'rgba(255,255,255,0.4)';
-    ctx.font = Math.round(Math.min(w, h) * 0.028) + 'px sans-serif';
-    ctx.fillText('Total: ' + Primordial.state.taps + ' toques', cx, cy + baseR + 100);
+    const cx = w / 2;
+    const cy = h * 0.40;
+    const baseR = Math.min(w, h) * (0.155 + this._punch * 0.03);
 
-    // Popup de evolução
-    if (this._state === 'popup') {
-      ctx.fillStyle = 'rgba(0,0,0,0.6)';
-      const pw = w * 0.6, ph = 50;
-      const px = (w - pw) / 2, py = h * 0.15;
-      ctx.beginPath();
-      ctx.moveTo(px + 12, py);
-      ctx.lineTo(px + pw - 12, py);
-      ctx.quadraticCurveTo(px + pw, py, px + pw, py + 12);
-      ctx.lineTo(px + pw, py + ph - 12);
-      ctx.quadraticCurveTo(px + pw, py + ph, px + pw - 12, py + ph);
-      ctx.lineTo(px + 12, py + ph);
-      ctx.quadraticCurveTo(px, py + ph, px, py + ph - 12);
-      ctx.lineTo(px, py + 12);
-      ctx.quadraticCurveTo(px, py, px + 12, py);
-      ctx.closePath();
-      ctx.fill();
-      ctx.fillStyle = tier.color || '#fff';
-      ctx.font = 'bold ' + Math.round(Math.min(w, h) * 0.04) + 'px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('⬆ ' + this._popupText, w / 2, py + ph / 2);
+    if (this._burst > 0) this._drawBurst(ctx, cx, cy, baseR, tier.color);
+
+    this._drawSprite(ctx, cx, cy, baseR, tier);
+
+    ctx.fillStyle = tier.color || '#fff';
+    ctx.font = 'bold ' + Math.round(Math.min(w, h) * 0.05) + 'px ' + this._font();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(tier.name.toUpperCase(), cx, cy + baseR + 34);
+
+    this._drawChips(ctx, w, h, tierIdx);
+
+    if (this._phase === 'spin') {
+      ctx.fillStyle = 'rgba(255,255,255,0.55)';
+      ctx.font = 'bold ' + Math.round(Math.min(w, h) * 0.026) + 'px sans-serif';
+      ctx.fillText('A SORTEAR A RARIDADE…', cx, h * 0.24);
+    }
+
+    if (this._flash > 0) {
+      ctx.fillStyle = 'rgba(255,255,255,' + (this._flash * 0.35) + ')';
+      ctx.fillRect(0, 0, w, h);
     }
   },
 
+  _drawBurst(ctx, cx, cy, r, color) {
+    const a = this._burst;
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, a);
+    ctx.strokeStyle = color || '#fff';
+    ctx.lineWidth = 3;
+    for (let i = 0; i < 14; i++) {
+      const ang = (i / 14) * Math.PI * 2;
+      const r0 = r * (1.15 + (1 - a) * 0.9);
+      const r1 = r0 + 26 * a;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(ang) * r0, cy + Math.sin(ang) * r0);
+      ctx.lineTo(cx + Math.cos(ang) * r1, cy + Math.sin(ang) * r1);
+      ctx.stroke();
+    }
+    ctx.restore();
+  },
+
+  _drawChips(ctx, w, h, activeIdx) {
+    const tiers = Primordial.TIERS;
+    const chipW = Math.min(w * 0.115, 120);
+    const gap = Math.max(4, chipW * 0.08);
+    const total = tiers.length * chipW + (tiers.length - 1) * gap;
+    const startX = (w - total) / 2;
+    const y = h * 0.74;
+    const chipH = Math.min(46, h * 0.11);
+
+    tiers.forEach((t, i) => {
+      const x = startX + i * (chipW + gap);
+      const on = i === activeIdx;
+      ctx.globalAlpha = on ? 1 : 0.35;
+      ctx.fillStyle = on ? t.color : 'rgba(255,255,255,0.06)';
+      this._roundRect(ctx, x, y, chipW, chipH, 8);
+      ctx.fill();
+      if (on) {
+        ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+      ctx.fillStyle = on ? '#0a0c16' : 'rgba(255,255,255,0.7)';
+      ctx.font = 'bold ' + Math.max(9, Math.round(chipH * 0.28)) + 'px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(t.name.slice(0, 9), x + chipW / 2, y + chipH / 2);
+      ctx.globalAlpha = 1;
+    });
+  },
+
+  _font() {
+    try {
+      const f = getComputedStyle(document.body).fontFamily;
+      if (f) return f;
+    } catch (e) {}
+    return 'sans-serif';
+  },
+
+  _roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  },
+
   _drawSprite(ctx, cx, cy, r, tier) {
-    const name = tier.sprite.replace('.png', '');
+    const name = (tier.sprite || '').replace('.png', '');
     const img = this._sprites[name];
     if (img && img.complete && img.naturalWidth > 0) {
       const s = r * 2;
@@ -211,70 +303,96 @@ const GotaScene = {
       ctx.font = Math.round(r * 1.2) + 'px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(tier.icon || '💧', cx, cy);
+      ctx.fillText('💧', cx, cy);
     }
-  },
-
-  _drawRewards(ctx, w, h) {
-    const tier = Primordial.getTierData();
-    // Fundo com a cor do tier escurecida
-    ctx.fillStyle = this._bgColor;
-    ctx.fillRect(0, 0, w, h);
-
-    // Nome do tier
-    ctx.fillStyle = tier.color || '#fff';
-    ctx.font = 'bold ' + Math.round(Math.min(w, h) * 0.06) + 'px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('⭐ ' + tier.name.toUpperCase() + ' ⭐', w / 2, h * 0.18);
-
-    // Lista de recompensas
-    const shown = this._rewards.slice(0, this._rewardIndex);
-    const startY = h * 0.32;
-    const lineH = Math.min(48, h * 0.07);
-    shown.forEach((r, i) => {
-      const y = startY + i * lineH;
-      const bounce = Math.sin(this._rewardTimer * 8 - i) * 4;
-      ctx.fillStyle = '#fff';
-      ctx.font = Math.round(Math.min(w, h) * 0.038) + 'px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(Primordial.rewardText(r), w / 2, y + bounce);
-    });
-
-    if (this._rewardIndex >= this._rewards.length) {
-      ctx.fillStyle = 'rgba(255,255,255,0.4)';
-      ctx.font = Math.round(Math.min(w, h) * 0.03) + 'px sans-serif';
-      ctx.fillText('A continuar…', w / 2, h * 0.85);
-    }
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.strokeStyle = tier.color || 'rgba(255,255,255,0.4)';
+    ctx.lineWidth = 4;
+    ctx.stroke();
   },
 
   _onTap(e) {
-    if (this._state === 'rewards' || this._state === 'done') return;
-    const now = performance.now();
-    const result = Primordial.tap(now);
+    if (this._phase !== 'play') return;
+    if (e && e.isPrimary === false) return;
+    const result = Primordial.tap(performance.now());
     if (!result) return;
 
-    document.getElementById('gota-tap-counter').textContent = Primordial.state.taps;
-
     const tier = Primordial.getTierData();
-    this._targetBgColor = tier.color || '#1a1a2e';
+    this._targetBgColor = tier.color;
+    this._updateMeter();
+    this._updateTier(tier);
 
-    if (result === 'evolve') {
-      this._popupText = tier.name + '!';
-      this._popupTimer = 1.2;
-      this._state = 'popup';
+    if (result === 'upgrade') {
+      this._punch = 1;
+      this._flash = 0.5;
+      this._burst = 1;
+      this._sfx('gotaUpgrade');
       if (navigator.vibrate) navigator.vibrate([15, 40, 15]);
-    } else if (result === 'claim') {
-      this._rewards = Primordial.getRewards();
-      Primordial.claimRewards(this._rewards);
-      window._gotaRewards = this._rewards;
-      this._rewardIndex = 0;
-      this._rewardTimer = 0;
-      this._state = 'rewards';
-      if (navigator.vibrate) navigator.vibrate([30, 50, 30, 50, 30]);
+    } else if (result === 'full') {
+      this._flash = 0.2;
+      this._sfx('gotaMiss');
+      if (navigator.vibrate) navigator.vibrate(14);
     } else {
-      if (navigator.vibrate) navigator.vibrate(10);
+      this._sfx('gotaTap');
+      if (navigator.vibrate) navigator.vibrate(8);
     }
+  },
+
+  _finish() {
+    if (this._phase === 'reveal' || this._phase === 'idle') return;
+    this._phase = 'reveal';
+    this._rewards = Primordial.claim() || [];
+    this.rewards = this._rewards;
+    this._flash = 0.7;
+    this._burst = 1;
+    this._sfx('gotaClaim');
+    if (navigator.vibrate) navigator.vibrate([30, 50, 30, 50, 30]);
+    this._setHud(false);
+    this._renderRewards();
+  },
+
+  _renderRewards() {
+    const panel = document.getElementById('gota-rewards');
+    if (!panel) return;
+    const tier = Primordial.getTierData();
+    const list = this._rewards || [];
+    const cards = list.length
+      ? list.map(r => `
+          <div class="gota-card" style="border-color:${tier.color}">
+            <div class="gota-card-icon">${r.icon || (r.type === 'coins' ? COIN_SVG : (r.type === 'trophies' ? '🏆' : '📦'))}</div>
+            <div class="gota-card-text">${Primordial.rewardText(r)}</div>
+          </div>
+        `).join('')
+      : `<div class="gota-card-empty">Sem recompensas nesta Gota.</div>`;
+
+    panel.innerHTML = `
+      <div class="gota-reveal">
+        <div class="gota-reveal-tier" style="color:${tier.color}">⭐ ${tier.name.toUpperCase()} ⭐</div>
+        <div class="gota-reveal-cards">${cards}</div>
+        <button class="gota-reveal-ok" id="gota-reveal-ok">CONTINUAR</button>
+      </div>
+    `;
+    panel.style.display = 'flex';
+    const ok = document.getElementById('gota-reveal-ok');
+    if (ok) ok.onclick = () => this._close();
+  },
+
+  _close() {
+    if (this._phase !== 'reveal') return;
+    this._phase = 'idle';
+    this._running = false;
+    if (this._raf) cancelAnimationFrame(this._raf);
+    const panel = document.getElementById('gota-rewards');
+    if (panel) { panel.style.display = 'none'; panel.innerHTML = ''; }
+    document.getElementById('screen-gota').classList.remove('active');
+    const cb = this._onDone;
+    this._onDone = null;
+    if (cb) cb();
+  },
+
+  _sfx(name) {
+    if (typeof AudioFX === 'undefined') return;
+    try { AudioFX.play(name); } catch (e) {}
   },
 };

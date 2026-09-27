@@ -17,7 +17,7 @@
   <meta property="og:image" content="splash_screen.png.jpg">
   <link rel="apple-touch-icon" href="icon-192.svg">
   <title>Power Rangers Primal Force</title>
-  <link rel="stylesheet" href="css/style.css?v=29">
+  <link rel="stylesheet" href="css/style.css?v=30">
 <script src="vendor/three.min.js"
         onerror="document.write('<script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js&quot;><\/script>')"></script>
 <script src="vendor/GLTFLoader.js"
@@ -284,11 +284,20 @@
 
   <!-- ── GOTA PRIMORDIAL (overlay) ── -->
   <div id="screen-gota" class="screen overlay gota-overlay">
-    <div id="gota-canvas-wrap">
-      <span id="gota-tap-counter">0</span>
-    </div>
     <canvas id="gota-canvas"></canvas>
-    <div id="gota-hint" class="gota-hint" style="display:none">👆 Toca repetidamente antes do tempo acabar!</div>
+    <div class="gota-top" id="gota-top">
+      <div class="gota-tier" id="gota-tier-name">COMUM</div>
+      <div class="gota-timer"><div class="gota-timer-fill" id="gota-timer-fill"></div></div>
+      <div class="gota-timer-label" id="gota-timer-label">12.0s</div>
+    </div>
+    <div id="gota-hint" class="gota-hint" style="display:none">👆 Carrega para carregar a Gota antes do tempo acabar!</div>
+    <div class="gota-bottom">
+      <div class="gota-meter" id="gota-meter"></div>
+      <div class="gota-actions" id="gota-actions">
+        <button class="gota-btn gota-collect" id="gota-collect">RECOLHER</button>
+        <button class="gota-btn gota-exit" id="gota-exit" title="Guardar e sair">&#10005;</button>
+      </div>
+    </div>
     <div id="gota-rewards" class="gota-rewards" style="display:none"></div>
   </div>
 
@@ -710,7 +719,7 @@
 
 <script src="js/core/utils.js?v=14"></script>
 <script src="js/core/currencyicons.js?v=1"></script>
-<script src="js/core/audio.js?v=3"></script>
+<script src="js/core/audio.js?v=4"></script>
 <script src="js/core/settings.js?v=1"></script>
 <script src="js/core/account.js?v=1"></script>
 <script src="js/core/input.js?v=14"></script>
@@ -721,7 +730,7 @@
 <script src="js/core/world3d.js?v=14"></script>
 <script src="js/core/wave.js?v=15"></script>
 <script src="js/core/progression.js?v=16"></script>
-<script src="js/core/primordial.js?v=14"></script>
+<script src="js/core/primordial.js?v=15"></script>
 <script src="js/core/story.js?v=14"></script>
 <script src="js/core/modelloader.js?v=1"></script>
 <script src="js/core/toonshader.js?v=1"></script>
@@ -745,16 +754,16 @@
 <script src="js/scenes/leaderboard.js?v=1"></script>
 <script src="js/scenes/trophies.js?v=14"></script>
 <script src="js/scenes/battlepass.js?v=15"></script>
-<script src="js/scenes/primordial.js?v=14"></script>
-<script src="js/scenes/shop.js?v=16"></script>
+<script src="js/scenes/primordial.js?v=15"></script>
+<script src="js/scenes/shop.js?v=17"></script>
 <script src="js/scenes/mapmaker.js?v=1"></script>
 <script src="js/mapeditor/data.js?v=1"></script>
 <script src="js/mapeditor/editor.js?v=2"></script>
 <script src="js/mapeditor/storage.js?v=1"></script>
 <script src="js/data/rangerparts.js?v=1"></script>
 <script src="js/scenes/creator.js?v=1"></script>
-<script src="js/scenes/game.js?v=17"></script>
+<script src="js/scenes/game.js?v=18"></script>
 <script src="js/scenes/account.js?v=2"></script>
-<script src="js/main.js?v=23"></script>
+<script src="js/main.js?v=24"></script>
 </body>
 </html>
