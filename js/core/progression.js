@@ -166,8 +166,24 @@ const Progression = {
     } catch(e) {}
   },
 
-  save() {
+  saveLocal() {
     try { localStorage.setItem('prf_progression', JSON.stringify(this.data)); } catch(e) {}
+  },
+
+  save() {
+    this.saveLocal();
+    this.queueCloudSync();
+  },
+
+  queueCloudSync() {
+    if (typeof SurgeID === 'undefined' || !SurgeID.isSignedIn()) return;
+    clearTimeout(this._cloudTimer);
+    this._cloudTimer = setTimeout(() => {
+      if (typeof SurgeID !== 'undefined' && SurgeID.isSignedIn()) {
+        const res = SurgeID.sync(Progression.data);
+        if (res && typeof res.catch === 'function') res.catch(() => {});
+      }
+    }, 5000);
   },
 
   addTrophies(n) {

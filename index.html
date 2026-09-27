@@ -17,7 +17,7 @@
   <meta property="og:image" content="splash_screen.png.jpg">
   <link rel="apple-touch-icon" href="icon-192.svg">
   <title>Power Rangers Primal Force</title>
-  <link rel="stylesheet" href="css/style.css?v=30">
+  <link rel="stylesheet" href="css/style.css?v=31">
 <script src="vendor/three.min.js"
         onerror="document.write('<script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js&quot;><\/script>')"></script>
 <script src="vendor/GLTFLoader.js"
@@ -701,6 +701,64 @@
     </div>
   </div>
 
+  <!-- ── SURGE ID ── -->
+  <div id="screen-surgeid" class="screen">
+    <div class="menu-bg"></div>
+    <button class="back-btn account-back" id="btn-back-surgeid">&#8592; Voltar</button>
+    <div class="account-box surgeid-box">
+      <div class="logo-title">
+        <div class="logo-sub">SURGE GAMES</div>
+        <div class="logo-main">SURGE ID</div>
+      </div>
+      <p class="account-subtitle" id="surgeid-subtitle">Uma conta para todos os teus jogos</p>
+
+      <div id="surgeid-signedout" class="surgeid-panel">
+        <div class="surgeid-tabs">
+          <button type="button" class="surgeid-tab active" id="surgeid-tab-login">Entrar</button>
+          <button type="button" class="surgeid-tab" id="surgeid-tab-register">Criar conta</button>
+        </div>
+        <form id="surgeid-form" class="account-form">
+          <label class="account-label" for="surgeid-email">Email</label>
+          <input type="email" id="surgeid-email" class="account-input" placeholder="oteu@email.com" required autocomplete="email">
+
+          <label class="account-label" for="surgeid-password">Palavra-passe</label>
+          <input type="password" id="surgeid-password" class="account-input" placeholder="mínimo 8 caracteres" required minlength="8" autocomplete="current-password">
+
+          <div id="surgeid-name-field" class="surgeid-hidden">
+            <label class="account-label" for="surgeid-name">Nome</label>
+            <input type="text" id="surgeid-name" class="account-input" placeholder="Ranger" maxlength="40">
+          </div>
+
+          <div id="surgeid-error" class="account-error"></div>
+
+          <button type="submit" id="surgeid-submit" class="menu-icon-btn menu-play-btn account-submit-btn">
+            <span class="corner-icon">⚡</span><span class="corner-label">ENTRAR</span>
+          </button>
+        </form>
+      </div>
+
+      <div id="surgeid-signedin" class="surgeid-panel surgeid-hidden">
+        <div class="surgeid-code" id="surgeid-code">SG-??????</div>
+        <div class="surgeid-email" id="surgeid-email-view"></div>
+        <div class="surgeid-state" id="surgeid-state"></div>
+
+        <div class="surgeid-stats">
+          <div class="surgeid-stat"><b id="surgeid-trophies">0</b><span>TROFÉUS</span></div>
+          <div class="surgeid-stat"><b id="surgeid-coins">0</b><span>MOEDAS</span></div>
+          <div class="surgeid-stat"><b id="surgeid-gems">0</b><span>JOIAS</span></div>
+          <div class="surgeid-stat"><b id="surgeid-bp">0</b><span>PASSE</span></div>
+        </div>
+
+        <div class="surgeid-actions">
+          <button type="button" class="menu-btn" id="surgeid-sync">GUARDAR NA NUVEM</button>
+          <button type="button" class="menu-btn secondary" id="surgeid-pull">CARREGAR DA NUVEM</button>
+          <button type="button" class="menu-btn secondary" id="surgeid-logout">SAIR DA CONTA</button>
+        </div>
+      </div>
+      <div class="surgeid-msg" id="surgeid-msg"></div>
+    </div>
+  </div>
+
   <!-- ── GAME OVER ── -->
   <div id="screen-gameover" class="screen overlay">
     <div class="gameover-box">
@@ -722,6 +780,7 @@
 <script src="js/core/audio.js?v=4"></script>
 <script src="js/core/settings.js?v=1"></script>
 <script src="js/core/account.js?v=1"></script>
+<script src="js/core/surgeid.js?v=1"></script>
 <script src="js/core/input.js?v=14"></script>
 <script src="js/core/joystick.js?v=14"></script>
 <script src="js/core/renderer.js?v=14"></script>
@@ -729,7 +788,7 @@
 <script src="js/core/engine3d.js?v=14"></script>
 <script src="js/core/world3d.js?v=14"></script>
 <script src="js/core/wave.js?v=15"></script>
-<script src="js/core/progression.js?v=16"></script>
+<script src="js/core/progression.js?v=17"></script>
 <script src="js/core/primordial.js?v=15"></script>
 <script src="js/core/story.js?v=14"></script>
 <script src="js/core/modelloader.js?v=1"></script>
@@ -744,7 +803,7 @@
 <script src="js/entities/particle.js?v=14"></script>
 <script src="js/entities/pickup.js?v=14"></script>
 <script src="js/ui/hud.js?v=15"></script>
-<script src="js/scenes/menu.js?v=18"></script>
+<script src="js/scenes/menu.js?v=19"></script>
 <script src="js/scenes/select.js?v=15"></script>
 <script src="js/scenes/dialog.js?v=14"></script>
 <script src="js/scenes/worldmap.js?v=15"></script>
@@ -764,6 +823,7 @@
 <script src="js/scenes/creator.js?v=1"></script>
 <script src="js/scenes/game.js?v=18"></script>
 <script src="js/scenes/account.js?v=2"></script>
-<script src="js/main.js?v=24"></script>
+<script src="js/scenes/surgeid.js?v=1"></script>
+<script src="js/main.js?v=25"></script>
 </body>
 </html>

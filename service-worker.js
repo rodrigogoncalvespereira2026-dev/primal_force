@@ -1,4 +1,4 @@
-const CACHE_NAME = 'primal-force-v8';
+const CACHE_NAME = 'primal-force-v9';
 const ASSETS = [
   './',
   './index.html',
@@ -23,6 +23,7 @@ const ASSETS = [
   './js/core/renderer.js',
   './js/core/settings.js',
   './js/core/story.js',
+  './js/core/surgeid.js',
   './js/core/toonshader.js',
   './js/core/utils.js',
   './js/core/wave.js',
@@ -53,6 +54,7 @@ const ASSETS = [
   './js/scenes/primordial.js',
   './js/scenes/select.js',
   './js/scenes/shop.js',
+  './js/scenes/surgeid.js',
   './js/scenes/trophies.js',
   './js/scenes/worldmap.js',
   './js/ui/hud.js',

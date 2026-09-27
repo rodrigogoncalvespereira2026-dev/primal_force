@@ -47,6 +47,8 @@ const MenuScene = {
             AudioFX.toggle();
             btn.querySelector('span:last-child').textContent = AudioFX.enabled ? 'Som: ligado' : 'Som: desligado';
           }
+        } else if (opcao === 'id') {
+          setTimeout(() => App.goTo('surgeid'), 150);
         } else {
           setTimeout(() => alert(`${nome} — em breve!`), 150);
         }

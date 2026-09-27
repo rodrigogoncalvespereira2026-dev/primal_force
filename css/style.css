@@ -1321,6 +1321,58 @@ body {
   justify-content: center;
 }
 
+#screen-surgeid { align-items: center; justify-content: center; }
+#screen-surgeid:not(.active) { display: none !important; }
+#screen-surgeid .surgeid-hidden { display: none; }
+.surgeid-box { width: min(420px, 90vw); }
+.surgeid-tabs { display: flex; gap: 8px; width: 100%; margin-bottom: 8px; }
+.surgeid-tab {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #9db3d6;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+.surgeid-tab.active { background: #ffd93e; border-color: #ffd93e; color: #0b1226; }
+.surgeid-panel { width: 100%; display: flex; flex-direction: column; align-items: center; }
+.surgeid-code {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: 4px;
+  color: #7ee8e0;
+  margin-top: 6px;
+}
+.surgeid-email { color: #9db3d6; font-size: 13px; margin-top: 4px; word-break: break-all; text-align: center; }
+.surgeid-state { color: #7ee8a8; font-size: 12px; margin-top: 8px; text-align: center; }
+.surgeid-stats { display: flex; gap: 8px; width: 100%; margin-top: 16px; }
+.surgeid-stat {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 8px 4px;
+  text-align: center;
+}
+.surgeid-stat b { display: block; font-size: 18px; color: #ffd93e; }
+.surgeid-stat span { font-size: 10px; color: #9db3d6; letter-spacing: 1px; }
+.surgeid-actions { display: flex; flex-direction: column; gap: 8px; width: 100%; margin-top: 16px; }
+.surgeid-actions .menu-btn { width: 100%; padding: 12px 16px; font-size: 14px; letter-spacing: 2px; }
+.surgeid-msg {
+  min-height: 18px;
+  margin-top: 10px;
+  width: 100%;
+  color: #7ee8a8;
+  font-size: 13px;
+  text-align: center;
+}
+.surgeid-msg.surgeid-error { color: #ff6b6b; }
+
 .pause-box h2, .gameover-box h2 {
   font-size: 32px;
   letter-spacing: 6px;

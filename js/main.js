@@ -25,6 +25,7 @@ const App = {
     editor:      'screen-editor',
     creator:     'screen-creator',
     account:     'screen-account',
+    surgeid:     'screen-surgeid',
   },
 
   goTo(name) {
@@ -57,6 +58,7 @@ const App = {
     if (name === 'creator') { CreatorScene.show(); }
     if (this._current === 'creator' && name !== 'creator') { CreatorScene.hide(); }
     if (name === 'account') { AccountScene.show(); }
+    if (name === 'surgeid' && typeof SurgeIDScene !== 'undefined') SurgeIDScene.show();
     if (name === 'game') {
       // Mapa personalizado = modo livre, sem missão de zona
       let customMap = null;
@@ -79,6 +81,19 @@ const App = {
 
   vpToApp(vx, vy) {
     return { x: vx, y: vy };
+  },
+
+  _initSurgeSync() {
+    if (typeof SurgeID === 'undefined') return;
+    SurgeID.restore();
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden' && SurgeID.isSignedIn()) {
+        SurgeID.sync(Progression.data);
+      }
+    });
+    if (SurgeID.isSignedIn()) {
+      setTimeout(() => { if (SurgeID.isSignedIn()) SurgeID.sync(Progression.data); }, 1500);
+    }
   },
 
   _forceLandscape() {
@@ -352,9 +367,11 @@ const App = {
     DialogSystem.init();
     GameScene.init();
     AccountScene.init();
+    if (typeof SurgeIDScene !== 'undefined') SurgeIDScene.init();
     this._initEditor();
     this.selectedRanger = RANGERS_DATA[0];
     Account.load();
+    this._initSurgeSync();
 
     // Splash screen: hide after animation or on click
     const splash = document.getElementById('splash-screen');

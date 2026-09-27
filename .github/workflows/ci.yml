@@ -32,6 +32,7 @@ jobs:
           node tests/progtest.js
           node tests/shoptest.js
           node tests/gotatest.js
+          node tests/surgeidtest.js
           node tests/dailytest.js
           node tests/musictest.js
           node tests/perfiltest.js
