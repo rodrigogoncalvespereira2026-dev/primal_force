@@ -1,4 +1,4 @@
-const CACHE_NAME = 'primal-force-v4';
+const CACHE_NAME = 'primal-force-v5';
 const ASSETS = [
   './',
   './index.html',
@@ -91,6 +91,23 @@ self.addEventListener('fetch', e => {
 
   const sameOrigin = new URL(req.url).origin === self.location.origin;
 
+  // Navegações (HTML): rede primeiro para o site nunca ficar preso a versões antigas
+  if (req.mode === 'navigate' && sameOrigin) {
+    e.respondWith(
+      fetch(req)
+        .then(res => {
+          if (res && res.ok) {
+            const copy = res.clone();
+            caches.open(CACHE_NAME).then(c => c.put(req, copy)).catch(() => {});
+            return res;
+          }
+          return caches.match(req).then(c => c || caches.match('./index.html') || Response.error());
+        })
+        .catch(() => caches.match(req).then(c => c || caches.match('./index.html') || Response.error()))
+    );
+    return;
+  }
+
   e.respondWith(
     caches.match(req).then(cached => {
       if (cached) {
@@ -105,12 +122,7 @@ self.addEventListener('fetch', e => {
           caches.open(CACHE_NAME).then(c => c.put(req, copy)).catch(() => {});
         }
         return res;
-      }).catch(() => {
-        if (req.mode === 'navigate' && sameOrigin) {
-          return caches.match('./index.html');
-        }
-        return Response.error();
-      });
+      }).catch(() => Response.error());
     })
   );
 });
