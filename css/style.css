@@ -1373,6 +1373,29 @@ body {
 }
 .surgeid-msg.surgeid-error { color: #ff6b6b; }
 
+@media (max-width: 480px) {
+  .surgeid-box {
+    width: 95vw;
+    padding: 24px 18px;
+  }
+  .surgeid-tabs { gap: 6px; margin-bottom: 6px; }
+  .surgeid-tab {
+    padding: 12px 8px;
+    font-size: 12px;
+    min-height: 44px;
+  }
+  .surgeid-code { font-size: 24px; letter-spacing: 2px; }
+  .surgeid-email { font-size: 12px; }
+  .surgeid-state { font-size: 11px; }
+  .surgeid-stats { gap: 6px; margin-top: 12px; }
+  .surgeid-stat { padding: 6px 3px; }
+  .surgeid-stat b { font-size: 16px; }
+  .surgeid-stat span { font-size: 9px; }
+  .surgeid-actions { gap: 10px; margin-top: 14px; }
+  .surgeid-actions .menu-btn { padding: 14px 12px; font-size: 14px; }
+  .account-input { font-size: 16px; }
+}
+
 .pause-box h2, .gameover-box h2 {
   font-size: 32px;
   letter-spacing: 6px;

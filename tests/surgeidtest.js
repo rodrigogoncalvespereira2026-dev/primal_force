@@ -129,7 +129,7 @@ setImmediate(() => {
   check('html tem botão guardar na nuvem', html.includes('id="surgeid-sync"'));
   check('html carrega o SDK', html.includes('js/core/surgeid.js?v=1'));
   check('html carrega a cena', html.includes('js/scenes/surgeid.js?v=1'));
-  check('html subiu o css', html.includes('css/style.css?v=31'));
+  check('html subiu o css', html.includes('css/style.css?v=32'));
 
   check('menu abre o surgeid', menuSrc.includes("opcao === 'id'") && menuSrc.includes("App.goTo('surgeid')"));
   check('main regista o ecrã', mainSrc.includes("surgeid:     'screen-surgeid'"));
@@ -144,7 +144,7 @@ setImmediate(() => {
   check('css tem o código do Surge ID', css.includes('.surgeid-code'));
   check('css tem os separadores', css.includes('.surgeid-tab.active'));
 
-  check('service worker bump', swSrc.includes("primal-force-v9"));
+  check('service worker bump', swSrc.includes("primal-force-v10"));
   check('service worker guarda o SDK', swSrc.includes('./js/core/surgeid.js'));
   check('service worker guarda a cena', swSrc.includes('./js/scenes/surgeid.js'));
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'primal-force-v9';
+const CACHE_NAME = 'primal-force-v10';
 const ASSETS = [
   './',
   './index.html',
