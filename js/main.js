@@ -351,7 +351,7 @@ const App = {
     const hideSplash = () => { if (splash) splash.classList.add('hidden'); };
     if (splash) {
       splash.addEventListener('click', hideSplash, { once: true });
-      setTimeout(hideSplash, 4000);
+      setTimeout(hideSplash, 3400);
     }
 
     if (!Account.exists()) {
