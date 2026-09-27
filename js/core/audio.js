@@ -10,8 +10,40 @@ const AudioFX = {
   _musicStep: 0,
 
   MUSIC: {
-    menu:   { bpm: 96,  chordLen: 16, chords: [[110, 261.63, 329.63], [87.31, 261.63, 440], [130.81, 329.63, 392], [98, 293.66, 493.88]] },
-    battle: { bpm: 150, chordLen: 16, chords: [[110, 164.81, 261.63], [87.31, 130.81, 220], [98, 146.83, 246.94], [82.41, 123.47, 196]] },
+    menu: {
+      bpm: 128,
+      roots: [36, 43, 45, 41],
+      triads: [[60, 64, 67], [59, 62, 67], [57, 60, 64], [57, 60, 65]],
+      melody: [
+        [[0, 72, 2], [2, 76, 2], [4, 79, 2], [6, 76, 2], [8, 74, 4], [12, 72, 2], [14, 71, 2]],
+        [[0, 74, 2], [2, 79, 2], [4, 83, 2], [6, 79, 2], [8, 77, 4], [12, 74, 2], [14, 76, 2]],
+        [[0, 76, 2], [2, 72, 2], [4, 69, 2], [6, 72, 2], [8, 76, 4], [12, 79, 2], [14, 76, 2]],
+        [[0, 77, 2], [2, 76, 2], [4, 72, 2], [6, 69, 2], [8, 65, 4], [12, 67, 2], [14, 69, 2]],
+      ],
+      drums: { kick: [0, 8], clap: [4, 12], hat: [0, 2, 4, 6, 8, 10, 12, 14], crash: [0] },
+      stabs: [2, 6, 10, 14],
+      bassOct: [6, 14],
+      lead: { type: 'square', gain: 0.15 },
+      bass: { gain: 0.2, cutoff: 750 },
+      stabGain: 0.045,
+    },
+    battle: {
+      bpm: 142,
+      roots: [45, 41, 48, 43],
+      triads: [[57, 60, 64], [57, 60, 65], [60, 64, 67], [59, 62, 67]],
+      melody: [
+        [[0, 69, 2], [2, 72, 2], [4, 76, 2], [6, 72, 2], [8, 69, 2], [10, 72, 2], [12, 76, 4]],
+        [[0, 65, 2], [2, 69, 2], [4, 72, 2], [6, 69, 2], [8, 77, 4], [12, 76, 2], [14, 74, 2]],
+        [[0, 67, 2], [2, 72, 2], [4, 76, 2], [6, 72, 2], [8, 79, 4], [12, 76, 2], [14, 74, 2]],
+        [[0, 74, 2], [2, 71, 2], [4, 67, 2], [6, 71, 2], [8, 74, 4], [12, 79, 2], [14, 76, 2]],
+      ],
+      drums: { kick: [0, 4, 8, 12], clap: [4, 12], hat: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], crash: [0, 2] },
+      stabs: [2, 6, 10, 14],
+      bassOct: [6, 14],
+      lead: { type: 'square', gain: 0.14 },
+      bass: { gain: 0.22, cutoff: 900 },
+      stabGain: 0.04,
+    },
   },
 
   init() {
@@ -121,9 +153,9 @@ const AudioFX = {
     const spec = this.MUSIC[this._musicTrack];
     if (!ctx || !spec || !this._musicGain) return;
     if (ctx.currentTime > this._musicNext + 2) this._musicNext = ctx.currentTime + 0.1;
-    const stepDur = 30 / spec.bpm;
+    const stepDur = 15 / spec.bpm;
     let guard = 0;
-    while (this._musicNext < ctx.currentTime + 0.8 && guard++ < 32) {
+    while (this._musicNext < ctx.currentTime + 0.8 && guard++ < 64) {
       this._playMusicStep(spec, this._musicStep, this._musicNext);
       this._musicStep++;
       this._musicNext += stepDur;
@@ -134,24 +166,139 @@ const AudioFX = {
     const ctx = this.ctx;
     const dest = this._musicGain;
     if (!ctx || !dest) return;
-    const stepDur = 30 / spec.bpm;
-    const chord = spec.chords[Math.floor(step / spec.chordLen) % spec.chords.length];
-    const s = step % spec.chordLen;
-    const delay = Math.max(0, t - ctx.currentTime);
-    if (this._musicTrack === 'battle') {
-      const arp = [0, 1, 2, 1];
-      this._tone({ f: chord[arp[s % 4]], dur: 0.2, type: 'triangle', gain: 0.05, delay, dest, noVol: true });
-      if (s % 4 === 0) this._tone({ f: chord[0] * 0.5, dur: 0.14, type: 'sine', gain: 0.09, delay, dest, noVol: true });
-      if (s % 4 === 2) this._tone({ f: chord[2] * 2, dur: 0.05, type: 'square', gain: 0.014, delay, dest, noVol: true });
-      return;
+    const stepDur = 15 / spec.bpm;
+    const bars = spec.roots.length;
+    const bar = Math.floor(step / 16) % bars;
+    const s = step % 16;
+    const mel = spec.melody[bar] || [];
+
+    for (let i = 0; i < mel.length; i++) {
+      const n = mel[i];
+      if (n[0] !== s) continue;
+      this._note(dest, t, this._hz(n[1]), Math.max(0.05, n[2] * stepDur * 0.92), spec.lead.gain, spec.lead.type);
     }
-    if (s === 0) {
-      const dur = stepDur * spec.chordLen;
-      chord.forEach((f, i) => this._tone({ f, dur, type: 'sine', gain: 0.055 - i * 0.008, delay, dest, noVol: true }));
+
+    if (s % 2 === 0) {
+      const oct = spec.bassOct.indexOf(s) >= 0 ? 12 : 0;
+      this._bass(dest, t, this._hz(spec.roots[bar] + oct), stepDur * 2 * 0.85, spec.bass.gain, spec.bass.cutoff);
     }
-    if (s % 4 === 2) {
-      this._tone({ f: chord[(s % 8 === 6) ? 2 : 1] * 2, dur: 0.5, type: 'triangle', gain: 0.03, delay, dest, noVol: true });
+
+    if (spec.stabs.indexOf(s) >= 0) {
+      const triad = spec.triads[bar];
+      for (let i = 0; i < triad.length; i++) {
+        this._note(dest, t, this._hz(triad[i]), stepDur * 0.9, spec.stabGain, 'square');
+      }
     }
+
+    const d = spec.drums;
+    if (d.kick.indexOf(s) >= 0)  this._kick(dest, t, 0.45);
+    if (d.clap.indexOf(s) >= 0)  this._clap(dest, t, 0.2);
+    if (d.hat.indexOf(s) >= 0)   this._hat(dest, t, s % 4 === 0 ? 0.075 : 0.045);
+    if (s === 0 && d.crash.indexOf(bar) >= 0) this._crash(dest, t, 0.12);
+  },
+
+  _hz(m) {
+    return 440 * Math.pow(2, (m - 69) / 12);
+  },
+
+  _note(dest, t, freq, dur, gain, type) {
+    const ctx = this.ctx;
+    if (!ctx) return;
+    dur = Math.max(0.03, dur);
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = type || 'square';
+    o.frequency.setValueAtTime(freq, t);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0003, gain), t + 0.012);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0003, gain * 0.6), t + dur * 0.7);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g);
+    g.connect(dest);
+    o.start(t);
+    o.stop(t + dur + 0.03);
+  },
+
+  _bass(dest, t, freq, dur, gain, cutoff) {
+    const ctx = this.ctx;
+    if (!ctx) return;
+    dur = Math.max(0.05, dur);
+    const o = ctx.createOscillator();
+    const f = ctx.createBiquadFilter();
+    const g = ctx.createGain();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(freq, t);
+    f.type = 'lowpass';
+    f.frequency.setValueAtTime(cutoff || 800, t);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0003, gain), t + 0.01);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0003, gain * 0.5), t + dur * 0.6);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(f);
+    f.connect(g);
+    g.connect(dest);
+    o.start(t);
+    o.stop(t + dur + 0.03);
+  },
+
+  _noiseBuffer() {
+    if (this._nbuf) return this._nbuf;
+    const ctx = this.ctx;
+    const len = Math.floor(ctx.sampleRate * 1.0);
+    const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+    this._nbuf = buf;
+    return buf;
+  },
+
+  _drum(dest, t, gain, dur, filterType, freq, q) {
+    const ctx = this.ctx;
+    if (!ctx) return;
+    const src = ctx.createBufferSource();
+    const flt = ctx.createBiquadFilter();
+    const g = ctx.createGain();
+    src.buffer = this._noiseBuffer();
+    flt.type = filterType;
+    flt.frequency.value = freq;
+    if (q) flt.Q.value = q;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0003, gain), t + 0.005);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(flt);
+    flt.connect(g);
+    g.connect(dest);
+    src.start(t);
+    src.stop(t + dur + 0.02);
+  },
+
+  _kick(dest, t, gain) {
+    const ctx = this.ctx;
+    if (!ctx) return;
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(155, t);
+    o.frequency.exponentialRampToValueAtTime(45, t + 0.1);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0003, gain), t + 0.006);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+    o.connect(g);
+    g.connect(dest);
+    o.start(t);
+    o.stop(t + 0.2);
+  },
+
+  _clap(dest, t, gain) {
+    this._drum(dest, t, gain, 0.13, 'bandpass', 1700, 1.1);
+  },
+
+  _hat(dest, t, gain) {
+    this._drum(dest, t, gain, 0.035, 'highpass', 7500, 0.7);
+  },
+
+  _crash(dest, t, gain) {
+    this._drum(dest, t, gain, 0.7, 'highpass', 5200, 0.6);
   },
 
   _tone(opts) {

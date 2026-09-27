@@ -31,5 +31,6 @@ jobs:
           node tests/wavetest.js
           node tests/progtest.js
           node tests/dailytest.js
+          node tests/musictest.js
           node tests/perfiltest.js
           node tests/smoke.js
