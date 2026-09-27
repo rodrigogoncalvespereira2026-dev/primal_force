@@ -30,6 +30,7 @@ jobs:
           node tests/check-scripts.js
           node tests/wavetest.js
           node tests/progtest.js
+          node tests/shoptest.js
           node tests/dailytest.js
           node tests/musictest.js
           node tests/perfiltest.js

@@ -17,7 +17,7 @@
   <meta property="og:image" content="splash_screen.png.jpg">
   <link rel="apple-touch-icon" href="icon-192.svg">
   <title>Power Rangers Primal Force</title>
-  <link rel="stylesheet" href="css/style.css?v=28">
+  <link rel="stylesheet" href="css/style.css?v=29">
 <script src="vendor/three.min.js"
         onerror="document.write('<script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js&quot;><\/script>')"></script>
 <script src="vendor/GLTFLoader.js"
@@ -294,21 +294,31 @@
 
   <!-- ── LOJA ── -->
   <div id="screen-shop" class="screen">
-    <div class="select-header">
-      <button class="back-btn" id="btn-back-shop">&#8592; Voltar</button>
-      <h1>LOJA</h1>
-    </div>
-    <div class="shop-currency-bar"><svg viewBox="0 0 24 24" width="16" height="16" style="display:inline-block;vertical-align:middle;margin:0 2px;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.4))"><circle cx="12" cy="12" r="10.5" fill="#DAA520" stroke="#996600" stroke-width="1"/><circle cx="12" cy="11" r="8" fill="#FFD700" stroke="#CC9900" stroke-width="0.5"/><text x="12" y="14.5" text-anchor="middle" font-size="10" font-weight="bold" fill="#8B6500">$</text></svg> <span id="shop-coins">0</span> Moedas &nbsp;·&nbsp; <svg viewBox="0 0 24 24" width="16" height="16" style="display:inline-block;vertical-align:middle;margin:0 2px;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.4))"><polygon points="12,2 20,9 12,22 4,9" fill="#6A5ACD" stroke="#3A0066" stroke-width="0.8"/><polygon points="12,2 16,9 12,22 8,9" fill="#9B8AFF" opacity="0.5"/></svg> <span id="shop-gems">0</span> Joias</div>
-    <div class="shop-hint">Os itens comprados são usados automaticamente no início da próxima missão.</div>
-    <div class="shop-scroll-wrap">
-      <div id="shop-scroll" class="shop-scroll">
-        <div id="shop-grid" class="shop-grid"></div>
+    <div class="shop-topbar">
+      <button class="shop-top-btn" id="btn-back-shop" title="Voltar">&#8592;</button>
+      <div class="shop-top-title">LOJA</div>
+      <div class="shop-top-stats">
+        <span class="shop-stat">🏆 <span id="shop-trophies">0</span></span>
+        <span class="shop-stat">🪙 <span id="shop-coins">0</span></span>
+        <span class="shop-stat">💎 <span id="shop-gems">0</span></span>
+        <span class="shop-stat shop-stat-bp">BP <span id="shop-bp-level">1</span></span>
       </div>
-      <button class="shop-arrow shop-arrow-left" id="shop-arrow-left">&#9664;</button>
-      <button class="shop-arrow shop-arrow-right" id="shop-arrow-right">&#9654;</button>
+      <button class="shop-top-btn shop-top-text" id="btn-shop-values">LISTA DE VALORES</button>
+      <button class="shop-top-btn" id="btn-shop-home" title="Menu principal">&#8962;</button>
     </div>
-    <div id="shop-primordial" class="shop-primordial-section"></div>
-    <div id="shop-skins" class="shop-skins-section"></div>
+    <div class="shop-body">
+      <div class="shop-cats" id="shop-cats"></div>
+      <div class="shop-panels" id="shop-panels"></div>
+    </div>
+    <div class="shop-values-overlay" id="shop-values" style="display:none">
+      <div class="shop-values-modal">
+        <div class="shop-values-head">
+          <h2>LISTA DE VALORES</h2>
+          <button class="shop-values-close" id="btn-shop-values-close">&#10005;</button>
+        </div>
+        <div class="shop-values-list" id="shop-values-list"></div>
+      </div>
+    </div>
   </div>
 
   <!-- ── MAPMAKER HUB ── -->
@@ -710,7 +720,7 @@
 <script src="js/core/engine3d.js?v=14"></script>
 <script src="js/core/world3d.js?v=14"></script>
 <script src="js/core/wave.js?v=15"></script>
-<script src="js/core/progression.js?v=15"></script>
+<script src="js/core/progression.js?v=16"></script>
 <script src="js/core/primordial.js?v=14"></script>
 <script src="js/core/story.js?v=14"></script>
 <script src="js/core/modelloader.js?v=1"></script>
@@ -736,7 +746,7 @@
 <script src="js/scenes/trophies.js?v=14"></script>
 <script src="js/scenes/battlepass.js?v=15"></script>
 <script src="js/scenes/primordial.js?v=14"></script>
-<script src="js/scenes/shop.js?v=15"></script>
+<script src="js/scenes/shop.js?v=16"></script>
 <script src="js/scenes/mapmaker.js?v=1"></script>
 <script src="js/mapeditor/data.js?v=1"></script>
 <script src="js/mapeditor/editor.js?v=2"></script>

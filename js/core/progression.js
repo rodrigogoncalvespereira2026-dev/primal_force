@@ -16,10 +16,20 @@ const Progression = {
     claimedBPFree: [],
     claimedBPPremium: [],
     lastFreePrimordial: null,
+    dailyDealDate: null,
     items: { potion: 0, shield: 0, speedBoost: 0, doubleCoins: 0, doubleTrophies: 0 },
   },
 
   GEM_PRICES: [10, 20, 30], // joias necessárias para 1ª, 2ª, 3+ gota extra por dia
+  GOTAPACK_PRICE: 25,        // pacote de 3 Gotas em sequência
+
+  SHOP_CATEGORIES: [
+    { id:'destaque', icon:'⭐', label:'Destaque' },
+    { id:'recursos', icon:'💰', label:'Recursos' },
+    { id:'gotas',    icon:'💧', label:'Gotas' },
+    { id:'skins',    icon:'🎨', label:'Skins' },
+    { id:'passe',    icon:'⚡', label:'Passe' },
+  ],
 
   // Skins cosméticas para recompensas lendárias
   SHOP_SKINS: [
@@ -32,20 +42,71 @@ const Progression = {
 
   // Catálogo da loja — itens comprados com moedas
   SHOP_ITEMS: [
-    { id:'potion',         name:'Poção de Vida',      desc:'Começa a próxima missão com o HP completo.',            icon:'🧪', price:50  },
-    { id:'shield',         name:'Escudo de Entrada',  desc:'Começa a missão com alguns segundos de invencibilidade.', icon:'🛡️', price:80  },
-    { id:'speedBoost',     name:'Bota de Velocidade', desc:'+30% de velocidade durante toda a missão.',             icon:'⚡', price:70  },
-    { id:'doubleCoins',    name:'Moeda Dupla',        desc:'Ganha o dobro de moedas nesta missão.',                 icon:COIN_SVG, price:100 },
-    { id:'doubleTrophies', name:'Troféu Duplo',       desc:'Ganha o dobro de troféus nesta missão.',                icon:'🏆', price:120 },
-    // Pacotes de moedas (comprados com joias)
-    { id:'coins_small',    name:'Pacote de Moedas',   desc:'500 moedas',  icon:COIN_SVG, price:5,  priceType:'gems', reward:{ coins:500 } },
-    { id:'coins_medium',   name:'Pacote de Moedas+',  desc:'1200 moedas', icon:COIN_SVG, price:10, priceType:'gems', reward:{ coins:1200 } },
-    { id:'coins_large',    name:'Pacote de Moedas++', desc:'3000 moedas', icon:COIN_SVG, price:20, priceType:'gems', reward:{ coins:3000 } },
-    // Pacotes de joias (comprados com moedas)
-    { id:'gems_small',     name:'Pacote de Joias',    desc:'3 joias',  icon:GEM_SVG, price:200, reward:{ gems:3 } },
-    { id:'gems_medium',    name:'Pacote de Joias+',   desc:'8 joias',  icon:GEM_SVG, price:500, reward:{ gems:8 } },
-    { id:'gems_large',     name:'Pacote de Joias++',  desc:'20 joias', icon:GEM_SVG, price:1000, reward:{ gems:20 } },
+    { id:'potion',         name:'Poção de Vida',      desc:'Começa a próxima missão com o HP completo.',            icon:'🧪', price:50,  cat:'recursos' },
+    { id:'shield',         name:'Escudo de Entrada',  desc:'Começa a missão com alguns segundos de invencibilidade.', icon:'🛡️', price:80,  cat:'recursos' },
+    { id:'speedBoost',     name:'Bota de Velocidade', desc:'+30% de velocidade durante toda a missão.',             icon:'⚡', price:70,  cat:'recursos' },
+    { id:'doubleCoins',    name:'Moeda Dupla',        desc:'Ganha o dobro de moedas nesta missão.',                 icon:COIN_SVG, price:100, cat:'recursos' },
+    { id:'doubleTrophies', name:'Troféu Duplo',       desc:'Ganha o dobro de troféus nesta missão.',                icon:'🏆', price:120, cat:'recursos' },
+    { id:'coins_small',    name:'Pacote de Moedas',   desc:'600 moedas',  icon:COIN_SVG, price:5,  priceType:'gems', reward:{ coins:600 },  bonus:'+100 A MAIS',  cat:'recursos' },
+    { id:'coins_medium',   name:'Pacote de Moedas+',  desc:'1500 moedas', icon:COIN_SVG, price:10, priceType:'gems', reward:{ coins:1500 }, bonus:'+300 A MAIS',  cat:'recursos' },
+    { id:'coins_large',    name:'Pacote de Moedas++', desc:'4000 moedas', icon:COIN_SVG, price:20, priceType:'gems', reward:{ coins:4000 }, bonus:'+1000 A MAIS', cat:'recursos', badge:'MELHOR OFERTA' },
+    { id:'gems_small',     name:'Pacote de Joias',    desc:'4 joias',     icon:GEM_SVG,  price:200,  reward:{ gems:4 },  bonus:'+1 A MAIS',   cat:'recursos' },
+    { id:'gems_medium',    name:'Pacote de Joias+',   desc:'10 joias',    icon:GEM_SVG,  price:500,  reward:{ gems:10 }, bonus:'+2 A MAIS',   cat:'recursos' },
+    { id:'gems_large',     name:'Pacote de Joias++',  desc:'25 joias',    icon:GEM_SVG,  price:1000, reward:{ gems:25 }, bonus:'+5 A MAIS',   cat:'recursos' },
+    { id:'pack_popular',   name:'Pacote Popular',     desc:'2500 moedas + 8 joias', icon:'🎁', price:12, priceType:'gems', reward:{ coins:2500, gems:8 }, bonus:'+1000 MOEDAS A MAIS', badge:'POPULAR', cat:'destaque' },
   ],
+
+  // Oferta do dia — escolhida de forma determinística pela data
+  DAILY_DEALS: [
+    { id:'coins_small',  off:0.5 },
+    { id:'potion',       off:0.5 },
+    { id:'gems_small',   off:0.4 },
+    { id:'shield',       off:0.5 },
+    { id:'speedBoost',   off:0.5 },
+    { id:'doubleTrophies', off:0.5 },
+    { id:'pack_popular', off:0.3 },
+  ],
+
+  itemsByCat(cat) {
+    return this.SHOP_ITEMS.filter(i => i.cat === cat);
+  },
+
+  getDailyDeal() {
+    const date = new Date().toISOString().slice(0, 10);
+    const day = Math.floor(Date.parse(date + 'T00:00:00Z') / 86400000);
+    const n = this.DAILY_DEALS.length;
+    const def = this.DAILY_DEALS[((day % n) + n) % n];
+    const item = this.SHOP_ITEMS.find(i => i.id === def.id);
+    if (!item) return null;
+    return {
+      item: item,
+      date: date,
+      price: Math.max(1, Math.round(item.price * (1 - def.off))),
+      priceType: item.priceType || 'coins',
+    };
+  },
+
+  isDailyDealBought() {
+    const deal = this.getDailyDeal();
+    return !!deal && this.data.dailyDealDate === deal.date;
+  },
+
+  buyDailyDeal() {
+    const deal = this.getDailyDeal();
+    if (!deal || this.data.dailyDealDate === deal.date) return false;
+    const item = Object.assign({}, deal.item, { price: deal.price });
+    if (!this._spend(item)) return false;
+    if (item.reward) {
+      if (item.reward.coins) this.data.coins += item.reward.coins;
+      if (item.reward.gems) this.data.gems = (this.data.gems || 0) + item.reward.gems;
+    } else {
+      this.data.items[item.id] = (this.data.items[item.id] || 0) + 1;
+    }
+    this.data.dailyDealDate = deal.date;
+    this.save();
+    return true;
+  },
+
   // Ajudante: devolve moedas/joias conforme o tipo de preço
   _canAfford(item) {
     if (item.priceType === 'gems') return (this.data.gems || 0) >= item.price;
